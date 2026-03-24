@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Traefik Manager",
+    "slug": "traefik-manager-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "traefikmanager",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "android": {
+      "package": "dev.chr0nzz.traefikmanager",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0d1117"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
