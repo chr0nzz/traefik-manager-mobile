@@ -20,6 +20,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "89ea617e-460f-45e6-90b1-ff436cb32b23"
+      }
+    },
+    "owner": "chronzz"
   }
 }
