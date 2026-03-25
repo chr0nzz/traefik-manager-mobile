@@ -3,9 +3,9 @@ import { useMemo, useEffect, useRef, useState } from 'react';
 import { Animated, FlatList, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { RouteCard } from '../../src/components/RouteCard';
 import { TopBar } from '../../src/components/TopBar';
-import { AddRouteModal } from '../../src/components/AddRouteModal';
 import { domainFromRule } from '../../src/api/routes';
 import { useRoutes, useToggleRoute } from '../../src/hooks/useRoutes';
 import { useNavStore } from '../../src/store/nav';
@@ -17,11 +17,11 @@ const PROTOS = ['All', 'HTTP', 'TCP', 'UDP'];
 const PAD = spacing.md;
 
 export default function RoutesScreen() {
+  const router                      = useRouter();
   const [search, setSearch]         = useState('');
   const [proto, setProto]           = useState('All');
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [showAdd, setShowAdd]       = useState(false);
   const [editMode, setEditMode]     = useState(false);
   const searchRef                   = useRef<TextInput>(null);
 
@@ -98,13 +98,13 @@ export default function RoutesScreen() {
             >
               <MaterialCommunityIcons name={editMode ? 'pencil' : 'pencil-outline'} size={18} color={editMode ? c.orange : c.muted} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowAdd(true)} hitSlop={8} style={[styles.topBarBtn, { borderColor: c.green + '55' }]}>
+            <TouchableOpacity onPress={() => router.push('/route/new')} hitSlop={8} style={[styles.topBarBtn, { borderColor: c.green + '55' }]}>
               <MaterialCommunityIcons name="plus" size={18} color={c.green} />
             </TouchableOpacity>
           </View>
         }
       />
-      <AddRouteModal visible={showAdd} onClose={() => setShowAdd(false)} />
+
 
       <View style={[styles.filterBar, { borderBottomColor: c.border }]}>
         {searchOpen ? (

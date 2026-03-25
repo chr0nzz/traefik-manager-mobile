@@ -14,17 +14,19 @@ export function saveMiddleware(
   content: string,
   isEdit = false,
   originalId = '',
+  configFile = '',
 ): Promise<{ ok: boolean; message?: string }> {
   return apiFormPost('/save-middleware', {
     middlewareName: name,
     middlewareContent: content,
     isMwEdit: isEdit ? 'true' : 'false',
     originalMwId: originalId,
+    configFile,
   });
 }
 
-export function deleteMiddleware(name: string): Promise<{ ok: boolean; message?: string }> {
-  return apiFormPost(`/delete-middleware/${encodeURIComponent(name)}`, {});
+export function deleteMiddleware(name: string, configFile = ''): Promise<{ ok: boolean; message?: string }> {
+  return apiFormPost(`/delete-middleware/${encodeURIComponent(name)}`, { configFile });
 }
 
 export async function getMiddlewares(): Promise<Middleware[]> {

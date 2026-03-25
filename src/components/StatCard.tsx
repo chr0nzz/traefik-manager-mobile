@@ -41,6 +41,11 @@ export function StatCard({ title, accent, data, onExplore }: Props) {
             { value: err,  color: c.red    },
           ]}
         />
+        <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+          <View style={styles.ringCenter}>
+            <Text style={[styles.ringCount, { color: c.text }]}>{ok}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Right column */}
@@ -117,6 +122,18 @@ const styles = StyleSheet.create({
   ringWrap: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: 72,
+    height: 72,
+  },
+  ringCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ringCount: {
+    fontSize: font.md,
+    fontWeight: '800',
+    lineHeight: font.md,
   },
   right: {
     flex: 1,

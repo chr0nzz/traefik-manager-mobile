@@ -30,7 +30,7 @@ export function useSaveRoute() {
 export function useDeleteRoute() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => deleteRoute(id),
+    mutationFn: ({ id, configFile }: { id: string; configFile?: string }) => deleteRoute(id, configFile),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['routes'] }),
   });
 }

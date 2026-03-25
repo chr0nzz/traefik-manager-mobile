@@ -53,6 +53,15 @@ export function getVersion(): Promise<TraefikVersion> {
   return apiFetch('/api/traefik/version');
 }
 
+export interface ManagerVersion {
+  version: string;
+  repo: string;
+}
+
+export function getManagerVersion(): Promise<ManagerVersion> {
+  return apiFetch('/api/manager/version');
+}
+
 export function getEntrypoints(): Promise<TraefikEntrypoint[]> {
   return apiFetch('/api/traefik/entrypoints');
 }

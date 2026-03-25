@@ -11,6 +11,9 @@ export interface Route {
   enabled: boolean;
   middlewares?: string[];
   entryPoints?: string[];
+  passHostHeader?: boolean;
+  certResolver?: string;
+  configFile?: string;
 }
 
 export function domainFromRule(rule: string): string {
@@ -34,6 +37,10 @@ export interface RouteFormData {
   targetPort: string;
   protocol: string;
   middlewares?: string;
+  scheme?: string;
+  passHostHeader?: boolean;
+  certResolver?: string;
+  configFile?: string;
 }
 
 export function saveRoute(
@@ -48,11 +55,24 @@ export function saveRoute(
     targetPort: data.targetPort,
     protocol: data.protocol,
     middlewares: data.middlewares ?? '',
+    scheme: data.scheme ?? 'http',
+    passHostHeader: (data.passHostHeader !== false) ? 'true' : '',
+    certResolver: data.certResolver ?? '',
+    configFile: data.configFile ?? '',
     isEdit: isEdit ? 'true' : 'false',
     originalId,
   });
 }
 
-export function deleteRoute(id: string): Promise<{ ok: boolean; message?: string }> {
-  return apiFormPost(`/delete/${encodeURIComponent(id)}`, {});
+export function deleteRoute(id: string, configFile = ''): Promise<{ ok: boolean; message?: string }> {
+  return apiFormPost(`/delete/${encodeURIComponent(id)}`, { configFile });
+}
+
+export interface ConfigEntry {
+  label: string;
+  path: string;
+}
+
+export function getConfigs(): Promise<ConfigEntry[]> {
+  return apiFetch('/api/configs');
 }

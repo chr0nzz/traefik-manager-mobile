@@ -89,6 +89,16 @@ export default function RootLayout() {
         >
           <Stack.Screen name="connect" />
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="route/[id]" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="route/new" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="middleware/[id]" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="middleware/new" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="service/[name]" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/appearance" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/server" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/backups" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/about" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/traefik" options={{ presentation: 'modal', headerShown: false }} />
         </Stack>
       </QueryClientProvider>
     </PaperProvider>

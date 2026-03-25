@@ -10,16 +10,15 @@ import { useDashboard } from '../../src/hooks/useDashboard';
 import { useNavStore } from '../../src/store/nav';
 import { useThemeStore } from '../../src/store/theme';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
-import { spacing } from '../../src/theme';
 
 export default function DashboardScreen() {
-  const { overview, version, entrypoints } = useDashboard();
-  const qc         = useQueryClient();
-  const c                  = useThemeStore(s => s.colors);
-  const setNavVis          = useNavStore(s => s.setVisible);
+  const { overview, entrypoints } = useDashboard();
+  const qc                  = useQueryClient();
+  const c                   = useThemeStore(s => s.colors);
+  const setNavVis           = useNavStore(s => s.setVisible);
   const setRouteProtoFilter = useNavStore(s => s.setRouteProtoFilter);
-  const swipe              = useTabSwipe('index');
-  const navigation         = useNavigation<any>();
+  const swipe               = useTabSwipe('index');
+  const navigation          = useNavigation<any>();
 
   const exploreRoutes = (proto: string) => {
     setRouteProtoFilter(proto);
@@ -28,11 +27,8 @@ export default function DashboardScreen() {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const lastY      = useRef(0);
 
-  const refreshing = overview.isFetching || version.isFetching;
-
   const onRefresh = () => {
     qc.invalidateQueries({ queryKey: ['overview'] });
-    qc.invalidateQueries({ queryKey: ['version'] });
     qc.invalidateQueries({ queryKey: ['entrypoints'] });
   };
 
@@ -45,7 +41,6 @@ export default function DashboardScreen() {
   };
 
   const d = overview.data;
-  const v = version.data?.Version;
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
@@ -53,15 +48,13 @@ export default function DashboardScreen() {
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.blue} />}
+        refreshControl={<RefreshControl refreshing={overview.isFetching} onRefresh={onRefresh} tintColor={c.blue} />}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
           { useNativeDriver: false, listener: onScrollListener },
         )}
         scrollEventThrottle={16}
       >
-        {v && <Text style={[styles.version, { color: c.muted }]}>Traefik {v}</Text>}
-
         {overview.isError && (
           <View style={[styles.errorBox, { borderColor: c.red + '55' }]}>
             <Text style={{ color: c.red, fontSize: 12 }}>
@@ -85,8 +78,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll:    { flex: 1 },
   content:   { padding: 16, paddingBottom: 110 },
-  version:   { fontSize: 12, marginBottom: 8 },
-
   errorBox: {
     backgroundColor: 'rgba(239,68,68,0.1)',
     borderRadius: 8, padding: 12, marginBottom: 12, borderWidth: 1,
