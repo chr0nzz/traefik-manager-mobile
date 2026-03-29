@@ -69,7 +69,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
-      <TopBar title="Settings" scrollAnim={scrollAnim} accent={c.blue} />
+      <TopBar title="Settings" scrollAnim={scrollAnim} accent={c.blue} icon="cog" />
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}

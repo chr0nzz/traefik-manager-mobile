@@ -1,21 +1,20 @@
 {
   "expo": {
     "name": "Traefik Manager",
-    "shortName": "Manager",
     "slug": "traefik-manager-mobile",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "scheme": "traefikmanager",
     "userInterfaceStyle": "automatic",
-    "icon": "./assets/AppIcons/appstore.png",
+    "icon": "./assets/icon.png",
     "ios": {
-      "icon": "./assets/AppIcons/appstore.png",
+      "icon": "./assets/icon.png",
       "bundleIdentifier": "dev.chr0nzz.traefikmanager"
     },
     "android": {
       "package": "dev.chr0nzz.traefikmanager",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/AppIcons/playstore.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d1117"
       }
     },
@@ -26,14 +25,16 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#0d1117",
-          "image": "./assets/AppIcons/appstore.png",
+          "image": "./assets/splash-icon.png",
           "imageWidth": 200,
           "dark": {
             "backgroundColor": "#0d1117",
-            "image": "./assets/AppIcons/appstore.png"
+            "image": "./assets/splash-icon.png"
           }
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

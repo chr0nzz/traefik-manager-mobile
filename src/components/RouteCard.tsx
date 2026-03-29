@@ -1,21 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
+  Image,
   Linking,
   StyleSheet,
   Switch,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Route, domainFromRule } from '../api/routes';
 import { font, radius, spacing } from '../theme';
 import { useThemeStore } from '../store/theme';
+import { useConnection } from '../store/connection';
 import { useDeleteRoute } from '../hooks/useRoutes';
-import { ProtocolBadge, StatusDot } from './StatusBadge';
+import { PillIconBtn, ProtocolBadge, StatusDot } from './StatusBadge';
+import { useDashboardConfig } from '../hooks/useDashboard';
 
 interface Props {
   route: Route;
@@ -27,7 +27,18 @@ interface Props {
 export function RouteCard({ route, onToggle, toggling, editMode = false }: Props) {
   const router = useRouter();
   const c      = useThemeStore(s => s.colors);
+  const { baseUrl, apiKey } = useConnection();
   const deleteRoute = useDeleteRoute();
+  const { data: dashConfig } = useDashboardConfig();
+  const isFileManagedRoute = !route.provider || route.provider === 'file';
+  const [iconVisible, setIconVisible] = useState(true);
+
+  const override   = dashConfig?.route_overrides?.[route.id] ?? dashConfig?.route_overrides?.[route.name];
+  const autoSlug   = (route.name || '').split('@')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
+  const iconUri    = override?.icon_type === 'url'  ? override.icon_url!
+                   : override?.icon_type === 'slug' ? `${baseUrl}/api/dashboard/icon/${override.icon_slug}`
+                   : `${baseUrl}/api/dashboard/icon/${autoSlug}`;
+  const iconHeaders = { 'X-Api-Key': apiKey, 'X-Requested-With': 'fetch' };
 
   const st     = route.enabled ? 'ok' : 'unknown';
   const domain = domainFromRule(route.rule);
@@ -64,27 +75,17 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
           <StatusDot status={st} />
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => router.push(`/route/${encodeURIComponent(route.id)}`)} hitSlop={8} style={styles.iconBtn}>
-            <MaterialCommunityIcons name="information-outline" size={17} color={c.muted} />
-          </TouchableOpacity>
+          <PillIconBtn icon="information-outline" color={c.muted} onPress={() => router.push(`/route/${encodeURIComponent(route.id)}`)} />
           {!!domain && (
-            <TouchableOpacity onPress={openUrl} hitSlop={8} style={styles.iconBtn}>
-              <MaterialCommunityIcons name="open-in-new" size={17} color={c.muted} />
-            </TouchableOpacity>
+            <PillIconBtn icon="open-in-new" color={c.muted} onPress={openUrl} />
           )}
-          {editMode && (
-            <TouchableOpacity onPress={handleDelete} hitSlop={8} style={styles.iconBtn}>
-              {deleteRoute.isPending
-                ? <ActivityIndicator size="small" color={c.red} />
-                : <MaterialCommunityIcons name="trash-can-outline" size={17} color={c.red} />}
-            </TouchableOpacity>
+          {editMode && isFileManagedRoute && (
+            <PillIconBtn icon="trash-can-outline" color={c.red} onPress={handleDelete} loading={deleteRoute.isPending} />
           )}
-          {editMode && (
-            <TouchableOpacity onPress={() => router.push(`/route/${encodeURIComponent(route.id)}?edit=1`)} hitSlop={8} style={styles.iconBtn}>
-              <MaterialCommunityIcons name="pencil-outline" size={17} color={c.muted} />
-            </TouchableOpacity>
+          {editMode && isFileManagedRoute && (
+            <PillIconBtn icon="pencil-outline" color={c.muted} onPress={() => router.push(`/route/${encodeURIComponent(route.id)}?edit=1`)} />
           )}
-          {editMode && (toggling
+          {editMode && isFileManagedRoute && (toggling
             ? <ActivityIndicator size="small" color={c.blue} style={{ marginLeft: 2 }} />
             : <Switch
                 value={route.enabled}
@@ -97,7 +98,16 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
         </View>
       </View>
 
-      <Text style={[styles.name, { color: c.text }]} numberOfLines={1}>{route.name}</Text>
+      <View style={styles.nameRow}>
+        {iconVisible && (
+          <Image
+            source={{ uri: iconUri, headers: iconHeaders }}
+            style={styles.appIcon}
+            onError={() => setIconVisible(false)}
+          />
+        )}
+        <Text style={[styles.name, { color: c.text, flexShrink: 1 }]} numberOfLines={1}>{route.name}</Text>
+      </View>
       <Text style={[styles.service, { color: c.muted }]} numberOfLines={1}>{route.service_name}</Text>
 
       {!!domain && (
@@ -152,7 +162,8 @@ const styles = StyleSheet.create({
   header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   badges:      { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1, alignItems: 'center' },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  iconBtn:     { padding: 2 },
+  nameRow:     { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  appIcon:     { width: 28, height: 28, borderRadius: 6, flexShrink: 0 },
   toggle:      { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] },
   name:        { fontSize: font.md, fontWeight: '700' },
   service:     { fontSize: font.sm },

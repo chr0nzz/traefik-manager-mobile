@@ -69,3 +69,20 @@ export function getEntrypoints(): Promise<TraefikEntrypoint[]> {
 export function getApiKeyStatus(): Promise<{ enabled: boolean; has_key: boolean }> {
   return apiFetch('/api/auth/apikey/status');
 }
+
+export interface RouteOverride {
+  icon_type?: 'auto' | 'slug' | 'url';
+  icon_slug?: string;
+  icon_url?:  string;
+  display_name?: string;
+  group?: string;
+}
+
+export interface DashboardConfig {
+  custom_groups:   unknown[];
+  route_overrides: Record<string, RouteOverride>;
+}
+
+export function getDashboardConfig(): Promise<DashboardConfig> {
+  return apiFetch('/api/dashboard/config');
+}

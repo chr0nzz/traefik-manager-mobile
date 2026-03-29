@@ -71,6 +71,7 @@ export default function MiddlewaresScreen() {
         title="Middleware"
         scrollAnim={scrollAnim}
         accent={c.purple}
+        icon="shield-link-variant"
         right={
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <TouchableOpacity

@@ -2,6 +2,7 @@ import React from 'react';
 import { Animated, Platform, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeStore } from '../store/theme';
 import { font } from '../theme';
@@ -10,10 +11,11 @@ interface Props {
   title: string;
   scrollAnim: Animated.Value;
   accent?: string;
+  icon?: string;
   right?: React.ReactNode;
 }
 
-export function TopBar({ title, scrollAnim, accent, right }: Props) {
+export function TopBar({ title, scrollAnim, accent, icon, right }: Props) {
   const c      = useThemeStore(s => s.colors);
   const isDark = useThemeStore(s => s.isDark);
   const insets = useSafeAreaInsets();
@@ -33,9 +35,9 @@ export function TopBar({ title, scrollAnim, accent, right }: Props) {
       {/* Base bar — always c.bg */}
       <View style={[styles.bar, { backgroundColor: c.bg, paddingTop: topPad }]}>
         <View style={styles.inner}>
-          {/* Accent dot + title */}
+          {/* Icon + title */}
           <View style={styles.titleRow}>
-            {accent && <View style={[styles.accentDot, { backgroundColor: accent }]} />}
+            {icon && <MaterialCommunityIcons name={icon as any} size={20} color={accent ?? c.text} />}
             <Text style={[styles.title, { color: c.text }]}>{title}</Text>
           </View>
           {right && <View style={styles.rightSlot}>{right}</View>}
@@ -78,11 +80,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     flex: 1,
-  },
-  accentDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
   },
   title: {
     fontSize: font.lg,

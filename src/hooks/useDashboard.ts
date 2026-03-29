@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getEntrypoints, getOverview } from '../api/traefik';
+import { getDashboardConfig, getEntrypoints, getOverview } from '../api/traefik';
 
 export function useDashboard() {
   const overview = useQuery({
@@ -17,4 +17,13 @@ export function useDashboard() {
   });
 
   return { overview, entrypoints };
+}
+
+export function useDashboardConfig() {
+  return useQuery({
+    queryKey: ['dashboardConfig'],
+    queryFn: getDashboardConfig,
+    staleTime: 60_000,
+    retry: 1,
+  });
 }

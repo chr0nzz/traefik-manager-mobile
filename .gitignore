@@ -9,6 +9,7 @@ ios/
 *.key
 *.mobileprovision
 *.orig.*
+*.apk
 web-build/
 .env
 

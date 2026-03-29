@@ -44,7 +44,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
-      <TopBar title="Dashboard" scrollAnim={scrollAnim} accent={c.blue} />
+      <TopBar title="Dashboard" scrollAnim={scrollAnim} accent={c.blue} icon="view-dashboard" />
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}

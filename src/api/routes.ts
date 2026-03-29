@@ -14,6 +14,7 @@ export interface Route {
   passHostHeader?: boolean;
   certResolver?: string;
   configFile?: string;
+  provider?: string;
 }
 
 export function domainFromRule(rule: string): string {

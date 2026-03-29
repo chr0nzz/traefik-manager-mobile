@@ -1,19 +1,16 @@
 import React from 'react';
 import {
-  ActivityIndicator,
   Alert,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Middleware } from '../api/middlewares';
 import { font, radius, spacing } from '../theme';
 import { useThemeStore } from '../store/theme';
 import { useDeleteMiddleware } from '../hooks/useMiddlewares';
-import { Badge, ProtocolBadge } from './StatusBadge';
+import { Badge, PillIconBtn, ProtocolBadge } from './StatusBadge';
 
 interface Props { middleware: Middleware; editMode?: boolean }
 
@@ -91,20 +88,12 @@ export function MiddlewareCard({ middleware, editMode = false }: Props) {
           {!!type && <Badge label={type} color={tc} bg={tc + '18'} />}
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => router.push(`/middleware/${encodeURIComponent(middleware.name)}`)} hitSlop={8} style={styles.iconBtn}>
-            <MaterialCommunityIcons name="information-outline" size={17} color={c.muted} />
-          </TouchableOpacity>
+          <PillIconBtn icon="information-outline" color={c.muted} onPress={() => router.push(`/middleware/${encodeURIComponent(middleware.name)}`)} />
           {editMode && (
-            <TouchableOpacity onPress={handleDelete} hitSlop={8} style={styles.iconBtn}>
-              {deleteMiddleware.isPending
-                ? <ActivityIndicator size="small" color={c.red} />
-                : <MaterialCommunityIcons name="trash-can-outline" size={17} color={c.red} />}
-            </TouchableOpacity>
+            <PillIconBtn icon="trash-can-outline" color={c.red} onPress={handleDelete} loading={deleteMiddleware.isPending} />
           )}
           {editMode && (
-            <TouchableOpacity onPress={() => router.push(`/middleware/${encodeURIComponent(middleware.name)}?edit=1`)} hitSlop={8} style={styles.iconBtn}>
-              <MaterialCommunityIcons name="pencil-outline" size={17} color={c.muted} />
-            </TouchableOpacity>
+            <PillIconBtn icon="pencil-outline" color={c.muted} onPress={() => router.push(`/middleware/${encodeURIComponent(middleware.name)}?edit=1`)} />
           )}
         </View>
       </View>
@@ -132,7 +121,6 @@ const styles = StyleSheet.create({
   header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   badges:      { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1, alignItems: 'center' },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  iconBtn:     { padding: 2 },
   name:        { fontSize: font.md, fontWeight: '700' },
   codeBlock:   { borderRadius: radius.sm, borderWidth: 1, padding: spacing.sm },
   codeText:    { fontSize: font.xs, fontFamily: 'monospace', lineHeight: 18 },

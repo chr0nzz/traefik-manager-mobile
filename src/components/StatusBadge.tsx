@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { font, radius, spacing } from '../theme';
 import { useThemeStore } from '../store/theme';
 
@@ -51,6 +52,25 @@ export function ProtocolBadge({ protocol }: { protocol: string }) {
   return <Badge label={(protocol ?? 'http').toUpperCase()} color={col} bg={col + '22'} />;
 }
 
+export function PillIconBtn({ icon, color, onPress, loading }: {
+  icon: string;
+  color: string;
+  onPress: () => void;
+  loading?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      hitSlop={4}
+      style={[styles.pillBtn, { backgroundColor: color + '18', borderColor: color + '44' }]}
+    >
+      {loading
+        ? <ActivityIndicator size="small" color={color} style={{ width: 14, height: 14 }} />
+        : <MaterialCommunityIcons name={icon as any} size={14} color={color} />}
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: spacing.sm,
@@ -63,5 +83,13 @@ const styles = StyleSheet.create({
     fontSize: font.xs,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  pillBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

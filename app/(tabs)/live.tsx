@@ -103,7 +103,7 @@ export default function LiveScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
-      <TopBar title="Services" scrollAnim={scrollAnim} accent={c.muted} />
+      <TopBar title="Services" scrollAnim={scrollAnim} accent={c.green} icon="lightning-bolt" />
 
       <View style={[styles.filterBar, { borderBottomColor: c.border }]}>
         {searchOpen ? (

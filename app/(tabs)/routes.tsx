@@ -89,6 +89,7 @@ export default function RoutesScreen() {
         title="Routes"
         scrollAnim={scrollAnim}
         accent={c.green}
+        icon="swap-horizontal"
         right={
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <TouchableOpacity

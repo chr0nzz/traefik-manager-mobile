@@ -1,12 +1,12 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { TraefikService } from '../api/traefik';
 import { font, radius, spacing } from '../theme';
 import { useThemeStore } from '../store/theme';
-import { ProtocolBadge } from './StatusBadge';
+import { PillIconBtn, ProtocolBadge } from './StatusBadge';
 import { providerOf } from '../utils';
 
 interface Props { service: TraefikService }
@@ -52,13 +52,11 @@ export function ServiceRow({ service }: Props) {
             <View style={[styles.statusDot, { backgroundColor: statusColor[st] }]} />
             <Text style={[styles.statusChipText, { color: statusColor[st] }]}>{statusLabel[st]}</Text>
           </View>
-          <TouchableOpacity
+          <PillIconBtn
+            icon="information-outline"
+            color={c.muted}
             onPress={() => router.push(`/service/${encodeURIComponent(service.name)}`)}
-            hitSlop={8}
-            style={styles.iconBtn}
-          >
-            <MaterialCommunityIcons name="information-outline" size={17} color={c.muted} />
-          </TouchableOpacity>
+          />
         </View>
       </View>
 
@@ -121,7 +119,6 @@ const styles = StyleSheet.create({
   statusChip:   { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full, borderWidth: 1 },
   statusDot:    { width: 6, height: 6, borderRadius: 3 },
   statusChipText:{ fontSize: font.xs, fontWeight: '600' },
-  iconBtn:      { padding: 2 },
   name:         { fontSize: font.md, fontWeight: '700' },
   metaRow:      { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   metaChip:     { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: radius.full, borderWidth: 1 },

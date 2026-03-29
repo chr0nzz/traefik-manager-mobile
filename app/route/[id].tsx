@@ -177,6 +177,7 @@ export default function RouteDetailScreen() {
 
   const domain = route ? domainFromRule(route.rule) : '';
   const mws    = route?.middlewares ?? [];
+  const isFileManagedRoute = !route?.provider || route.provider === 'file';
 
   const handleToggle = () => {
     if (!route) return;
@@ -299,32 +300,38 @@ export default function RouteDetailScreen() {
             </>
           ) : (
             <>
-              <TouchableOpacity
-                onPress={handleDelete}
-                hitSlop={8}
-                style={styles.headerIconBtn}
-                disabled={deleteRoute.isPending}
-              >
-                {deleteRoute.isPending
-                  ? <ActivityIndicator size="small" color={c.red} />
-                  : <MaterialCommunityIcons name="trash-can-outline" size={20} color={c.red} />}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setEditMode(true)}
-                hitSlop={8}
-                style={styles.headerIconBtn}
-              >
-                <MaterialCommunityIcons name="pencil-outline" size={20} color={c.muted} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleToggle} hitSlop={8} style={styles.headerIconBtn} disabled={toggling}>
-                {toggling
-                  ? <ActivityIndicator size="small" color={c.blue} />
-                  : <MaterialCommunityIcons
-                      name={route.enabled ? 'toggle-switch' : 'toggle-switch-off-outline'}
-                      size={24}
-                      color={route.enabled ? c.blue : c.muted}
-                    />}
-              </TouchableOpacity>
+              {isFileManagedRoute && (
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  hitSlop={8}
+                  style={styles.headerIconBtn}
+                  disabled={deleteRoute.isPending}
+                >
+                  {deleteRoute.isPending
+                    ? <ActivityIndicator size="small" color={c.red} />
+                    : <MaterialCommunityIcons name="trash-can-outline" size={20} color={c.red} />}
+                </TouchableOpacity>
+              )}
+              {isFileManagedRoute && (
+                <TouchableOpacity
+                  onPress={() => setEditMode(true)}
+                  hitSlop={8}
+                  style={styles.headerIconBtn}
+                >
+                  <MaterialCommunityIcons name="pencil-outline" size={20} color={c.muted} />
+                </TouchableOpacity>
+              )}
+              {isFileManagedRoute && (
+                <TouchableOpacity onPress={handleToggle} hitSlop={8} style={styles.headerIconBtn} disabled={toggling}>
+                  {toggling
+                    ? <ActivityIndicator size="small" color={c.blue} />
+                    : <MaterialCommunityIcons
+                        name={route.enabled ? 'toggle-switch' : 'toggle-switch-off-outline'}
+                        size={24}
+                        color={route.enabled ? c.blue : c.muted}
+                      />}
+                </TouchableOpacity>
+              )}
             </>
           )}
         </View>
