@@ -29,24 +29,9 @@ export function TopBar({ title, scrollAnim, accent, icon, right }: Props) {
   });
 
   return (
-    <View style={{ position: 'relative' }}>
+    <View style={{ position: 'relative', backgroundColor: c.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
 
-      {/* Base bar — always c.bg */}
-      <View style={[styles.bar, { backgroundColor: c.bg, paddingTop: topPad }]}>
-        <View style={styles.inner}>
-          {/* Icon + title */}
-          <View style={styles.titleRow}>
-            {icon && <MaterialCommunityIcons name={icon as any} size={20} color={accent ?? c.text} />}
-            <Text style={[styles.title, { color: c.text }]}>{title}</Text>
-          </View>
-          {right && <View style={styles.rightSlot}>{right}</View>}
-        </View>
-        {/* Accent bottom border */}
-        {accent && <View style={[styles.accentLine, { backgroundColor: accent }]} />}
-      </View>
-
-      {/* Scroll elevation overlay — c.card fades in */}
       <Animated.View
         style={[
           StyleSheet.absoluteFill,
@@ -54,7 +39,18 @@ export function TopBar({ title, scrollAnim, accent, icon, right }: Props) {
         ]}
         pointerEvents="none"
       />
-      {/* Scroll border bottom */}
+
+      <View style={[styles.bar, { paddingTop: topPad }]}>
+        <View style={styles.inner}>
+          <View style={styles.titleRow}>
+            {icon && <MaterialCommunityIcons name={icon as any} size={20} color={accent ?? c.text} />}
+            <Text style={[styles.title, { color: c.text }]}>{title}</Text>
+          </View>
+          {right && <View style={styles.rightSlot}>{right}</View>}
+        </View>
+        {accent && <View style={[styles.accentLine, { backgroundColor: accent }]} />}
+      </View>
+
       <Animated.View
         style={[
           styles.scrollBorder,
