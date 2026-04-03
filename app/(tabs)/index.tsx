@@ -17,8 +17,8 @@ export default function DashboardScreen() {
   const c                   = useThemeStore(s => s.colors);
   const setNavVis           = useNavStore(s => s.setVisible);
   const setRouteProtoFilter = useNavStore(s => s.setRouteProtoFilter);
-  const swipe               = useTabSwipe('index');
-  const navigation          = useNavigation<any>();
+  const swipe      = useTabSwipe('index');
+  const navigation = useNavigation<any>();
 
   const exploreRoutes = (proto: string) => {
     setRouteProtoFilter(proto);

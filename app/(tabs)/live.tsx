@@ -34,7 +34,7 @@ export default function LiveScreen() {
   const qc        = useQueryClient();
   const setNavVis = useNavStore(s => s.setVisible);
   const c         = useThemeStore(s => s.colors);
-  const swipe     = useTabSwipe('live');
+  const swipe      = useTabSwipe('live');
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const lastY      = useRef(0);
 
