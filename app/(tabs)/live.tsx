@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FilterDropdown } from '../../src/components/FilterDropdown';
 import { ServiceRow } from '../../src/components/ServiceRow';
 import { TopBar } from '../../src/components/TopBar';
+import { DemoBanner } from '../../src/components/DemoBanner';
 import { useLive } from '../../src/hooks/useLive';
 import { useNavStore } from '../../src/store/nav';
 import { useThemeStore } from '../../src/store/theme';
@@ -104,7 +105,7 @@ export default function LiveScreen() {
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar title="Services" scrollAnim={scrollAnim} accent={c.green} icon="lightning-bolt" />
-
+      <DemoBanner />
       <View style={[styles.filterBar, { borderBottomColor: c.border, backgroundColor: c.bg }]}>
         {searchOpen ? (
           /* ── Expanded search ── */

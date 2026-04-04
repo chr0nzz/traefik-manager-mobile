@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { RouteCard } from '../../src/components/RouteCard';
 import { TopBar } from '../../src/components/TopBar';
+import { DemoBanner } from '../../src/components/DemoBanner';
 import { domainFromRule } from '../../src/api/routes';
 import { useRoutes, useToggleRoute } from '../../src/hooks/useRoutes';
 import { useNavStore } from '../../src/store/nav';
@@ -107,6 +108,7 @@ export default function RoutesScreen() {
       />
 
 
+      <DemoBanner />
       <View style={[styles.filterBar, { borderBottomColor: c.border }]}>
         {searchOpen ? (
           /* ── Expanded search row ── */

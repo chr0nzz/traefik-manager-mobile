@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { EntrypointCard } from '../../src/components/EntrypointCard';
 import { StatCard } from '../../src/components/StatCard';
 import { TopBar } from '../../src/components/TopBar';
+import { DemoBanner } from '../../src/components/DemoBanner';
 import { useDashboard } from '../../src/hooks/useDashboard';
 import { useNavStore } from '../../src/store/nav';
 import { useThemeStore } from '../../src/store/theme';
@@ -45,6 +46,7 @@ export default function DashboardScreen() {
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar title="Dashboard" scrollAnim={scrollAnim} accent={c.blue} icon="view-dashboard" />
+      <DemoBanner />
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}

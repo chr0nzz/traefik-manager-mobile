@@ -12,10 +12,16 @@ export default function ServerScreen() {
   const router   = useRouter();
   const insets   = useSafeAreaInsets();
   const c        = useThemeStore(s => s.colors);
-  const { baseUrl, clearConnection } = useConnection();
+  const { baseUrl, demoMode, clearConnection, exitDemoMode } = useConnection();
   const qc       = useQueryClient();
 
   const handleDisconnect = () => {
+    if (demoMode) {
+      exitDemoMode();
+      qc.clear();
+      router.replace('/connect');
+      return;
+    }
     Alert.alert('Disconnect', 'Remove saved connection?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -32,7 +38,6 @@ export default function ServerScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: c.bg }]}>
-      {/* Header */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 4, borderBottomColor: c.border, backgroundColor: c.card }]}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
           <MaterialCommunityIcons name="arrow-left" size={22} color={c.text} />
@@ -45,32 +50,43 @@ export default function ServerScreen() {
 
         <Text style={[styles.sectionLabel, { color: c.muted }]}>CONNECTION</Text>
         <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
-          {/* URL row */}
           <View style={[styles.row, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
             <Text style={[styles.rowLabel, { color: c.muted }]}>URL</Text>
             <Text style={[styles.rowValue, { color: c.text, fontFamily: 'monospace' }]} numberOfLines={2}>
-              {baseUrl || '—'}
+              {demoMode ? 'Demo' : (baseUrl || '—')}
             </Text>
           </View>
-          {/* Status row */}
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: c.muted }]}>STATUS</Text>
-            <View style={[styles.chip, { backgroundColor: c.green + '20', borderColor: c.green + '55' }]}>
-              <View style={[styles.dot, { backgroundColor: c.green }]} />
-              <Text style={[styles.chipText, { color: c.green }]}>Connected</Text>
-            </View>
+            {demoMode ? (
+              <View style={[styles.chip, { backgroundColor: c.blue + '20', borderColor: c.blue + '55' }]}>
+                <MaterialCommunityIcons name="flask-outline" size={11} color={c.blue} />
+                <Text style={[styles.chipText, { color: c.blue }]}>Demo Mode</Text>
+              </View>
+            ) : (
+              <View style={[styles.chip, { backgroundColor: c.green + '20', borderColor: c.green + '55' }]}>
+                <View style={[styles.dot, { backgroundColor: c.green }]} />
+                <Text style={[styles.chipText, { color: c.green }]}>Connected</Text>
+              </View>
+            )}
           </View>
         </View>
 
-        <Text style={[styles.sectionLabel, { color: c.muted }]}>DANGER ZONE</Text>
-        <View style={[styles.sectionBody, { borderColor: c.red + '44', backgroundColor: c.card }]}>
+        <Text style={[styles.sectionLabel, { color: demoMode ? c.blue + 'cc' : c.red + 'cc' }]}>
+          {demoMode ? 'DEMO' : 'DANGER ZONE'}
+        </Text>
+        <View style={[styles.sectionBody, { borderColor: demoMode ? c.blue + '44' : c.red + '44', backgroundColor: c.card }]}>
           <TouchableOpacity style={styles.disconnectRow} onPress={handleDisconnect} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="logout" size={18} color={c.red} />
-            <Text style={[styles.disconnectLabel, { color: c.red }]}>Disconnect</Text>
+            <MaterialCommunityIcons name={demoMode ? 'flask-off-outline' : 'logout'} size={18} color={demoMode ? c.blue : c.red} />
+            <Text style={[styles.disconnectLabel, { color: demoMode ? c.blue : c.red }]}>
+              {demoMode ? 'Exit Demo' : 'Disconnect'}
+            </Text>
           </TouchableOpacity>
         </View>
         <Text style={[styles.hint, { color: c.muted }]}>
-          Removes the saved server URL and API key from this device.
+          {demoMode
+            ? 'Returns to the connect screen. Demo data will be cleared.'
+            : 'Removes the saved server URL and API key from this device.'}
         </Text>
 
       </ScrollView>

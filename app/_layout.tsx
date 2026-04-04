@@ -41,9 +41,9 @@ const queryClient = new QueryClient({
 });
 
 function ConnectionGate() {
-  const { baseUrl, apiKey, ready, loadConnection } = useConnection();
-  const { load: loadTheme, applySystem }           = useThemeStore();
-  const { load: loadAppLock }                      = useAppLock();
+  const { baseUrl, apiKey, ready, demoMode, loadConnection } = useConnection();
+  const { load: loadTheme, applySystem }                    = useThemeStore();
+  const { load: loadAppLock }                               = useAppLock();
   const router     = useRouter();
   const segments   = useSegments();
   const didRoute   = useRef(false);
@@ -61,7 +61,7 @@ function ConnectionGate() {
   useEffect(() => {
     if (!ready) return;
     if (didRoute.current) return;
-    const connected  = !!baseUrl && !!apiKey;
+    const connected  = (!!baseUrl && !!apiKey) || demoMode;
     const onConnect  = segments[0] === 'connect';
     if (!connected && !onConnect) {
       didRoute.current = true;
@@ -134,13 +134,28 @@ function AppLockGate() {
 }
 
 export default function RootLayout() {
-  const isDark = useThemeStore(s => s.isDark);
-  const c      = useThemeStore(s => s.colors);
-  const theme  = makePaperTheme(isDark);
+  const isDark    = useThemeStore(s => s.isDark);
+  const c         = useThemeStore(s => s.colors);
+  const demoMode  = useConnection(s => s.demoMode);
+  const theme     = makePaperTheme(isDark);
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(c.bg);
   }, [c.bg]);
+
+  useEffect(() => {
+    if (!demoMode) return;
+    const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
+      if (next === 'background' || next === 'inactive') {
+        queryClient.removeQueries({ queryKey: ['routes'] });
+        queryClient.removeQueries({ queryKey: ['middlewares'] });
+        queryClient.removeQueries({ queryKey: ['live-services'] });
+        queryClient.removeQueries({ queryKey: ['overview'] });
+        queryClient.removeQueries({ queryKey: ['entrypoints'] });
+      }
+    });
+    return () => sub.remove();
+  }, [demoMode]);
 
   return (
     <SafeAreaProvider>

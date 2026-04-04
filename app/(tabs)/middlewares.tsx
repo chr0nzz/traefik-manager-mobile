@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { MiddlewareCard } from '../../src/components/MiddlewareCard';
 import { TopBar } from '../../src/components/TopBar';
+import { DemoBanner } from '../../src/components/DemoBanner';
 import { useMiddlewares } from '../../src/hooks/useMiddlewares';
 import { useNavStore } from '../../src/store/nav';
 import { useThemeStore } from '../../src/store/theme';
@@ -87,8 +88,7 @@ export default function MiddlewaresScreen() {
           </View>
         }
       />
-
-
+      <DemoBanner />
       <View style={[styles.filterBar, { borderBottomColor: c.border }]}>
         {searchOpen ? (
           <View style={styles.searchRow}>

@@ -15,7 +15,7 @@ export default function ConnectScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
   const [showKey, setShowKey] = useState(false);
-  const { setConnection }     = useConnection();
+  const { setConnection, enterDemoMode } = useConnection();
   const router                = useRouter();
   const c                     = useThemeStore(s => s.colors);
   const insets                = useSafeAreaInsets();
@@ -105,6 +105,17 @@ export default function ConnectScreen() {
           >
             Connect
           </Button>
+
+          <Button
+            mode="outlined"
+            onPress={() => { enterDemoMode(); router.replace('/(tabs)'); }}
+            disabled={loading}
+            style={styles.demoBtn}
+            contentStyle={styles.btnContent}
+            labelStyle={[styles.btnLabel, { color: c.muted }]}
+          >
+            Try Demo
+          </Button>
         </Surface>
 
         <Text style={[styles.hint, { color: c.muted }]}>
@@ -154,6 +165,10 @@ const styles = StyleSheet.create({
   btn: {
     marginTop: spacing.xs,
     borderRadius: radius.sm,
+  },
+  demoBtn: {
+    borderRadius: radius.sm,
+    borderColor: 'transparent',
   },
   btnContent: {
     paddingVertical: 4,

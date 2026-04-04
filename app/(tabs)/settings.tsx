@@ -10,6 +10,7 @@ import { useThemeStore, ThemeMode } from '../../src/store/theme';
 import { useAppLock } from '../../src/store/applock';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useBackups } from '../../src/hooks/useBackups';
+import { DemoBanner } from '../../src/components/DemoBanner';
 import { font, radius, spacing } from '../../src/theme';
 
 const version = Constants.expoConfig?.version ?? '—';
@@ -75,6 +76,7 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar title="Settings" scrollAnim={scrollAnim} accent={c.blue} icon="cog" />
+      <DemoBanner />
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
