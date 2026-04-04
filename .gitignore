@@ -10,6 +10,7 @@ ios/
 *.mobileprovision
 *.orig.*
 *.apk
+*.aab
 web-build/
 .env
 

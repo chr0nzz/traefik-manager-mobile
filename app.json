@@ -13,14 +13,21 @@
     },
     "android": {
       "package": "dev.chr0nzz.traefikmanager",
-      "targetSdkVersion": 35,
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d1117"
       }
     },
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "targetSdkVersion": 35
+          }
+        }
+      ],
       "expo-router",
       "expo-secure-store",
       [

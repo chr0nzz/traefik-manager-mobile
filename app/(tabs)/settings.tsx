@@ -2,6 +2,7 @@ import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import { useRef } from 'react';
 import { TopBar } from '../../src/components/TopBar';
 import { useConnection } from '../../src/store/connection';
@@ -9,6 +10,8 @@ import { useThemeStore, ThemeMode } from '../../src/store/theme';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useBackups } from '../../src/hooks/useBackups';
 import { font, radius, spacing } from '../../src/theme';
+
+const version = Constants.expoConfig?.version ?? '—';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
   light: '☀ Light',
@@ -100,7 +103,7 @@ export default function SettingsScreen() {
             c={c}
           />
           <NavRow
-            icon="server-outline"
+            icon="server"
             label="Server"
             value={baseUrl ? baseUrl.replace(/^https?:\/\//, '') : 'Not connected'}
             onPress={() => router.push('/settings/server')}
@@ -126,7 +129,7 @@ export default function SettingsScreen() {
           <NavRow
             icon="information-outline"
             label="About"
-            value="v0.2.0"
+            value={`v${version}`}
             onPress={() => router.push('/settings/about')}
             isLast
             c={c}

@@ -74,7 +74,7 @@ export function ServiceRow({ service }: Props) {
             backgroundColor: activeCount === servers.length ? c.green + '12' : c.orange + '12',
             borderColor:     activeCount === servers.length ? c.green + '44' : c.orange + '44',
           }]}>
-            <MaterialCommunityIcons name="server-outline" size={11} color={activeCount === servers.length ? c.green : c.orange} />
+            <MaterialCommunityIcons name="server" size={11} color={activeCount === servers.length ? c.green : c.orange} />
             <Text style={[styles.metaChipText, { color: activeCount === servers.length ? c.green : c.orange }]}>
               {serverSummary}
             </Text>
