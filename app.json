@@ -2,7 +2,7 @@
   "expo": {
     "name": "Traefik Manager",
     "slug": "traefik-manager-mobile",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "orientation": "portrait",
     "scheme": "traefikmanager",
     "userInterfaceStyle": "automatic",
@@ -13,7 +13,8 @@
     },
     "android": {
       "package": "dev.chr0nzz.traefikmanager",
-      "versionCode": 3,
+      "versionCode": 4,
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d1117"
