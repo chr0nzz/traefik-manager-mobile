@@ -31,7 +31,8 @@ export function pct(n: number, total: number): string {
 export function normalizeUrl(url: string): string {
   let u = url.trim().replace(/\/+$/, '');
   if (u && !u.startsWith('http://') && !u.startsWith('https://')) {
-    u = 'https://' + u;
+    const isIp = /^(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(u);
+    u = (isIp ? 'http://' : 'https://') + u;
   }
   return u;
 }
