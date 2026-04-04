@@ -1,6 +1,6 @@
 {
   "name": "traefik-manager-mobile",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",

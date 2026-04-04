@@ -24,19 +24,21 @@ export default function ConnectScreen() {
     setError('');
     const base = normalizeUrl(url);
     if (!base) { setError('Enter a URL'); return; }
-    if (!apiKey.trim()) { setError('Enter an API key'); return; }
 
     setLoading(true);
     try {
-      const res = await fetch(`${base}/api/auth/apikey/status`, {
-        headers: { 'X-Api-Key': apiKey.trim(), 'X-Requested-With': 'fetch' },
-      });
+      const key = apiKey.trim();
+      const headers: Record<string, string> = { 'X-Requested-With': 'fetch' };
+      if (key) headers['X-Api-Key'] = key;
+
+      const res = await fetch(`${base}/api/auth/apikey/status`, { headers });
       if (res.status === 401) throw new Error('Invalid API key');
       if (!res.ok)            throw new Error(`Server error ${res.status}`);
       const data = await res.json();
-      if (!data.enabled)      throw new Error('API key auth is not enabled on this server');
+      if (!data.enabled && key) throw new Error('API key auth is not enabled on this server');
+      if (data.enabled && !key) throw new Error('This server requires an API key');
 
-      await setConnection(base, apiKey.trim());
+      await setConnection(base, key);
       router.replace('/(tabs)');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Connection failed');
@@ -78,7 +80,7 @@ export default function ConnectScreen() {
             label="API Key"
             value={apiKey}
             onChangeText={setApiKey}
-            placeholder="Your API key from Settings → Auth"
+            placeholder="Required if API key auth is enabled"
             secureTextEntry={!showKey}
             autoCapitalize="none"
             autoCorrect={false}
@@ -119,7 +121,7 @@ export default function ConnectScreen() {
         </Surface>
 
         <Text style={[styles.hint, { color: c.muted }]}>
-          Generate an API key in Settings → Authentication
+          Leave API key empty if your instance has built-in auth disabled
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
