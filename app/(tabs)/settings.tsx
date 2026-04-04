@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { TopBar } from '../../src/components/TopBar';
 import { useConnection } from '../../src/store/connection';
 import { useThemeStore, ThemeMode } from '../../src/store/theme';
+import { useAppLock } from '../../src/store/applock';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useBackups } from '../../src/hooks/useBackups';
 import { font, radius, spacing } from '../../src/theme';
@@ -64,6 +65,7 @@ export default function SettingsScreen() {
   const { baseUrl } = useConnection();
   const { mode }    = useThemeStore();
   const c           = useThemeStore(s => s.colors);
+  const appLockEnabled = useAppLock(s => s.enabled);
   const swipe       = useTabSwipe('settings');
   const scrollAnim  = useRef(new Animated.Value(0)).current;
 
@@ -90,6 +92,15 @@ export default function SettingsScreen() {
             label="Appearance"
             value={THEME_LABEL[mode]}
             onPress={() => router.push('/settings/appearance')}
+            isLast={false}
+            c={c}
+          />
+          <NavRow
+            icon="lock-outline"
+            iconColor={c.blue}
+            label="App Lock"
+            value={appLockEnabled ? 'Enabled' : 'Disabled'}
+            onPress={() => router.push('/settings/applock')}
             isLast={false}
             c={c}
           />
