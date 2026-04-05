@@ -7,6 +7,16 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 ---
 
+## Download
+
+| Platform | Link |
+|---|---|
+| Android (APK) | [Latest release](https://github.com/chr0nzz/traefik-manager-mobile/releases/latest) |
+| Google Play Beta | [Sign up to beta test](https://forms.gle/csituqc92sreNooZ8) |
+| iOS | Build from source (see below) |
+
+---
+
 ## Features
 
 - **Routes** - view, enable/disable, add, edit, and delete HTTP/TCP/UDP routes
