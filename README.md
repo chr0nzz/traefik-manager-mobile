@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/mobile-banner.png" width="128" height="128" alt="Traefik Manager">
+<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/mobile-banner.png" alt="Traefik Manager">
 
 # Traefik Manager Mobile
 
@@ -16,11 +16,11 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 ## Download
 
-| Platform | Link |
-|---|---|
-| Android (APK) | [Latest release](https://github.com/chr0nzz/traefik-manager-mobile/releases/latest) |
-| Google Play Beta | [Sign up to beta test](https://forms.gle/csituqc92sreNooZ8) |
-| iOS | Build from source (see below) |
+| Platform         | Link                                                                                |
+| ------------------| -------------------------------------------------------------------------------------|
+| Android (APK)    | [Latest release](https://github.com/chr0nzz/traefik-manager-mobile/releases/latest) |
+| Google Play Beta | [Sign up to beta test](https://forms.gle/csituqc92sreNooZ8)                         |
+| iOS              | Build from source (see below)                                                       |
 
 ---
 
