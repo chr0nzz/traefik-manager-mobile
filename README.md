@@ -1,4 +1,3 @@
-<div align="center">
 
 <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/mobile-banner.png" alt="Traefik Manager">
 
