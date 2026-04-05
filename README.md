@@ -1,9 +1,16 @@
-# traefik-manager-mobile
+<div align="center">
+
+<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/mobile-banner.png" width="128" height="128" alt="Traefik Manager">
+
+# Traefik Manager Mobile
 
 Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-manager) - manage your Traefik routes, middlewares, and services from your phone.
 
 > **Requires Traefik Manager v0.6.0 or higher.**
 > The mobile app authenticates via the API key feature introduced in v0.6.0. Earlier versions are not supported.
+>
+> **Mobile app v0.6.0+ requires Traefik Manager v0.10.0 or higher.**
+> v0.10.0 includes the `CONFIG_DIR` multi-file API changes that the mobile app depends on.
 
 ---
 
@@ -32,7 +39,7 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 | Requirement | Version |
 |---|---|
-| Traefik Manager (server) | **v0.6.0 or higher** |
+| Traefik Manager (server) | **v0.10.0 or higher** (mobile v0.6.0+), v0.6.0+ for earlier mobile versions |
 | Expo SDK | 54 |
 | React Native | 0.81 |
 | Android | 7.0+ (API 24+) |
