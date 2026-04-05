@@ -23,6 +23,20 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 ---
 
+## Screenshots
+
+| Connect | Dashboard | Routes |
+|---|---|---|
+| ![Connect](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-connect-1.png) | ![Dashboard](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-dashboard-2.png) | ![Routes](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-routes-3.png) |
+
+| Middlewares | Services | Settings |
+|---|---|---|
+| ![Middlewares](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-middleware-4.png) | ![Services](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-services-5.png) | ![Settings](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-settings-6.png) |
+
+[View light & dark screenshots in the docs](https://traefik-manager.chr0nzz.dev/ui-examples#mobile-app)
+
+---
+
 ## Features
 
 - **Routes** - view, enable/disable, add, edit, and delete HTTP/TCP/UDP routes
