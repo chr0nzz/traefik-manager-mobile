@@ -153,6 +153,7 @@ export const DEMO_ENTRYPOINTS = [
   { name: 'websecure', address: ':443' },
 ];
 
-export const DEMO_CONFIGS = [
-  { label: 'dynamic.yml', value: 'dynamic.yml' },
-];
+export const DEMO_CONFIGS = {
+  files: [{ label: 'dynamic.yml', path: 'dynamic.yml' }],
+  configDirSet: false,
+};

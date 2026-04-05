@@ -17,6 +17,7 @@ import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
 import { useSaveMiddleware } from '../../src/hooks/useMiddlewares';
 import { useConfigs } from '../../src/hooks/useConfigs';
+import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
 
 interface Template {
   id: string; name: string; icon: string; description: string; yaml: string;
@@ -53,7 +54,9 @@ export default function NewMiddlewareScreen() {
 
   const saveMiddleware = useSaveMiddleware();
   const configs        = useConfigs();
-  const multiConfig    = (configs.data?.length ?? 0) > 1;
+  const configFiles      = configs.data?.files ?? [];
+  const configDirSet     = configs.data?.configDirSet ?? false;
+  const showConfigPicker = configFiles.length > 1 || configDirSet;
 
   const [step,        setStep]        = useState<'pick' | 'form'>('pick');
   const [fName,       setFName]       = useState('');
@@ -62,9 +65,6 @@ export default function NewMiddlewareScreen() {
   const [saving,      setSaving]      = useState(false);
   const [saveErr,     setSaveErr]     = useState('');
 
-  useEffect(() => {
-    if (configs.data?.length && !fConfigFile) setFConfigFile(configs.data[0].label);
-  }, [configs.data]);
 
   const selectTemplate = (t: Template) => {
     setFYaml(t.yaml);
@@ -182,24 +182,18 @@ export default function NewMiddlewareScreen() {
             />
           </View>
 
-          {multiConfig && (
-            <>
+          {showConfigPicker && (
+            <View style={styles.formGroup}>
               <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
-              <View style={styles.toggleRow}>
-                {(configs.data ?? []).map(cfg => (
-                  <TouchableOpacity
-                    key={cfg.label}
-                    style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                      fConfigFile === cfg.label && { backgroundColor: c.purple + '20', borderColor: c.purple }]}
-                    onPress={() => setFConfigFile(cfg.label)}
-                  >
-                    <Text style={[styles.toggleBtnTxt, { color: fConfigFile === cfg.label ? c.purple : c.muted }]}>
-                      {cfg.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
+              <ConfigFilePicker
+                files={configFiles}
+                configDirSet={configDirSet}
+                value={fConfigFile}
+                onChange={setFConfigFile}
+                allowNew
+                c={c}
+              />
+            </View>
           )}
 
           {!!saveErr && <Text style={[styles.errTxt, { color: c.red }]}>{saveErr}</Text>}

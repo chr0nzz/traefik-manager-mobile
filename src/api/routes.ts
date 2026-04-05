@@ -74,6 +74,11 @@ export interface ConfigEntry {
   path: string;
 }
 
-export function getConfigs(): Promise<ConfigEntry[]> {
+export interface ConfigsResponse {
+  files: ConfigEntry[];
+  configDirSet: boolean;
+}
+
+export function getConfigs(): Promise<ConfigsResponse> {
   return apiFetch('/api/configs');
 }

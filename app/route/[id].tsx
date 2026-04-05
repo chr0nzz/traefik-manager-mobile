@@ -22,6 +22,7 @@ import { useThemeStore } from '../../src/store/theme';
 import { useRoutes, useDeleteRoute, useSaveRoute, useToggleRoute } from '../../src/hooks/useRoutes';
 import { useConfigs } from '../../src/hooks/useConfigs';
 import { useSettings } from '../../src/hooks/useSettings';
+import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
 import { ProtocolBadge } from '../../src/components/StatusBadge';
 
 // ── helpers ──────────────────────────────────────────────────────
@@ -129,7 +130,9 @@ export default function RouteDetailScreen() {
   const saveRoute    = useSaveRoute();
   const configs      = useConfigs();
   const { data: settings } = useSettings();
-  const multiConfig  = (configs.data?.length ?? 0) > 1;
+  const configFiles      = configs.data?.files ?? [];
+  const configDirSet     = configs.data?.configDirSet ?? false;
+  const showConfigPicker = configFiles.length > 1 || configDirSet;
   const resolvers    = (settings?.cert_resolver ?? '').split(',').map(r => r.trim()).filter(Boolean);
 
   const decodedId = decodeURIComponent(id ?? '');
@@ -163,7 +166,7 @@ export default function RouteDetailScreen() {
     setFScheme((r.target || '').startsWith('https://') ? 'https' : 'http');
     setFPassHost(r.passHostHeader !== false);
     setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
-    setFConfigFile(r.configFile ?? '');
+    setFConfigFile(r.configFile || configFiles[0]?.label || '');
     setSaveErr('');
   };
 
@@ -423,24 +426,17 @@ export default function RouteDetailScreen() {
               ))}
             </View>
 
-            {multiConfig && (
-              <>
+            {showConfigPicker && (
+              <View style={styles.formGroup}>
                 <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
-                <View style={styles.toggleRow}>
-                  {(configs.data ?? []).map(cfg => (
-                    <TouchableOpacity
-                      key={cfg.label}
-                      style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                        fConfigFile === cfg.label && { backgroundColor: c.purple + '20', borderColor: c.purple }]}
-                      onPress={() => setFConfigFile(cfg.label)}
-                    >
-                      <Text style={[styles.toggleBtnTxt, { color: fConfigFile === cfg.label ? c.purple : c.muted }]}>
-                        {cfg.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </>
+                <ConfigFilePicker
+                  files={configFiles}
+                  configDirSet={configDirSet}
+                  value={fConfigFile}
+                  onChange={setFConfigFile}
+                  c={c}
+                />
+              </View>
             )}
 
             {!!saveErr && <Text style={[styles.errTxt, { color: c.red }]}>{saveErr}</Text>}

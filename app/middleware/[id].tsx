@@ -18,6 +18,7 @@ import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
 import { useMiddlewares, useDeleteMiddleware, useSaveMiddleware } from '../../src/hooks/useMiddlewares';
 import { useConfigs } from '../../src/hooks/useConfigs';
+import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
 import { ProtocolBadge, Badge } from '../../src/components/StatusBadge';
 import { providerOf } from '../../src/utils';
 
@@ -109,7 +110,9 @@ export default function MiddlewareDetailScreen() {
   const deleteMiddleware = useDeleteMiddleware();
   const saveMiddleware   = useSaveMiddleware();
   const configs          = useConfigs();
-  const multiConfig      = (configs.data?.length ?? 0) > 1;
+  const configFiles      = configs.data?.files ?? [];
+  const configDirSet     = configs.data?.configDirSet ?? false;
+  const showConfigPicker = configFiles.length > 1 || configDirSet;
 
   const decodedName  = decodeURIComponent(id ?? '');
   const middleware   = data?.find(m => m.name === decodedName);
@@ -141,7 +144,7 @@ export default function MiddlewareDetailScreen() {
   const populateForm = () => {
     setFName(baseName);
     setFYaml(config);
-    setFConfigFile('');
+    setFConfigFile(middleware?.configFile || configFiles[0]?.label || '');
     setSaveErr('');
   };
 
@@ -306,24 +309,17 @@ export default function MiddlewareDetailScreen() {
               />
             </View>
 
-            {multiConfig && (
-              <>
+            {showConfigPicker && (
+              <View style={styles.formGroup}>
                 <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
-                <View style={styles.toggleRow}>
-                  {(configs.data ?? []).map(cfg => (
-                    <TouchableOpacity
-                      key={cfg.label}
-                      style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                        fConfigFile === cfg.label && { backgroundColor: c.purple + '20', borderColor: c.purple }]}
-                      onPress={() => setFConfigFile(cfg.label)}
-                    >
-                      <Text style={[styles.toggleBtnTxt, { color: fConfigFile === cfg.label ? c.purple : c.muted }]}>
-                        {cfg.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </>
+                <ConfigFilePicker
+                  files={configFiles}
+                  configDirSet={configDirSet}
+                  value={fConfigFile}
+                  onChange={setFConfigFile}
+                  c={c}
+                />
+              </View>
             )}
 
             {!!saveErr && <Text style={[styles.errTxt, { color: c.red }]}>{saveErr}</Text>}
