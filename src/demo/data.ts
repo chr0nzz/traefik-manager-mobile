@@ -157,3 +157,16 @@ export const DEMO_CONFIGS = {
   files: [{ label: 'dynamic.yml', path: 'dynamic.yml' }],
   configDirSet: false,
 };
+
+export const DEMO_LOGS = {
+  lines: [
+    '192.168.1.10 - - [06/Apr/2026:12:00:01 +0000] "GET /api/health HTTP/2.0" 200 42 "-" "Go-http-client/2.0" 1 "websecure@internal" "http://backend:8080" 2ms',
+    '192.168.1.55 - - [06/Apr/2026:12:00:03 +0000] "GET / HTTP/2.0" 200 3842 "-" "Mozilla/5.0" 1 "websecure@internal" "http://app:3000" 8ms',
+    '10.0.0.1 - - [06/Apr/2026:12:00:05 +0000] "POST /api/login HTTP/2.0" 401 61 "-" "curl/7.88.1" 1 "websecure@internal" "http://auth:4000" 3ms',
+    '192.168.1.10 - - [06/Apr/2026:12:00:07 +0000] "GET /dashboard HTTP/2.0" 304 0 "-" "Mozilla/5.0" 1 "websecure@internal" "http://app:3000" 1ms',
+    '10.0.0.2 - - [06/Apr/2026:12:00:09 +0000] "GET /missing HTTP/2.0" 404 19 "-" "curl/7.88.1" 1 "websecure@internal" "http://app:3000" 2ms',
+    '192.168.1.55 - - [06/Apr/2026:12:00:11 +0000] "GET /metrics HTTP/2.0" 200 1204 "-" "Prometheus/2.40.0" 1 "websecure@internal" "http://metrics:9090" 5ms',
+    '10.0.0.3 - - [06/Apr/2026:12:00:13 +0000] "GET /api/data HTTP/2.0" 500 88 "-" "axios/1.4.0" 1 "websecure@internal" "http://api:3000" 142ms',
+    '192.168.1.10 - - [06/Apr/2026:12:00:15 +0000] "GET /static/app.js HTTP/2.0" 200 98432 "-" "Mozilla/5.0" 1 "websecure@internal" "http://app:3000" 12ms',
+  ],
+};

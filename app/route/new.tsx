@@ -6,11 +6,10 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Button, SegmentedButtons, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,27 +23,6 @@ import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
 
 const PROTOCOLS = ['http', 'tcp', 'udp'] as const;
 type Colors = ReturnType<typeof useThemeStore.getState>['colors'];
-
-function FormField({ label, value, onChange, c, placeholder, keyboardType }: {
-  label: string; value: string; onChange: (v: string) => void; c: Colors;
-  placeholder?: string; keyboardType?: 'default' | 'url' | 'numeric';
-}) {
-  return (
-    <View style={styles.formGroup}>
-      <Text style={[styles.formLabel, { color: c.muted }]}>{label}</Text>
-      <TextInput
-        style={[styles.formInput, { backgroundColor: c.bg, borderColor: c.border, color: c.text }]}
-        value={value}
-        onChangeText={onChange}
-        placeholder={placeholder}
-        placeholderTextColor={c.muted}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType={keyboardType ?? 'default'}
-      />
-    </View>
-  );
-}
 
 export default function NewRouteScreen() {
   const router  = useRouter();
@@ -109,83 +87,125 @@ export default function NewRouteScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: c.bg, paddingTop: insets.top }]}>
 
-      {/* Header */}
       <View style={[styles.headerBar, { borderBottomColor: c.border, backgroundColor: c.card }]}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={12} style={styles.headerBtn}>
           <MaterialCommunityIcons name="chevron-down" size={26} color={c.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: c.text }]}>New Route</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity
+          <Button
+            mode="contained"
             onPress={handleSave}
+            loading={saving}
             disabled={saving}
-            style={[styles.headerActionBtn, { borderColor: c.green, backgroundColor: c.green }]}
+            compact
           >
-            {saving
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Text style={[styles.headerActionTxt, { color: '#fff' }]}>Create</Text>}
-          </TouchableOpacity>
+            Create
+          </Button>
         </View>
       </View>
 
-      {/* Form */}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
         >
-          <FormField label="NAME" value={fName} onChange={setFName} c={c} placeholder="my-service" />
-          <FormField label="HOST / DOMAIN" value={fHost} onChange={setFHost} c={c}
-            placeholder="app.example.com" keyboardType="url" />
-          <FormField label="TARGET IP / HOST" value={fIp} onChange={setFIp} c={c}
-            placeholder="192.168.1.10" keyboardType="url" />
-          <FormField label="TARGET PORT" value={fPort} onChange={setFPort} c={c}
-            placeholder="8080" keyboardType="numeric" />
-          <FormField label="MIDDLEWARES (comma-separated)" value={fMws} onChange={setFMws} c={c}
-            placeholder="auth@file, compress" />
+          <TextInput
+            label="Name"
+            value={fName}
+            onChangeText={setFName}
+            placeholder="my-service"
+            autoCapitalize="none"
+            autoCorrect={false}
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
+          <TextInput
+            label="Host / Domain"
+            value={fHost}
+            onChangeText={setFHost}
+            placeholder="app.example.com"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
+          <TextInput
+            label="Target IP / Host"
+            value={fIp}
+            onChangeText={setFIp}
+            placeholder="192.168.1.10"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
+          <TextInput
+            label="Target Port"
+            value={fPort}
+            onChangeText={setFPort}
+            placeholder="8080"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="numeric"
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
+          <TextInput
+            label="Middlewares (comma-separated)"
+            value={fMws}
+            onChangeText={setFMws}
+            placeholder="auth@file, compress"
+            autoCapitalize="none"
+            autoCorrect={false}
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
 
-          <Text style={[styles.formLabel, { color: c.muted }]}>BACKEND SCHEME</Text>
-          <View style={styles.toggleRow}>
-            {(['http', 'https'] as const).map(s => (
-              <TouchableOpacity
-                key={s}
-                style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                  fScheme === s && { backgroundColor: c.blue + '20', borderColor: c.blue }]}
-                onPress={() => setFScheme(s)}
-              >
-                <Text style={[styles.toggleBtnTxt, { color: fScheme === s ? c.blue : c.muted }]}>
-                  {s.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
+          <SegmentedButtons
+            value={fScheme}
+            onValueChange={setFScheme}
+            buttons={[
+              { value: 'http',  label: 'HTTP'  },
+              { value: 'https', label: 'HTTPS' },
+            ]}
+          />
 
           <View style={styles.switchRow}>
             <View style={{ flex: 1, gap: 2 }}>
-              <Text style={[styles.formLabel, { color: c.muted }]}>PASS HOST HEADER</Text>
-              <Text style={[styles.formHint, { color: c.muted }]}>Forward original Host to backend</Text>
+              <Text style={[styles.fieldLabel, { color: c.text }]}>Pass Host Header</Text>
+              <Text style={[styles.fieldHint, { color: c.muted }]}>Forward original Host to backend</Text>
             </View>
             <Switch
               value={fPassHost}
               onValueChange={setFPassHost}
-              trackColor={{ false: c.border, true: c.blue + '66' }}
-              thumbColor={fPassHost ? c.blue : c.muted}
+              trackColor={{ false: c.border, true: c.blue }}
+              thumbColor={fPassHost ? '#fff' : c.muted}
             />
           </View>
 
           {resolvers.length > 0 && (fProto === 'http' || fProto === 'tcp') && (
             <>
-              <Text style={[styles.formLabel, { color: c.muted }]}>CERT RESOLVER</Text>
-              <View style={styles.toggleRow}>
+              <Text style={[styles.fieldLabel, { color: c.muted }]}>Cert Resolver</Text>
+              <View style={styles.chipRow}>
                 {resolvers.map(r => (
                   <TouchableOpacity
                     key={r}
-                    style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                      fCertResolver === r && { backgroundColor: c.blue + '20', borderColor: c.blue }]}
                     onPress={() => setFCertResolver(r)}
+                    style={[
+                      styles.chip,
+                      {
+                        backgroundColor: fCertResolver === r ? c.secondaryContainer : 'transparent',
+                        borderColor:     fCertResolver === r ? c.blue : c.border,
+                      },
+                    ]}
+                    activeOpacity={0.7}
                   >
-                    <Text style={[styles.toggleBtnTxt, { color: fCertResolver === r ? c.blue : c.muted }]}>
+                    <Text style={{ color: fCertResolver === r ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
                       {r}
                     </Text>
                   </TouchableOpacity>
@@ -194,25 +214,16 @@ export default function NewRouteScreen() {
             </>
           )}
 
-          <Text style={[styles.formLabel, { color: c.muted }]}>PROTOCOL</Text>
-          <View style={styles.toggleRow}>
-            {PROTOCOLS.map(p => (
-              <TouchableOpacity
-                key={p}
-                style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                  fProto === p && { backgroundColor: c.blue + '20', borderColor: c.blue }]}
-                onPress={() => setFProto(p)}
-              >
-                <Text style={[styles.toggleBtnTxt, { color: fProto === p ? c.blue : c.muted }]}>
-                  {p.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <Text style={[styles.fieldLabel, { color: c.muted }]}>Protocol</Text>
+          <SegmentedButtons
+            value={fProto}
+            onValueChange={setFProto}
+            buttons={PROTOCOLS.map(p => ({ value: p, label: p.toUpperCase() }))}
+          />
 
           {showConfigPicker && (
             <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
+              <Text style={[styles.fieldLabel, { color: c.muted }]}>Config File</Text>
               <ConfigFilePicker
                 files={configFiles}
                 configDirSet={configDirSet}
@@ -233,27 +244,20 @@ export default function NewRouteScreen() {
 
 const styles = StyleSheet.create({
   screen:  { flex: 1 },
-  // Header
   headerBar: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     borderBottomWidth: 1, gap: spacing.sm,
   },
-  headerBtn:       { width: 36, alignItems: 'flex-start' },
-  headerTitle:     { flex: 1, fontSize: font.lg, fontWeight: '700', textAlign: 'center' },
-  headerActions:   { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  headerActionBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.sm, borderWidth: 1 },
-  headerActionTxt: { fontSize: font.sm, fontWeight: '600' },
-  // Scroll
+  headerBtn:     { width: 36, alignItems: 'flex-start' },
+  headerTitle:   { flex: 1, fontSize: font.lg, fontWeight: '700', textAlign: 'center' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   scrollContent: { padding: spacing.md, gap: spacing.md },
-  // Form
-  formGroup:    { gap: 4 },
-  formLabel:    { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5 },
-  formHint:     { fontSize: font.xs, opacity: 0.7 },
-  formInput:    { borderWidth: 1, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 9, fontSize: font.sm },
-  toggleRow:    { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  toggleBtn:    { flex: 1, paddingVertical: 8, borderRadius: radius.sm, borderWidth: 1, alignItems: 'center', minWidth: 60 },
-  toggleBtnTxt: { fontSize: font.sm, fontWeight: '700' },
-  switchRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  errTxt:       { fontSize: font.sm },
+  formGroup:     { gap: 4 },
+  fieldLabel:    { fontSize: font.sm, fontWeight: '500', marginBottom: 4 },
+  fieldHint:     { fontSize: font.xs, opacity: 0.8 },
+  switchRow:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
+  chipRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chip:          { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 7 },
+  errTxt:        { fontSize: font.sm },
 });

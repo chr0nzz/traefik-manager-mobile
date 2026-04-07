@@ -80,7 +80,7 @@ export function MiddlewareCard({ middleware, editMode = false }: Props) {
   };
 
   return (
-    <Surface style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]} elevation={1}>
+    <Surface style={[styles.card, { backgroundColor: c.card }]} elevation={1}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.badges}>
@@ -112,7 +112,6 @@ export function MiddlewareCard({ middleware, editMode = false }: Props) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.md,
-    borderWidth: 1,
     marginBottom: spacing.sm,
     overflow: 'hidden',
     padding: spacing.md,

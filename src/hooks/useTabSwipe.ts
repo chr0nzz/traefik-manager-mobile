@@ -2,10 +2,15 @@ import { useRef } from 'react';
 import { PanResponder } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const TABS = ['index', 'routes', 'middlewares', 'live', 'settings'];
+import { useTabsStore } from '../store/tabs';
+
+const BASE_TABS = ['index', 'routes', 'middlewares', 'live', 'settings'];
+const TABS_WITH_LOGS = ['index', 'routes', 'middlewares', 'live', 'logs'];
 
 export function useTabSwipe(tabName: string) {
   const navigation = useNavigation<any>();
+  const showLogs   = useTabsStore(s => s.showLogsTab);
+  const TABS       = showLogs ? TABS_WITH_LOGS : BASE_TABS;
   const tabRef = useRef(tabName);
   tabRef.current = tabName;
 

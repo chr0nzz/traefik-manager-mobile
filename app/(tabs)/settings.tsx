@@ -1,5 +1,5 @@
 import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { TopBar } from '../../src/components/TopBar';
 import { useConnection } from '../../src/store/connection';
 import { useThemeStore, ThemeMode } from '../../src/store/theme';
+import { useTabsStore } from '../../src/store/tabs';
 import { useAppLock } from '../../src/store/applock';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useBackups } from '../../src/hooks/useBackups';
@@ -31,9 +32,9 @@ function SectionLabel({ title, c }: { title: string; c: Colors }) {
 
 function NavGroup({ children, c }: { children: React.ReactNode; c: Colors }) {
   return (
-    <View style={[styles.group, { backgroundColor: c.card, borderColor: c.border }]}>
+    <Surface style={[styles.group, { backgroundColor: c.card }]} elevation={1}>
       {children}
-    </View>
+    </Surface>
   );
 }
 
@@ -65,6 +66,7 @@ export default function SettingsScreen() {
   const router      = useRouter();
   const { baseUrl } = useConnection();
   const { mode }    = useThemeStore();
+  const showLogsTab = useTabsStore(s => s.showLogsTab);
   const c           = useThemeStore(s => s.colors);
   const appLockEnabled = useAppLock(s => s.enabled);
   const swipe       = useTabSwipe('settings');
@@ -125,6 +127,19 @@ export default function SettingsScreen() {
           />
         </NavGroup>
 
+        <SectionLabel title="TABS" c={c} />
+        <NavGroup c={c}>
+          <NavRow
+            icon="text-search"
+            iconColor={c.blue}
+            label="Logs"
+            value={showLogsTab ? 'Enabled' : 'Disabled'}
+            onPress={() => router.push('/settings/logs')}
+            isLast
+            c={c}
+          />
+        </NavGroup>
+
         <SectionLabel title="DATA" c={c} />
         <NavGroup c={c}>
           <NavRow
@@ -158,17 +173,15 @@ const styles = StyleSheet.create({
   scroll:    { flex: 1 },
   content:   { padding: spacing.lg, gap: spacing.sm, paddingBottom: 110 },
   sectionLabel: {
-    fontSize: font.xs,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 2,
+    fontSize: font.sm,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+    marginBottom: 4,
     marginTop: spacing.sm,
     paddingHorizontal: 4,
   },
   group: {
     borderRadius: radius.md,
-    borderWidth: 1,
     overflow: 'hidden',
   },
   navRow: {

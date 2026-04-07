@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, TouchableOpacity, View, useColorScheme } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,7 +36,7 @@ export default function AppearanceScreen() {
         <Text style={[styles.sectionLabel, { color: c.muted }]}>THEME</Text>
 
         {/* Section body */}
-        <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
+        <Surface style={[styles.sectionBody, { backgroundColor: c.card }]} elevation={1}>
           {MODES.map((m, i) => {
             const active = mode === m.key;
             return (
@@ -64,7 +64,7 @@ export default function AppearanceScreen() {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </Surface>
 
         <Text style={[styles.hint, { color: c.muted }]}>
           System follows your device's appearance setting.
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase', paddingHorizontal: 4,
   },
   sectionBody: {
-    borderRadius: 10, borderWidth: 1, overflow: 'hidden',
+    borderRadius: radius.md, overflow: 'hidden',
   },
   modeRow: {
     flexDirection: 'row', alignItems: 'center',

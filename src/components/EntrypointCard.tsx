@@ -14,7 +14,7 @@ export function EntrypointCard({ data }: Props) {
   const count = data?.length ?? 0;
 
   return (
-    <Surface style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]} elevation={1}>
+    <Surface style={[styles.card, { backgroundColor: c.card }]} elevation={1}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: c.teal }]}>ENTRY POINTS</Text>
         <Text style={[styles.count, { color: c.teal }]}>{count}</Text>
@@ -38,7 +38,6 @@ export function EntrypointCard({ data }: Props) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.md,
-    borderWidth: 1,
     padding: spacing.md,
     flex: 1,
   },

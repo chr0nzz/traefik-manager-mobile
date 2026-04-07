@@ -17,9 +17,10 @@ interface Props {
   accent: string;
   data?: StatData;
   onExplore?: () => void;
+  vertical?: boolean;
 }
 
-export function StatCard({ title, accent, data, onExplore }: Props) {
+export function StatCard({ title, accent, data, onExplore, vertical }: Props) {
   const c     = useThemeStore(s => s.colors);
   const total = data?.total    ?? 0;
   const warn  = data?.warnings ?? 0;
@@ -28,8 +29,42 @@ export function StatCard({ title, accent, data, onExplore }: Props) {
 
   const pct = (n: number) => total > 0 ? `${Math.round((n / total) * 100)}%` : '0%';
 
+  if (vertical) {
+    return (
+      <Surface style={[styles.cardVertical, { backgroundColor: c.card }]} elevation={1}>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: c.text }]} numberOfLines={1}>{title}</Text>
+          {onExplore && (
+            <TouchableOpacity onPress={onExplore} hitSlop={8}>
+              <Text style={[styles.explore, { color: accent }]}>→</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <View style={styles.ringWrapVertical}>
+          <StatRing
+            size={60}
+            strokeWidth={9}
+            segments={[
+              { value: ok,   color: c.green  },
+              { value: warn, color: c.yellow },
+              { value: err,  color: c.red    },
+            ]}
+          />
+          <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+            <View style={styles.ringCenter}>
+              <Text style={[styles.ringCountVertical, { color: c.text }]}>{ok}</Text>
+            </View>
+          </View>
+        </View>
+        <StatRow icon="check-circle" label="OK"   count={ok}   pct={pct(ok)}   color={c.green}  tc={c.text} mc={c.muted} compact />
+        <StatRow icon="alert-circle" label="Warn" count={warn} pct={pct(warn)} color={c.yellow} tc={c.text} mc={c.muted} compact />
+        <StatRow icon="close-circle" label="Err"  count={err}  pct={pct(err)}  color={c.red}    tc={c.text} mc={c.muted} compact />
+      </Surface>
+    );
+  }
+
   return (
-    <Surface style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]} elevation={1}>
+    <Surface style={[styles.card, { backgroundColor: c.card }]} elevation={1}>
       {/* Ring */}
       <View style={styles.ringWrap}>
         <StatRing
@@ -61,50 +96,26 @@ export function StatCard({ title, accent, data, onExplore }: Props) {
         </View>
 
         {/* Rows */}
-        <StatRow
-          icon="check-circle"
-          label="Success"
-          count={ok}
-          pct={pct(ok)}
-          color={c.green}
-          tc={c.text}
-          mc={c.muted}
-        />
-        <StatRow
-          icon="alert-circle"
-          label="Warnings"
-          count={warn}
-          pct={pct(warn)}
-          color={c.yellow}
-          tc={c.text}
-          mc={c.muted}
-        />
-        <StatRow
-          icon="close-circle"
-          label="Errors"
-          count={err}
-          pct={pct(err)}
-          color={c.red}
-          tc={c.text}
-          mc={c.muted}
-        />
+        <StatRow icon="check-circle" label="Success"  count={ok}   pct={pct(ok)}   color={c.green}  tc={c.text} mc={c.muted} />
+        <StatRow icon="alert-circle" label="Warnings" count={warn} pct={pct(warn)} color={c.yellow} tc={c.text} mc={c.muted} />
+        <StatRow icon="close-circle" label="Errors"   count={err}  pct={pct(err)}  color={c.red}    tc={c.text} mc={c.muted} />
       </View>
     </Surface>
   );
 }
 
 function StatRow({
-  icon, label, count, pct, color, tc, mc,
+  icon, label, count, pct, color, tc, mc, compact,
 }: {
   icon: string; label: string; count: number;
-  pct: string; color: string; tc: string; mc: string;
+  pct: string; color: string; tc: string; mc: string; compact?: boolean;
 }) {
   return (
     <View style={styles.row}>
-      <MaterialCommunityIcons name={icon as any} size={16} color={color} />
-      <Text style={[styles.rowLabel, { color: tc }]}>{label}</Text>
-      <Text style={[styles.rowPct, { color: mc }]}>{pct}</Text>
-      <Text style={[styles.rowCount, { color: tc }]}>{count}</Text>
+      <MaterialCommunityIcons name={icon as any} size={compact ? 13 : 16} color={color} />
+      <Text style={[styles.rowLabel, { color: tc, fontSize: compact ? font.xs : font.sm }]}>{label}</Text>
+      <Text style={[styles.rowPct,   { color: mc, fontSize: compact ? font.xs : font.sm }]}>{pct}</Text>
+      <Text style={[styles.rowCount, { color: tc, fontSize: compact ? font.xs : font.sm }]}>{count}</Text>
     </View>
   );
 }
@@ -112,12 +123,31 @@ function StatRow({
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.md,
-    borderWidth: 1,
     padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     marginBottom: spacing.sm,
+  },
+  cardVertical: {
+    borderRadius: radius.md,
+    padding: spacing.md,
+    flexDirection: 'column',
+    marginBottom: spacing.sm,
+    gap: 4,
+  },
+  ringWrapVertical: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    alignSelf: 'center',
+    marginVertical: spacing.xs,
+  },
+  ringCountVertical: {
+    fontSize: font.sm,
+    fontWeight: '800',
+    lineHeight: font.sm,
   },
   ringWrap: {
     alignItems: 'center',

@@ -1,5 +1,5 @@
 import { Image, Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,9 +17,9 @@ function Section({ title, children, c }: { title: string; children: React.ReactN
   return (
     <View style={styles.section}>
       <Text style={[styles.sectionLabel, { color: c.muted }]}>{title}</Text>
-      <View style={[styles.sectionBody, { backgroundColor: c.card, borderColor: c.border }]}>
+      <Surface style={[styles.sectionBody, { backgroundColor: c.card }]} elevation={1}>
         {children}
-      </View>
+      </Surface>
     </View>
   );
 }
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase', paddingHorizontal: 4,
   },
   sectionBody: {
-    borderRadius: radius.md, borderWidth: 1, overflow: 'hidden',
+    borderRadius: radius.md, overflow: 'hidden',
   },
   row: {
     flexDirection: 'row', alignItems: 'center',

@@ -36,7 +36,7 @@ export function ServiceRow({ service }: Props) {
   const serverSummary = servers.length > 0 ? `${activeCount}/${servers.length} active` : null;
 
   return (
-    <Surface style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]} elevation={1}>
+    <Surface style={[styles.card, { backgroundColor: c.card }]} elevation={1}>
       {/* Header row */}
       <View style={styles.header}>
         <View style={styles.badges}>
@@ -107,7 +107,7 @@ export function ServiceRow({ service }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.md, borderWidth: 1,
+    borderRadius: radius.md,
     marginBottom: spacing.sm, overflow: 'hidden',
     padding: spacing.md, gap: 6,
   },

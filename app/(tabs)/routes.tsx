@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useEffect, useRef, useState } from 'react';
-import { Animated, FlatList, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, FlatList, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,8 +9,10 @@ import { TopBar } from '../../src/components/TopBar';
 import { DemoBanner } from '../../src/components/DemoBanner';
 import { domainFromRule } from '../../src/api/routes';
 import { useRoutes, useToggleRoute } from '../../src/hooks/useRoutes';
+import { useLayout } from '../../src/hooks/useLayout';
 import { useNavStore } from '../../src/store/nav';
 import { useThemeStore } from '../../src/store/theme';
+import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { font, radius, spacing } from '../../src/theme';
 
@@ -26,10 +28,10 @@ export default function RoutesScreen() {
   const [editMode, setEditMode]     = useState(false);
   const searchRef                   = useRef<TextInput>(null);
 
-  const setNavVis          = useNavStore(s => s.setVisible);
   const routeProtoFilter   = useNavStore(s => s.routeProtoFilter);
   const setRouteProtoFilter = useNavStore(s => s.setRouteProtoFilter);
   const c                  = useThemeStore(s => s.colors);
+  const openDrawer         = useDrawerStore(s => s.open);
 
   // Apply filter set by Dashboard Explore button
   useEffect(() => {
@@ -40,19 +42,11 @@ export default function RoutesScreen() {
   }, [routeProtoFilter]);
   const swipe      = useTabSwipe('routes');
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const lastY      = useRef(0);
-
-  const onScrollListener = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const y = e.nativeEvent.contentOffset.y;
-    const dy = y - lastY.current;
-    if (dy > 8)  setNavVis(false);
-    if (dy < -8 || y < 10) setNavVis(true);
-    lastY.current = y;
-  };
 
   const { data, isFetching, isError, error } = useRoutes();
   const toggle = useToggleRoute();
   const qc     = useQueryClient();
+  const { contentPadding, contentMaxWidth } = useLayout();
 
   const routes = useMemo(() => {
     let list = data?.apps ?? [];
@@ -89,8 +83,7 @@ export default function RoutesScreen() {
       <TopBar
         title="Routes"
         scrollAnim={scrollAnim}
-        accent={c.green}
-        icon="swap-horizontal"
+        onMenuPress={openDrawer}
         right={
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <TouchableOpacity
@@ -109,7 +102,7 @@ export default function RoutesScreen() {
 
 
       <DemoBanner />
-      <View style={[styles.filterBar, { borderBottomColor: c.border }]}>
+      <View style={[styles.filterBar, { borderBottomColor: c.border, paddingHorizontal: contentPadding }]}>
         {searchOpen ? (
           /* ── Expanded search row ── */
           <View style={styles.searchRow}>
@@ -171,10 +164,10 @@ export default function RoutesScreen() {
         renderItem={({ item }) => (
           <RouteCard route={item} onToggle={handleToggle} toggling={togglingId === item.id} editMode={editMode} />
         )}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { padding: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
-          { useNativeDriver: false, listener: onScrollListener },
+          { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
         refreshControl={
@@ -197,7 +190,6 @@ export default function RoutesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   filterBar: {
-    paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
   },
@@ -245,7 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm, borderWidth: 1,
     backgroundColor: 'rgba(239,68,68,0.08)',
   },
-  list: { padding: PAD, paddingBottom: 110 },
+  list: { paddingBottom: 110 },
   topBarBtn: {
     padding: 5,
     borderRadius: radius.sm,

@@ -1,5 +1,5 @@
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -49,7 +49,7 @@ export default function ServerScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
 
         <Text style={[styles.sectionLabel, { color: c.muted }]}>CONNECTION</Text>
-        <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
+        <Surface style={[styles.sectionBody, { backgroundColor: c.card }]} elevation={1}>
           <View style={[styles.row, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
             <Text style={[styles.rowLabel, { color: c.muted }]}>URL</Text>
             <Text style={[styles.rowValue, { color: c.text, fontFamily: 'monospace' }]} numberOfLines={2}>
@@ -70,12 +70,12 @@ export default function ServerScreen() {
               </View>
             )}
           </View>
-        </View>
+        </Surface>
 
         <Text style={[styles.sectionLabel, { color: demoMode ? c.blue + 'cc' : c.red + 'cc' }]}>
           {demoMode ? 'DEMO' : 'DANGER ZONE'}
         </Text>
-        <View style={[styles.sectionBody, { borderColor: demoMode ? c.blue + '44' : c.red + '44', backgroundColor: c.card }]}>
+        <View style={[styles.sectionBody, { borderWidth: 1, borderColor: demoMode ? c.blue + '44' : c.red + '44', backgroundColor: c.card }]}>
           <TouchableOpacity style={styles.disconnectRow} onPress={handleDisconnect} activeOpacity={0.7}>
             <MaterialCommunityIcons name={demoMode ? 'flask-off-outline' : 'logout'} size={18} color={demoMode ? c.blue : c.red} />
             <Text style={[styles.disconnectLabel, { color: demoMode ? c.blue : c.red }]}>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     fontSize: font.xs, fontWeight: '700', letterSpacing: 0.8,
     textTransform: 'uppercase', paddingHorizontal: 4,
   },
-  sectionBody: { borderRadius: radius.md, borderWidth: 1, overflow: 'hidden' },
+  sectionBody: { borderRadius: radius.md, overflow: 'hidden' },
   row: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: spacing.md, paddingVertical: 12,

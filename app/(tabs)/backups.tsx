@@ -1,8 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
-import { useNavStore } from '../../src/store/nav';
 import { BackupItem } from '../../src/components/BackupItem';
 import { useBackupMutations, useBackups } from '../../src/hooks/useBackups';
 import { font, radius, spacing } from '../../src/theme';
@@ -13,17 +12,7 @@ export default function BackupsScreen() {
   const { data, isFetching, isError, error } = useBackups();
   const { create, restore, remove } = useBackupMutations();
   const qc        = useQueryClient();
-  const setNavVis = useNavStore(s => s.setVisible);
   const c         = useThemeStore(s => s.colors);
-  const lastY     = useRef(0);
-
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const y = e.nativeEvent.contentOffset.y;
-    const dy = y - lastY.current;
-    if (dy > 8)  setNavVis(false);
-    if (dy < -8 || y < 10) setNavVis(true);
-    lastY.current = y;
-  };
 
   const backups = data?.backups ?? [];
 
@@ -78,7 +67,6 @@ export default function BackupsScreen() {
             restoring={restoringFile === item.filename}
           />
         )}
-        onScroll={onScroll}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 110 }}
         refreshControl={

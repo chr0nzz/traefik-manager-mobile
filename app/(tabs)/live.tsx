@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useRef, useState } from 'react';
-import { Animated, FlatList, NativeScrollEvent, NativeSyntheticEvent, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, FlatList, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FilterDropdown } from '../../src/components/FilterDropdown';
@@ -8,8 +8,9 @@ import { ServiceRow } from '../../src/components/ServiceRow';
 import { TopBar } from '../../src/components/TopBar';
 import { DemoBanner } from '../../src/components/DemoBanner';
 import { useLive } from '../../src/hooks/useLive';
-import { useNavStore } from '../../src/store/nav';
+import { useLayout } from '../../src/hooks/useLayout';
 import { useThemeStore } from '../../src/store/theme';
+import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { font, radius, spacing } from '../../src/theme';
 import { providerOf } from '../../src/utils';
@@ -32,20 +33,12 @@ export default function LiveScreen() {
   const searchRef                   = useRef<TextInput>(null);
 
   const { data, isFetching, isError, error } = useLive();
-  const qc        = useQueryClient();
-  const setNavVis = useNavStore(s => s.setVisible);
-  const c         = useThemeStore(s => s.colors);
+  const qc         = useQueryClient();
+  const c          = useThemeStore(s => s.colors);
+  const openDrawer = useDrawerStore(s => s.open);
   const swipe      = useTabSwipe('live');
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const lastY      = useRef(0);
-
-  const onScrollListener = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const y = e.nativeEvent.contentOffset.y;
-    const dy = y - lastY.current;
-    if (dy > 8)  setNavVis(false);
-    if (dy < -8 || y < 10) setNavVis(true);
-    lastY.current = y;
-  };
+  const { contentPadding, contentMaxWidth } = useLayout();
 
   const allServices = data ?? [];
 
@@ -104,9 +97,9 @@ export default function LiveScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
-      <TopBar title="Services" scrollAnim={scrollAnim} accent={c.green} icon="lightning-bolt" />
+      <TopBar title="Services" scrollAnim={scrollAnim} onMenuPress={openDrawer} />
       <DemoBanner />
-      <View style={[styles.filterBar, { borderBottomColor: c.border, backgroundColor: c.bg }]}>
+      <View style={[styles.filterBar, { borderBottomColor: c.border, backgroundColor: c.bg, paddingHorizontal: contentPadding }]}>
         {searchOpen ? (
           /* ── Expanded search ── */
           <View style={styles.searchRow}>
@@ -170,10 +163,10 @@ export default function LiveScreen() {
         data={filtered}
         keyExtractor={s => s.name}
         renderItem={({ item }) => <ServiceRow service={item} />}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { padding: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
-          { useNativeDriver: false, listener: onScrollListener },
+          { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
         refreshControl={
@@ -196,7 +189,6 @@ export default function LiveScreen() {
 const styles = StyleSheet.create({
   container:  { flex: 1 },
   filterBar: {
-    paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
   },
@@ -247,5 +239,5 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm, borderWidth: 1,
     backgroundColor: 'rgba(239,68,68,0.08)',
   },
-  list: { padding: PAD, paddingBottom: 110 },
+  list: { paddingBottom: 110 },
 });

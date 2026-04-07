@@ -66,7 +66,7 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
   };
 
   return (
-    <Surface style={[styles.card, { backgroundColor: c.card, borderColor: c.border }, !route.enabled && styles.cardDisabled]} elevation={1}>
+    <Surface style={[styles.card, { backgroundColor: c.card }, !route.enabled && styles.cardDisabled]} elevation={1}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.badges}>
@@ -90,8 +90,8 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
             : <Switch
                 value={route.enabled}
                 onValueChange={(v) => onToggle(route.id, v)}
-                trackColor={{ false: c.border, true: c.blue + '66' }}
-                thumbColor={route.enabled ? c.blue : c.muted}
+                trackColor={{ false: c.border, true: c.blue }}
+                thumbColor={route.enabled ? '#fff' : c.muted}
                 style={styles.toggle}
               />
           )}
@@ -154,7 +154,7 @@ function SmallChip({ label, color, c }: { label: string; color: string; c: Retur
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.md, borderWidth: 1,
+    borderRadius: radius.md,
     marginBottom: spacing.sm, overflow: 'hidden',
     padding: spacing.md, gap: 6,
   },

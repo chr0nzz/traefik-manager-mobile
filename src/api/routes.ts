@@ -82,3 +82,12 @@ export interface ConfigsResponse {
 export function getConfigs(): Promise<ConfigsResponse> {
   return apiFetch('/api/configs');
 }
+
+export interface LogsResponse {
+  lines: string[];
+  error?: string;
+}
+
+export function getLogs(lines = 100): Promise<LogsResponse> {
+  return apiFetch(`/api/traefik/logs?lines=${lines}`);
+}

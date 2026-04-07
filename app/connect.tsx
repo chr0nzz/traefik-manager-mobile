@@ -63,7 +63,7 @@ export default function ConnectScreen() {
           <Text style={[styles.subtitle, { color: c.muted }]}>Connect to your instance</Text>
         </View>
 
-        <Surface style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]} elevation={1}>
+        <Surface style={[styles.card, { backgroundColor: c.card }]} elevation={1}>
           <TextInput
             label="Instance URL"
             value={url}
@@ -155,7 +155,6 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: radius.lg,
-    borderWidth: 1,
     padding: spacing.xl,
     marginBottom: spacing.lg,
     gap: spacing.md,
@@ -166,10 +165,8 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginTop: spacing.xs,
-    borderRadius: radius.sm,
   },
   demoBtn: {
-    borderRadius: radius.sm,
     borderColor: 'transparent',
   },
   btnContent: {

@@ -1,27 +1,26 @@
 import React from 'react';
-import { Animated, Platform, StyleSheet, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeStore } from '../store/theme';
-import { font } from '../theme';
 
 interface Props {
   title: string;
   scrollAnim: Animated.Value;
+  onMenuPress?: () => void;
+  right?: React.ReactNode;
   accent?: string;
   icon?: string;
-  right?: React.ReactNode;
 }
 
-export function TopBar({ title, scrollAnim, accent, icon, right }: Props) {
+export function TopBar({ title, scrollAnim, onMenuPress, right, accent, icon }: Props) {
   const c      = useThemeStore(s => s.colors);
   const isDark = useThemeStore(s => s.isDark);
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === 'android' ? (insets.top || 24) : insets.top;
 
-  // Fade in card background + border on scroll (elevation effect)
   const scrollOpacity = scrollAnim.interpolate({
     inputRange:  [0, 30],
     outputRange: [0, 1],
@@ -42,13 +41,25 @@ export function TopBar({ title, scrollAnim, accent, icon, right }: Props) {
 
       <View style={[styles.bar, { paddingTop: topPad }]}>
         <View style={styles.inner}>
-          <View style={styles.titleRow}>
-            {icon && <MaterialCommunityIcons name={icon as any} size={20} color={accent ?? c.text} />}
-            <Text style={[styles.title, { color: c.text }]}>{title}</Text>
-          </View>
+          {onMenuPress ? (
+            <Pressable
+              onPress={onMenuPress}
+              style={styles.menuBtn}
+              hitSlop={8}
+              android_ripple={{ color: c.border, borderless: true, radius: 20 }}
+            >
+              <MaterialCommunityIcons name="menu" size={24} color={c.text} />
+            </Pressable>
+          ) : icon ? (
+            <View style={styles.iconSlot}>
+              <MaterialCommunityIcons name={icon as any} size={22} color={accent ?? c.text} />
+            </View>
+          ) : null}
+
+          <Text style={[styles.title, { color: c.text }]}>{title}</Text>
+
           {right && <View style={styles.rightSlot}>{right}</View>}
         </View>
-        {accent && <View style={[styles.accentLine, { backgroundColor: accent }]} />}
       </View>
 
       <Animated.View
@@ -67,29 +78,33 @@ const styles = StyleSheet.create({
   inner: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 46,
-    paddingHorizontal: 16,
+    height: 56,
+    paddingHorizontal: 4,
+    gap: 4,
   },
-  titleRow: {
-    flexDirection: 'row',
+  menuBtn: {
+    width: 48,
+    height: 48,
     alignItems: 'center',
-    gap: 8,
-    flex: 1,
+    justifyContent: 'center',
+    borderRadius: 24,
   },
-  title: {
-    fontSize: font.lg,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-  },
-  rightSlot: {
-    alignItems: 'flex-end',
+  iconSlot: {
+    width: 44,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  accentLine: {
-    height: 2,
-    width: '100%',
-    opacity: 0.7,
+  title: {
+    flex: 1,
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: 0,
+    paddingHorizontal: 8,
+  },
+  rightSlot: {
+    paddingRight: 12,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   scrollBorder: {
     position: 'absolute',

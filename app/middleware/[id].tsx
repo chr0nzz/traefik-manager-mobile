@@ -6,11 +6,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -72,7 +71,7 @@ function Section({ icon, title, children, c }: {
         <MaterialCommunityIcons name={icon as any} size={14} color={c.blue} />
         <Text style={[styles.sectionTitle, { color: c.text }]}>{title}</Text>
       </View>
-      <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
+      <View style={[styles.sectionBody, { backgroundColor: c.card }]}>
         {children}
       </View>
     </View>
@@ -281,37 +280,33 @@ export default function MiddlewareDetailScreen() {
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: c.muted }]}>NAME</Text>
-              <TextInput
-                style={[styles.formInput, { backgroundColor: c.bg, borderColor: c.border, color: c.text }]}
-                value={fName}
-                onChangeText={setFName}
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholder="middleware-name"
-                placeholderTextColor={c.muted}
-              />
-            </View>
+            <TextInput
+              label="Name"
+              value={fName}
+              onChangeText={setFName}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="middleware-name"
+              mode="outlined"
+              style={{ backgroundColor: c.bg }}
+            />
 
-            <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG (YAML)</Text>
-              <TextInput
-                style={[styles.formInput, styles.yamlInput, { backgroundColor: c.bg, borderColor: c.border, color: c.green, fontFamily: 'monospace' }]}
-                value={fYaml}
-                onChangeText={setFYaml}
-                multiline
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholder={'redirectScheme:\n  scheme: https\n  permanent: true'}
-                placeholderTextColor={c.muted}
-                textAlignVertical="top"
-              />
-            </View>
+            <TextInput
+              label="Config (YAML)"
+              value={fYaml}
+              onChangeText={setFYaml}
+              multiline
+              numberOfLines={10}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder={'redirectScheme:\n  scheme: https\n  permanent: true'}
+              mode="outlined"
+              style={{ backgroundColor: c.bg, fontFamily: 'monospace', minHeight: 200 }}
+            />
 
             {showConfigPicker && (
               <View style={styles.formGroup}>
-                <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
+                <Text style={{ fontSize: 12, fontWeight: '500', color: c.muted, marginBottom: 4 }}>Config File</Text>
                 <ConfigFilePicker
                   files={configFiles}
                   configDirSet={configDirSet}
@@ -398,7 +393,7 @@ const styles = StyleSheet.create({
   section:      { gap: 6 },
   sectionHeader:{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 2 },
   sectionTitle: { fontSize: font.xs, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase' as const, flex: 1 },
-  sectionBody:  { borderRadius: radius.md, borderWidth: 1, overflow: 'hidden' as const },
+  sectionBody:  { borderRadius: radius.md, overflow: 'hidden' as const },
   // Rows
   row:      { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: 11, gap: spacing.sm },
   rowLabel: { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5, width: 120 },
@@ -410,13 +405,6 @@ const styles = StyleSheet.create({
   // Code block
   codeWrap: { padding: spacing.md },
   codeText: { fontSize: font.xs, fontFamily: 'monospace', lineHeight: 18 },
-  // Form
-  formGroup:     { gap: 4 },
-  formLabel:     { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5 },
-  formInput:     { borderWidth: 1, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 9, fontSize: font.sm },
-  yamlInput:     { minHeight: 220, paddingTop: spacing.sm, fontSize: font.xs, lineHeight: 18 },
-  toggleRow:     { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  toggleBtn:     { flex: 1, paddingVertical: 8, borderRadius: radius.sm, borderWidth: 1, alignItems: 'center', minWidth: 60 },
-  toggleBtnTxt:  { fontSize: font.sm, fontWeight: '700' },
-  errTxt:        { fontSize: font.sm },
+  formGroup: { gap: 4 },
+  errTxt:    { fontSize: font.sm },
 });

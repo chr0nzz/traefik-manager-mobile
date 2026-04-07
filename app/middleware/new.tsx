@@ -5,11 +5,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Button, Surface, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -106,7 +105,7 @@ export default function NewMiddlewareScreen() {
             return (
               <TouchableOpacity
                 key={t.id}
-                style={[styles.templateRow, { backgroundColor: c.card, borderColor: c.border }]}
+                style={[styles.templateRow, { backgroundColor: c.card }]}
                 onPress={() => selectTemplate(t)}
                 activeOpacity={0.7}
               >
@@ -135,15 +134,15 @@ export default function NewMiddlewareScreen() {
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: c.text }]}>New Middleware</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity
+          <Button
+            mode="contained"
             onPress={handleSave}
+            loading={saving}
             disabled={saving}
-            style={[styles.headerActionBtn, { borderColor: c.purple, backgroundColor: c.purple }]}
+            compact
           >
-            {saving
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Text style={[styles.headerActionTxt, { color: '#fff' }]}>Create</Text>}
-          </TouchableOpacity>
+            Create
+          </Button>
         </View>
       </View>
 
@@ -153,38 +152,34 @@ export default function NewMiddlewareScreen() {
           contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.formGroup}>
-            <Text style={[styles.formLabel, { color: c.muted }]}>NAME</Text>
-            <TextInput
-              style={[styles.formInput, { backgroundColor: c.bg, borderColor: c.border, color: c.text }]}
-              value={fName}
-              onChangeText={setFName}
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholder="my-middleware"
-              placeholderTextColor={c.muted}
-              autoFocus
-            />
-          </View>
+          <TextInput
+            label="Name"
+            value={fName}
+            onChangeText={setFName}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="my-middleware"
+            autoFocus
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
 
-          <View style={styles.formGroup}>
-            <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG (YAML)</Text>
-            <TextInput
-              style={[styles.formInput, styles.yamlInput, { backgroundColor: c.bg, borderColor: c.border, color: c.green, fontFamily: 'monospace' }]}
-              value={fYaml}
-              onChangeText={setFYaml}
-              multiline
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholder={'redirectScheme:\n  scheme: https\n  permanent: true'}
-              placeholderTextColor={c.muted}
-              textAlignVertical="top"
-            />
-          </View>
+          <TextInput
+            label="Config (YAML)"
+            value={fYaml}
+            onChangeText={setFYaml}
+            multiline
+            numberOfLines={10}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={'redirectScheme:\n  scheme: https\n  permanent: true'}
+            mode="outlined"
+            style={{ backgroundColor: c.bg, fontFamily: 'monospace', minHeight: 200 }}
+          />
 
           {showConfigPicker && (
             <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
+              <Text style={{ fontSize: 12, fontWeight: '500', color: c.muted, marginBottom: 4 }}>Config File</Text>
               <ConfigFilePicker
                 files={configFiles}
                 configDirSet={configDirSet}
@@ -214,27 +209,18 @@ const styles = StyleSheet.create({
   headerBtn:       { width: 36, alignItems: 'flex-start' },
   headerTitle:     { flex: 1, fontSize: font.lg, fontWeight: '700', textAlign: 'center' },
   headerActions:   { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  headerActionBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.sm, borderWidth: 1 },
-  headerActionTxt: { fontSize: font.sm, fontWeight: '600' },
   // Templates
   templateList: { padding: spacing.md, gap: spacing.sm },
   templateRow: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    borderRadius: radius.md, borderWidth: 1,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md, paddingVertical: spacing.md,
   },
   templateIcon: { width: 44, height: 44, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
   templateText: { flex: 1, gap: 2 },
   templateName: { fontSize: font.sm, fontWeight: '700' },
   templateDesc: { fontSize: font.xs },
-  // Scroll / form
+  // Form
   scrollContent: { padding: spacing.md, gap: spacing.md },
-  formGroup:    { gap: 4 },
-  formLabel:    { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5 },
-  formInput:    { borderWidth: 1, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 9, fontSize: font.sm },
-  yamlInput:    { minHeight: 220, paddingTop: spacing.sm, fontSize: font.xs, lineHeight: 18 },
-  toggleRow:    { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  toggleBtn:    { flex: 1, paddingVertical: 8, borderRadius: radius.sm, borderWidth: 1, alignItems: 'center', minWidth: 60 },
-  toggleBtnTxt: { fontSize: font.sm, fontWeight: '700' },
-  errTxt:       { fontSize: font.sm },
+  errTxt:        { fontSize: font.sm },
 });

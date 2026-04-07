@@ -1,31 +1,35 @@
 export const darkColors = {
-  bg:      '#0d1117',
-  card:    '#161b22',
-  border:  '#30363d',
-  text:    '#e6edf3',
-  muted:   '#7d8590',
-  blue:    '#24a1de',
-  green:   '#22c55e',
-  yellow:  '#f59e0b',
-  red:     '#ef4444',
-  orange:  '#f0883e',
-  purple:  '#a371f7',
-  teal:    '#1abc9c',
+  bg:                   '#0d1117',
+  card:                 '#161b22',
+  border:               '#30363d',
+  text:                 '#e6edf3',
+  muted:                '#7d8590',
+  blue:                 '#24a1de',
+  green:                '#22c55e',
+  yellow:               '#f59e0b',
+  red:                  '#ef4444',
+  orange:               '#f0883e',
+  purple:               '#a371f7',
+  teal:                 '#1abc9c',
+  secondaryContainer:   '#1c3a50',
+  onSecondaryContainer: '#9ecfef',
 };
 
 export const lightColors = {
-  bg:      '#f6f8fa',
-  card:    '#ffffff',
-  border:  '#d0d7de',
-  text:    '#1f2328',
-  muted:   '#636e7b',
-  blue:    '#0969da',
-  green:   '#1a7f37',
-  yellow:  '#9a6700',
-  red:     '#cf222e',
-  orange:  '#bc4c00',
-  purple:  '#8250df',
-  teal:    '#0e7069',
+  bg:                   '#f6f8fa',
+  card:                 '#ffffff',
+  border:               '#d0d7de',
+  text:                 '#1f2328',
+  muted:                '#636e7b',
+  blue:                 '#0969da',
+  green:                '#1a7f37',
+  yellow:               '#9a6700',
+  red:                  '#cf222e',
+  orange:               '#bc4c00',
+  purple:               '#8250df',
+  teal:                 '#0e7069',
+  secondaryContainer:   '#cce5f6',
+  onSecondaryContainer: '#003a57',
 };
 
 export const colors = darkColors;
@@ -40,9 +44,9 @@ export const spacing = {
 };
 
 export const radius = {
-  sm: 6,
-  md: 10,
-  lg: 14,
+  sm: 8,
+  md: 12,
+  lg: 16,
   full: 999,
 };
 

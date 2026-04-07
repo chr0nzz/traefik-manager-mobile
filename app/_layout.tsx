@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useConnection } from '../src/store/connection';
 import { useThemeStore } from '../src/store/theme';
 import { useAppLock } from '../src/store/applock';
+import { useTabsStore } from '../src/store/tabs';
 import { darkColors, lightColors } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -23,15 +24,35 @@ function makePaperTheme(isDark: boolean) {
     ...base,
     colors: {
       ...base.colors,
-      primary:          c.blue,
-      secondary:        c.purple,
-      background:       c.bg,
-      surface:          c.card,
-      surfaceVariant:   c.card,
-      onSurface:        c.text,
-      onSurfaceVariant: c.muted,
-      outline:          c.border,
-      error:            c.red,
+      primary:                c.blue,
+      onPrimary:              '#ffffff',
+      primaryContainer:       c.secondaryContainer,
+      onPrimaryContainer:     c.onSecondaryContainer,
+      secondary:              c.purple,
+      onSecondary:            '#ffffff',
+      secondaryContainer:     c.secondaryContainer,
+      onSecondaryContainer:   c.onSecondaryContainer,
+      tertiary:               c.teal,
+      background:             c.bg,
+      onBackground:           c.text,
+      surface:                c.card,
+      onSurface:              c.text,
+      surfaceVariant:         isDark ? '#1e2a36' : '#e8f0f8',
+      onSurfaceVariant:       c.muted,
+      outline:                c.border,
+      outlineVariant:         c.border,
+      error:                  c.red,
+      onError:                '#ffffff',
+      inverseSurface:         isDark ? c.text : c.card,
+      inverseOnSurface:       isDark ? c.bg : c.text,
+      inversePrimary:         c.blue,
+      elevation: {
+        ...base.colors.elevation,
+        level0: 'transparent',
+        level1: isDark ? '#1a2130' : '#f0f6ff',
+        level2: isDark ? '#1e2638' : '#e8f0fa',
+        level3: isDark ? '#222d40' : '#e0eaf6',
+      },
     },
   };
 }
@@ -44,6 +65,7 @@ function ConnectionGate() {
   const { baseUrl, apiKey, ready, demoMode, loadConnection } = useConnection();
   const { load: loadTheme, applySystem }                    = useThemeStore();
   const { load: loadAppLock }                               = useAppLock();
+  const { load: loadTabs }                                  = useTabsStore();
   const router     = useRouter();
   const segments   = useSegments();
   const didRoute   = useRef(false);
@@ -51,7 +73,7 @@ function ConnectionGate() {
   const systemIsDark = colorScheme === 'dark';
 
   useEffect(() => {
-    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock()]).then(() => SplashScreen.hideAsync());
+    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs()]).then(() => SplashScreen.hideAsync());
   }, []);
 
   useEffect(() => {
@@ -138,6 +160,12 @@ export default function RootLayout() {
   const c         = useThemeStore(s => s.colors);
   const demoMode  = useConnection(s => s.demoMode);
   const theme     = makePaperTheme(isDark);
+  const [screenKey, setScreenKey] = useState('init');
+
+  const onRootLayout = (e: { nativeEvent: { layout: { width: number } } }) => {
+    const w = String(Math.round(e.nativeEvent.layout.width));
+    setScreenKey(prev => prev === w ? prev : w);
+  };
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(c.bg);
@@ -159,11 +187,13 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+    <View style={{ flex: 1 }} onLayout={onRootLayout}>
     <PaperProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <StatusBar style={isDark ? 'light' : 'dark'} />
         <ConnectionGate />
         <Stack
+          key={screenKey}
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: c.bg },
@@ -186,6 +216,7 @@ export default function RootLayout() {
         <AppLockGate />
       </QueryClientProvider>
     </PaperProvider>
+    </View>
     </SafeAreaProvider>
   );
 }

@@ -25,15 +25,19 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 ## Screenshots
 
-| Connect | Dashboard | Routes |
-|---|---|---|
-| ![Connect](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-connect-1.png) | ![Dashboard](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-dashboard-2.png) | ![Routes](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-routes-3.png) |
+<div align="center">
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-connect-1.png"    alt="Connect"     width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-dashboard-2.png"  alt="Dashboard"   width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-routes-3.png"     alt="Routes"      width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-middleware-4.png" alt="Middlewares"  width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-services-5.png"   alt="Services"    width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-settings-6.png"   alt="Settings"    width="150" />
+</div>
+<div align="center">
+  <sub>Connect &nbsp;·&nbsp; Dashboard &nbsp;·&nbsp; Routes &nbsp;·&nbsp; Middlewares &nbsp;·&nbsp; Services &nbsp;·&nbsp; Settings</sub>
+</div>
 
-| Middlewares | Services | Settings |
-|---|---|---|
-| ![Middlewares](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-middleware-4.png) | ![Services](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-services-5.png) | ![Settings](https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-settings-6.png) |
-
-[View light & dark screenshots in the docs](https://traefik-manager.chr0nzz.dev/ui-examples#mobile-app)
+[View light & dark screenshots in the docs](https://traefik-manager.chr0nzz.dev/ui-examples)
 
 ---
 

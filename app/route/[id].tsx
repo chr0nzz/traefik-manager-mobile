@@ -8,11 +8,10 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { SegmentedButtons, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -57,7 +56,7 @@ function Section({ icon, title, count, children, c }: {
           </View>
         )}
       </View>
-      <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
+      <View style={[styles.sectionBody, { backgroundColor: c.card }]}>
         {children}
       </View>
     </View>
@@ -97,22 +96,19 @@ function FormField({ label, value, onChange, c, placeholder, keyboardType, multi
   placeholder?: string; keyboardType?: 'default' | 'url' | 'numeric'; multiline?: boolean;
 }) {
   return (
-    <View style={styles.formGroup}>
-      <Text style={[styles.formLabel, { color: c.muted }]}>{label}</Text>
-      <TextInput
-        style={[styles.formInput, { backgroundColor: c.bg, borderColor: c.border, color: c.text },
-          multiline && styles.multilineInput]}
-        value={value}
-        onChangeText={onChange}
-        placeholder={placeholder}
-        placeholderTextColor={c.muted}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType={keyboardType ?? 'default'}
-        multiline={multiline}
-        textAlignVertical={multiline ? 'top' : undefined}
-      />
-    </View>
+    <TextInput
+      label={label}
+      value={value}
+      onChangeText={onChange}
+      placeholder={placeholder}
+      autoCapitalize="none"
+      autoCorrect={false}
+      keyboardType={keyboardType ?? 'default'}
+      multiline={multiline}
+      numberOfLines={multiline ? 4 : 1}
+      mode="outlined"
+      style={{ backgroundColor: c.bg }}
+    />
   );
 }
 
@@ -361,47 +357,47 @@ export default function RouteDetailScreen() {
             <FormField label="MIDDLEWARES (comma-separated)" value={fMws} onChange={setFMws} c={c}
               placeholder="e.g. auth@file, compress" />
 
-            <Text style={[styles.formLabel, { color: c.muted }]}>BACKEND SCHEME</Text>
-            <View style={styles.toggleRow}>
-              {(['http', 'https'] as const).map(s => (
-                <TouchableOpacity
-                  key={s}
-                  style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                    fScheme === s && { backgroundColor: c.blue + '20', borderColor: c.blue }]}
-                  onPress={() => setFScheme(s)}
-                >
-                  <Text style={[styles.toggleBtnTxt, { color: fScheme === s ? c.blue : c.muted }]}>
-                    {s.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
+            <SegmentedButtons
+              value={fScheme}
+              onValueChange={setFScheme}
+              buttons={[
+                { value: 'http',  label: 'HTTP'  },
+                { value: 'https', label: 'HTTPS' },
+              ]}
+            />
 
             <View style={styles.switchRow}>
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={[styles.formLabel, { color: c.muted }]}>PASS HOST HEADER</Text>
-                <Text style={[styles.formHint, { color: c.muted }]}>Forward original Host to backend</Text>
+                <Text style={[styles.fieldLabel, { color: c.text }]}>Pass Host Header</Text>
+                <Text style={[styles.fieldHint, { color: c.muted }]}>Forward original Host to backend</Text>
               </View>
               <Switch
                 value={fPassHost}
                 onValueChange={setFPassHost}
-                trackColor={{ false: c.border, true: c.blue + '66' }}
-                thumbColor={fPassHost ? c.blue : c.muted}
+                trackColor={{ false: c.border, true: c.blue }}
+                thumbColor={fPassHost ? '#fff' : c.muted}
               />
             </View>
 
             {resolvers.length > 0 && (fProto === 'http' || fProto === 'tcp') && (
               <>
-                <Text style={[styles.formLabel, { color: c.muted }]}>CERT RESOLVER</Text>
-                <View style={styles.toggleRow}>
+                <Text style={[styles.fieldLabel, { color: c.muted }]}>Cert Resolver</Text>
+                <View style={styles.resolverChipRow}>
                   {resolvers.map(r => (
                     <TouchableOpacity
                       key={r}
-                      style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                        fCertResolver === r && { backgroundColor: c.blue + '20', borderColor: c.blue }]}
                       onPress={() => setFCertResolver(r)}
+                      style={[
+                        styles.resolverChip,
+                        {
+                          backgroundColor: fCertResolver === r ? c.secondaryContainer : 'transparent',
+                          borderColor:     fCertResolver === r ? c.blue : c.border,
+                        },
+                      ]}
+                      activeOpacity={0.7}
                     >
-                      <Text style={[styles.toggleBtnTxt, { color: fCertResolver === r ? c.blue : c.muted }]}>
+                      <Text style={{ color: fCertResolver === r ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
                         {r}
                       </Text>
                     </TouchableOpacity>
@@ -410,25 +406,16 @@ export default function RouteDetailScreen() {
               </>
             )}
 
-            <Text style={[styles.formLabel, { color: c.muted }]}>PROTOCOL</Text>
-            <View style={styles.toggleRow}>
-              {PROTOCOLS.map(p => (
-                <TouchableOpacity
-                  key={p}
-                  style={[styles.toggleBtn, { borderColor: c.border, backgroundColor: c.bg },
-                    fProto === p && { backgroundColor: c.blue + '20', borderColor: c.blue }]}
-                  onPress={() => setFProto(p)}
-                >
-                  <Text style={[styles.toggleBtnTxt, { color: fProto === p ? c.blue : c.muted }]}>
-                    {p.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={[styles.fieldLabel, { color: c.muted }]}>Protocol</Text>
+            <SegmentedButtons
+              value={fProto}
+              onValueChange={setFProto}
+              buttons={PROTOCOLS.map(p => ({ value: p, label: p.toUpperCase() }))}
+            />
 
             {showConfigPicker && (
               <View style={styles.formGroup}>
-                <Text style={[styles.formLabel, { color: c.muted }]}>CONFIG FILE</Text>
+                <Text style={[styles.fieldLabel, { color: c.muted }]}>Config File</Text>
                 <ConfigFilePicker
                   files={configFiles}
                   configDirSet={configDirSet}
@@ -570,7 +557,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: font.xs, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase' as const, flex: 1 },
   countBadge:   { paddingHorizontal: 6, paddingVertical: 1, borderRadius: radius.full, minWidth: 20, alignItems: 'center' },
   countText:    { fontSize: font.xs, fontWeight: '700' },
-  sectionBody:  { borderRadius: radius.md, borderWidth: 1, overflow: 'hidden' as const },
+  sectionBody:  { borderRadius: radius.md, overflow: 'hidden' as const },
   // Rows
   row:      { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: 11, gap: spacing.sm },
   rowLabel: { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5, width: 130 },
@@ -582,15 +569,11 @@ const styles = StyleSheet.create({
   chipText:  { fontSize: font.xs, fontWeight: '600' },
   chipsRow:  { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, padding: spacing.md },
-  // Form
-  formGroup:     { gap: 4 },
-  formLabel:     { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5 },
-  formHint:      { fontSize: font.xs, opacity: 0.7 },
-  formInput:     { borderWidth: 1, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 9, fontSize: font.sm },
-  multilineInput:{ minHeight: 80, paddingTop: spacing.sm },
-  toggleRow:     { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  toggleBtn:     { flex: 1, paddingVertical: 8, borderRadius: radius.sm, borderWidth: 1, alignItems: 'center', minWidth: 60 },
-  toggleBtnTxt:  { fontSize: font.sm, fontWeight: '700' },
-  switchRow:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  errTxt:        { fontSize: font.sm, color: 'red' },
+  formGroup:  { gap: 4 },
+  fieldLabel: { fontSize: font.sm, fontWeight: '500', marginBottom: 4 },
+  fieldHint:  { fontSize: font.xs, opacity: 0.8 },
+  switchRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
+  resolverChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  resolverChip:    { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 7 },
+  errTxt:          { fontSize: font.sm, color: 'red' },
 });

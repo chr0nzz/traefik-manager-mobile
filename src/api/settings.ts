@@ -17,5 +17,5 @@ export function saveSettings(s: Partial<AppSettings>): Promise<{ ok: boolean; me
 }
 
 export function testTraefikUrl(url: string): Promise<{ ok: boolean; version?: string; error?: string }> {
-  return apiPost('/api/setup/test-connection', { url });
+  return apiPost('/api/settings/test-connection', { url });
 }

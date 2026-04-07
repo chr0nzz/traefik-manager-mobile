@@ -1,6 +1,6 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -42,7 +42,7 @@ export default function AppLockScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
         <Text style={[styles.sectionLabel, { color: c.muted }]}>SECURITY</Text>
 
-        <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
+        <Surface style={[styles.sectionBody, { backgroundColor: c.card }]} elevation={1}>
           <View style={styles.toggleRow}>
             <MaterialCommunityIcons
               name={enabled ? 'lock' : 'lock-outline'}
@@ -54,11 +54,11 @@ export default function AppLockScreen() {
             <Switch
               value={enabled}
               onValueChange={handleToggle}
-              trackColor={{ false: c.border, true: c.blue + '66' }}
-              thumbColor={enabled ? c.blue : c.muted}
+              trackColor={{ false: c.border, true: c.blue }}
+              thumbColor={enabled ? '#fff' : c.muted}
             />
           </View>
-        </View>
+        </Surface>
 
         <Text style={[styles.hint, { color: c.muted }]}>
           Uses your device fingerprint, face unlock, or PIN. You will be prompted each time you open the app or return from the background.
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase', paddingHorizontal: 4,
   },
   sectionBody: {
-    borderRadius: radius.md, borderWidth: 1, overflow: 'hidden',
+    borderRadius: radius.md, overflow: 'hidden',
   },
   toggleRow: {
     flexDirection: 'row',

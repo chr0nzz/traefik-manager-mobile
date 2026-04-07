@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
-  ScrollView, StyleSheet, TextInput, TouchableOpacity, View,
+  ScrollView, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Surface, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -83,47 +83,41 @@ export default function TraefikSettingsScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
         >
-          <Text style={[styles.sectionLabel, { color: c.muted }]}>DOMAINS</Text>
-          <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
-            <TextInput
-              style={[styles.input, { color: c.text, borderColor: 'transparent' }]}
-              placeholderTextColor={c.muted}
-              placeholder="example.com, home.lab"
-              value={domains}
-              onChangeText={setDomains}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+          <TextInput
+            label="Domains"
+            value={domains}
+            onChangeText={setDomains}
+            placeholder="example.com, home.lab"
+            autoCapitalize="none"
+            autoCorrect={false}
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
           <Text style={[styles.hint, { color: c.muted }]}>Separate multiple domains with a comma.</Text>
 
-          <Text style={[styles.sectionLabel, { color: c.muted }]}>CERT RESOLVERS</Text>
-          <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
-            <TextInput
-              style={[styles.input, { color: c.text, borderColor: 'transparent' }]}
-              placeholderTextColor={c.muted}
-              placeholder="letsencrypt, cloudflare"
-              value={resolvers}
-              onChangeText={setResolvers}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+          <TextInput
+            label="Cert Resolvers"
+            value={resolvers}
+            onChangeText={setResolvers}
+            placeholder="letsencrypt, cloudflare"
+            autoCapitalize="none"
+            autoCorrect={false}
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
           <Text style={[styles.hint, { color: c.muted }]}>Separate multiple resolvers with a comma. The first is used as the default per route.</Text>
 
-          <Text style={[styles.sectionLabel, { color: c.muted }]}>TRAEFIK API</Text>
-          <View style={[styles.sectionBody, { borderColor: c.border, backgroundColor: c.card }]}>
-            <TextInput
-              style={[styles.input, { color: c.text, borderColor: 'transparent', fontFamily: 'monospace' }]}
-              placeholderTextColor={c.muted}
-              placeholder="http://traefik:8080"
-              value={apiUrl}
-              onChangeText={text => { setApiUrl(text); setTestResult(null); }}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-            />
-          </View>
+          <TextInput
+            label="Traefik API URL"
+            value={apiUrl}
+            onChangeText={text => { setApiUrl(text); setTestResult(null); }}
+            placeholder="http://traefik:8080"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            mode="outlined"
+            style={{ backgroundColor: c.bg, fontFamily: 'monospace' }}
+          />
           <TouchableOpacity
             onPress={handleTest}
             disabled={testing || !apiUrl}
@@ -157,15 +151,6 @@ const styles = StyleSheet.create({
   headerTitle: { flex: 1, fontSize: font.lg, fontWeight: '700' },
   saveBtn:     { fontSize: font.md, fontWeight: '600' },
   content:     { padding: spacing.lg, gap: spacing.sm },
-  sectionLabel: {
-    fontSize: font.xs, fontWeight: '700', letterSpacing: 0.8,
-    textTransform: 'uppercase', paddingHorizontal: 4,
-  },
-  sectionBody:  { borderRadius: radius.md, borderWidth: 1, overflow: 'hidden' },
-  input: {
-    paddingHorizontal: spacing.md, paddingVertical: 12,
-    fontSize: font.sm,
-  },
   hint: { fontSize: font.xs, paddingHorizontal: 4, marginTop: 2 },
   testBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
