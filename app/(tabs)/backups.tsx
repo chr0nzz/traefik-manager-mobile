@@ -6,6 +6,7 @@ import { BackupItem } from '../../src/components/BackupItem';
 import { useBackupMutations, useBackups } from '../../src/hooks/useBackups';
 import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
+import { useLayout } from '../../src/hooks/useLayout';
 
 export default function BackupsScreen() {
   const [restoringFile, setRestoringFile] = useState<string | null>(null);
@@ -13,6 +14,7 @@ export default function BackupsScreen() {
   const { create, restore, remove } = useBackupMutations();
   const qc        = useQueryClient();
   const c         = useThemeStore(s => s.colors);
+  const { listBottomPadding } = useLayout();
 
   const backups = data?.backups ?? [];
 
@@ -68,7 +70,7 @@ export default function BackupsScreen() {
           />
         )}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: 110 }}
+        contentContainerStyle={{ paddingBottom: listBottomPadding }}
         refreshControl={
           <RefreshControl
             refreshing={isFetching}

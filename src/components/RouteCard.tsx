@@ -27,7 +27,7 @@ interface Props {
 export function RouteCard({ route, onToggle, toggling, editMode = false }: Props) {
   const router = useRouter();
   const c      = useThemeStore(s => s.colors);
-  const { baseUrl, apiKey } = useConnection();
+  const { baseUrl, apiKey, demoMode } = useConnection();
   const deleteRoute = useDeleteRoute();
   const { data: dashConfig } = useDashboardConfig();
   const isFileManagedRoute = !route.provider || route.provider === 'file';
@@ -35,7 +35,8 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
 
   const override   = dashConfig?.route_overrides?.[route.id] ?? dashConfig?.route_overrides?.[route.name];
   const autoSlug   = (route.name || '').split('@')[0].toLowerCase().replace(/[^a-z0-9-]/g, '');
-  const iconUri    = override?.icon_type === 'url'  ? override.icon_url!
+  const iconUri    = demoMode ? null
+                   : override?.icon_type === 'url'  ? override.icon_url!
                    : override?.icon_type === 'slug' ? `${baseUrl}/api/dashboard/icon/${override.icon_slug}`
                    : `${baseUrl}/api/dashboard/icon/${autoSlug}`;
   const iconHeaders = { 'X-Api-Key': apiKey, 'X-Requested-With': 'fetch' };
@@ -99,7 +100,7 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
       </View>
 
       <View style={styles.nameRow}>
-        {iconVisible && (
+        {iconUri && iconVisible && (
           <Image
             source={{ uri: iconUri, headers: iconHeaders }}
             style={styles.appIcon}

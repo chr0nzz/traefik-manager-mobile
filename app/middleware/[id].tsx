@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -18,6 +17,7 @@ import { useThemeStore } from '../../src/store/theme';
 import { useMiddlewares, useDeleteMiddleware, useSaveMiddleware } from '../../src/hooks/useMiddlewares';
 import { useConfigs } from '../../src/hooks/useConfigs';
 import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
+import { ConfirmDialog } from '../../src/components/ConfirmDialog';
 import { ProtocolBadge, Badge } from '../../src/components/StatusBadge';
 import { providerOf } from '../../src/utils';
 
@@ -139,6 +139,7 @@ export default function MiddlewareDetailScreen() {
   const [fConfigFile, setFConfigFile] = useState('');
   const [saving,      setSaving]      = useState(false);
   const [saveErr,     setSaveErr]     = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const populateForm = () => {
     setFName(baseName);
@@ -157,20 +158,12 @@ export default function MiddlewareDetailScreen() {
 
   const handleDelete = () => {
     if (!middleware) return;
-    Alert.alert(
-      'Delete Middleware',
-      `Delete "${baseName}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete', style: 'destructive',
-          onPress: () => deleteMiddleware.mutate(
-            { name: baseName },
-            { onSuccess: () => router.back(), onError: (e) => Alert.alert('Error', e.message) },
-          ),
-        },
-      ],
-    );
+    setConfirmDelete(true);
+  };
+
+  const doDelete = () => {
+    setConfirmDelete(false);
+    deleteMiddleware.mutate({ name: baseName }, { onSuccess: () => router.back() });
   };
 
   const handleSave = () => {
@@ -219,6 +212,15 @@ export default function MiddlewareDetailScreen() {
   // ── render ───────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { backgroundColor: c.bg, paddingTop: insets.top }]}>
+      <ConfirmDialog
+        visible={confirmDelete}
+        title="Delete Middleware"
+        message={`Delete "${baseName}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmDestructive
+        onConfirm={doDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
 
       {/* Header */}
       <View style={[styles.headerBar, { borderBottomColor: c.border, backgroundColor: c.card }]}>

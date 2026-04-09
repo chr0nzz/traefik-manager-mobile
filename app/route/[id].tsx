@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -23,6 +22,7 @@ import { useConfigs } from '../../src/hooks/useConfigs';
 import { useSettings } from '../../src/hooks/useSettings';
 import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
 import { ProtocolBadge } from '../../src/components/StatusBadge';
+import { ConfirmDialog } from '../../src/components/ConfirmDialog';
 
 // ── helpers ──────────────────────────────────────────────────────
 
@@ -150,6 +150,7 @@ export default function RouteDetailScreen() {
   const [fConfigFile,   setFConfigFile]   = useState('');
   const [saving,      setSaving]      = useState(false);
   const [saveErr,     setSaveErr]     = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const populateForm = (r: NonNullable<typeof route>) => {
     const p = parseTarget(r.target);
@@ -189,19 +190,15 @@ export default function RouteDetailScreen() {
 
   const handleDelete = () => {
     if (!route) return;
-    Alert.alert(
-      'Delete Route',
-      `Delete "${route.name}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete', style: 'destructive',
-          onPress: () => deleteRoute.mutate(
-            { id: route.id, configFile: route.configFile },
-            { onSuccess: () => router.back(), onError: (e) => Alert.alert('Error', e.message) },
-          ),
-        },
-      ],
+    setConfirmDelete(true);
+  };
+
+  const doDelete = () => {
+    if (!route) return;
+    setConfirmDelete(false);
+    deleteRoute.mutate(
+      { id: route.id, configFile: route.configFile },
+      { onSuccess: () => router.back() },
     );
   };
 
@@ -267,6 +264,15 @@ export default function RouteDetailScreen() {
   // ── render ───────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { backgroundColor: c.bg, paddingTop: insets.top }]}>
+      <ConfirmDialog
+        visible={confirmDelete}
+        title="Delete Route"
+        message={`Delete "${route?.name}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmDestructive
+        onConfirm={doDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
 
       {/* Header */}
       <View style={[styles.headerBar, { borderBottomColor: c.border, backgroundColor: c.card }]}>

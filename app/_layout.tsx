@@ -1,5 +1,5 @@
 import * as LocalAuthentication from 'expo-local-authentication';
-import * as SystemUI from 'expo-system-ui';
+import { useMaterial3Theme } from '@pchmn/expo-material3-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -13,7 +13,8 @@ import { useConnection } from '../src/store/connection';
 import { useThemeStore } from '../src/store/theme';
 import { useAppLock } from '../src/store/applock';
 import { useTabsStore } from '../src/store/tabs';
-import { darkColors, lightColors } from '../src/theme';
+import { useOrientationStore } from '../src/store/orientation';
+import { darkColors, lightColors, dynamicColorsFromM3 } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -66,6 +67,7 @@ function ConnectionGate() {
   const { load: loadTheme, applySystem }                    = useThemeStore();
   const { load: loadAppLock }                               = useAppLock();
   const { load: loadTabs }                                  = useTabsStore();
+  const { load: loadOrientation }                           = useOrientationStore();
   const router     = useRouter();
   const segments   = useSegments();
   const didRoute   = useRef(false);
@@ -73,7 +75,7 @@ function ConnectionGate() {
   const systemIsDark = colorScheme === 'dark';
 
   useEffect(() => {
-    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs()]).then(() => SplashScreen.hideAsync());
+    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs(), loadOrientation()]).then(() => SplashScreen.hideAsync());
   }, []);
 
   useEffect(() => {
@@ -156,11 +158,19 @@ function AppLockGate() {
 }
 
 export default function RootLayout() {
-  const isDark    = useThemeStore(s => s.isDark);
-  const c         = useThemeStore(s => s.colors);
-  const demoMode  = useConnection(s => s.demoMode);
-  const theme     = makePaperTheme(isDark);
+  const isDark     = useThemeStore(s => s.isDark);
+  const mode       = useThemeStore(s => s.mode);
+  const setColors  = useThemeStore(s => s.setColors);
+  const c          = useThemeStore(s => s.colors);
+  const demoMode   = useConnection(s => s.demoMode);
+  const { theme: m3Theme } = useMaterial3Theme({ fallbackSourceColor: '#24a1de' });
   const [screenKey, setScreenKey] = useState('init');
+
+  const paperTheme = mode === 'dynamic' && m3Theme
+    ? (isDark
+        ? { ...MD3DarkTheme, colors: m3Theme.dark }
+        : { ...MD3LightTheme, colors: m3Theme.light })
+    : makePaperTheme(isDark);
 
   const onRootLayout = (e: { nativeEvent: { layout: { width: number } } }) => {
     const w = String(Math.round(e.nativeEvent.layout.width));
@@ -168,8 +178,11 @@ export default function RootLayout() {
   };
 
   useEffect(() => {
-    SystemUI.setBackgroundColorAsync(c.bg);
-  }, [c.bg]);
+    if (mode === 'dynamic' && m3Theme) {
+      const scheme = isDark ? m3Theme.dark : m3Theme.light;
+      setColors(dynamicColorsFromM3(scheme as Record<string, any>));
+    }
+  }, [mode, isDark, m3Theme]);
 
   useEffect(() => {
     if (!demoMode) return;
@@ -188,7 +201,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
     <View style={{ flex: 1 }} onLayout={onRootLayout}>
-    <PaperProvider theme={theme}>
+    <PaperProvider theme={paperTheme}>
       <QueryClientProvider client={queryClient}>
         <StatusBar style={isDark ? 'light' : 'dark'} />
         <ConnectionGate />

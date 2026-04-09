@@ -49,7 +49,7 @@ function M3NavBar({ state, navigation }: BottomTabBarProps) {
             key={tab.name}
             style={styles.item}
             onPress={() => navigation.navigate(tab.name)}
-            android_ripple={{ color: c.secondaryContainer, borderless: false, radius: 64 }}
+            android_ripple={{ color: c.secondaryContainer, borderless: true, radius: 48 }}
           >
             <View style={[
               styles.indicator,

@@ -1,11 +1,13 @@
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
 import { useConnection } from '../../src/store/connection';
 import { useThemeStore } from '../../src/store/theme';
+import { ConfirmDialog } from '../../src/components/ConfirmDialog';
 import { font, radius, spacing } from '../../src/theme';
 
 export default function ServerScreen() {
@@ -14,6 +16,7 @@ export default function ServerScreen() {
   const c        = useThemeStore(s => s.colors);
   const { baseUrl, demoMode, clearConnection, exitDemoMode } = useConnection();
   const qc       = useQueryClient();
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   const handleDisconnect = () => {
     if (demoMode) {
@@ -22,22 +25,27 @@ export default function ServerScreen() {
       router.replace('/connect');
       return;
     }
-    Alert.alert('Disconnect', 'Remove saved connection?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Disconnect',
-        style: 'destructive',
-        onPress: async () => {
-          await clearConnection();
-          qc.clear();
-          router.replace('/connect');
-        },
-      },
-    ]);
+    setConfirmVisible(true);
+  };
+
+  const doDisconnect = async () => {
+    setConfirmVisible(false);
+    await clearConnection();
+    qc.clear();
+    router.replace('/connect');
   };
 
   return (
     <View style={[styles.screen, { backgroundColor: c.bg }]}>
+      <ConfirmDialog
+        visible={confirmVisible}
+        title="Disconnect"
+        message="Remove the saved server URL and API key from this device?"
+        confirmLabel="Disconnect"
+        confirmDestructive
+        onConfirm={doDisconnect}
+        onCancel={() => setConfirmVisible(false)}
+      />
       <View style={[styles.headerBar, { paddingTop: insets.top + 4, borderBottomColor: c.border, backgroundColor: c.card }]}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
           <MaterialCommunityIcons name="arrow-left" size={22} color={c.text} />

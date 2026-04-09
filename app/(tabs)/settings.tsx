@@ -12,6 +12,7 @@ import { useAppLock } from '../../src/store/applock';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useBackups } from '../../src/hooks/useBackups';
 import { DemoBanner } from '../../src/components/DemoBanner';
+import { useLayout } from '../../src/hooks/useLayout';
 import { font, radius, spacing } from '../../src/theme';
 
 const version = Constants.expoConfig?.version ?? '—';
@@ -62,6 +63,7 @@ function NavRow({
   );
 }
 
+
 export default function SettingsScreen() {
   const router      = useRouter();
   const { baseUrl } = useConnection();
@@ -71,6 +73,7 @@ export default function SettingsScreen() {
   const appLockEnabled = useAppLock(s => s.enabled);
   const swipe       = useTabSwipe('settings');
   const scrollAnim  = useRef(new Animated.Value(0)).current;
+  const { listBottomPadding } = useLayout();
 
   const { data: backups } = useBackups();
   const backupCount = backups?.length ?? 0;
@@ -81,7 +84,7 @@ export default function SettingsScreen() {
       <DemoBanner />
       <Animated.ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: listBottomPadding }]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
           { useNativeDriver: false },
@@ -171,7 +174,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll:    { flex: 1 },
-  content:   { padding: spacing.lg, gap: spacing.sm, paddingBottom: 110 },
+  content:   { padding: spacing.lg, gap: spacing.sm },
   sectionLabel: {
     fontSize: font.sm,
     fontWeight: '500',

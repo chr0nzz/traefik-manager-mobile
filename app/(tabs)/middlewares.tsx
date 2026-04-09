@@ -33,7 +33,7 @@ export default function MiddlewaresScreen() {
   const scrollAnim = useRef(new Animated.Value(0)).current;
 
   const { data, isFetching, isError, error } = useMiddlewares();
-  const { contentPadding, contentMaxWidth } = useLayout();
+  const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
 
   const middlewares = useMemo(() => {
     let list = data ?? [];
@@ -139,7 +139,7 @@ export default function MiddlewaresScreen() {
         data={middlewares}
         keyExtractor={m => m.name}
         renderItem={({ item }) => <MiddlewareCard middleware={item} editMode={editMode} />}
-        contentContainerStyle={[styles.list, { padding: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
+        contentContainerStyle={[styles.list, { padding: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
           { useNativeDriver: false },
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm, borderWidth: 1,
     backgroundColor: 'rgba(239,68,68,0.08)',
   },
-  list: { paddingBottom: 110 },
+  list: {},
   topBarBtn: {
     padding: 5,
     borderRadius: 6,

@@ -46,7 +46,7 @@ export default function RoutesScreen() {
   const { data, isFetching, isError, error } = useRoutes();
   const toggle = useToggleRoute();
   const qc     = useQueryClient();
-  const { contentPadding, contentMaxWidth } = useLayout();
+  const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
 
   const routes = useMemo(() => {
     let list = data?.apps ?? [];
@@ -164,7 +164,7 @@ export default function RoutesScreen() {
         renderItem={({ item }) => (
           <RouteCard route={item} onToggle={handleToggle} toggling={togglingId === item.id} editMode={editMode} />
         )}
-        contentContainerStyle={[styles.list, { padding: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
+        contentContainerStyle={[styles.list, { padding: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
           { useNativeDriver: false },
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm, borderWidth: 1,
     backgroundColor: 'rgba(239,68,68,0.08)',
   },
-  list: { paddingBottom: 110 },
+  list: {},
   topBarBtn: {
     padding: 5,
     borderRadius: radius.sm,

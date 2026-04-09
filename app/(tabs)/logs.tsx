@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
-import { Animated, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TopBar } from '../../src/components/TopBar';
@@ -13,15 +13,95 @@ import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { font, radius, spacing } from '../../src/theme';
 
-const LINE_OPTIONS = [100, 500, 1000];
+const LINE_OPTIONS = [100, 150, 200];
 
-function statusColor(line: string, colors: ReturnType<typeof useThemeStore.getState>['colors']): string {
-  const m = line.match(/" (\d{3}) /);
-  if (!m) return colors.text;
-  const code = parseInt(m[1], 10);
-  if (code >= 500) return colors.red  ?? '#f87171';
-  if (code >= 400) return colors.yellow ?? '#fbbf24';
-  return colors.text;
+interface ParsedLog {
+  ip: string;
+  date: string;
+  method: string;
+  path: string;
+  status: number;
+  size: string;
+  duration: string;
+  raw: string;
+}
+
+function parseLogLine(line: string): ParsedLog | null {
+  const m = line.match(
+    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+)(?:[^"]*"[^"]*"[^"]*"[^"]*")? ?(\S+)?/
+  );
+  if (!m) return null;
+  const [, ip, date, method, path, statusStr, size, duration] = m;
+  const status = parseInt(statusStr, 10);
+  const shortDate = date.split(' ')[0].replace(/\[/, '');
+  return { ip, date: shortDate, method, path, status, size: size === '-' ? '—' : size, duration: duration ?? '', raw: line };
+}
+
+function statusColor(status: number, colors: ReturnType<typeof useThemeStore.getState>['colors']): string {
+  if (status >= 500) return colors.red    ?? '#f87171';
+  if (status >= 400) return colors.yellow ?? '#fbbf24';
+  if (status >= 300) return colors.teal   ?? '#1abc9c';
+  if (status >= 200) return colors.green  ?? '#22c55e';
+  return colors.muted;
+}
+
+function methodColor(method: string, colors: ReturnType<typeof useThemeStore.getState>['colors']): string {
+  switch (method) {
+    case 'GET':    return colors.blue;
+    case 'POST':   return colors.green;
+    case 'PUT':    return colors.orange;
+    case 'PATCH':  return colors.yellow;
+    case 'DELETE': return colors.red;
+    default:       return colors.muted;
+  }
+}
+
+function LogCard({ item, c }: { item: string; c: ReturnType<typeof useThemeStore.getState>['colors'] }) {
+  const parsed = parseLogLine(item);
+
+  if (!parsed) {
+    return (
+      <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+        <Text style={[styles.rawLine, { color: c.muted }]}>{item}</Text>
+      </View>
+    );
+  }
+
+  const sc = statusColor(parsed.status, c);
+  const mc = methodColor(parsed.method, c);
+
+  return (
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+      <View style={styles.cardTop}>
+        <View style={[styles.badge, { backgroundColor: sc + '22', borderColor: sc + '55' }]}>
+          <Text style={[styles.badgeText, { color: sc }]}>{parsed.status}</Text>
+        </View>
+        <View style={[styles.badge, { backgroundColor: mc + '22', borderColor: mc + '55' }]}>
+          <Text style={[styles.badgeText, { color: mc }]}>{parsed.method}</Text>
+        </View>
+        <Text style={[styles.path, { color: c.text }]} numberOfLines={1} ellipsizeMode="middle">
+          {parsed.path}
+        </Text>
+      </View>
+      <View style={styles.cardBottom}>
+        <Text style={[styles.meta, { color: c.muted }]}>{parsed.ip}</Text>
+        <Text style={[styles.metaDot, { color: c.border }]}>·</Text>
+        <Text style={[styles.meta, { color: c.muted }]}>{parsed.date}</Text>
+        {!!parsed.size && parsed.size !== '—' && (
+          <>
+            <Text style={[styles.metaDot, { color: c.border }]}>·</Text>
+            <Text style={[styles.meta, { color: c.muted }]}>{parsed.size}B</Text>
+          </>
+        )}
+        {!!parsed.duration && (
+          <>
+            <Text style={[styles.metaDot, { color: c.border }]}>·</Text>
+            <Text style={[styles.meta, { color: c.muted }]}>{parsed.duration}</Text>
+          </>
+        )}
+      </View>
+    </View>
+  );
 }
 
 export default function LogsScreen() {
@@ -33,7 +113,7 @@ export default function LogsScreen() {
   const qc         = useQueryClient();
 
   const openDrawer = useDrawerStore(s => s.open);
-  const { contentPadding, contentMaxWidth } = useLayout();
+  const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
 
   const { data, isFetching, isError } = useLogs();
   const [showPicker, setShowPicker] = useState(false);
@@ -99,7 +179,7 @@ export default function LogsScreen() {
         <Animated.FlatList
           data={[...lines].reverse()}
           keyExtractor={(_, i) => String(i)}
-          contentContainerStyle={[styles.listContent, { paddingHorizontal: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
+          contentContainerStyle={[styles.listContent, { paddingHorizontal: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
             { useNativeDriver: false },
@@ -112,11 +192,7 @@ export default function LogsScreen() {
               tintColor={c.blue}
             />
           }
-          renderItem={({ item }) => (
-            <Text style={[styles.logLine, { color: statusColor(item, c), borderBottomColor: c.border }]}>
-              {item}
-            </Text>
-          )}
+          renderItem={({ item }) => <LogCard item={item} c={c} />}
         />
       )}
     </View>
@@ -124,7 +200,7 @@ export default function LogsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:    { flex: 1 },
+  container: { flex: 1 },
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -163,14 +239,43 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   pickerText: { fontSize: font.md },
-  listContent: { paddingBottom: 110, paddingTop: 8 },
-  logLine: {
-    fontFamily: 'monospace',
-    fontSize: 11,
-    lineHeight: 18,
-    paddingVertical: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  listContent: { paddingTop: spacing.sm, gap: spacing.sm },
+  card: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    gap: 6,
   },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  badge: {
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    fontSize: font.xs,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  path: {
+    flex: 1,
+    fontSize: font.sm,
+    fontFamily: 'monospace',
+  },
+  cardBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  meta:    { fontSize: font.xs },
+  metaDot: { fontSize: font.xs },
+  rawLine: { fontSize: 11, fontFamily: 'monospace' },
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 8, padding: spacing.xl },
   errorText:  { fontSize: font.md, textAlign: 'center' },
   errorHint:  { fontSize: font.sm, textAlign: 'center' },

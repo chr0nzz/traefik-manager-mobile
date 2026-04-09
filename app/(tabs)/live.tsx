@@ -38,7 +38,7 @@ export default function LiveScreen() {
   const openDrawer = useDrawerStore(s => s.open);
   const swipe      = useTabSwipe('live');
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const { contentPadding, contentMaxWidth } = useLayout();
+  const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
 
   const allServices = data ?? [];
 
@@ -163,7 +163,7 @@ export default function LiveScreen() {
         data={filtered}
         keyExtractor={s => s.name}
         renderItem={({ item }) => <ServiceRow service={item} />}
-        contentContainerStyle={[styles.list, { padding: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
+        contentContainerStyle={[styles.list, { padding: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
           { useNativeDriver: false },
@@ -239,5 +239,5 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm, borderWidth: 1,
     backgroundColor: 'rgba(239,68,68,0.08)',
   },
-  list: { paddingBottom: 110 },
+  list: {},
 });

@@ -1,9 +1,11 @@
 import { useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type WindowClass = 'compact' | 'medium' | 'expanded';
 
 export function useLayout() {
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const windowClass: WindowClass =
     width < 600  ? 'compact'  :
@@ -26,5 +28,7 @@ export function useLayout() {
     isMedium   ? 840  :
                  undefined;
 
-  return { windowClass, isCompact, isMedium, isExpanded, columns, contentPadding, contentMaxWidth };
+  const listBottomPadding = 60 + insets.bottom + 16;
+
+  return { windowClass, isCompact, isMedium, isExpanded, columns, contentPadding, contentMaxWidth, listBottomPadding };
 }

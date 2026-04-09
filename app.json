@@ -2,8 +2,8 @@
   "expo": {
     "name": "Traefik Manager",
     "slug": "traefik-manager-mobile",
-    "version": "0.7.0",
-    "orientation": "portrait",
+    "version": "0.8.0",
+    "orientation": "default",
     "scheme": "traefikmanager",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "dev.chr0nzz.traefikmanager",
-      "versionCode": 9,
+      "versionCode": 10,
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -25,10 +25,16 @@
         "expo-build-properties",
         {
           "android": {
-            "targetSdkVersion": 35
+            "targetSdkVersion": 35,
+            "packagingOptions": {
+              "jniLibs": {
+                "useLegacyPackaging": false
+              }
+            }
           }
         }
       ],
+      "react-native-edge-to-edge",
       "expo-router",
       "expo-local-authentication",
       "expo-secure-store",

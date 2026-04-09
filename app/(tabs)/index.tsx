@@ -22,7 +22,7 @@ export default function DashboardScreen() {
   const openDrawer  = useDrawerStore(s => s.open);
   const swipe       = useTabSwipe('index');
   const navigation  = useNavigation<any>();
-  const { contentPadding, contentMaxWidth } = useLayout();
+  const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
   const twoCol = true;
 
   const exploreRoutes = (proto: string) => {
@@ -48,7 +48,7 @@ export default function DashboardScreen() {
       <DemoBanner />
       <Animated.ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.content, { padding: contentPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
+        contentContainerStyle={[styles.content, { padding: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
         refreshControl={<RefreshControl refreshing={overview.isFetching} onRefresh={onRefresh} tintColor={c.blue} />}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
@@ -84,7 +84,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll:    { flex: 1 },
-  content:   { paddingBottom: 110 },
+  content:   {},
   errorBox: {
     backgroundColor: 'rgba(239,68,68,0.1)',
     borderRadius: 8, padding: 12, marginBottom: 12, borderWidth: 1,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
   },
   gridCol: {
     flex: 1,
