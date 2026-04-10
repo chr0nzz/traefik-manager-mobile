@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
+import { saveWidgetCredentials, clearWidgetCredentials } from '../native/WidgetCredentials';
 
 const KEY_URL = 'tm_base_url';
 const KEY_API = 'tm_api_key';
@@ -25,6 +26,7 @@ export const useConnection = create<ConnectionState>((set) => ({
   setConnection: async (baseUrl, apiKey) => {
     await SecureStore.setItemAsync(KEY_URL, baseUrl);
     await SecureStore.setItemAsync(KEY_API, apiKey);
+    await saveWidgetCredentials(baseUrl, apiKey);
     set({ baseUrl, apiKey, demoMode: false });
   },
 
@@ -37,6 +39,7 @@ export const useConnection = create<ConnectionState>((set) => ({
   clearConnection: async () => {
     await SecureStore.deleteItemAsync(KEY_URL);
     await SecureStore.deleteItemAsync(KEY_API);
+    await clearWidgetCredentials();
     set({ baseUrl: '', apiKey: '', demoMode: false });
   },
 

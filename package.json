@@ -1,11 +1,11 @@
 {
   "name": "traefik-manager-mobile",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "build:preview": "eas build --platform android --profile preview",
     "build:prod": "eas build --platform android --profile production"
   },

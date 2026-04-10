@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -15,11 +15,18 @@ interface Props {
   icon?: string;
 }
 
+function useIsWide() {
+  const { width } = useWindowDimensions();
+  return width >= 600;
+}
+
 export function TopBar({ title, scrollAnim, onMenuPress, right, accent, icon }: Props) {
-  const c      = useThemeStore(s => s.colors);
-  const isDark = useThemeStore(s => s.isDark);
-  const insets = useSafeAreaInsets();
-  const topPad = Platform.OS === 'android' ? (insets.top || 24) : insets.top;
+  const c        = useThemeStore(s => s.colors);
+  const isDark   = useThemeStore(s => s.isDark);
+  const insets   = useSafeAreaInsets();
+  const isWide   = useIsWide();
+  const topPad   = Platform.OS === 'android' ? (insets.top || 24) : insets.top;
+  const showMenu = !!onMenuPress && !isWide;
 
   const scrollOpacity = scrollAnim.interpolate({
     inputRange:  [0, 30],
@@ -41,7 +48,7 @@ export function TopBar({ title, scrollAnim, onMenuPress, right, accent, icon }: 
 
       <View style={[styles.bar, { paddingTop: topPad }]}>
         <View style={styles.inner}>
-          {onMenuPress ? (
+          {showMenu ? (
             <Pressable
               onPress={onMenuPress}
               style={styles.menuBtn}

@@ -20,14 +20,16 @@ import { useTabsStore } from '../store/tabs';
 import { useConnection } from '../store/connection';
 import { useAppLock } from '../store/applock';
 import { useBackups } from '../hooks/useBackups';
+import { useSettings } from '../hooks/useSettings';
 import { font, radius, spacing } from '../theme';
 
 const version = Constants.expoConfig?.version ?? '?';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
-  light: 'Light',
-  dark: 'Dark',
-  system: 'System',
+  light:   'Light',
+  dark:    'Dark',
+  system:  'System',
+  dynamic: 'Dynamic',
 };
 
 type Colors = ReturnType<typeof useThemeStore.getState>['colors'];
@@ -63,12 +65,13 @@ export function NavigationDrawer() {
   const router     = useRouter();
   const c          = useThemeStore(s => s.colors);
   const isDark     = useThemeStore(s => s.isDark);
-  const { mode }   = useThemeStore();
+  const mode       = useThemeStore(s => s.mode);
   const { isOpen, close } = useDrawerStore();
   const { baseUrl, demoMode } = useConnection();
   const appLockEnabled = useAppLock(s => s.enabled);
   const showLogsTab    = useTabsStore(s => s.showLogsTab);
   const { data: backups } = useBackups();
+  const { data: settings } = useSettings();
   const backupCount = backups?.length ?? 0;
 
   const DRAWER_WIDTH = Math.min(320, width - 56);
@@ -146,7 +149,7 @@ export function NavigationDrawer() {
           <DrawerItem
             icon="server-network"
             label="Traefik"
-            value="Domains & resolvers"
+            value={settings?.traefik_api_url ? settings.traefik_api_url.replace(/^https?:\/\//, '') : 'Not configured'}
             onPress={() => navigate('/settings/traefik')}
             c={c}
           />

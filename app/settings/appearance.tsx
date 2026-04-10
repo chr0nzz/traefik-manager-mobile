@@ -1,10 +1,9 @@
-import { Platform, ScrollView, StyleSheet, Switch, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Platform, ScrollView, StyleSheet, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeStore, ThemeMode } from '../../src/store/theme';
-import { useOrientationStore } from '../../src/store/orientation';
 import { font, radius, spacing } from '../../src/theme';
 
 const BASE_MODES: { key: ThemeMode; label: string; icon: string }[] = [
@@ -23,11 +22,11 @@ const MODES = Platform.OS === 'android' && Number(Platform.Version) >= 31
 export default function AppearanceScreen() {
   const router      = useRouter();
   const insets      = useSafeAreaInsets();
-  const { mode, setMode } = useThemeStore();
+  const mode        = useThemeStore(s => s.mode);
+  const setMode     = useThemeStore(s => s.setMode);
   const c           = useThemeStore(s => s.colors);
   const colorScheme = useColorScheme();
   const systemIsDark = colorScheme === 'dark';
-  const { locked: orientationLocked, setLocked: setOrientationLocked } = useOrientationStore();
 
   return (
     <View style={[styles.screen, { backgroundColor: c.bg }]}>
@@ -81,21 +80,6 @@ export default function AppearanceScreen() {
             ? 'Dynamic follows your wallpaper & style colors (Android 12+).'
             : ''}
         </Text>
-
-        <Text style={[styles.sectionLabel, { color: c.muted }]}>ORIENTATION</Text>
-
-        <Surface style={[styles.sectionBody, { backgroundColor: c.card }]} elevation={1}>
-          <View style={styles.toggleRow}>
-            <MaterialCommunityIcons name="screen-rotation-lock" size={18} color={c.blue} />
-            <Text style={[styles.toggleLabel, { color: c.text }]}>Lock to Portrait</Text>
-            <Switch
-              value={orientationLocked}
-              onValueChange={setOrientationLocked}
-              trackColor={{ false: c.border, true: c.blue + '80' }}
-              thumbColor={orientationLocked ? c.blue : c.muted}
-            />
-          </View>
-        </Surface>
       </ScrollView>
     </View>
   );
@@ -133,10 +117,4 @@ const styles = StyleSheet.create({
   },
   modeLabel: { flex: 1, fontSize: font.md },
   hint: { fontSize: font.xs, paddingHorizontal: 4, marginTop: 4 },
-  toggleRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: spacing.md, paddingVertical: 14,
-    gap: spacing.md,
-  },
-  toggleLabel: { flex: 1, fontSize: font.md },
 });

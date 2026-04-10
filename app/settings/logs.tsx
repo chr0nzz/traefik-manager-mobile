@@ -7,7 +7,7 @@ import { useTabsStore } from '../../src/store/tabs';
 import { useThemeStore } from '../../src/store/theme';
 import { font, radius, spacing } from '../../src/theme';
 
-const LINE_OPTIONS = [100, 500, 1000];
+const LINE_OPTIONS = [100, 150, 200];
 
 export default function LogsSettingsScreen() {
   const router        = useRouter();

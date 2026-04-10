@@ -13,7 +13,6 @@ import { useConnection } from '../src/store/connection';
 import { useThemeStore } from '../src/store/theme';
 import { useAppLock } from '../src/store/applock';
 import { useTabsStore } from '../src/store/tabs';
-import { useOrientationStore } from '../src/store/orientation';
 import { darkColors, lightColors, dynamicColorsFromM3 } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -67,7 +66,6 @@ function ConnectionGate() {
   const { load: loadTheme, applySystem }                    = useThemeStore();
   const { load: loadAppLock }                               = useAppLock();
   const { load: loadTabs }                                  = useTabsStore();
-  const { load: loadOrientation }                           = useOrientationStore();
   const router     = useRouter();
   const segments   = useSegments();
   const didRoute   = useRef(false);
@@ -75,7 +73,7 @@ function ConnectionGate() {
   const systemIsDark = colorScheme === 'dark';
 
   useEffect(() => {
-    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs(), loadOrientation()]).then(() => SplashScreen.hideAsync());
+    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs()]).then(() => SplashScreen.hideAsync());
   }, []);
 
   useEffect(() => {

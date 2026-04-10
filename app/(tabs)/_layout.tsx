@@ -1,12 +1,17 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Tabs } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Tabs, useRouter, useSegments } from 'expo-router';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeStore } from '../../src/store/theme';
 import { useTabsStore } from '../../src/store/tabs';
+import { useDrawerStore } from '../../src/store/drawer';
 import { NavigationDrawer } from '../../src/components/NavigationDrawer';
+
+function useIsWide() {
+  const { width } = useWindowDimensions();
+  return width >= 600;
+}
 
 const BASE_TABS = [
   { name: 'index',       icon: 'view-dashboard-outline',      activeIcon: 'view-dashboard',      label: 'Home'      },
@@ -23,13 +28,25 @@ const TABS_WITH_LOGS = [
   { name: 'logs',        icon: 'text-search',                 activeIcon: 'text-search',          label: 'Logs'      },
 ] as const;
 
-function M3NavBar({ state, navigation }: BottomTabBarProps) {
+function useFocused() {
+  const segments = useSegments();
+  const currentTab = segments[segments.length - 1] ?? '';
+  return (name: string) =>
+    name === 'index'
+      ? currentTab === '(tabs)' || currentTab === 'index' || currentTab === ''
+      : currentTab === name;
+}
+
+function M3NavBar() {
   const insets   = useSafeAreaInsets();
   const c        = useThemeStore(s => s.colors);
   const showLogs = useTabsStore(s => s.showLogsTab);
+  const isWide   = useIsWide();
+  const router   = useRouter();
+  const focused  = useFocused();
   const TABS     = showLogs ? TABS_WITH_LOGS : BASE_TABS;
 
-  const currentRouteName = state.routes[state.index]?.name;
+  if (isWide) return null;
 
   return (
     <View
@@ -43,27 +60,27 @@ function M3NavBar({ state, navigation }: BottomTabBarProps) {
       ]}
     >
       {TABS.map((tab) => {
-        const focused = currentRouteName === tab.name;
+        const active = focused(tab.name);
         return (
           <Pressable
             key={tab.name}
             style={styles.item}
-            onPress={() => navigation.navigate(tab.name)}
-            android_ripple={{ color: c.secondaryContainer, borderless: true, radius: 48 }}
+            onPress={() => router.navigate(tab.name === 'index' ? '/' : (`/${tab.name}` as any))}
+            android_ripple={{ color: 'transparent', borderless: true, radius: 48 }}
           >
             <View style={[
               styles.indicator,
-              focused && { backgroundColor: c.secondaryContainer },
+              active && { backgroundColor: c.secondaryContainer },
             ]}>
               <MaterialCommunityIcons
-                name={focused ? tab.activeIcon : tab.icon}
+                name={active ? tab.activeIcon : tab.icon}
                 size={24}
-                color={focused ? c.onSecondaryContainer : c.muted}
+                color={active ? c.onSecondaryContainer : c.muted}
               />
             </View>
             <Text style={[
               styles.label,
-              { color: focused ? c.onSecondaryContainer : c.muted },
+              { color: active ? c.onSecondaryContainer : c.muted },
             ]}>
               {tab.label}
             </Text>
@@ -74,31 +91,95 @@ function M3NavBar({ state, navigation }: BottomTabBarProps) {
   );
 }
 
+function M3NavRail() {
+  const insets   = useSafeAreaInsets();
+  const c        = useThemeStore(s => s.colors);
+  const showLogs = useTabsStore(s => s.showLogsTab);
+  const open     = useDrawerStore(s => s.open);
+  const router   = useRouter();
+  const focused  = useFocused();
+  const TABS     = showLogs ? TABS_WITH_LOGS : BASE_TABS;
+
+  return (
+    <View style={[
+      styles.rail,
+      {
+        backgroundColor: c.card,
+        borderRightColor: c.border,
+        paddingTop: insets.top + 8,
+        paddingBottom: insets.bottom + 8,
+      },
+    ]}>
+      <Pressable
+        style={styles.railMenu}
+        onPress={open}
+        android_ripple={{ color: 'transparent', borderless: true, radius: 28 }}
+      >
+        <MaterialCommunityIcons name="menu" size={22} color={c.muted} />
+      </Pressable>
+
+      <View style={styles.railItems}>
+        {TABS.map((tab) => {
+          const active = focused(tab.name);
+          return (
+            <Pressable
+              key={tab.name}
+              style={styles.railItem}
+              onPress={() => router.navigate(tab.name === 'index' ? '/' : (`/${tab.name}` as any))}
+              android_ripple={{ color: 'transparent', borderless: true, radius: 40 }}
+            >
+              <View style={[
+                styles.railIndicator,
+                active && { backgroundColor: c.secondaryContainer },
+              ]}>
+                <MaterialCommunityIcons
+                  name={active ? tab.activeIcon : tab.icon}
+                  size={24}
+                  color={active ? c.onSecondaryContainer : c.muted}
+                />
+              </View>
+              <Text style={[
+                styles.railLabel,
+                { color: active ? c.onSecondaryContainer : c.muted, fontWeight: active ? '600' : '500' },
+              ]}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export default function TabsLayout() {
+  const isWide   = useIsWide();
   const showLogs = useTabsStore(s => s.showLogsTab);
 
   return (
-    <View style={{ flex: 1 }}>
-    <Tabs
-      tabBar={(props) => <M3NavBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen name="index"       options={{ title: 'Dashboard' }} />
-      <Tabs.Screen name="routes"      options={{ title: 'Routes'    }} />
-      <Tabs.Screen name="middlewares" options={{ title: 'Middleware' }} />
-      <Tabs.Screen name="live"        options={{ title: 'Services'  }} />
-      <Tabs.Screen name="logs"        options={{ title: 'Logs', href: showLogs ? undefined : null }} />
-      <Tabs.Screen name="backups"     options={{ href: null }}         />
-      <Tabs.Screen name="settings"    options={{ href: null }}         />
-    </Tabs>
-    <NavigationDrawer />
+    <View style={styles.root}>
+      {isWide && <M3NavRail />}
+      <View style={{ flex: 1 }}>
+        <Tabs
+          screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}
+        >
+          <Tabs.Screen name="index"       options={{ title: 'Dashboard' }} />
+          <Tabs.Screen name="routes"      options={{ title: 'Routes'    }} />
+          <Tabs.Screen name="middlewares" options={{ title: 'Middleware' }} />
+          <Tabs.Screen name="live"        options={{ title: 'Services'  }} />
+          <Tabs.Screen name="logs"        options={{ title: 'Logs', href: showLogs ? undefined : null }} />
+          <Tabs.Screen name="backups"     options={{ href: null }}         />
+          <Tabs.Screen name="settings"    options={{ href: null }}         />
+        </Tabs>
+        <M3NavBar />
+      </View>
+      <NavigationDrawer />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, flexDirection: 'row' },
   container: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
@@ -127,5 +208,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     letterSpacing: 0.5,
+  },
+  rail: {
+    width: 80,
+    alignSelf: 'stretch',
+    borderRightWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+  },
+  railMenu: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  railItems: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+    paddingTop: 8,
+  },
+  railItem: {
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    width: 72,
+  },
+  railIndicator: {
+    width: 56,
+    height: 32,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  railLabel: {
+    fontSize: 11,
+    letterSpacing: 0.3,
+    textAlign: 'center',
   },
 });

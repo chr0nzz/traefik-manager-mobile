@@ -11,6 +11,7 @@ import { useTabsStore } from '../../src/store/tabs';
 import { useThemeStore } from '../../src/store/theme';
 import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
+import { useRouter } from 'expo-router';
 import { font, radius, spacing } from '../../src/theme';
 
 const LINE_OPTIONS = [100, 150, 200];
@@ -23,18 +24,39 @@ interface ParsedLog {
   status: number;
   size: string;
   duration: string;
+  service: string;
+  serviceUrl: string;
   raw: string;
 }
 
 function parseLogLine(line: string): ParsedLog | null {
+  // Full Traefik CLF+extra: ... "referer" "ua" count "router@provider" "serviceURL" duration
+  const full = line.match(
+    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+) "[^"]*" "[^"]*" \S+ "([^"]*)" "([^"]*)" (\S+)/
+  );
+  if (full) {
+    const [, ip, date, method, path, statusStr, size, service, serviceUrl, duration] = full;
+    return {
+      ip, date: date.split(' ')[0], method, path,
+      status: parseInt(statusStr, 10),
+      size: size === '-' ? '—' : size,
+      service: service === '-' ? '' : service,
+      serviceUrl: serviceUrl === '-' ? '' : serviceUrl,
+      duration, raw: line,
+    };
+  }
+  // Fallback: basic CLF without Traefik extras
   const m = line.match(
     /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+)(?:[^"]*"[^"]*"[^"]*"[^"]*")? ?(\S+)?/
   );
   if (!m) return null;
   const [, ip, date, method, path, statusStr, size, duration] = m;
-  const status = parseInt(statusStr, 10);
-  const shortDate = date.split(' ')[0].replace(/\[/, '');
-  return { ip, date: shortDate, method, path, status, size: size === '-' ? '—' : size, duration: duration ?? '', raw: line };
+  return {
+    ip, date: date.split(' ')[0].replace(/\[/, ''), method, path,
+    status: parseInt(statusStr, 10),
+    size: size === '-' ? '—' : size,
+    service: '', serviceUrl: '', duration: duration ?? '', raw: line,
+  };
 }
 
 function statusColor(status: number, colors: ReturnType<typeof useThemeStore.getState>['colors']): string {
@@ -56,14 +78,14 @@ function methodColor(method: string, colors: ReturnType<typeof useThemeStore.get
   }
 }
 
-function LogCard({ item, c }: { item: string; c: ReturnType<typeof useThemeStore.getState>['colors'] }) {
+function LogCard({ item, c, onPress }: { item: string; c: ReturnType<typeof useThemeStore.getState>['colors']; onPress: () => void }) {
   const parsed = parseLogLine(item);
 
   if (!parsed) {
     return (
-      <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
         <Text style={[styles.rawLine, { color: c.muted }]}>{item}</Text>
-      </View>
+      </TouchableOpacity>
     );
   }
 
@@ -71,7 +93,7 @@ function LogCard({ item, c }: { item: string; c: ReturnType<typeof useThemeStore
   const mc = methodColor(parsed.method, c);
 
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
       <View style={styles.cardTop}>
         <View style={[styles.badge, { backgroundColor: sc + '22', borderColor: sc + '55' }]}>
           <Text style={[styles.badgeText, { color: sc }]}>{parsed.status}</Text>
@@ -99,10 +121,17 @@ function LogCard({ item, c }: { item: string; c: ReturnType<typeof useThemeStore
             <Text style={[styles.meta, { color: c.muted }]}>{parsed.duration}</Text>
           </>
         )}
+        {!!parsed.service && (
+          <>
+            <Text style={[styles.metaDot, { color: c.border }]}>·</Text>
+            <Text style={[styles.meta, { color: c.blue }]} numberOfLines={1}>{parsed.service}</Text>
+          </>
+        )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
+
 
 export default function LogsScreen() {
   const c          = useThemeStore(s => s.colors);
@@ -111,12 +140,13 @@ export default function LogsScreen() {
   const swipe      = useTabSwipe('logs');
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const qc         = useQueryClient();
+  const router     = useRouter();
 
   const openDrawer = useDrawerStore(s => s.open);
   const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
 
   const { data, isFetching, isError } = useLogs();
-  const [showPicker, setShowPicker] = useState(false);
+  const [showPicker, setShowPicker]   = useState(false);
 
   const lines = data?.lines ?? [];
   const error = data?.error;
@@ -192,7 +222,7 @@ export default function LogsScreen() {
               tintColor={c.blue}
             />
           }
-          renderItem={({ item }) => <LogCard item={item} c={c} />}
+          renderItem={({ item }) => <LogCard item={item} c={c} onPress={() => router.push({ pathname: '/log-detail', params: { raw: item } })} />}
         />
       )}
     </View>
