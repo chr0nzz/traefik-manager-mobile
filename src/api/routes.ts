@@ -15,12 +15,18 @@ export interface Route {
   certResolver?: string;
   configFile?: string;
   provider?: string;
+  insecureSkipVerify?: boolean;
 }
 
 export function domainFromRule(rule: string): string {
   if (!rule) return '';
-  const m = rule.match(/Host\(`([^`]+)`\)/i);
-  return m ? m[1] : '';
+  const matches = [...rule.matchAll(/Host\(`([^`]+)`\)/gi)].map(m => m[1]);
+  return matches.join(', ');
+}
+
+export function domainsFromRule(rule: string): string[] {
+  if (!rule) return [];
+  return [...rule.matchAll(/Host\(`([^`]+)`\)/gi)].map(m => m[1]);
 }
 
 export function getRoutes(): Promise<{ apps: Route[]; middlewares: unknown[] }> {
@@ -33,15 +39,21 @@ export function toggleRoute(id: string, enable: boolean): Promise<{ ok: boolean;
 
 export interface RouteFormData {
   serviceName: string;
-  subdomain: string;
+  protocol: string;
   targetIp: string;
   targetPort: string;
-  protocol: string;
+  configFile?: string;
+  subdomain?: string;
+  domains?: string[];
+  entryPoints?: string;
   middlewares?: string;
   scheme?: string;
   passHostHeader?: boolean;
   certResolver?: string;
-  configFile?: string;
+  insecureSkipVerify?: boolean;
+  tcpRule?: string;
+  tcpEntryPoints?: string;
+  udpEntryPoint?: string;
 }
 
 export function saveRoute(
@@ -49,20 +61,34 @@ export function saveRoute(
   isEdit = false,
   originalId = '',
 ): Promise<{ ok: boolean; message?: string }> {
-  return apiFormPost('/save', {
+  const base: Record<string, string | string[]> = {
     serviceName: data.serviceName,
-    subdomain: data.subdomain,
-    targetIp: data.targetIp,
-    targetPort: data.targetPort,
-    protocol: data.protocol,
-    middlewares: data.middlewares ?? '',
-    scheme: data.scheme ?? 'http',
-    passHostHeader: (data.passHostHeader !== false) ? 'true' : '',
-    certResolver: data.certResolver ?? '',
-    configFile: data.configFile ?? '',
-    isEdit: isEdit ? 'true' : 'false',
+    targetIp:    data.targetIp,
+    targetPort:  data.targetPort,
+    protocol:    data.protocol,
+    configFile:  data.configFile ?? '',
+    isEdit:      isEdit ? 'true' : 'false',
     originalId,
-  });
+  };
+
+  if (data.protocol === 'http') {
+    base.subdomain         = data.subdomain ?? '';
+    base.domains           = data.domains && data.domains.length > 0 ? data.domains : [];
+    base.entryPoints       = [data.entryPoints || 'https', ''];
+    base.middlewares       = data.middlewares ?? '';
+    base.scheme            = data.scheme ?? 'http';
+    base.passHostHeader    = data.passHostHeader !== false ? 'true' : '';
+    base.certResolver      = data.certResolver ?? '';
+    base.insecureSkipVerify = data.insecureSkipVerify ? 'true' : '';
+  } else if (data.protocol === 'tcp') {
+    base.tcpRule     = data.tcpRule ?? '';
+    base.entryPoints = ['', data.tcpEntryPoints || ''];
+    base.certResolver = data.certResolver ?? '';
+  } else if (data.protocol === 'udp') {
+    base.udpEntryPoint = data.udpEntryPoint ?? '';
+  }
+
+  return apiFormPost('/save', base);
 }
 
 export function deleteRoute(id: string, configFile = ''): Promise<{ ok: boolean; message?: string }> {

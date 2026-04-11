@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Linking,
   StyleSheet,
-  Switch,
   View,
 } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { Surface, Switch, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Route, domainFromRule } from '../api/routes';
 import { font, radius, spacing } from '../theme';
@@ -73,6 +73,7 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
         <View style={styles.badges}>
           <ProtocolBadge protocol={route.protocol} />
           {route.tls && <SmallChip label="🔒 TLS" color={c.green} c={c} />}
+          {route.insecureSkipVerify && <SmallChip label="⚠ TLS skip" color="#d4a017" c={c} />}
           <StatusDot status={st} />
         </View>
         <View style={styles.headerRight}>
@@ -91,9 +92,6 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
             : <Switch
                 value={route.enabled}
                 onValueChange={(v) => onToggle(route.id, v)}
-                trackColor={{ false: c.border, true: c.blue }}
-                thumbColor={route.enabled ? '#fff' : c.muted}
-                style={styles.toggle}
               />
           )}
         </View>
@@ -165,7 +163,6 @@ const styles = StyleSheet.create({
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   nameRow:     { flexDirection: 'row', alignItems: 'center', gap: 8 },
   appIcon:     { width: 28, height: 28, borderRadius: 6, flexShrink: 0 },
-  toggle:      { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] },
   name:        { fontSize: font.md, fontWeight: '700' },
   service:     { fontSize: font.sm },
   field:       { borderRadius: radius.sm, padding: spacing.sm },

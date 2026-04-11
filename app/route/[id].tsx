@@ -6,15 +6,14 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Switch,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SegmentedButtons, Text, TextInput } from 'react-native-paper';
+import { SegmentedButtons, Switch, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RouteFormData, domainFromRule } from '../../src/api/routes';
+import { RouteFormData, domainFromRule, domainsFromRule } from '../../src/api/routes';
 import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
 import { useRoutes, useDeleteRoute, useSaveRoute, useToggleRoute } from '../../src/hooks/useRoutes';
@@ -134,37 +133,84 @@ export default function RouteDetailScreen() {
   const decodedId = decodeURIComponent(id ?? '');
   const route     = data?.apps.find(r => r.id === decodedId);
 
+  const editDomains = settings?.domains ?? [];
+
   const [editMode,    setEditMode]    = useState(edit === '1');
   const [toggling,    setToggling]    = useState(false);
 
   // ── edit form state ──────────────────────────────────────────
-  const [fName,       setFName]       = useState('');
-  const [fHost,       setFHost]       = useState('');
-  const [fIp,         setFIp]         = useState('');
-  const [fPort,       setFPort]       = useState('');
-  const [fProto,      setFProto]      = useState('http');
-  const [fMws,        setFMws]        = useState('');
-  const [fScheme,       setFScheme]       = useState('http');
-  const [fPassHost,     setFPassHost]     = useState(true);
-  const [fCertResolver, setFCertResolver] = useState('');
-  const [fConfigFile,   setFConfigFile]   = useState('');
-  const [saving,      setSaving]      = useState(false);
-  const [saveErr,     setSaveErr]     = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [fName,           setFName]           = useState('');
+  const [fProto,          setFProto]          = useState('http');
+  const [fIp,             setFIp]             = useState('');
+  const [fPort,           setFPort]           = useState('');
+  const [fConfigFile,     setFConfigFile]     = useState('');
+  const [saving,          setSaving]          = useState(false);
+  const [saveErr,         setSaveErr]         = useState('');
+  const [confirmDelete,   setConfirmDelete]   = useState(false);
+
+  const [fSubdomain,      setFSubdomain]      = useState('');
+  const [fDomains,        setFDomains]        = useState<string[]>([]);
+  const [fEntryPoints,    setFEntryPoints]    = useState('https');
+  const [fMws,            setFMws]            = useState('');
+  const [fScheme,         setFScheme]         = useState('http');
+  const [fPassHost,       setFPassHost]       = useState(true);
+  const [fInsecure,       setFInsecure]       = useState(false);
+  const [fCertResolver,   setFCertResolver]   = useState('');
+
+  const [fTcpRule,        setFTcpRule]        = useState('');
+  const [fTcpEntryPoints, setFTcpEntryPoints] = useState('');
+
+  const [fUdpEntryPoint,  setFUdpEntryPoint]  = useState('');
+
+  const toggleEditDomain = (d: string) => {
+    setFDomains(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]);
+  };
 
   const populateForm = (r: NonNullable<typeof route>) => {
-    const p = parseTarget(r.target);
+    const p     = parseTarget(r.target);
+    const proto = (r.protocol ?? 'http').toLowerCase();
     setFName(r.name);
-    setFHost(domainFromRule(r.rule) || r.rule);
+    setFProto(proto);
     setFIp(p.ip);
     setFPort(p.port);
-    setFProto((r.protocol ?? 'http').toLowerCase());
-    setFMws((r.middlewares ?? []).join(', '));
-    setFScheme((r.target || '').startsWith('https://') ? 'https' : 'http');
-    setFPassHost(r.passHostHeader !== false);
-    setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
     setFConfigFile(r.configFile || configFiles[0]?.label || '');
     setSaveErr('');
+
+    if (proto === 'http') {
+      const ruleDomains = domainsFromRule(r.rule);
+      let subdomain = '';
+      const matchedDomains: string[] = [];
+      for (const fullHost of ruleDomains) {
+        let found = false;
+        for (const d of editDomains) {
+          if (fullHost.endsWith('.' + d)) {
+            if (!subdomain) subdomain = fullHost.slice(0, -(d.length + 1));
+            matchedDomains.push(d);
+            found = true;
+            break;
+          } else if (fullHost === d) {
+            matchedDomains.push(d);
+            found = true;
+            break;
+          }
+        }
+        if (!found && !subdomain) subdomain = fullHost;
+      }
+      setFSubdomain(subdomain);
+      setFDomains(matchedDomains.length > 0 ? matchedDomains : editDomains.slice(0, 1));
+      setFEntryPoints((r.entryPoints ?? ['https']).join(', '));
+      setFMws((r.middlewares ?? []).join(', '));
+      setFScheme((r.target || '').startsWith('https://') ? 'https' : 'http');
+      setFPassHost(r.passHostHeader !== false);
+      setFInsecure(!!r.insecureSkipVerify);
+      setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
+    } else if (proto === 'tcp') {
+      setFTcpRule(r.rule ?? '');
+      setFTcpEntryPoints((r.entryPoints ?? []).join(', '));
+      setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
+    } else if (proto === 'udp') {
+      setFUdpEntryPoint((r.entryPoints ?? [])[0] ?? '');
+    }
   };
 
   useEffect(() => {
@@ -204,21 +250,33 @@ export default function RouteDetailScreen() {
 
   const handleSave = () => {
     if (!route) return;
-    if (!fName.trim() || !fIp.trim()) { setSaveErr('Name and target IP are required'); return; }
+    if (!fName.trim()) { setSaveErr('Name is required'); return; }
+    if (!fIp.trim()) { setSaveErr('Target IP is required'); return; }
     setSaving(true);
     setSaveErr('');
     const formData: RouteFormData = {
-      serviceName:    fName.trim(),
-      subdomain:      fHost.trim(),
-      targetIp:       fIp.trim(),
-      targetPort:     fPort.trim(),
-      protocol:       fProto,
-      middlewares:    fMws.trim(),
-      scheme:         fScheme,
-      passHostHeader: fPassHost,
-      certResolver:   fCertResolver,
-      configFile:     fConfigFile,
+      serviceName: fName.trim(),
+      protocol:    fProto,
+      targetIp:    fIp.trim(),
+      targetPort:  fPort.trim(),
+      configFile:  fConfigFile,
     };
+    if (fProto === 'http') {
+      formData.subdomain         = fSubdomain.trim();
+      formData.domains           = fDomains;
+      formData.entryPoints       = fEntryPoints;
+      formData.middlewares       = fMws.trim();
+      formData.scheme            = fScheme;
+      formData.passHostHeader    = fPassHost;
+      formData.insecureSkipVerify = fInsecure;
+      formData.certResolver      = fCertResolver;
+    } else if (fProto === 'tcp') {
+      formData.tcpRule        = fTcpRule.trim();
+      formData.tcpEntryPoints = fTcpEntryPoints.trim();
+      formData.certResolver   = fCertResolver;
+    } else if (fProto === 'udp') {
+      formData.udpEntryPoint = fUdpEntryPoint.trim();
+    }
     saveRoute.mutate(
       { data: formData, isEdit: true, originalId: route.id },
       {
@@ -354,37 +412,113 @@ export default function RouteDetailScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <FormField label="NAME" value={fName} onChange={setFName} c={c} />
-            <FormField label="HOST / DOMAIN" value={fHost} onChange={setFHost} c={c}
-              placeholder="e.g. app.example.com" keyboardType="url" />
+
+            <Text style={[styles.fieldLabel, { color: c.muted }]}>Protocol</Text>
+            <SegmentedButtons
+              value={fProto}
+              onValueChange={setFProto}
+              buttons={PROTOCOLS.map(p => ({ value: p, label: p.toUpperCase() }))}
+            />
+
+            {fProto === 'http' && (
+              <>
+                <FormField label="SUBDOMAIN" value={fSubdomain} onChange={setFSubdomain} c={c}
+                  placeholder="e.g. app" keyboardType="url" />
+
+                {editDomains.length > 0 && (
+                  <>
+                    <Text style={[styles.fieldLabel, { color: c.muted }]}>DOMAIN{editDomains.length > 1 ? 'S' : ''}</Text>
+                    <View style={styles.resolverChipRow}>
+                      {editDomains.map(d => (
+                        <TouchableOpacity
+                          key={d}
+                          onPress={() => editDomains.length === 1 ? null : toggleEditDomain(d)}
+                          style={[
+                            styles.resolverChip,
+                            {
+                              backgroundColor: (fDomains.includes(d) || editDomains.length === 1) ? c.secondaryContainer : 'transparent',
+                              borderColor:     (fDomains.includes(d) || editDomains.length === 1) ? c.blue : c.border,
+                            },
+                          ]}
+                          activeOpacity={editDomains.length === 1 ? 1 : 0.7}
+                        >
+                          <Text style={{ color: (fDomains.includes(d) || editDomains.length === 1) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                            {d}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </>
+                )}
+              </>
+            )}
+
+            {fProto === 'tcp' && (
+              <FormField label="SNI RULE" value={fTcpRule} onChange={setFTcpRule} c={c}
+                placeholder="HostSNI(`tcp.example.com`) or HostSNI(`*`)" />
+            )}
+
             <FormField label="TARGET IP / HOST" value={fIp} onChange={setFIp} c={c}
               placeholder="e.g. 192.168.1.10" keyboardType="url" />
             <FormField label="TARGET PORT" value={fPort} onChange={setFPort} c={c}
               placeholder="e.g. 8080" keyboardType="numeric" />
-            <FormField label="MIDDLEWARES (comma-separated)" value={fMws} onChange={setFMws} c={c}
-              placeholder="e.g. auth@file, compress" />
 
-            <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
-            <SegmentedButtons
-              value={fScheme}
-              onValueChange={setFScheme}
-              buttons={[
-                { value: 'http',  label: 'HTTP'  },
-                { value: 'https', label: 'HTTPS' },
-              ]}
-            />
+            {fProto === 'http' && (
+              <>
+                <FormField label="ENTRY POINTS (comma-separated)" value={fEntryPoints} onChange={setFEntryPoints} c={c}
+                  placeholder="https" />
+                <FormField label="MIDDLEWARES (comma-separated)" value={fMws} onChange={setFMws} c={c}
+                  placeholder="e.g. auth@file, compress" />
 
-            <View style={styles.switchRow}>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={[styles.fieldLabel, { color: c.text }]}>Pass Host Header</Text>
-                <Text style={[styles.fieldHint, { color: c.muted }]}>Forward original Host to backend</Text>
-              </View>
-              <Switch
-                value={fPassHost}
-                onValueChange={setFPassHost}
-                trackColor={{ false: c.border, true: c.blue }}
-                thumbColor={fPassHost ? '#fff' : c.muted}
-              />
-            </View>
+                <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
+                <SegmentedButtons
+                  value={fScheme}
+                  onValueChange={setFScheme}
+                  buttons={[
+                    { value: 'http',  label: 'HTTP'  },
+                    { value: 'https', label: 'HTTPS' },
+                  ]}
+                />
+
+                <View style={styles.switchRow}>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={[styles.fieldLabel, { color: c.text }]}>Pass Host Header</Text>
+                    <Text style={[styles.fieldHint, { color: c.muted }]}>Forward original Host to backend</Text>
+                  </View>
+                  <Switch
+                    value={fPassHost}
+                    onValueChange={setFPassHost}
+                  />
+                </View>
+
+                <View style={styles.switchRow}>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={[styles.fieldLabel, { color: c.text }]}>Skip TLS Verification</Text>
+                    <Text style={[styles.fieldHint, { color: c.muted }]}>For self-signed backend certs (insecureSkipVerify)</Text>
+                  </View>
+                  <Switch
+                    value={fInsecure}
+                    onValueChange={setFInsecure}
+                  />
+                </View>
+              </>
+            )}
+
+            {fProto === 'tcp' && (
+              <FormField label="ENTRY POINTS (comma-separated)" value={fTcpEntryPoints} onChange={setFTcpEntryPoints} c={c}
+                placeholder="tcp, postgres" />
+            )}
+
+            {fProto === 'udp' && (
+              <>
+                <FormField label="ENTRY POINT" value={fUdpEntryPoint} onChange={setFUdpEntryPoint} c={c}
+                  placeholder="qbittorrent-udp" />
+                <View style={[styles.infoBox, { backgroundColor: c.blue + '14', borderColor: c.blue + '44' }]}>
+                  <MaterialCommunityIcons name="information-outline" size={14} color={c.blue} />
+                  <Text style={[styles.infoText, { color: c.blue }]}>UDP routers don't support rules. Traffic is routed by entry point only.</Text>
+                </View>
+              </>
+            )}
 
             {resolvers.length > 0 && (fProto === 'http' || fProto === 'tcp') && (
               <>
@@ -411,13 +545,6 @@ export default function RouteDetailScreen() {
                 </View>
               </>
             )}
-
-            <Text style={[styles.fieldLabel, { color: c.muted }]}>Protocol</Text>
-            <SegmentedButtons
-              value={fProto}
-              onValueChange={setFProto}
-              buttons={PROTOCOLS.map(p => ({ value: p, label: p.toUpperCase() }))}
-            />
 
             {showConfigPicker && (
               <View style={styles.formGroup}>
@@ -581,5 +708,7 @@ const styles = StyleSheet.create({
   switchRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
   resolverChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   resolverChip:    { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 7 },
+  infoBox:         { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10, borderRadius: radius.sm, borderWidth: 1 },
+  infoText:        { fontSize: font.xs, flex: 1 },
   errTxt:          { fontSize: font.sm, color: 'red' },
 });

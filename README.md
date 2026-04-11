@@ -43,10 +43,11 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 ## Features
 
-- **Routes** - view, enable/disable, add, edit, and delete HTTP/TCP/UDP routes
+- **Routes** - view, enable/disable, add, edit, and delete HTTP/TCP/UDP routes; assign multiple domains per route
 - **Middlewares** - view, add, edit, and delete middlewares with 12 built-in templates (HTTPS redirect, basic auth, rate limit, forward auth, and more)
 - **Services** - live service overview with health status, provider, and linked routers
 - **Edit mode** - toggle edit mode to reveal enable/disable toggles, edit, and delete actions on cards
+- **insecureSkipVerify** - per-route toggle for backends with self-signed certificates
 - **System theme** - follows iOS/Android system light/dark preference automatically
 - **Secure storage** - server URL and API key stored in device secure storage
 

@@ -40,9 +40,17 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   });
 }
 
-export async function apiFormPost<T>(path: string, params: Record<string, string>): Promise<T> {
+export async function apiFormPost<T>(path: string, params: Record<string, string | string[]>): Promise<T> {
   const { baseUrl, apiKey } = useConnection.getState();
   if (!baseUrl || !apiKey) throw new ApiError(0, 'Not connected');
+  const sp = new URLSearchParams();
+  for (const [key, val] of Object.entries(params)) {
+    if (Array.isArray(val)) {
+      val.forEach(v => sp.append(key, v));
+    } else {
+      sp.append(key, val);
+    }
+  }
   const res = await fetch(`${baseUrl}${path}`, {
     method: 'POST',
     headers: {
@@ -50,7 +58,7 @@ export async function apiFormPost<T>(path: string, params: Record<string, string
       'X-Requested-With': 'fetch',
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams(params).toString(),
+    body: sp.toString(),
   });
   if (res.status === 401) throw new ApiError(401, 'Invalid API key');
   if (!res.ok) {

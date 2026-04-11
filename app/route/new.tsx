@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
-  Switch,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Button, SegmentedButtons, Text, TextInput } from 'react-native-paper';
+import { Button, SegmentedButtons, Switch, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,40 +35,66 @@ export default function NewRouteScreen() {
   const configDirSet   = configs.data?.configDirSet ?? false;
   const showConfigPicker = configFiles.length > 1 || configDirSet;
 
-  const [fName,         setFName]         = useState('');
-  const [fHost,         setFHost]         = useState('');
-  const [fIp,           setFIp]           = useState('');
-  const [fPort,         setFPort]         = useState('');
-  const [fProto,        setFProto]        = useState('http');
-  const [fMws,          setFMws]          = useState('');
-  const [fScheme,       setFScheme]       = useState('http');
-  const [fPassHost,     setFPassHost]     = useState(true);
-  const [fCertResolver, setFCertResolver] = useState('');
-  const [fConfigFile,   setFConfigFile]   = useState('');
-  const [saving,        setSaving]        = useState(false);
-  const [saveErr,       setSaveErr]       = useState('');
+  const [fName,             setFName]             = useState('');
+  const [fProto,            setFProto]            = useState('http');
+  const [fIp,               setFIp]               = useState('');
+  const [fPort,             setFPort]             = useState('');
+  const [fConfigFile,       setFConfigFile]       = useState('');
+  const [saving,            setSaving]            = useState(false);
+  const [saveErr,           setSaveErr]           = useState('');
+
+  const [fSubdomain,        setFSubdomain]        = useState('');
+  const [fDomains,          setFDomains]          = useState<string[]>([]);
+  const [fEntryPoints,      setFEntryPoints]      = useState('https');
+  const [fMws,              setFMws]              = useState('');
+  const [fScheme,           setFScheme]           = useState('http');
+  const [fPassHost,         setFPassHost]         = useState(true);
+  const [fInsecure,         setFInsecure]         = useState(false);
+  const [fCertResolver,     setFCertResolver]     = useState('');
+
+  const [fTcpRule,          setFTcpRule]          = useState('');
+  const [fTcpEntryPoints,   setFTcpEntryPoints]   = useState('');
+
+  const [fUdpEntryPoint,    setFUdpEntryPoint]    = useState('');
+
+  const domains = settings?.domains ?? [];
+
+  const toggleDomain = (d: string) => {
+    setFDomains(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]);
+  };
 
   useEffect(() => {
     if (resolvers.length > 0 && !fCertResolver) setFCertResolver(resolvers[0]);
   }, [settings]);
 
-
   const handleSave = () => {
-    if (!fName.trim() || !fIp.trim()) { setSaveErr('Name and target IP are required'); return; }
+    if (!fName.trim()) { setSaveErr('Name is required'); return; }
+    if (!fIp.trim()) { setSaveErr('Target IP is required'); return; }
     setSaving(true);
     setSaveErr('');
     const data: RouteFormData = {
-      serviceName:    fName.trim(),
-      subdomain:      fHost.trim(),
-      targetIp:       fIp.trim(),
-      targetPort:     fPort.trim(),
-      protocol:       fProto,
-      middlewares:    fMws.trim(),
-      scheme:         fScheme,
-      passHostHeader: fPassHost,
-      certResolver:   fCertResolver,
-      configFile:     fConfigFile,
+      serviceName: fName.trim(),
+      protocol:    fProto,
+      targetIp:    fIp.trim(),
+      targetPort:  fPort.trim(),
+      configFile:  fConfigFile,
     };
+    if (fProto === 'http') {
+      data.subdomain         = fSubdomain.trim();
+      data.domains           = fDomains;
+      data.entryPoints       = fEntryPoints;
+      data.middlewares       = fMws.trim();
+      data.scheme            = fScheme;
+      data.passHostHeader    = fPassHost;
+      data.insecureSkipVerify = fInsecure;
+      data.certResolver      = fCertResolver;
+    } else if (fProto === 'tcp') {
+      data.tcpRule        = fTcpRule.trim();
+      data.tcpEntryPoints = fTcpEntryPoints.trim();
+      data.certResolver   = fCertResolver;
+    } else if (fProto === 'udp') {
+      data.udpEntryPoint = fUdpEntryPoint.trim();
+    }
     saveRoute.mutate(
       { data, isEdit: false, originalId: '' },
       {
@@ -121,17 +145,69 @@ export default function NewRouteScreen() {
             mode="outlined"
             style={{ backgroundColor: c.bg }}
           />
-          <TextInput
-            label="Host / Domain"
-            value={fHost}
-            onChangeText={setFHost}
-            placeholder="app.example.com"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-            mode="outlined"
-            style={{ backgroundColor: c.bg }}
+
+          <Text style={[styles.fieldLabel, { color: c.muted }]}>Protocol</Text>
+          <SegmentedButtons
+            value={fProto}
+            onValueChange={setFProto}
+            buttons={PROTOCOLS.map(p => ({ value: p, label: p.toUpperCase() }))}
           />
+
+          {fProto === 'http' && (
+            <>
+              <TextInput
+                label="Subdomain"
+                value={fSubdomain}
+                onChangeText={setFSubdomain}
+                placeholder="app"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+                mode="outlined"
+                style={{ backgroundColor: c.bg }}
+              />
+
+              {domains.length > 0 && (
+                <>
+                  <Text style={[styles.fieldLabel, { color: c.muted }]}>Domain{domains.length > 1 ? 's' : ''}</Text>
+                  <View style={styles.chipRow}>
+                    {domains.map(d => (
+                      <TouchableOpacity
+                        key={d}
+                        onPress={() => domains.length === 1 ? null : toggleDomain(d)}
+                        style={[
+                          styles.chip,
+                          {
+                            backgroundColor: (fDomains.includes(d) || domains.length === 1) ? c.secondaryContainer : 'transparent',
+                            borderColor:     (fDomains.includes(d) || domains.length === 1) ? c.blue : c.border,
+                          },
+                        ]}
+                        activeOpacity={domains.length === 1 ? 1 : 0.7}
+                      >
+                        <Text style={{ color: (fDomains.includes(d) || domains.length === 1) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                          {d}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+            </>
+          )}
+
+          {fProto === 'tcp' && (
+            <TextInput
+              label="SNI Rule"
+              value={fTcpRule}
+              onChangeText={setFTcpRule}
+              placeholder="HostSNI(`tcp.example.com`) or HostSNI(`*`)"
+              autoCapitalize="none"
+              autoCorrect={false}
+              mode="outlined"
+              style={{ backgroundColor: c.bg }}
+            />
+          )}
+
           <TextInput
             label="Target IP / Host"
             value={fIp}
@@ -154,39 +230,95 @@ export default function NewRouteScreen() {
             mode="outlined"
             style={{ backgroundColor: c.bg }}
           />
-          <TextInput
-            label="Middlewares (comma-separated)"
-            value={fMws}
-            onChangeText={setFMws}
-            placeholder="auth@file, compress"
-            autoCapitalize="none"
-            autoCorrect={false}
-            mode="outlined"
-            style={{ backgroundColor: c.bg }}
-          />
 
-          <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
-          <SegmentedButtons
-            value={fScheme}
-            onValueChange={setFScheme}
-            buttons={[
-              { value: 'http',  label: 'HTTP'  },
-              { value: 'https', label: 'HTTPS' },
-            ]}
-          />
+          {fProto === 'http' && (
+            <>
+              <TextInput
+                label="Entry Points (comma-separated)"
+                value={fEntryPoints}
+                onChangeText={setFEntryPoints}
+                placeholder="https"
+                autoCapitalize="none"
+                autoCorrect={false}
+                mode="outlined"
+                style={{ backgroundColor: c.bg }}
+              />
+              <TextInput
+                label="Middlewares (comma-separated)"
+                value={fMws}
+                onChangeText={setFMws}
+                placeholder="auth@file, compress"
+                autoCapitalize="none"
+                autoCorrect={false}
+                mode="outlined"
+                style={{ backgroundColor: c.bg }}
+              />
 
-          <View style={styles.switchRow}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={[styles.fieldLabel, { color: c.text }]}>Pass Host Header</Text>
-              <Text style={[styles.fieldHint, { color: c.muted }]}>Forward original Host to backend</Text>
-            </View>
-            <Switch
-              value={fPassHost}
-              onValueChange={setFPassHost}
-              trackColor={{ false: c.border, true: c.blue }}
-              thumbColor={fPassHost ? '#fff' : c.muted}
+              <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
+              <SegmentedButtons
+                value={fScheme}
+                onValueChange={setFScheme}
+                buttons={[
+                  { value: 'http',  label: 'HTTP'  },
+                  { value: 'https', label: 'HTTPS' },
+                ]}
+              />
+
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[styles.fieldLabel, { color: c.text }]}>Pass Host Header</Text>
+                  <Text style={[styles.fieldHint, { color: c.muted }]}>Forward original Host to backend</Text>
+                </View>
+                <Switch
+                  value={fPassHost}
+                  onValueChange={setFPassHost}
+                />
+              </View>
+
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[styles.fieldLabel, { color: c.text }]}>Skip TLS Verification</Text>
+                  <Text style={[styles.fieldHint, { color: c.muted }]}>For self-signed backend certs (insecureSkipVerify)</Text>
+                </View>
+                <Switch
+                  value={fInsecure}
+                  onValueChange={setFInsecure}
+                />
+              </View>
+            </>
+          )}
+
+          {fProto === 'tcp' && (
+            <TextInput
+              label="Entry Points (comma-separated)"
+              value={fTcpEntryPoints}
+              onChangeText={setFTcpEntryPoints}
+              placeholder="tcp, postgres"
+              autoCapitalize="none"
+              autoCorrect={false}
+              mode="outlined"
+              style={{ backgroundColor: c.bg }}
             />
-          </View>
+          )}
+
+          {fProto === 'udp' && (
+            <>
+              <TextInput
+                label="Entry Point"
+                value={fUdpEntryPoint}
+                onChangeText={setFUdpEntryPoint}
+                placeholder="qbittorrent-udp"
+                autoCapitalize="none"
+                autoCorrect={false}
+                mode="outlined"
+                style={{ backgroundColor: c.bg }}
+              />
+              <View style={[styles.infoBox, { backgroundColor: c.blue + '14', borderColor: c.blue + '44' }]}>
+                <MaterialCommunityIcons name="information-outline" size={14} color={c.blue} />
+                <Text style={[styles.infoText, { color: c.blue }]}>UDP routers don't support rules. Traffic is routed by entry point only.</Text>
+              </View>
+            </>
+          )}
 
           {resolvers.length > 0 && (fProto === 'http' || fProto === 'tcp') && (
             <>
@@ -213,13 +345,6 @@ export default function NewRouteScreen() {
               </View>
             </>
           )}
-
-          <Text style={[styles.fieldLabel, { color: c.muted }]}>Protocol</Text>
-          <SegmentedButtons
-            value={fProto}
-            onValueChange={setFProto}
-            buttons={PROTOCOLS.map(p => ({ value: p, label: p.toUpperCase() }))}
-          />
 
           {showConfigPicker && (
             <View style={styles.formGroup}>
@@ -259,5 +384,7 @@ const styles = StyleSheet.create({
   switchRow:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
   chipRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip:          { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 7 },
+  infoBox:       { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10, borderRadius: radius.sm, borderWidth: 1 },
+  infoText:      { fontSize: font.xs, flex: 1 },
   errTxt:        { fontSize: font.sm },
 });

@@ -58,6 +58,14 @@ export function ConfigFilePicker({ files, configDirSet, value, onChange, allowNe
     onChange(text);
   };
 
+  const handleNewNameBlur = () => {
+    if (newName && !/\.ya?ml$/.test(newName)) {
+      const normalized = newName + '.yml';
+      setNewName(normalized);
+      onChange(normalized);
+    }
+  };
+
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
@@ -79,6 +87,7 @@ export function ConfigFilePicker({ files, configDirSet, value, onChange, allowNe
           style={[styles.newInput, { backgroundColor: c.bg, borderColor: c.purple, color: c.text }]}
           value={newName}
           onChangeText={handleNewName}
+          onBlur={handleNewNameBlur}
           placeholder="app-myservice.yml"
           placeholderTextColor={c.muted}
           autoCapitalize="none"

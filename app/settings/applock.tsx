@@ -1,6 +1,6 @@
 import * as LocalAuthentication from 'expo-local-authentication';
-import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Surface, Switch, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -54,8 +54,6 @@ export default function AppLockScreen() {
             <Switch
               value={enabled}
               onValueChange={handleToggle}
-              trackColor={{ false: c.border, true: c.blue }}
-              thumbColor={enabled ? '#fff' : c.muted}
             />
           </View>
         </Surface>

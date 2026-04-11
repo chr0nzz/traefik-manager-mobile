@@ -65,6 +65,7 @@ export default function RoutesScreen() {
   const handleToggle = async (id: string, enable: boolean) => {
     setTogglingId(id);
     try { await toggle.mutateAsync({ id, enable }); }
+    catch { }
     finally { setTogglingId(null); }
   };
 
