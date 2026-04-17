@@ -91,8 +91,8 @@ android {
         applicationId 'dev.chr0nzz.traefikmanager'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 12
-        versionName "0.10.0"
+        versionCode 13
+        versionName "0.11.0"
     }
     signingConfigs {
         debug {

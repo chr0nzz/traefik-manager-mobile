@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   fieldLabel:  { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5, marginBottom: 2 },
   fieldValue:  { fontSize: font.sm, fontFamily: 'monospace' },
   mwRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2 },
-  mwChip:      { paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.full, borderWidth: 1 },
+  mwChip:      { paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.sm, borderWidth: 1 },
   mwTxt:       { fontSize: font.xs, fontWeight: '600' },
-  chip:        { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full, borderWidth: 1, alignSelf: 'flex-start' },
+  chip:        { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.sm, borderWidth: 1, alignSelf: 'flex-start' },
   chipText:    { fontSize: font.xs, fontWeight: '600' },
 });

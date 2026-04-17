@@ -41,7 +41,7 @@ export function BackupItem({ backup, onRestore, onDelete, restoring }: Props) {
 
   return (
     <View style={styles.row}>
-      <View style={styles.iconWrap}>
+      <View style={[styles.iconWrap, { backgroundColor: c.blue + '1A', borderColor: c.blue + '33' }]}>
         <MaterialCommunityIcons name="database-export" size={20} color={c.blue} />
       </View>
       <View style={styles.info}>
@@ -50,7 +50,7 @@ export function BackupItem({ backup, onRestore, onDelete, restoring }: Props) {
       </View>
       <View style={styles.actions}>
         <TouchableOpacity
-          style={[styles.btn, styles.restoreBtn, restoring && styles.btnDisabled]}
+          style={[styles.btn, styles.restoreBtn, { backgroundColor: c.blue + '0F', borderColor: c.blue + '59' }, restoring && styles.btnDisabled]}
           onPress={confirmRestore}
           disabled={restoring}
         >
@@ -61,7 +61,7 @@ export function BackupItem({ backup, onRestore, onDelete, restoring }: Props) {
           />
           <Text style={[styles.btnTxt, { color: c.blue }]}>Restore</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.btn, styles.deleteBtn]} onPress={confirmDelete}>
+        <TouchableOpacity style={[styles.btn, styles.deleteBtn, { backgroundColor: c.red + '0F', borderColor: c.red + '4D' }]} onPress={confirmDelete}>
           <MaterialCommunityIcons name="trash-can-outline" size={15} color={c.red} />
         </TouchableOpacity>
       </View>
@@ -81,9 +81,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(36,161,222,0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(36,161,222,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -111,13 +109,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     borderWidth: 1,
   },
-  restoreBtn: {
-    borderColor: 'rgba(36,161,222,0.35)',
-    backgroundColor: 'rgba(36,161,222,0.06)',
-  },
+  restoreBtn: {},
   deleteBtn: {
-    borderColor: 'rgba(239,68,68,0.3)',
-    backgroundColor: 'rgba(239,68,68,0.06)',
     paddingHorizontal: 7,
   },
   btnDisabled: { opacity: 0.5 },

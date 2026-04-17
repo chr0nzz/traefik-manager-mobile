@@ -53,7 +53,7 @@ export default function BackupsScreen() {
       </View>
 
       {isError && (
-        <View style={styles.errorBox}>
+        <View style={[styles.errorBox, { backgroundColor: c.red + '1A', borderColor: c.red + '4D' }]}>
           <Text style={[styles.errorText, { color: c.red }]}>{(error as Error)?.message ?? 'Failed to load'}</Text>
         </View>
       )}
@@ -100,10 +100,8 @@ const styles = StyleSheet.create({
   list:  { flex: 1 },
   empty: { textAlign: 'center', fontSize: font.base, marginTop: spacing.xxl },
   errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.1)',
     borderRadius: radius.sm,
     margin: spacing.md, padding: spacing.md, borderWidth: 1,
-    borderColor: 'rgba(239,68,68,0.3)',
   },
   errorText: { fontSize: font.sm },
 });

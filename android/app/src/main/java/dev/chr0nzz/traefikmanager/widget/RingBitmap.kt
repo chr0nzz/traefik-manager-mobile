@@ -20,7 +20,15 @@ object RingBitmap {
         return bmp
     }
 
-    fun create(ok: Int, warn: Int, err: Int, sizePx: Int, textColor: Int, trackColor: Int): Bitmap {
+    fun create(
+        ok: Int, warn: Int, err: Int,
+        sizePx: Int,
+        textColor: Int,
+        trackColor: Int,
+        okColor: Int,
+        warnColor: Int,
+        errColor: Int,
+    ): Bitmap {
         val bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         val stroke = sizePx * 0.14f
@@ -43,9 +51,9 @@ object RingBitmap {
 
         data class Seg(val value: Int, val color: Int)
         val segs = listOf(
-            Seg(ok,   0xFF22c55e.toInt()),
-            Seg(warn, 0xFFf59e0b.toInt()),
-            Seg(err,  0xFFef4444.toInt()),
+            Seg(ok,   okColor),
+            Seg(warn, warnColor),
+            Seg(err,  errColor),
         )
 
         var startAngle = -90f

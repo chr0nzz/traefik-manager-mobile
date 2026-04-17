@@ -95,6 +95,24 @@ export function deleteRoute(id: string, configFile = ''): Promise<{ ok: boolean;
   return apiFormPost(`/delete/${encodeURIComponent(id)}`, { configFile });
 }
 
+export interface Entrypoint {
+  name: string;
+  address: string;
+}
+
+export function getEntrypoints(): Promise<Entrypoint[]> {
+  return apiFetch('/api/traefik/entrypoints');
+}
+
+export interface MiddlewareEntry {
+  name: string;
+  type?: string;
+}
+
+export function getMiddlewares(): Promise<{ http: MiddlewareEntry[]; tcp: MiddlewareEntry[] }> {
+  return apiFetch('/api/traefik/middlewares');
+}
+
 export interface ConfigEntry {
   label: string;
   path: string;

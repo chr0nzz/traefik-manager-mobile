@@ -26,10 +26,9 @@ import { font, radius, spacing } from '../theme';
 const version = Constants.expoConfig?.version ?? '?';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
-  light:   'Light',
-  dark:    'Dark',
-  system:  'System',
-  dynamic: 'Dynamic',
+  light:  'Light',
+  dark:   'Dark',
+  system: 'System',
 };
 
 type Colors = ReturnType<typeof useThemeStore.getState>['colors'];

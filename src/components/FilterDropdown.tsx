@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    height: 36,
     paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: radius.full,
+    borderRadius: radius.sm,
     borderWidth: 1,
   },
   chipText: {

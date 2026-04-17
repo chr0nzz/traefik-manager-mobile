@@ -36,21 +36,21 @@ export const colors = darkColors;
 
 type Colors = typeof darkColors;
 
-export function dynamicColorsFromM3(scheme: Record<string, any>): Colors {
-  const elev = scheme.elevation as Record<string, string> | undefined;
+export function dynamicColorsFromM3(scheme: Record<string, any>, isDark: boolean): Colors {
+  const base = isDark ? darkColors : lightColors;
   return {
-    bg:                   scheme.background,
-    card:                 elev?.level2 ?? scheme.surfaceVariant ?? scheme.surface,
+    bg:                   scheme.background ?? scheme.surface,
+    card:                 scheme.surfaceVariant ?? scheme.secondaryContainer,
     border:               scheme.outlineVariant ?? scheme.outline,
-    text:                 scheme.onBackground,
+    text:                 scheme.onSurface,
     muted:                scheme.onSurfaceVariant,
     blue:                 scheme.primary,
-    green:                '#22c55e',
-    yellow:               '#f59e0b',
+    green:                base.green,
+    yellow:               base.yellow,
     red:                  scheme.error,
-    orange:               '#f0883e',
-    purple:               scheme.secondary,
-    teal:                 scheme.tertiary,
+    orange:               base.orange,
+    purple:               scheme.secondary ?? base.purple,
+    teal:                 base.teal,
     secondaryContainer:   scheme.secondaryContainer,
     onSecondaryContainer: scheme.onSecondaryContainer,
   };

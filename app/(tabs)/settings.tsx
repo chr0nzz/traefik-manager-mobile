@@ -18,8 +18,8 @@ import { font, radius, spacing } from '../../src/theme';
 const version = Constants.expoConfig?.version ?? '—';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
-  light: '☀ Light',
-  dark: '🌙 Dark',
+  light:  '☀ Light',
+  dark:   '🌙 Dark',
   system: '⚙ System',
 };
 

@@ -8,7 +8,7 @@ import { font, radius, spacing } from '../src/theme';
 
 function parseLogLine(line: string) {
   const full = line.match(
-    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+) "[^"]*" "[^"]*" \S+ "([^"]*)" "([^"]*)" (\S+)/
+    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d+) (\S+) "[^"]*" "[^"]*" \S+ "([^"]*)" "([^"]*)" (\S+)/
   );
   if (full) {
     const [, ip, date, method, path, statusStr, size, service, serviceUrl, duration] = full;
@@ -22,7 +22,7 @@ function parseLogLine(line: string) {
     };
   }
   const m = line.match(
-    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+)(?:[^"]*"[^"]*"[^"]*"[^"]*")? ?(\S+)?/
+    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d+) (\S+)(?:[^"]*"[^"]*"[^"]*"[^"]*")? ?(\S+)?/
   );
   if (!m) return null;
   const [, ip, date, method, path, statusStr, size, duration] = m;
@@ -35,6 +35,7 @@ function parseLogLine(line: string) {
 }
 
 function statusColor(status: number, c: ReturnType<typeof useThemeStore.getState>['colors']) {
+  if (!status)       return c.muted  ?? '#8b949e';
   if (status >= 500) return c.red    ?? '#f87171';
   if (status >= 400) return c.yellow ?? '#fbbf24';
   if (status >= 300) return c.teal   ?? '#1abc9c';
@@ -87,7 +88,7 @@ export default function LogDetailScreen() {
           <>
             <View style={styles.badges}>
               <View style={[styles.badge, { backgroundColor: sc! + '22', borderColor: sc! + '55' }]}>
-                <Text style={[styles.badgeText, { color: sc! }]}>{parsed.status}</Text>
+                <Text style={[styles.badgeText, { color: sc! }]}>{parsed.status || 'tunnel'}</Text>
               </View>
               <View style={[styles.badge, { backgroundColor: mc! + '22', borderColor: mc! + '55' }]}>
                 <Text style={[styles.badgeText, { color: mc! }]}>{parsed.method}</Text>

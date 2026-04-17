@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs, useRouter, useSegments } from 'expo-router';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useState } from 'react';
 import { Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeStore } from '../../src/store/theme';
@@ -30,7 +31,7 @@ const TABS_WITH_LOGS = [
 
 function useFocused() {
   const segments = useSegments();
-  const currentTab = segments[segments.length - 1] ?? '';
+  const currentTab: string = segments[segments.length - 1] ?? '';
   return (name: string) =>
     name === 'index'
       ? currentTab === '(tabs)' || currentTab === 'index' || currentTab === ''
@@ -41,12 +42,9 @@ function M3NavBar() {
   const insets   = useSafeAreaInsets();
   const c        = useThemeStore(s => s.colors);
   const showLogs = useTabsStore(s => s.showLogsTab);
-  const isWide   = useIsWide();
   const router   = useRouter();
   const focused  = useFocused();
   const TABS     = showLogs ? TABS_WITH_LOGS : BASE_TABS;
-
-  if (isWide) return null;
 
   return (
     <View
@@ -115,7 +113,7 @@ function M3NavRail() {
         onPress={open}
         android_ripple={{ color: 'transparent', borderless: true, radius: 28 }}
       >
-        <MaterialCommunityIcons name="menu" size={22} color={c.muted} />
+        <MaterialCommunityIcons name="cog-outline" size={22} color={c.muted} />
       </Pressable>
 
       <View style={styles.railItems}>
@@ -153,11 +151,21 @@ function M3NavRail() {
 }
 
 export default function TabsLayout() {
-  const isWide   = useIsWide();
-  const showLogs = useTabsStore(s => s.showLogsTab);
+  const windowIsWide = useIsWide();
+  const [layoutWide, setLayoutWide] = useState<boolean | null>(null);
+  const isWide      = layoutWide ?? windowIsWide;
+  const showLogs    = useTabsStore(s => s.showLogsTab);
+  const setIsWide   = useDrawerStore(s => s.setIsWide);
 
   return (
-    <View style={styles.root}>
+    <View
+      style={styles.root}
+      onLayout={(e) => {
+        const wide = e.nativeEvent.layout.width >= 600;
+        setLayoutWide(wide);
+        setIsWide(wide);
+      }}
+    >
       {isWide && <M3NavRail />}
       <View style={{ flex: 1 }}>
         <Tabs
@@ -171,7 +179,7 @@ export default function TabsLayout() {
           <Tabs.Screen name="backups"     options={{ href: null }}         />
           <Tabs.Screen name="settings"    options={{ href: null }}         />
         </Tabs>
-        <M3NavBar />
+        {!isWide && <M3NavBar />}
       </View>
       <NavigationDrawer />
     </View>
@@ -225,8 +233,8 @@ const styles = StyleSheet.create({
   railItems: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
-    paddingTop: 8,
   },
   railItem: {
     alignItems: 'center',

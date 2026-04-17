@@ -57,7 +57,7 @@ export default function DashboardScreen() {
         scrollEventThrottle={16}
       >
         {overview.isError && (
-          <View style={[styles.errorBox, { borderColor: c.red + '55' }]}>
+          <View style={[styles.errorBox, { backgroundColor: c.red + '1A', borderColor: c.red + '55' }]}>
             <Text style={{ color: c.red, fontSize: 12 }}>
               {(overview.error as Error)?.message ?? 'Failed to load'}
             </Text>
@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
   scroll:    { flex: 1 },
   content:   {},
   errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.1)',
     borderRadius: 8, padding: 12, marginBottom: 12, borderWidth: 1,
   },
   grid: {

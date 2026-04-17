@@ -8,4 +8,5 @@
     android:targetCellHeight="2"
     android:updatePeriodMillis="0"
     android:description="@string/widget_description"
-    android:previewImage="@mipmap/ic_launcher" />
+    android:previewImage="@mipmap/ic_launcher"
+    android:widgetFeatures="reconfigurable|configuration_optional" />

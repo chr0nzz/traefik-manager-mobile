@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useRef, useState } from 'react';
-import { Animated, FlatList, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FilterDropdown } from '../../src/components/FilterDropdown';
@@ -15,8 +15,6 @@ import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { font, radius, spacing } from '../../src/theme';
 import { providerOf } from '../../src/utils';
 
-const PAD = spacing.md;
-
 function statusOf(s: string) {
   const l = (s || '').toLowerCase();
   if (l === 'enabled' || l === 'success') return 'ok';
@@ -29,8 +27,6 @@ export default function LiveScreen() {
   const [status, setStatus]         = useState('all');
   const [proto, setProto]           = useState('all');
   const [provider, setProvider]     = useState('all');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const searchRef                   = useRef<TextInput>(null);
 
   const { data, isFetching, isError, error } = useLive();
   const qc         = useQueryClient();
@@ -68,6 +64,8 @@ export default function LiveScreen() {
 
   const hasFilters = status !== 'all' || proto !== 'all' || provider !== 'all';
 
+  const clearFilters = () => { setStatus('all'); setProto('all'); setProvider('all'); };
+
   const statusOpts = [
     { value: 'all',     label: 'All Status' },
     { value: 'success', label: 'Success'    },
@@ -83,78 +81,66 @@ export default function LiveScreen() {
     ...uniqueProviders.map(p => ({ value: p, label: p })),
   ];
 
-  const clearFilters = () => { setStatus('all'); setProto('all'); setProvider('all'); setSearch(''); };
-
-  const openSearch = () => {
-    setSearchOpen(true);
-    setTimeout(() => searchRef.current?.focus(), 50);
-  };
-
-  const closeSearch = () => {
-    setSearch('');
-    setSearchOpen(false);
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
-      <TopBar title="Services" scrollAnim={scrollAnim} onMenuPress={openDrawer} />
-      <DemoBanner />
-      <View style={[styles.filterBar, { borderBottomColor: c.border, backgroundColor: c.bg, paddingHorizontal: contentPadding }]}>
-        {searchOpen ? (
-          /* ── Expanded search ── */
-          <View style={styles.searchRow}>
-            <TouchableOpacity onPress={closeSearch} hitSlop={8} style={styles.backBtn}>
-              <MaterialCommunityIcons name="arrow-left" size={20} color={c.muted} />
-            </TouchableOpacity>
-            <TextInput
-              ref={searchRef}
-              style={[styles.searchExpanded, { backgroundColor: c.card, borderColor: c.muted + '88', color: c.text }]}
-              value={search}
-              onChangeText={setSearch}
-              placeholder="Search services..."
-              placeholderTextColor={c.muted}
-              autoCorrect={false}
-              returnKeyType="search"
-            />
-            {search.length > 0 && (
-              <TouchableOpacity onPress={() => setSearch('')} hitSlop={8} style={styles.clearBtn}>
-                <MaterialCommunityIcons name="close-circle" size={18} color={c.muted} />
+      <TopBar
+        title="Services"
+        scrollAnim={scrollAnim}
+        onMenuPress={openDrawer}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search services..."
+        overflowSections={[
+          {
+            title: 'Status',
+            items: statusOpts.map(o => ({
+              label: o.label,
+              selected: status === o.value,
+              onPress: () => setStatus(o.value),
+            })),
+          },
+          {
+            title: 'Protocol',
+            items: protoOpts.map(o => ({
+              label: o.label,
+              selected: proto === o.value,
+              onPress: () => setProto(o.value),
+            })),
+          },
+          {
+            title: 'Provider',
+            items: providerOpts.map(o => ({
+              label: o.label,
+              selected: provider === o.value,
+              onPress: () => setProvider(o.value),
+            })),
+          },
+          ...(hasFilters ? [{
+            items: [{ label: 'Clear filters', onPress: clearFilters, icon: 'close-circle-outline' }],
+          }] : []),
+        ]}
+        wideFilters={
+          <View style={styles.dropRow}>
+            <FilterDropdown value={status}   options={statusOpts}   onChange={setStatus}   placeholder="Status"   label="Filter by Status" />
+            <FilterDropdown value={proto}    options={protoOpts}    onChange={setProto}    placeholder="Protocol" label="Filter by Protocol" />
+            <FilterDropdown value={provider} options={providerOpts} onChange={setProvider} placeholder="Provider" label="Filter by Provider" />
+            {hasFilters && (
+              <TouchableOpacity
+                style={[styles.clearChip, { borderColor: c.red + '55', backgroundColor: c.red + '12' }]}
+                onPress={clearFilters}
+              >
+                <MaterialCommunityIcons name="close" size={12} color={c.red} />
+                <Text style={[styles.clearChipText, { color: c.red }]}>Clear</Text>
               </TouchableOpacity>
             )}
           </View>
-        ) : (
-          /* ── Filter row ── */
-          <View style={styles.filterRow}>
-            {/* Search icon pill */}
-            <TouchableOpacity
-              style={[styles.searchIconBtn, { backgroundColor: c.card, borderColor: c.border }]}
-              onPress={openSearch}
-              hitSlop={6}
-            >
-              <MaterialCommunityIcons name="magnify" size={18} color={c.muted} />
-            </TouchableOpacity>
+        }
+      />
 
-            {/* Dropdowns */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dropRow}>
-              <FilterDropdown value={status}   options={statusOpts}   onChange={setStatus}   placeholder="Status"   label="Filter by Status" />
-              <FilterDropdown value={proto}    options={protoOpts}    onChange={setProto}    placeholder="Protocol" label="Filter by Protocol" />
-              <FilterDropdown value={provider} options={providerOpts} onChange={setProvider} placeholder="Provider" label="Filter by Provider" />
-              {hasFilters && (
-                <TouchableOpacity
-                  style={[styles.clearChip, { borderColor: c.red + '55', backgroundColor: c.red + '12' }]}
-                  onPress={clearFilters}
-                >
-                  <MaterialCommunityIcons name="close" size={12} color={c.red} />
-                  <Text style={[styles.clearChipText, { color: c.red }]}>Clear</Text>
-                </TouchableOpacity>
-              )}
-            </ScrollView>
-          </View>
-        )}
-      </View>
+      <DemoBanner />
 
       {isError && (
-        <View style={[styles.errorBox, { borderColor: c.red + '55' }]}>
+        <View style={[styles.errorBox, { backgroundColor: c.red + '14', borderColor: c.red + '55' }]}>
           <Text style={{ color: c.red, fontSize: font.sm }}>{(error as Error)?.message ?? 'Failed to load'}</Text>
         </View>
       )}
@@ -187,38 +173,7 @@ export default function LiveScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:  { flex: 1 },
-  filterBar: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  backBtn:  { padding: 2 },
-  clearBtn: { padding: 2 },
-  searchIconBtn: {
-    width: 36, height: 36,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchExpanded: {
-    flex: 1,
-    borderRadius: radius.full,
-    borderWidth: 1.5,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 8,
-    fontSize: font.sm,
-  },
+  container: { flex: 1 },
   dropRow: {
     flexDirection: 'row',
     gap: spacing.xs,
@@ -228,16 +183,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    height: 36,
     paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: radius.full,
+    borderRadius: radius.sm,
     borderWidth: 1,
   },
   clearChipText: { fontSize: font.xs, fontWeight: '700' },
   errorBox: {
     margin: spacing.md, padding: spacing.md,
     borderRadius: spacing.sm, borderWidth: 1,
-    backgroundColor: 'rgba(239,68,68,0.08)',
   },
   list: {},
 });

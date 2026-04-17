@@ -23,6 +23,7 @@ import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
@@ -44,22 +45,58 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 
+private data class WidgetColors(
+    val bg:         Color,
+    val onBg:       Color,
+    val onBgMuted:  Color,
+    val primary:    Color,
+    val tertiary:   Color,
+    val error:      Color,
+    val track:      Color,
+)
+
+private fun resolveColors(context: Context): WidgetColors {
+    val isNight = context.resources.configuration.uiMode and
+        android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+        android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+    val scheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (isNight) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else {
+        if (isNight) darkColorScheme() else lightColorScheme()
+    }
+
+    return WidgetColors(
+        bg        = scheme.secondaryContainer,
+        onBg      = scheme.onSecondaryContainer,
+        onBgMuted = scheme.onSecondaryContainer.copy(alpha = 0.65f),
+        primary   = scheme.primary,
+        tertiary  = scheme.tertiary,
+        error     = scheme.error,
+        track     = scheme.secondaryContainer.copy(alpha = 0.45f),
+    )
+}
+
+private fun Color.toArgb(): Int = android.graphics.Color.argb(
+    (alpha * 255).toInt(), (red * 255).toInt(), (green * 255).toInt(), (blue * 255).toInt()
+)
+
 class StatusWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         WidgetUpdateWorker.enqueueImmediate(context)
 
-        val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val glanceColors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             ColorProviders(
                 light = dynamicLightColorScheme(context),
-                dark = dynamicDarkColorScheme(context)
+                dark  = dynamicDarkColorScheme(context),
             )
         } else {
             ColorProviders(light = lightColorScheme(), dark = darkColorScheme())
         }
 
         provideContent {
-            GlanceTheme(colors = colors) {
+            GlanceTheme(colors = glanceColors) {
                 WidgetContent()
             }
         }
@@ -67,33 +104,25 @@ class StatusWidget : GlanceAppWidget() {
 
     @Composable
     private fun WidgetContent() {
-        val prefs = currentState<Preferences>()
-        val ok = prefs[okKey] ?: -1
-        val warn = prefs[warnKey] ?: -1
+        val prefs      = currentState<Preferences>()
+        val ok         = prefs[okKey]         ?: -1
+        val warn       = prefs[warnKey]       ?: -1
         val errorCount = prefs[errorCountKey] ?: -1
-        val offline = prefs[offlineKey] ?: false
-        val updatedAt = prefs[updatedAtKey]
-        val hasData = ok >= 0
-        val total = if (hasData) (ok + warn + errorCount).coerceAtLeast(0) else 0
-
+        val offline    = prefs[offlineKey]    ?: false
+        val updatedAt  = prefs[updatedAtKey]
+        val hasData    = ok >= 0
+        val total      = if (hasData) (ok + warn + errorCount).coerceAtLeast(0) else 0
         fun pct(n: Int) = if (total > 0) "${n * 100 / total}%" else "0%"
 
-        val ctx2 = LocalContext.current
-        val isNight2 = ctx2.resources.configuration.uiMode and
-            android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-            android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val bgScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (isNight2) dynamicDarkColorScheme(ctx2) else dynamicLightColorScheme(ctx2)
-        } else {
-            if (isNight2) darkColorScheme() else lightColorScheme()
-        }
-        val bgColor = ColorProvider(bgScheme.surfaceContainer)
+        val ctx    = LocalContext.current
+        val wc     = resolveColors(ctx)
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(bgColor)
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .cornerRadius(25.dp)
+                .background(ColorProvider(wc.bg))
+                .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
 
@@ -109,17 +138,17 @@ class StatusWidget : GlanceAppWidget() {
                         Text(
                             "Services",
                             style = TextStyle(
-                                color = GlanceTheme.colors.onSurface,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
+                                color      = ColorProvider(wc.onBg),
+                                fontSize   = 13.sp,
+                                fontWeight = FontWeight.Bold,
                             )
                         )
                         if (offline && hasData) {
                             Text(
                                 "offline",
                                 style = TextStyle(
-                                    color = ColorProvider(Color(0xFFf59e0b)),
-                                    fontSize = 9.sp
+                                    color    = ColorProvider(wc.tertiary),
+                                    fontSize = 9.sp,
                                 )
                             )
                         }
@@ -132,52 +161,57 @@ class StatusWidget : GlanceAppWidget() {
                     ) {
                         Text(
                             "↻",
-                            style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 16.sp)
+                            style = TextStyle(
+                                color    = ColorProvider(wc.primary),
+                                fontSize = 16.sp,
+                            )
                         )
                     }
                 }
 
                 Spacer(GlanceModifier.height(8.dp))
 
-                val ctx = LocalContext.current
-                val isNight = ctx.resources.configuration.uiMode and
-                    android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-                    android.content.res.Configuration.UI_MODE_NIGHT_YES
-                val scheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (isNight) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
-                } else {
-                    if (isNight) darkColorScheme() else lightColorScheme()
-                }
-                fun toArgb(c: androidx.compose.ui.graphics.Color) = android.graphics.Color.argb(
-                    (c.alpha * 255).toInt(), (c.red * 255).toInt(),
-                    (c.green * 255).toInt(), (c.blue * 255).toInt()
-                )
-
                 if (!hasData) {
                     Text(
-                        if (offline) "Could not connect.\nOpen the app and connect first." else "Loading...",
-                        style = TextStyle(color = GlanceTheme.colors.secondary, fontSize = 11.sp),
-                        maxLines = 3
+                        if (offline) "Could not connect.\nOpen app to reconnect." else "Loading...",
+                        style = TextStyle(
+                            color    = ColorProvider(wc.onBgMuted),
+                            fontSize = 11.sp,
+                        ),
+                        maxLines = 3,
                     )
                 } else {
-                    val bmp = RingBitmap.create(ok, warn, errorCount, 130, toArgb(scheme.onSurface), toArgb(scheme.surfaceVariant))
+                    val bmp = RingBitmap.create(
+                        ok        = ok,
+                        warn      = warn,
+                        err       = errorCount,
+                        sizePx    = 130,
+                        textColor = wc.onBg.toArgb(),
+                        trackColor = wc.track.toArgb(),
+                        okColor   = wc.primary.toArgb(),
+                        warnColor = wc.tertiary.toArgb(),
+                        errColor  = wc.error.toArgb(),
+                    )
 
-                    Box(modifier = GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Image(
-                            provider = ImageProvider(bmp),
+                            provider           = ImageProvider(bmp),
                             contentDescription = "service ring",
-                            contentScale = ContentScale.Fit,
-                            modifier = GlanceModifier.size(65.dp)
+                            contentScale       = ContentScale.Fit,
+                            modifier           = GlanceModifier.size(65.dp)
                         )
                     }
 
                     Spacer(GlanceModifier.height(8.dp))
 
-                    StatRow(dotArgb = 0xFF22c55e.toInt(), label = "OK",   pct = pct(ok),         count = ok)
+                    StatRow(dotColor = wc.primary,  label = "OK",   pct = pct(ok),         count = ok,         wc = wc)
                     Spacer(GlanceModifier.height(4.dp))
-                    StatRow(dotArgb = 0xFFf59e0b.toInt(), label = "Warn", pct = pct(warn),       count = warn)
+                    StatRow(dotColor = wc.tertiary, label = "Warn", pct = pct(warn),       count = warn,       wc = wc)
                     Spacer(GlanceModifier.height(4.dp))
-                    StatRow(dotArgb = 0xFFef4444.toInt(), label = "Err",  pct = pct(errorCount), count = errorCount)
+                    StatRow(dotColor = wc.error,    label = "Err",  pct = pct(errorCount), count = errorCount, wc = wc)
                 }
 
                 Spacer(GlanceModifier.defaultWeight())
@@ -189,7 +223,10 @@ class StatusWidget : GlanceAppWidget() {
                             System.currentTimeMillis(),
                             android.text.format.DateUtils.MINUTE_IN_MILLIS
                         ).toString(),
-                        style = TextStyle(color = GlanceTheme.colors.secondary, fontSize = 9.sp)
+                        style = TextStyle(
+                            color    = ColorProvider(wc.onBgMuted),
+                            fontSize = 9.sp,
+                        )
                     )
                 }
             }
@@ -197,43 +234,43 @@ class StatusWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun StatRow(dotArgb: Int, label: String, pct: String, count: Int) {
+    private fun StatRow(dotColor: Color, label: String, pct: String, count: Int, wc: WidgetColors) {
         Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier          = GlanceModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                provider = ImageProvider(RingBitmap.circle(dotArgb, 24)),
+                provider           = ImageProvider(RingBitmap.circle(dotColor.toArgb(), 24)),
                 contentDescription = null,
-                modifier = GlanceModifier.size(10.dp)
+                modifier           = GlanceModifier.size(10.dp)
             )
             Spacer(GlanceModifier.width(5.dp))
             Text(
                 label,
-                style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 11.sp),
+                style    = TextStyle(color = ColorProvider(wc.onBg), fontSize = 11.sp),
                 modifier = GlanceModifier.defaultWeight()
             )
             Text(
                 pct,
-                style = TextStyle(color = GlanceTheme.colors.secondary, fontSize = 10.sp)
+                style = TextStyle(color = ColorProvider(wc.onBgMuted), fontSize = 10.sp)
             )
             Spacer(GlanceModifier.width(6.dp))
             Text(
                 count.toString(),
                 style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
+                    color      = ColorProvider(wc.onBg),
+                    fontSize   = 11.sp,
+                    fontWeight = FontWeight.Bold,
                 )
             )
         }
     }
 
     companion object {
-        val okKey = intPreferencesKey("ok")
-        val warnKey = intPreferencesKey("warn")
+        val okKey         = intPreferencesKey("ok")
+        val warnKey       = intPreferencesKey("warn")
         val errorCountKey = intPreferencesKey("error_count")
-        val offlineKey = booleanPreferencesKey("offline")
-        val updatedAtKey = longPreferencesKey("updated_at")
+        val offlineKey    = booleanPreferencesKey("offline")
+        val updatedAtKey  = longPreferencesKey("updated_at")
     }
 }

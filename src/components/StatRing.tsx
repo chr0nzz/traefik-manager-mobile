@@ -32,7 +32,7 @@ export function StatRing({ size = 72, strokeWidth = 12, segments }: Props) {
   return (
     <View style={{ width: size, height: size }}>
       <Svg width={size} height={size}>
-        <Circle cx={cx} cy={cy} r={r} fill="none" stroke={c.border} strokeWidth={strokeWidth} />
+        <Circle cx={cx} cy={cy} r={r} fill="none" stroke={c.muted + '40'} strokeWidth={strokeWidth} />
         <G rotation={-90} origin={`${cx},${cy}`}>
           {arcs.map((arc, i) => (
             <Circle

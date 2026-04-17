@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useRef, useState } from 'react';
-import { Animated, FlatList, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, FlatList, Pressable, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -16,15 +16,12 @@ import { font, radius, spacing } from '../../src/theme';
 import { providerOf } from '../../src/utils';
 
 const PROTOS = ['All', 'HTTP', 'TCP'];
-const PAD = spacing.md;
 
 export default function MiddlewaresScreen() {
   const router                      = useRouter();
-  const [search, setSearch] = useState('');
-  const [proto, setProto]   = useState('All');
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch]         = useState('');
+  const [proto, setProto]           = useState('All');
   const [editMode, setEditMode]     = useState(false);
-  const searchRef           = useRef<TextInput>(null);
 
   const c          = useThemeStore(s => s.colors);
   const openDrawer = useDrawerStore(s => s.open);
@@ -49,88 +46,61 @@ export default function MiddlewaresScreen() {
     return list;
   }, [data, proto, search]);
 
-  const openSearch = () => {
-    setSearchOpen(true);
-    setTimeout(() => searchRef.current?.focus(), 50);
-  };
-
-  const closeSearch = () => {
-    setSearch('');
-    setSearchOpen(false);
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar
         title="Middleware"
         scrollAnim={scrollAnim}
         onMenuPress={openDrawer}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search middlewares..."
+        searchAccent={c.purple}
+        overflowSections={[{
+          title: 'Protocol',
+          items: PROTOS.map(p => ({
+            label: p,
+            selected: proto === p,
+            onPress: () => setProto(p),
+          })),
+        }]}
+        wideFilters={
+          <View style={styles.wideRow}>
+            {PROTOS.map(p => (
+              <TouchableOpacity
+                key={p}
+                style={[styles.chip, { borderColor: c.border, backgroundColor: c.card }, proto === p && { backgroundColor: c.purple + '20', borderColor: c.purple + '66' }]}
+                onPress={() => setProto(p)}
+              >
+                <Text style={[styles.chipText, { color: proto === p ? c.purple : c.muted }]}>{p}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        }
         right={
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <TouchableOpacity
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <Pressable
               onPress={() => setEditMode(v => !v)}
-              hitSlop={8}
-              style={[styles.topBarBtn, editMode && { backgroundColor: c.orange + '22', borderColor: c.orange + '55' }]}
+              style={[styles.trailingBtn, { borderColor: editMode ? c.orange + '66' : c.border }]}
+              android_ripple={{ color: c.muted + '40' }}
             >
-              <MaterialCommunityIcons name={editMode ? 'pencil' : 'pencil-outline'} size={18} color={editMode ? c.orange : c.muted} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/middleware/new')} hitSlop={8} style={[styles.topBarBtn, { borderColor: c.purple + '55' }]}>
-              <MaterialCommunityIcons name="plus" size={18} color={c.purple} />
-            </TouchableOpacity>
+              <MaterialCommunityIcons name={editMode ? 'pencil' : 'pencil-outline'} size={20} color={editMode ? c.orange : c.muted} />
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/middleware/new')}
+              style={[styles.trailingBtn, { borderColor: c.purple + '66' }]}
+              android_ripple={{ color: c.muted + '40' }}
+            >
+              <MaterialCommunityIcons name="plus" size={20} color={c.purple} />
+            </Pressable>
           </View>
         }
       />
-      <DemoBanner />
-      <View style={[styles.filterBar, { borderBottomColor: c.border, paddingHorizontal: contentPadding }]}>
-        {searchOpen ? (
-          <View style={styles.searchRow}>
-            <TouchableOpacity onPress={closeSearch} hitSlop={8} style={styles.backBtn}>
-              <MaterialCommunityIcons name="arrow-left" size={20} color={c.muted} />
-            </TouchableOpacity>
-            <TextInput
-              ref={searchRef}
-              style={[styles.searchExpanded, { backgroundColor: c.card, borderColor: c.purple + '88', color: c.text }]}
-              value={search}
-              onChangeText={setSearch}
-              placeholder="Search middlewares..."
-              placeholderTextColor={c.muted}
-              autoCorrect={false}
-              returnKeyType="search"
-            />
-            {search.length > 0 && (
-              <TouchableOpacity onPress={() => setSearch('')} hitSlop={8} style={styles.clearBtn}>
-                <MaterialCommunityIcons name="close-circle" size={18} color={c.muted} />
-              </TouchableOpacity>
-            )}
-          </View>
-        ) : (
-          <View style={styles.filterRow}>
-            <TouchableOpacity
-              style={[styles.searchBtn, { backgroundColor: c.card, borderColor: c.border }]}
-              onPress={openSearch}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="magnify" size={15} color={c.muted} />
-              <Text style={[styles.searchBtnText, { color: c.muted }]}>Search middlewares...</Text>
-            </TouchableOpacity>
 
-            <View style={styles.protoRow}>
-              {PROTOS.map(p => (
-                <TouchableOpacity
-                  key={p}
-                  style={[styles.protoBtn, { borderColor: c.border, backgroundColor: c.card }, proto === p && { backgroundColor: c.purple + '20', borderColor: c.purple + '66' }]}
-                  onPress={() => setProto(p)}
-                >
-                  <Text style={[styles.protoBtnText, { color: proto === p ? c.purple : c.muted }]}>{p}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-      </View>
+      <DemoBanner />
 
       {isError && (
-        <View style={[styles.errorBox, { borderColor: c.red + '55' }]}>
+        <View style={[styles.errorBox, { backgroundColor: c.red + '14', borderColor: c.red + '55' }]}>
           <Text style={{ color: c.red, fontSize: font.sm }}>{(error as Error)?.message ?? 'Failed to load'}</Text>
         </View>
       )}
@@ -164,59 +134,31 @@ export default function MiddlewaresScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  filterBar: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  backBtn:  { padding: 2 },
-  clearBtn: { padding: 2 },
-  searchBtn: {
-    flex: 1,
+  wideRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    borderRadius: radius.full,
+  },
+  chip: {
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  searchBtnText: { fontSize: font.sm, flex: 1 },
-  searchExpanded: {
-    flex: 1,
-    borderRadius: radius.full,
-    borderWidth: 1.5,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 8,
-    fontSize: font.sm,
-  },
-  protoRow: { flexDirection: 'row', gap: spacing.xs },
-  protoBtn: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-    borderWidth: 1,
-  },
-  protoBtnText: { fontSize: font.xs, fontWeight: '700' },
+  chipText: { fontSize: font.xs, fontWeight: '700' },
   errorBox: {
     margin: spacing.md, padding: spacing.md,
-    borderRadius: spacing.sm, borderWidth: 1,
-    backgroundColor: 'rgba(239,68,68,0.08)',
+    borderRadius: radius.sm, borderWidth: 1,
   },
   list: {},
-  topBarBtn: {
-    padding: 5,
-    borderRadius: 6,
+  trailingBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: 'transparent',
   },
 });

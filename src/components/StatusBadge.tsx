@@ -42,14 +42,14 @@ export function Badge({ label, color, bg }: BadgeProps) {
 export function ProtocolBadge({ protocol }: { protocol: string }) {
   const c = useThemeStore(s => s.colors);
   const p = (protocol ?? '').toLowerCase();
-  const colorMap: Record<string, string> = {
-    http:  c.blue,
-    https: c.blue,
-    tcp:   c.purple,
-    udp:   c.orange,
+  const variants: Record<string, { color: string; bg: string }> = {
+    http:  { color: c.blue,                bg: c.blue   + '18' },
+    https: { color: c.blue,                bg: c.blue   + '18' },
+    tcp:   { color: c.purple,              bg: c.purple + '18' },
+    udp:   { color: c.onSecondaryContainer, bg: c.secondaryContainer },
   };
-  const col = colorMap[p] ?? c.muted;
-  return <Badge label={(protocol ?? 'http').toUpperCase()} color={col} bg={col + '18'} />;
+  const v = variants[p] ?? { color: c.muted, bg: c.muted + '18' };
+  return <Badge label={(protocol ?? 'http').toUpperCase()} color={v.color} bg={v.bg} />;
 }
 
 export function PillIconBtn({ icon, color, onPress, loading }: {

@@ -3,7 +3,7 @@ import { useMaterial3Theme } from '@pchmn/expo-material3-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Appearance, AppState, AppStateStatus, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider, Text } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -73,7 +73,8 @@ function ConnectionGate() {
   const systemIsDark = colorScheme === 'dark';
 
   useEffect(() => {
-    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs()]).then(() => SplashScreen.hideAsync());
+    const initDark = Appearance.getColorScheme() === 'dark';
+    Promise.all([loadConnection(), loadTheme(initDark), loadAppLock(), loadTabs()]).then(() => SplashScreen.hideAsync());
   }, []);
 
   useEffect(() => {
@@ -156,15 +157,15 @@ function AppLockGate() {
 }
 
 export default function RootLayout() {
-  const isDark     = useThemeStore(s => s.isDark);
-  const mode       = useThemeStore(s => s.mode);
-  const setColors  = useThemeStore(s => s.setColors);
-  const c          = useThemeStore(s => s.colors);
-  const demoMode   = useConnection(s => s.demoMode);
+  const isDark        = useThemeStore(s => s.isDark);
+  const dynamicColors = useThemeStore(s => s.dynamicColors);
+  const setColors     = useThemeStore(s => s.setColors);
+  const c             = useThemeStore(s => s.colors);
+  const demoMode      = useConnection(s => s.demoMode);
   const { theme: m3Theme } = useMaterial3Theme({ fallbackSourceColor: '#24a1de' });
   const [screenKey, setScreenKey] = useState('init');
 
-  const paperTheme = mode === 'dynamic' && m3Theme
+  const paperTheme = dynamicColors && m3Theme
     ? (isDark
         ? { ...MD3DarkTheme, colors: m3Theme.dark }
         : { ...MD3LightTheme, colors: m3Theme.light })
@@ -176,11 +177,11 @@ export default function RootLayout() {
   };
 
   useEffect(() => {
-    if (mode === 'dynamic' && m3Theme) {
+    if (dynamicColors && m3Theme) {
       const scheme = isDark ? m3Theme.dark : m3Theme.light;
-      setColors(dynamicColorsFromM3(scheme as Record<string, any>));
+      setColors(dynamicColorsFromM3(scheme as Record<string, any>, isDark));
     }
-  }, [mode, isDark, m3Theme]);
+  }, [dynamicColors, isDark, m3Theme]);
 
   useEffect(() => {
     if (!demoMode) return;
@@ -223,6 +224,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings/backups" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="settings/about" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="settings/traefik" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="log-detail" options={{ presentation: 'modal', headerShown: false }} />
         </Stack>
         <AppLockGate />
       </QueryClientProvider>

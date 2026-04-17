@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
-import { Animated, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Animated, Pressable, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TopBar } from '../../src/components/TopBar';
@@ -32,13 +32,13 @@ interface ParsedLog {
 function parseLogLine(line: string): ParsedLog | null {
   // Full Traefik CLF+extra: ... "referer" "ua" count "router@provider" "serviceURL" duration
   const full = line.match(
-    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+) "[^"]*" "[^"]*" \S+ "([^"]*)" "([^"]*)" (\S+)/
+    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d+) (\S+) "[^"]*" "[^"]*" \S+ "([^"]*)" "([^"]*)" (\S+)/
   );
   if (full) {
     const [, ip, date, method, path, statusStr, size, service, serviceUrl, duration] = full;
     return {
       ip, date: date.split(' ')[0], method, path,
-      status: parseInt(statusStr, 10),
+      status: parseInt(statusStr, 10) || 0,
       size: size === '-' ? '—' : size,
       service: service === '-' ? '' : service,
       serviceUrl: serviceUrl === '-' ? '' : serviceUrl,
@@ -47,19 +47,20 @@ function parseLogLine(line: string): ParsedLog | null {
   }
   // Fallback: basic CLF without Traefik extras
   const m = line.match(
-    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d{3}) (\S+)(?:[^"]*"[^"]*"[^"]*"[^"]*")? ?(\S+)?/
+    /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d+) (\S+)(?:[^"]*"[^"]*"[^"]*"[^"]*")? ?(\S+)?/
   );
   if (!m) return null;
   const [, ip, date, method, path, statusStr, size, duration] = m;
   return {
     ip, date: date.split(' ')[0].replace(/\[/, ''), method, path,
-    status: parseInt(statusStr, 10),
+    status: parseInt(statusStr, 10) || 0,
     size: size === '-' ? '—' : size,
     service: '', serviceUrl: '', duration: duration ?? '', raw: line,
   };
 }
 
 function statusColor(status: number, colors: ReturnType<typeof useThemeStore.getState>['colors']): string {
+  if (!status)       return colors.muted  ?? '#8b949e';
   if (status >= 500) return colors.red    ?? '#f87171';
   if (status >= 400) return colors.yellow ?? '#fbbf24';
   if (status >= 300) return colors.teal   ?? '#1abc9c';
@@ -96,7 +97,7 @@ function LogCard({ item, c, onPress }: { item: string; c: ReturnType<typeof useT
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
       <View style={styles.cardTop}>
         <View style={[styles.badge, { backgroundColor: sc + '22', borderColor: sc + '55' }]}>
-          <Text style={[styles.badgeText, { color: sc }]}>{parsed.status}</Text>
+          <Text style={[styles.badgeText, { color: sc }]}>{parsed.status || 'tunnel'}</Text>
         </View>
         <View style={[styles.badge, { backgroundColor: mc + '22', borderColor: mc + '55' }]}>
           <Text style={[styles.badgeText, { color: mc }]}>{parsed.method}</Text>
@@ -141,58 +142,66 @@ export default function LogsScreen() {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const qc         = useQueryClient();
   const router     = useRouter();
+  const [search, setSearch] = useState('');
 
   const openDrawer = useDrawerStore(s => s.open);
   const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
 
   const { data, isFetching, isError } = useLogs();
-  const [showPicker, setShowPicker]   = useState(false);
 
   const lines = data?.lines ?? [];
   const error = data?.error;
 
+  const displayLines = useMemo(() => {
+    const reversed = [...lines].reverse();
+    if (!search.trim()) return reversed;
+    const q = search.toLowerCase();
+    return reversed.filter(l => l.toLowerCase().includes(q));
+  }, [lines, search]);
+
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
-      <TopBar title="Logs" scrollAnim={scrollAnim} onMenuPress={openDrawer} />
+      <TopBar
+        title="Logs"
+        scrollAnim={scrollAnim}
+        onMenuPress={openDrawer}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search logs..."
+        searchAccent={c.blue}
+        overflowSections={[{
+          title: 'Log lines',
+          items: LINE_OPTIONS.map(opt => ({
+            label: `${opt} lines`,
+            selected: logLines === opt,
+            onPress: () => { setLines(opt); qc.invalidateQueries({ queryKey: ['logs'] }); },
+          })),
+        }]}
+        wideFilters={
+          <View style={styles.wideRow}>
+            {LINE_OPTIONS.map(opt => (
+              <TouchableOpacity
+                key={opt}
+                style={[styles.lineChip, { borderColor: c.border, backgroundColor: c.card }, logLines === opt && { borderColor: c.blue + '66', backgroundColor: c.blue + '18' }]}
+                onPress={() => { setLines(opt); qc.invalidateQueries({ queryKey: ['logs'] }); }}
+              >
+                <Text style={[styles.lineChipText, { color: logLines === opt ? c.blue : c.muted }]}>{opt} lines</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        }
+        right={
+          <Pressable
+            style={[styles.refreshBtn, { borderColor: c.border }]}
+            onPress={() => qc.invalidateQueries({ queryKey: ['logs'] })}
+            disabled={isFetching}
+            android_ripple={{ color: c.muted + '40' }}
+          >
+            <MaterialCommunityIcons name="refresh" size={20} color={isFetching ? c.muted : c.blue} />
+          </Pressable>
+        }
+      />
       <DemoBanner />
-
-      <View style={[styles.toolbar, { borderBottomColor: c.border, paddingHorizontal: contentPadding }]}>
-        <TouchableOpacity
-          style={[styles.lineBtn, { borderColor: c.border, backgroundColor: c.card }]}
-          onPress={() => setShowPicker(v => !v)}
-        >
-          <MaterialCommunityIcons name="format-list-numbered" size={14} color={c.muted} />
-          <Text style={[styles.lineBtnText, { color: c.muted }]}>{logLines} lines</Text>
-          <MaterialCommunityIcons name={showPicker ? 'chevron-up' : 'chevron-down'} size={14} color={c.muted} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.refreshBtn, { borderColor: c.border, backgroundColor: c.card }]}
-          onPress={() => qc.invalidateQueries({ queryKey: ['logs'] })}
-          disabled={isFetching}
-        >
-          <MaterialCommunityIcons
-            name="refresh"
-            size={16}
-            color={isFetching ? c.muted : c.blue}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {showPicker && (
-        <View style={[styles.picker, { backgroundColor: c.card, borderColor: c.border, marginHorizontal: contentPadding }]}>
-          {LINE_OPTIONS.map(opt => (
-            <TouchableOpacity
-              key={opt}
-              style={[styles.pickerRow, { borderBottomColor: c.border }, opt === LINE_OPTIONS[LINE_OPTIONS.length - 1] && { borderBottomWidth: 0 }]}
-              onPress={() => { setLines(opt); setShowPicker(false); qc.invalidateQueries({ queryKey: ['logs'] }); }}
-            >
-              <Text style={[styles.pickerText, { color: logLines === opt ? c.blue : c.text }]}>{opt} lines</Text>
-              {logLines === opt && <MaterialCommunityIcons name="check" size={16} color={c.blue} />}
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
 
       {isError || error ? (
         <View style={styles.center}>
@@ -207,7 +216,7 @@ export default function LogsScreen() {
         </View>
       ) : (
         <Animated.FlatList
-          data={[...lines].reverse()}
+          data={displayLines}
           keyExtractor={(_, i) => String(i)}
           contentContainerStyle={[styles.listContent, { paddingHorizontal: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
           onScroll={Animated.event(
@@ -231,44 +240,28 @@ export default function LogsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  toolbar: {
+  wideRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
+    gap: 6,
   },
-  lineBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  lineChip: {
+    height: 36,
+    paddingHorizontal: 12,
     borderRadius: radius.sm,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  lineBtnText: { fontSize: font.sm },
+  lineChipText: { fontSize: font.xs, fontWeight: '700' },
   refreshBtn: {
-    marginLeft: 'auto',
-    padding: 7,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: radius.sm,
     borderWidth: 1,
   },
-  picker: {
-    marginTop: 4,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  pickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-  },
-  pickerText: { fontSize: font.md },
   listContent: { paddingTop: spacing.sm, gap: spacing.sm },
   card: {
     borderRadius: radius.md,

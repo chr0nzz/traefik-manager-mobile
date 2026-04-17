@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RouteFormData, deleteRoute, getRoutes, saveRoute, toggleRoute } from '../api/routes';
+import { RouteFormData, deleteRoute, getEntrypoints, getMiddlewares, getRoutes, saveRoute, toggleRoute } from '../api/routes';
 import { useConnection } from '../store/connection';
 import { DEMO_ROUTES_DATA } from '../demo/data';
 
@@ -72,6 +72,26 @@ export function useSaveRoute() {
     onSuccess: () => {
       if (!demoMode) qc.invalidateQueries({ queryKey: ['routes'] });
     },
+  });
+}
+
+export function useEntrypoints() {
+  const demoMode = useConnection(s => s.demoMode);
+  return useQuery({
+    queryKey: ['entrypoints'],
+    queryFn: demoMode ? () => [] : getEntrypoints,
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
+export function useMiddlewares() {
+  const demoMode = useConnection(s => s.demoMode);
+  return useQuery({
+    queryKey: ['middlewares-form'],
+    queryFn: demoMode ? () => ({ http: [], tcp: [] }) : getMiddlewares,
+    staleTime: 60_000,
+    retry: 1,
   });
 }
 

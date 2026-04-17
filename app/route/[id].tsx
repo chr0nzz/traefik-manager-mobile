@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteFormData, domainFromRule, domainsFromRule } from '../../src/api/routes';
 import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
-import { useRoutes, useDeleteRoute, useSaveRoute, useToggleRoute } from '../../src/hooks/useRoutes';
+import { useRoutes, useDeleteRoute, useSaveRoute, useToggleRoute, useEntrypoints, useMiddlewares } from '../../src/hooks/useRoutes';
 import { useConfigs } from '../../src/hooks/useConfigs';
 import { useSettings } from '../../src/hooks/useSettings';
 import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
@@ -123,6 +123,8 @@ export default function RouteDetailScreen() {
   const toggleRoute  = useToggleRoute();
   const deleteRoute  = useDeleteRoute();
   const saveRoute    = useSaveRoute();
+  const { data: entrypointData } = useEntrypoints();
+  const { data: middlewareData } = useMiddlewares();
   const configs      = useConfigs();
   const { data: settings } = useSettings();
   const configFiles      = configs.data?.files ?? [];
@@ -150,20 +152,37 @@ export default function RouteDetailScreen() {
 
   const [fSubdomain,      setFSubdomain]      = useState('');
   const [fDomains,        setFDomains]        = useState<string[]>([]);
-  const [fEntryPoints,    setFEntryPoints]    = useState('https');
-  const [fMws,            setFMws]            = useState('');
+  const [fEntryPoints,    setFEntryPoints]    = useState<string[]>([]);
+  const [fMws,            setFMws]            = useState<string[]>([]);
   const [fScheme,         setFScheme]         = useState('http');
   const [fPassHost,       setFPassHost]       = useState(true);
   const [fInsecure,       setFInsecure]       = useState(false);
   const [fCertResolver,   setFCertResolver]   = useState('');
 
   const [fTcpRule,        setFTcpRule]        = useState('');
-  const [fTcpEntryPoints, setFTcpEntryPoints] = useState('');
+  const [fTcpEntryPoints, setFTcpEntryPoints] = useState<string[]>([]);
 
   const [fUdpEntryPoint,  setFUdpEntryPoint]  = useState('');
+  const [fUdpEntryPoints, setFUdpEntryPoints] = useState<string[]>([]);
 
   const toggleEditDomain = (d: string) => {
     setFDomains(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d]);
+  };
+
+  const toggleEntryPoint = (ep: string) => {
+    setFEntryPoints(prev => prev.includes(ep) ? prev.filter(x => x !== ep) : [...prev, ep]);
+  };
+
+  const toggleTcpEntryPoint = (ep: string) => {
+    setFTcpEntryPoints(prev => prev.includes(ep) ? prev.filter(x => x !== ep) : [...prev, ep]);
+  };
+
+  const toggleMw = (mw: string) => {
+    const base = mw.split('@')[0];
+    setFMws(prev => {
+      const has = prev.some(m => m.split('@')[0] === base);
+      return has ? prev.filter(m => m.split('@')[0] !== base) : [...prev, mw];
+    });
   };
 
   const populateForm = (r: NonNullable<typeof route>) => {
@@ -198,18 +217,20 @@ export default function RouteDetailScreen() {
       }
       setFSubdomain(subdomain);
       setFDomains(matchedDomains.length > 0 ? matchedDomains : editDomains.slice(0, 1));
-      setFEntryPoints((r.entryPoints ?? ['https']).join(', '));
-      setFMws((r.middlewares ?? []).join(', '));
+      setFEntryPoints(r.entryPoints ?? ['https']);
+      setFMws(r.middlewares ?? []);
       setFScheme((r.target || '').startsWith('https://') ? 'https' : 'http');
       setFPassHost(r.passHostHeader !== false);
       setFInsecure(!!r.insecureSkipVerify);
       setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
     } else if (proto === 'tcp') {
       setFTcpRule(r.rule ?? '');
-      setFTcpEntryPoints((r.entryPoints ?? []).join(', '));
+      setFTcpEntryPoints(r.entryPoints ?? []);
       setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
     } else if (proto === 'udp') {
-      setFUdpEntryPoint((r.entryPoints ?? [])[0] ?? '');
+      const eps = r.entryPoints ?? [];
+      setFUdpEntryPoints(eps);
+      setFUdpEntryPoint(eps[0] ?? '');
     }
   };
 
@@ -264,18 +285,18 @@ export default function RouteDetailScreen() {
     if (fProto === 'http') {
       formData.subdomain         = fSubdomain.trim();
       formData.domains           = fDomains;
-      formData.entryPoints       = fEntryPoints;
-      formData.middlewares       = fMws.trim();
+      formData.entryPoints       = fEntryPoints.join(', ');
+      formData.middlewares       = fMws.join(', ');
       formData.scheme            = fScheme;
       formData.passHostHeader    = fPassHost;
       formData.insecureSkipVerify = fInsecure;
       formData.certResolver      = fCertResolver;
     } else if (fProto === 'tcp') {
       formData.tcpRule        = fTcpRule.trim();
-      formData.tcpEntryPoints = fTcpEntryPoints.trim();
+      formData.tcpEntryPoints = fTcpEntryPoints.join(', ');
       formData.certResolver   = fCertResolver;
     } else if (fProto === 'udp') {
-      formData.udpEntryPoint = fUdpEntryPoint.trim();
+      formData.udpEntryPoint = fUdpEntryPoints.length > 0 ? fUdpEntryPoints[0] : fUdpEntryPoint.trim();
     }
     saveRoute.mutate(
       { data: formData, isEdit: true, originalId: route.id },
@@ -453,6 +474,32 @@ export default function RouteDetailScreen() {
               </>
             )}
 
+            {fProto === 'http' && entrypointData && entrypointData.length > 0 && (
+              <>
+                <Text style={[styles.fieldLabel, { color: c.muted }]}>ENTRY POINTS</Text>
+                <View style={styles.resolverChipRow}>
+                  {entrypointData.map(ep => (
+                    <TouchableOpacity
+                      key={ep.name}
+                      onPress={() => toggleEntryPoint(ep.name)}
+                      style={[
+                        styles.resolverChip,
+                        {
+                          backgroundColor: fEntryPoints.includes(ep.name) ? c.secondaryContainer : 'transparent',
+                          borderColor:     fEntryPoints.includes(ep.name) ? c.blue : c.border,
+                        },
+                      ]}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={{ color: fEntryPoints.includes(ep.name) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                        {ep.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+
             {fProto === 'tcp' && (
               <FormField label="SNI RULE" value={fTcpRule} onChange={setFTcpRule} c={c}
                 placeholder="HostSNI(`tcp.example.com`) or HostSNI(`*`)" />
@@ -463,12 +510,45 @@ export default function RouteDetailScreen() {
             <FormField label="TARGET PORT" value={fPort} onChange={setFPort} c={c}
               placeholder="e.g. 8080" keyboardType="numeric" />
 
+            {fProto === 'http' && !entrypointData?.length && (
+              <FormField label="ENTRY POINTS (comma-separated)" value={fEntryPoints.join(', ')} onChange={v => setFEntryPoints(v.split(',').map(s => s.trim()).filter(Boolean))} c={c}
+                placeholder="https" />
+            )}
+
             {fProto === 'http' && (
               <>
-                <FormField label="ENTRY POINTS (comma-separated)" value={fEntryPoints} onChange={setFEntryPoints} c={c}
-                  placeholder="https" />
-                <FormField label="MIDDLEWARES (comma-separated)" value={fMws} onChange={setFMws} c={c}
-                  placeholder="e.g. auth@file, compress" />
+                {middlewareData && middlewareData.http.length > 0 ? (
+                  <>
+                    <Text style={[styles.fieldLabel, { color: c.muted }]}>MIDDLEWARES</Text>
+                    <View style={styles.resolverChipRow}>
+                      {middlewareData.http.map(mw => {
+                        const label = mw.name.split('@')[0];
+                        const on = fMws.some(m => m.split('@')[0] === label);
+                        return (
+                          <TouchableOpacity
+                            key={mw.name}
+                            onPress={() => toggleMw(mw.name)}
+                            style={[
+                              styles.resolverChip,
+                              {
+                                backgroundColor: on ? 'rgba(163,113,247,0.15)' : 'transparent',
+                                borderColor:     on ? '#a371f7' : c.border,
+                              },
+                            ]}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={{ color: on ? '#a371f7' : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                              {label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </>
+                ) : (
+                  <FormField label="MIDDLEWARES (comma-separated)" value={fMws.join(', ')} onChange={v => setFMws(v.split(',').map(s => s.trim()).filter(Boolean))} c={c}
+                    placeholder="e.g. auth@file, compress" />
+                )}
 
                 <Text style={[styles.fieldLabel, { color: c.muted }]}>Backend Scheme</Text>
                 <SegmentedButtons
@@ -505,14 +585,66 @@ export default function RouteDetailScreen() {
             )}
 
             {fProto === 'tcp' && (
-              <FormField label="ENTRY POINTS (comma-separated)" value={fTcpEntryPoints} onChange={setFTcpEntryPoints} c={c}
-                placeholder="tcp, postgres" />
+              entrypointData && entrypointData.length > 0 ? (
+                <>
+                  <Text style={[styles.fieldLabel, { color: c.muted }]}>ENTRY POINTS</Text>
+                  <View style={styles.resolverChipRow}>
+                    {entrypointData.map(ep => (
+                      <TouchableOpacity
+                        key={ep.name}
+                        onPress={() => toggleTcpEntryPoint(ep.name)}
+                        style={[
+                          styles.resolverChip,
+                          {
+                            backgroundColor: fTcpEntryPoints.includes(ep.name) ? c.secondaryContainer : 'transparent',
+                            borderColor:     fTcpEntryPoints.includes(ep.name) ? c.blue : c.border,
+                          },
+                        ]}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={{ color: fTcpEntryPoints.includes(ep.name) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                          {ep.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              ) : (
+                <FormField label="ENTRY POINTS (comma-separated)" value={fTcpEntryPoints.join(', ')} onChange={v => setFTcpEntryPoints(v.split(',').map(s => s.trim()).filter(Boolean))} c={c}
+                  placeholder="tcp, postgres" />
+              )
             )}
 
             {fProto === 'udp' && (
               <>
-                <FormField label="ENTRY POINT" value={fUdpEntryPoint} onChange={setFUdpEntryPoint} c={c}
-                  placeholder="qbittorrent-udp" />
+                {entrypointData && entrypointData.length > 0 ? (
+                  <>
+                    <Text style={[styles.fieldLabel, { color: c.muted }]}>Entry Point</Text>
+                    <View style={styles.resolverChipRow}>
+                      {entrypointData.map(ep => (
+                        <TouchableOpacity
+                          key={ep.name}
+                          onPress={() => setFUdpEntryPoints(prev => prev.includes(ep.name) ? prev.filter(x => x !== ep.name) : [...prev, ep.name])}
+                          style={[
+                            styles.resolverChip,
+                            {
+                              backgroundColor: fUdpEntryPoints.includes(ep.name) ? c.secondaryContainer : 'transparent',
+                              borderColor:     fUdpEntryPoints.includes(ep.name) ? c.blue : c.border,
+                            },
+                          ]}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={{ color: fUdpEntryPoints.includes(ep.name) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                            {ep.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </>
+                ) : (
+                  <FormField label="ENTRY POINT" value={fUdpEntryPoint} onChange={setFUdpEntryPoint} c={c}
+                    placeholder="qbittorrent-udp" />
+                )}
                 <View style={[styles.infoBox, { backgroundColor: c.blue + '14', borderColor: c.blue + '44' }]}>
                   <MaterialCommunityIcons name="information-outline" size={14} color={c.blue} />
                   <Text style={[styles.infoText, { color: c.blue }]}>UDP routers don't support rules. Traffic is routed by entry point only.</Text>
@@ -688,7 +820,7 @@ const styles = StyleSheet.create({
   section:      { gap: 6 },
   sectionHeader:{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 2 },
   sectionTitle: { fontSize: font.xs, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase' as const, flex: 1 },
-  countBadge:   { paddingHorizontal: 6, paddingVertical: 1, borderRadius: radius.full, minWidth: 20, alignItems: 'center' },
+  countBadge:   { paddingHorizontal: 6, paddingVertical: 1, borderRadius: radius.sm, minWidth: 20, alignItems: 'center' },
   countText:    { fontSize: font.xs, fontWeight: '700' },
   sectionBody:  { borderRadius: radius.md, overflow: 'hidden' as const },
   // Rows
@@ -698,7 +830,7 @@ const styles = StyleSheet.create({
   rowText:  { fontSize: font.sm },
   emptyRow: { paddingHorizontal: spacing.md, paddingVertical: 11 },
   // Chips
-  chip:      { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full, borderWidth: 1, alignSelf: 'flex-start' as const },
+  chip:      { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.sm, borderWidth: 1, alignSelf: 'flex-start' as const },
   chipText:  { fontSize: font.xs, fontWeight: '600' },
   chipsRow:  { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, padding: spacing.md },
@@ -707,7 +839,7 @@ const styles = StyleSheet.create({
   fieldHint:  { fontSize: font.xs, opacity: 0.8 },
   switchRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingVertical: spacing.xs },
   resolverChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  resolverChip:    { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 7 },
+  resolverChip:    { borderWidth: 1, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 7 },
   infoBox:         { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10, borderRadius: radius.sm, borderWidth: 1 },
   infoText:        { fontSize: font.xs, flex: 1 },
   errTxt:          { fontSize: font.sm, color: 'red' },
