@@ -1,5 +1,5 @@
 import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { Surface, Switch, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
@@ -68,7 +68,11 @@ export default function SettingsScreen() {
   const router      = useRouter();
   const { baseUrl } = useConnection();
   const { mode }    = useThemeStore();
-  const showLogsTab = useTabsStore(s => s.showLogsTab);
+  const showLogsTab       = useTabsStore(s => s.showLogsTab);
+  const showCertsTab      = useTabsStore(s => s.showCertsTab);
+  const showPluginsTab    = useTabsStore(s => s.showPluginsTab);
+  const setShowCertsTab   = useTabsStore(s => s.setShowCertsTab);
+  const setShowPluginsTab = useTabsStore(s => s.setShowPluginsTab);
   const c           = useThemeStore(s => s.colors);
   const appLockEnabled = useAppLock(s => s.enabled);
   const swipe       = useTabSwipe('settings');
@@ -138,9 +142,19 @@ export default function SettingsScreen() {
             label="Logs"
             value={showLogsTab ? 'Enabled' : 'Disabled'}
             onPress={() => router.push('/settings/logs')}
-            isLast
+            isLast={false}
             c={c}
           />
+          <View style={[styles.toggleRow, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
+            <MaterialCommunityIcons name="certificate-outline" size={18} color={c.blue} style={styles.navIcon} />
+            <Text style={[styles.navLabel, { color: c.text }]}>Certificates</Text>
+            <Switch value={showCertsTab} onValueChange={setShowCertsTab} />
+          </View>
+          <View style={styles.toggleRow}>
+            <MaterialCommunityIcons name="puzzle-outline" size={18} color={c.blue} style={styles.navIcon} />
+            <Text style={[styles.navLabel, { color: c.text }]}>Plugins</Text>
+            <Switch value={showPluginsTab} onValueChange={setShowPluginsTab} />
+          </View>
         </NavGroup>
 
         <SectionLabel title="DATA" c={c} />
@@ -186,6 +200,13 @@ const styles = StyleSheet.create({
   group: {
     borderRadius: radius.md,
     overflow: 'hidden',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    gap: spacing.sm,
   },
   navRow: {
     flexDirection: 'row',

@@ -33,6 +33,7 @@ export const useConnection = create<ConnectionState>((set) => ({
   loadConnection: async () => {
     const baseUrl = await SecureStore.getItemAsync(KEY_URL) ?? '';
     const apiKey  = await SecureStore.getItemAsync(KEY_API)  ?? '';
+    if (baseUrl) await saveWidgetCredentials(baseUrl, apiKey);
     set({ baseUrl, apiKey, ready: true });
   },
 

@@ -40,7 +40,7 @@ export function dynamicColorsFromM3(scheme: Record<string, any>, isDark: boolean
   const base = isDark ? darkColors : lightColors;
   return {
     bg:                   scheme.background ?? scheme.surface,
-    card:                 scheme.surfaceVariant ?? scheme.secondaryContainer,
+    card:                 scheme.surfaceContainerHigh ?? scheme.surfaceVariant,
     border:               scheme.outlineVariant ?? scheme.outline,
     text:                 scheme.onSurface,
     muted:                scheme.onSurfaceVariant,

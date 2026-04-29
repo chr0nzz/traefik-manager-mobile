@@ -103,6 +103,16 @@ export default function AboutScreen() {
           <Row label="Traefik" value={tv ?? '—'} isLast={false} c={c} />
           <Row label="Built by" value="chr0nzz" isLast c={c} />
         </Section>
+
+        <Section title="LEGAL" c={c}>
+          <Row
+            icon="book-open-outline"
+            label="Open Source Attributions"
+            onPress={() => router.push('/settings/attributions' as any)}
+            isLast
+            c={c}
+          />
+        </Section>
       </ScrollView>
     </View>
   );

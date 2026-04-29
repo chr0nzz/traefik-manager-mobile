@@ -69,6 +69,8 @@ export function NavigationDrawer() {
   const { baseUrl, demoMode } = useConnection();
   const appLockEnabled = useAppLock(s => s.enabled);
   const showLogsTab    = useTabsStore(s => s.showLogsTab);
+  const showCertsTab   = useTabsStore(s => s.showCertsTab);
+  const showPluginsTab = useTabsStore(s => s.showPluginsTab);
   const { data: backups } = useBackups();
   const { data: settings } = useSettings();
   const backupCount = backups?.length ?? 0;
@@ -167,6 +169,20 @@ export function NavigationDrawer() {
             label="Logs"
             value={showLogsTab ? 'Enabled' : 'Disabled'}
             onPress={() => navigate('/settings/logs')}
+            c={c}
+          />
+          <DrawerItem
+            icon="certificate-outline"
+            label="Certificates"
+            value={showCertsTab ? 'Enabled' : 'Disabled'}
+            onPress={() => navigate('/settings/certs')}
+            c={c}
+          />
+          <DrawerItem
+            icon="puzzle-outline"
+            label="Plugins"
+            value={showPluginsTab ? 'Enabled' : 'Disabled'}
+            onPress={() => navigate('/settings/plugins')}
             c={c}
           />
 

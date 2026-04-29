@@ -22,6 +22,7 @@ export default function RoutesScreen() {
   const router                      = useRouter();
   const [search, setSearch]         = useState('');
   const [proto, setProto]           = useState('All');
+  const [showStatus, setShowStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [editMode, setEditMode]     = useState(false);
 
@@ -47,6 +48,8 @@ export default function RoutesScreen() {
 
   const routes = useMemo(() => {
     let list = data?.apps ?? [];
+    if (showStatus === 'active')   list = list.filter(r => r.enabled !== false);
+    if (showStatus === 'inactive') list = list.filter(r => r.enabled === false);
     if (proto !== 'All') list = list.filter(r => r.protocol?.toLowerCase() === proto.toLowerCase());
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -57,7 +60,7 @@ export default function RoutesScreen() {
       );
     }
     return list;
-  }, [data, proto, search]);
+  }, [data, proto, search, showStatus]);
 
   const handleToggle = async (id: string, enable: boolean) => {
     setTogglingId(id);
@@ -76,14 +79,24 @@ export default function RoutesScreen() {
         onSearchChange={setSearch}
         searchPlaceholder="Search routes..."
         searchAccent={c.green}
-        overflowSections={[{
-          title: 'Protocol',
-          items: PROTOS.map(p => ({
-            label: p,
-            selected: proto === p,
-            onPress: () => setProto(p),
-          })),
-        }]}
+        overflowSections={[
+          {
+            title: 'Protocol',
+            items: PROTOS.map(p => ({
+              label: p,
+              selected: proto === p,
+              onPress: () => setProto(p),
+            })),
+          },
+          {
+            title: 'Status',
+            items: [
+              { label: 'All Routes',     selected: showStatus === 'all',      onPress: () => setShowStatus('all')      },
+              { label: 'Active only',    selected: showStatus === 'active',   onPress: () => setShowStatus('active')   },
+              { label: 'Inactive only',  selected: showStatus === 'inactive', onPress: () => setShowStatus('inactive') },
+            ],
+          },
+        ]}
         wideFilters={
           <View style={styles.wideRow}>
             {PROTOS.map(p => (

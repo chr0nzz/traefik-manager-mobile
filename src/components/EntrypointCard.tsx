@@ -9,35 +9,43 @@ interface Props {
   data?: TraefikEntrypoint[];
 }
 
-const MAX_VISIBLE = 5;
+function epColor(address: string, c: ReturnType<typeof useThemeStore.getState>['colors']): string {
+  const port = (address || '').split(':').pop() || '';
+  if (['443', '8443'].includes(port)) return c.green;
+  if (['80', '8080'].includes(port))  return c.blue;
+  return c.muted;
+}
 
 export function EntrypointCard({ data }: Props) {
-  const c       = useThemeStore(s => s.colors);
-  const all     = data ?? [];
-  const visible = all.slice(0, MAX_VISIBLE);
-  const extra   = all.length - MAX_VISIBLE;
+  const c   = useThemeStore(s => s.colors);
+  const all = data ?? [];
 
   return (
     <Surface style={[styles.card, { backgroundColor: c.card }]} elevation={1}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: c.teal }]}>ENTRY POINTS</Text>
-        <Text style={[styles.count, { color: c.teal }]}>{all.length}</Text>
+        <Text style={[styles.count, { color: c.teal }]}>{data ? all.length : '—'}</Text>
       </View>
-      <View style={styles.list}>
-        {visible.map(ep => (
-          <View key={ep.name} style={styles.row}>
-            <View style={[styles.dot, { backgroundColor: c.teal }]} />
-            <Text style={[styles.name, { color: c.text }]} numberOfLines={1}>{ep.name}</Text>
-            <Text style={[styles.address, { color: c.muted }]} numberOfLines={1}>{ep.address}</Text>
-          </View>
-        ))}
-        {extra > 0 && (
-          <Text style={[styles.more, { color: c.muted }]}>+{extra} more</Text>
-        )}
-        {!data && (
-          <Text style={[styles.placeholder, { color: c.muted }]}>Loading…</Text>
-        )}
-      </View>
+
+      {!data ? (
+        <Text style={[styles.placeholder, { color: c.muted }]}>Loading…</Text>
+      ) : all.length === 0 ? (
+        <Text style={[styles.placeholder, { color: c.muted }]}>No entry points</Text>
+      ) : (
+        <View style={styles.chips}>
+          {all.map(ep => {
+            const color = epColor(ep.address, c);
+            return (
+              <View key={ep.name} style={[styles.chip, { borderColor: color + '55', backgroundColor: color + '14' }]}>
+                <Text style={[styles.chipName, { color }]} numberOfLines={1}>{ep.name}</Text>
+                {!!ep.address && (
+                  <Text style={[styles.chipAddr, { color: c.muted }]} numberOfLines={1}>{ep.address}</Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
+      )}
     </Surface>
   );
 }
@@ -57,34 +65,37 @@ const styles = StyleSheet.create({
   title: {
     fontSize: font.xs,
     fontWeight: '700',
-    textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   count: {
     fontSize: font.lg,
     fontWeight: '800',
   },
-  list: { gap: 5 },
-  more: { fontSize: font.xs, marginTop: 2 },
-  row: {
+  chips: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 6,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 7,
+    borderWidth: 1,
+    maxWidth: '100%',
+    overflow: 'hidden',
+  },
+  chipName: {
+    fontSize: font.xs,
+    fontWeight: '700',
     flexShrink: 0,
   },
-  name: {
-    flex: 1,
-    fontSize: font.sm,
-    fontWeight: '600',
-  },
-  address: {
+  chipAddr: {
     fontSize: font.xs,
     fontFamily: 'monospace',
+    flexShrink: 1,
   },
   placeholder: {
     fontSize: font.xs,

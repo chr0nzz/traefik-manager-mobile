@@ -4,6 +4,7 @@ export interface Backup {
   name: string;
   size: number;
   modified: string;
+  kind?: string;
 }
 
 export function getBackups(): Promise<Backup[]> {
@@ -12,6 +13,10 @@ export function getBackups(): Promise<Backup[]> {
 
 export function createBackup(): Promise<{ ok: boolean }> {
   return apiPost('/api/backup/create');
+}
+
+export function createStaticBackup(): Promise<{ ok: boolean }> {
+  return apiPost('/api/static/backup/create');
 }
 
 export function restoreBackup(name: string): Promise<{ ok: boolean; message?: string }> {

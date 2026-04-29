@@ -86,3 +86,34 @@ export interface DashboardConfig {
 export function getDashboardConfig(): Promise<DashboardConfig> {
   return apiFetch('/api/dashboard/config');
 }
+
+export interface Cert {
+  resolver: string;
+  main:     string;
+  sans:     string[];
+  not_after: string | null;
+}
+
+export interface CertsResponse {
+  certs:  Cert[];
+  errors: string[];
+}
+
+export function getCerts(): Promise<CertsResponse> {
+  return apiFetch('/api/traefik/certs');
+}
+
+export interface Plugin {
+  name:       string;
+  moduleName: string;
+  version:    string;
+}
+
+export interface PluginsResponse {
+  plugins: Plugin[];
+  error?:  string;
+}
+
+export function getPlugins(): Promise<PluginsResponse> {
+  return apiFetch('/api/traefik/plugins');
+}

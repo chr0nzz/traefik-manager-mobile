@@ -16,7 +16,7 @@ export default function BackupsScreen() {
   const c         = useThemeStore(s => s.colors);
   const { listBottomPadding } = useLayout();
 
-  const backups = data?.backups ?? [];
+  const backups = data ?? [];
 
   const handleCreate = async () => {
     await create.mutateAsync();
@@ -60,13 +60,13 @@ export default function BackupsScreen() {
 
       <FlatList
         data={backups}
-        keyExtractor={b => b.filename}
+        keyExtractor={b => b.name}
         renderItem={({ item }) => (
           <BackupItem
             backup={item}
             onRestore={handleRestore}
             onDelete={handleDelete}
-            restoring={restoringFile === item.filename}
+            restoring={restoringFile === item.name}
           />
         )}
         scrollEventThrottle={16}
