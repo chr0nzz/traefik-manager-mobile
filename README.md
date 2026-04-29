@@ -22,12 +22,12 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 ## Screenshots
 
 <div align="center">
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-connect-1.png"    alt="Connect"     width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-dashboard-2.png"  alt="Dashboard"   width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-routes-3.png"     alt="Routes"      width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-middleware-4.png" alt="Middlewares"  width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-services-5.png"   alt="Services"    width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-settings-6.png"   alt="Settings"    width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-connect-1.png"    alt="Connect"     width="130" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-dashboard-2.png"  alt="Dashboard"   width="130" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-routes-3.png"     alt="Routes"      width="130" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-middleware-4.png" alt="Middlewares"  width="130" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-services-5.png"   alt="Services"    width="130" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-settings-6.png"   alt="Settings"    width="130" />
 </div>
 <div align="center">
   <sub>Connect &nbsp;·&nbsp; Dashboard &nbsp;·&nbsp; Routes &nbsp;·&nbsp; Middlewares &nbsp;·&nbsp; Services &nbsp;·&nbsp; Settings</sub>
@@ -51,13 +51,13 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 ## Requirements
 
-| Requirement | Version |
-|---|---|
-| Traefik Manager (server) | **v0.10.0 or higher** (mobile v0.6.0+), v0.6.0+ for earlier mobile versions |
-| Expo SDK | 54 |
-| React Native | 0.81 |
-| Android | 7.0+ (API 24+) |
-| iOS | 16+ |
+| Requirement              | Version                                                                     |
+| --------------------------| -----------------------------------------------------------------------------|
+| Traefik Manager (server) | **v0.10.0 or higher** |
+| Expo SDK                 | 54                                                                          |
+| React Native             | 0.81                                                                        |
+| Android                  | 7.0+ (API 24+)                                                              |
+| iOS                      | 16+                                                                         |
 
 ---
 
