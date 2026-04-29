@@ -36,15 +36,32 @@ export const colors = darkColors;
 
 type Colors = typeof darkColors;
 
+function blendHex(base: string, overlay: string, alpha: number): string {
+  const b = base.replace('#', '');
+  const o = overlay.replace('#', '');
+  const br = parseInt(b.slice(0, 2), 16);
+  const bg = parseInt(b.slice(2, 4), 16);
+  const bb = parseInt(b.slice(4, 6), 16);
+  const or = parseInt(o.slice(0, 2), 16);
+  const og = parseInt(o.slice(2, 4), 16);
+  const ob = parseInt(o.slice(4, 6), 16);
+  const r = Math.round(br * (1 - alpha) + or * alpha);
+  const g = Math.round(bg * (1 - alpha) + og * alpha);
+  const bl = Math.round(bb * (1 - alpha) + ob * alpha);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`;
+}
+
 export function dynamicColorsFromM3(scheme: Record<string, any>, isDark: boolean): Colors {
   const base = isDark ? darkColors : lightColors;
+  const surface = scheme.background ?? scheme.surface ?? base.bg;
+  const primary = scheme.primary ?? base.blue;
   return {
-    bg:                   scheme.background ?? scheme.surface,
-    card:                 scheme.surfaceContainerHigh ?? scheme.surfaceVariant,
+    bg:                   surface,
+    card:                 blendHex(surface, primary, 0.08),
     border:               scheme.outlineVariant ?? scheme.outline,
     text:                 scheme.onSurface,
     muted:                scheme.onSurfaceVariant,
-    blue:                 scheme.primary,
+    blue:                 primary,
     green:                base.green,
     yellow:               base.yellow,
     red:                  scheme.error,
