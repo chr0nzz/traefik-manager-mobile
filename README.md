@@ -1,15 +1,11 @@
 
-<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/mobile-banner.png" alt="Traefik Manager">
+<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/mobile-banner.png" alt="Traefik Manager">
 
 # Traefik Manager Mobile
 
 Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-manager) - manage your Traefik routes, middlewares, and services from your phone.
 
-> **Requires Traefik Manager v0.6.0 or higher.**
-> The mobile app authenticates via the API key feature introduced in v0.6.0. Earlier versions are not supported.
->
-> **Mobile app v0.6.0+ requires Traefik Manager v0.10.0 or higher.**
-> v0.10.0 includes the `CONFIG_DIR` multi-file API changes that the mobile app depends on.
+> **Requires Traefik Manager v1.0.0 or higher.**
 
 ---
 
@@ -26,12 +22,12 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 ## Screenshots
 
 <div align="center">
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-connect-1.png"    alt="Connect"     width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-dashboard-2.png"  alt="Dashboard"   width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-routes-3.png"     alt="Routes"      width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-middleware-4.png" alt="Middlewares"  width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-services-5.png"   alt="Services"    width="150" />
-  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/images/dark-mobile-settings-6.png"   alt="Settings"    width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-connect-1.png"    alt="Connect"     width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-dashboard-2.png"  alt="Dashboard"   width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-routes-3.png"     alt="Routes"      width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-middleware-4.png" alt="Middlewares"  width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-services-5.png"   alt="Services"    width="150" />
+  <img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/dark-mobile-settings-6.png"   alt="Settings"    width="150" />
 </div>
 <div align="center">
   <sub>Connect &nbsp;·&nbsp; Dashboard &nbsp;·&nbsp; Routes &nbsp;·&nbsp; Middlewares &nbsp;·&nbsp; Services &nbsp;·&nbsp; Settings</sub>
