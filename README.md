@@ -14,7 +14,7 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 | Platform         | Link                                                                                |
 | ------------------| -------------------------------------------------------------------------------------|
 | Android (APK)    | [Latest release](https://github.com/chr0nzz/traefik-manager-mobile/releases/latest) |
-| Google Play Beta | [Sign up to beta test](https://forms.gle/csituqc92sreNooZ8)                         |
+| Google Play | [Install from Play Store](https://play.google.com/store/apps/details?id=dev.chr0nzz.traefikmanager)                         |
 | iOS              | Build from source (see below)                                                       |
 
 ---
