@@ -31,10 +31,10 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 </div>
 <div align="center">
   <sub>Connect &nbsp;·&nbsp; Dashboard &nbsp;·&nbsp; Routes &nbsp;·&nbsp; Middlewares &nbsp;·&nbsp; Services &nbsp;·&nbsp; Settings</sub>
-</div>
+
 
 [View light & dark screenshots in the docs](https://traefik-manager.xyzlab.dev/ui-examples.html)
-
+</div>
 ---
 
 ## Features
