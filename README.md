@@ -35,7 +35,7 @@ Companion mobile app for [Traefik Manager](https://github.com/chr0nzz/traefik-ma
 
 [View light & dark screenshots in the docs](https://traefik-manager.xyzlab.dev/ui-examples.html)
 </div>
----
+
 
 ## Features
 
