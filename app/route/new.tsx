@@ -54,6 +54,9 @@ export default function NewRouteScreen() {
   const [fInsecure,         setFInsecure]         = useState(false);
   const [fCertResolver,     setFCertResolver]     = useState('');
 
+  const [fHttpRule,         setFHttpRule]         = useState('');
+  const [fAdvancedRule,     setFAdvancedRule]     = useState(false);
+
   const [fTcpRule,          setFTcpRule]          = useState('');
   const [fTcpEntryPoints,   setFTcpEntryPoints]   = useState<string[]>([]);
 
@@ -83,7 +86,7 @@ export default function NewRouteScreen() {
   };
 
   useEffect(() => {
-    if (resolvers.length > 0 && !fCertResolver) setFCertResolver(resolvers[0]);
+    if (!fCertResolver) setFCertResolver(resolvers.length > 0 ? resolvers[0] : '__disabled__');
   }, [settings]);
 
   useEffect(() => {
@@ -106,8 +109,12 @@ export default function NewRouteScreen() {
       configFile:  fConfigFile,
     };
     if (fProto === 'http') {
-      data.subdomain         = fSubdomain.trim();
-      data.domains           = fDomains;
+      if (fAdvancedRule && fHttpRule.trim()) {
+        data.httpRule = fHttpRule.trim();
+      } else {
+        data.subdomain = fSubdomain.trim();
+        data.domains   = fDomains;
+      }
       data.entryPoints       = fEntryPoints.join(', ');
       data.middlewares       = fMws.join(', ');
       data.scheme            = fScheme;
@@ -181,41 +188,66 @@ export default function NewRouteScreen() {
 
           {fProto === 'http' && (
             <>
-              <TextInput
-                label="Subdomain"
-                value={fSubdomain}
-                onChangeText={setFSubdomain}
-                placeholder="app"
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-                mode="outlined"
-                style={{ backgroundColor: c.bg }}
+              <Text style={[styles.fieldLabel, { color: c.muted }]}>Rule Mode</Text>
+              <SegmentedButtons
+                value={fAdvancedRule ? 'advanced' : 'simple'}
+                onValueChange={v => setFAdvancedRule(v === 'advanced')}
+                buttons={[
+                  { value: 'simple',   label: 'Simple'   },
+                  { value: 'advanced', label: 'Advanced rule' },
+                ]}
               />
 
-              {domains.length > 0 && (
+              {fAdvancedRule ? (
+                <TextInput
+                  label="Rule"
+                  value={fHttpRule}
+                  onChangeText={setFHttpRule}
+                  placeholder="Host(`app.example.com`) || PathPrefix(`/api`)"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  mode="outlined"
+                  style={{ backgroundColor: c.bg }}
+                />
+              ) : (
                 <>
-                  <Text style={[styles.fieldLabel, { color: c.muted }]}>Domain{domains.length > 1 ? 's' : ''}</Text>
-                  <View style={styles.chipRow}>
-                    {domains.map(d => (
-                      <TouchableOpacity
-                        key={d}
-                        onPress={() => domains.length === 1 ? null : toggleDomain(d)}
-                        style={[
-                          styles.chip,
-                          {
-                            backgroundColor: (fDomains.includes(d) || domains.length === 1) ? c.secondaryContainer : 'transparent',
-                            borderColor:     (fDomains.includes(d) || domains.length === 1) ? c.blue : c.border,
-                          },
-                        ]}
-                        activeOpacity={domains.length === 1 ? 1 : 0.7}
-                      >
-                        <Text style={{ color: (fDomains.includes(d) || domains.length === 1) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
-                          {d}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                  <TextInput
+                    label="Subdomain"
+                    value={fSubdomain}
+                    onChangeText={setFSubdomain}
+                    placeholder="app"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="url"
+                    mode="outlined"
+                    style={{ backgroundColor: c.bg }}
+                  />
+
+                  {domains.length > 0 && (
+                    <>
+                      <Text style={[styles.fieldLabel, { color: c.muted }]}>Domain{domains.length > 1 ? 's' : ''}</Text>
+                      <View style={styles.chipRow}>
+                        {domains.map(d => (
+                          <TouchableOpacity
+                            key={d}
+                            onPress={() => domains.length === 1 ? null : toggleDomain(d)}
+                            style={[
+                              styles.chip,
+                              {
+                                backgroundColor: (fDomains.includes(d) || domains.length === 1) ? c.secondaryContainer : 'transparent',
+                                borderColor:     (fDomains.includes(d) || domains.length === 1) ? c.blue : c.border,
+                              },
+                            ]}
+                            activeOpacity={domains.length === 1 ? 1 : 0.7}
+                          >
+                            <Text style={{ color: (fDomains.includes(d) || domains.length === 1) ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                              {d}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </>
+                  )}
                 </>
               )}
             </>
@@ -454,25 +486,29 @@ export default function NewRouteScreen() {
             </>
           )}
 
-          {resolvers.length > 0 && (fProto === 'http' || fProto === 'tcp') && (
+          {(fProto === 'http' || fProto === 'tcp') && (
             <>
               <Text style={[styles.fieldLabel, { color: c.muted }]}>Cert Resolver</Text>
               <View style={styles.chipRow}>
-                {resolvers.map(r => (
+                {[
+                  { value: '__disabled__', label: 'No TLS' },
+                  ...resolvers.map(r => ({ value: r, label: r })),
+                  { value: '__none__', label: 'None (ext. cert)' },
+                ].map(opt => (
                   <TouchableOpacity
-                    key={r}
-                    onPress={() => setFCertResolver(r)}
+                    key={opt.value}
+                    onPress={() => setFCertResolver(opt.value)}
                     style={[
                       styles.chip,
                       {
-                        backgroundColor: fCertResolver === r ? c.secondaryContainer : 'transparent',
-                        borderColor:     fCertResolver === r ? c.blue : c.border,
+                        backgroundColor: fCertResolver === opt.value ? c.secondaryContainer : 'transparent',
+                        borderColor:     fCertResolver === opt.value ? c.blue : c.border,
                       },
                     ]}
                     activeOpacity={0.7}
                   >
-                    <Text style={{ color: fCertResolver === r ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
-                      {r}
+                    <Text style={{ color: fCertResolver === opt.value ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>
+                      {opt.label}
                     </Text>
                   </TouchableOpacity>
                 ))}

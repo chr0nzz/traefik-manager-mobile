@@ -51,6 +51,7 @@ export interface RouteFormData {
   passHostHeader?: boolean;
   certResolver?: string;
   insecureSkipVerify?: boolean;
+  httpRule?: string;
   tcpRule?: string;
   tcpEntryPoints?: string;
   udpEntryPoint?: string;
@@ -80,6 +81,7 @@ export function saveRoute(
     base.passHostHeader    = data.passHostHeader !== false ? 'true' : '';
     base.certResolver      = data.certResolver ?? '';
     base.insecureSkipVerify = data.insecureSkipVerify ? 'true' : '';
+    if (data.httpRule) base.httpRule = data.httpRule;
   } else if (data.protocol === 'tcp') {
     base.tcpRule     = data.tcpRule ?? '';
     base.entryPoints = ['', data.tcpEntryPoints || ''];
