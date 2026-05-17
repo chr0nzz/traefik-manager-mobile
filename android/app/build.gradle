@@ -91,13 +91,8 @@ android {
         applicationId 'dev.chr0nzz.traefikmanager'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 16
-        versionName "1.1.0"
-        externalNativeBuild {
-            cmake {
-                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-            }
-        }
+        versionCode 17
+        versionName "1.2.0"
     }
     signingConfigs {
         debug {
