@@ -26,6 +26,7 @@
         {
           "android": {
             "targetSdkVersion": 35,
+            "kotlinVersion": "1.9.25",
             "packagingOptions": {
               "jniLibs": {
                 "useLegacyPackaging": false
