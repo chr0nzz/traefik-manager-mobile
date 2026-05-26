@@ -29,6 +29,13 @@ export function deleteMiddleware(name: string, configFile = ''): Promise<{ ok: b
   return apiFormPost(`/delete-middleware/${encodeURIComponent(name)}`, { configFile });
 }
 
+export function generateHtpasswd(
+  username: string,
+  password: string,
+): Promise<{ hash: string }> {
+  return apiFormPost('/api/tools/htpasswd', { username, password });
+}
+
 export async function getMiddlewares(): Promise<Middleware[]> {
   const data = await apiFetch<{ http?: Middleware[]; tcp?: Middleware[] }>('/api/traefik/middlewares');
   const http = (data.http ?? []).map(m => ({ ...m, _proto: 'http' }));

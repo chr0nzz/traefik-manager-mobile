@@ -17,6 +17,7 @@ import { useThemeStore } from '../../src/store/theme';
 import { useSaveMiddleware } from '../../src/hooks/useMiddlewares';
 import { useConfigs } from '../../src/hooks/useConfigs';
 import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
+import { MiddlewareWizard, WIZARD_TEMPLATES } from '../../src/components/MiddlewareWizard';
 
 interface Template {
   id: string; name: string; icon: string; description: string; yaml: string;
@@ -25,23 +26,39 @@ interface Template {
 const TEMPLATES: Template[] = [
   { id: 'blank', name: 'Blank', icon: 'file-outline', description: 'Start from scratch', yaml: '' },
   { id: 'https-redirect', name: 'HTTPS Redirect', icon: 'lock-outline', description: 'Redirect HTTP to HTTPS', yaml: 'redirectScheme:\n  scheme: https\n  permanent: true' },
-  { id: 'basic-auth', name: 'Basic Auth', icon: 'account-key-outline', description: 'Password protect your service', yaml: 'basicAuth:\n  users:\n    - "user:$apr1$replace_me" # htpasswd format\n  realm: "Authentication Required"' },
-  { id: 'security-headers', name: 'Security Headers', icon: 'shield-check-outline', description: 'Add HSTS and security headers', yaml: 'headers:\n  stsSeconds: 31536000\n  stsIncludeSubdomains: true\n  stsPreload: true\n  forceSTSHeader: true\n  contentTypeNosniff: true\n  browserXssFilter: true\n  frameDeny: true' },
+  { id: 'basic-auth', name: 'Basic Auth', icon: 'account-key-outline', description: 'Password protect your service', yaml: 'basicAuth:\n  users: []\n  realm: "Authentication Required"' },
+  { id: 'digest-auth', name: 'Digest Auth', icon: 'key-outline', description: 'MD5 digest authentication', yaml: 'digestAuth:\n  users:\n    - "user:realm:hash"' },
+  { id: 'security-headers', name: 'Security Headers', icon: 'shield-check-outline', description: 'Add HSTS and security headers', yaml: 'headers:\n  forceSTSHeader: true\n  stsSeconds: 315360000\n  stsIncludeSubdomains: true\n  stsPreload: true\n  contentTypeNosniff: true\n  browserXssFilter: true\n  frameDeny: true\n  referrerPolicy: "strict-origin-when-cross-origin"' },
   { id: 'rate-limit', name: 'Rate Limit', icon: 'speedometer', description: 'Limit request rate per source IP', yaml: 'rateLimit:\n  average: 100\n  burst: 50\n  period: 1s' },
   { id: 'forward-auth', name: 'Forward Auth', icon: 'shield-account-outline', description: 'Delegate auth to external service', yaml: 'forwardAuth:\n  address: "http://auth-service:9000/verify"\n  trustForwardHeader: true\n  authResponseHeaders:\n    - X-Auth-User\n    - X-Auth-Role' },
-  { id: 'strip-prefix', name: 'Strip Prefix', icon: 'scissors-cutting', description: 'Remove a URL path prefix', yaml: 'stripPrefix:\n  prefixes:\n    - "/api"' },
-  { id: 'add-prefix', name: 'Add Prefix', icon: 'plus-box-outline', description: 'Prepend a URL path prefix', yaml: 'addPrefix:\n  prefix: "/api"' },
-  { id: 'compress', name: 'Compress', icon: 'zip-box-outline', description: 'Enable gzip / brotli compression', yaml: 'compress: {}' },
+  { id: 'forward-auth-authentik', name: 'Authentik', icon: 'shield-account', description: 'Authentik SSO forward auth', yaml: 'forwardAuth:\n  address: "http://authentik-server:9000/outpost.goauthentik.io/auth/traefik"\n  trustForwardHeader: true\n  authResponseHeaders:\n    - X-authentik-username\n    - X-authentik-groups\n    - X-authentik-email\n    - X-authentik-name' },
+  { id: 'forward-auth-authelia', name: 'Authelia', icon: 'shield-lock', description: 'Authelia forward auth', yaml: 'forwardAuth:\n  address: "http://authelia:9091/api/authz/forward-auth"\n  trustForwardHeader: true\n  authResponseHeaders:\n    - Remote-User\n    - Remote-Name\n    - Remote-Groups\n    - Remote-Email' },
+  { id: 'forward-auth-gatekeeper', name: 'Gatekeeper', icon: 'gate', description: 'Gatekeeper forward auth', yaml: 'forwardAuth:\n  address: "https://auth.example.com/auth/verify"\n  trustForwardHeader: false\n  authResponseHeaders:\n    - X-Auth-User\n    - X-Auth-Email' },
   { id: 'ip-allowlist', name: 'IP Allowlist', icon: 'ip-network-outline', description: 'Restrict access by IP range', yaml: 'ipAllowList:\n  sourceRange:\n    - "10.0.0.0/8"\n    - "172.16.0.0/12"\n    - "192.168.0.0/16"' },
+  { id: 'ip-allowlist-private', name: 'Private IPs', icon: 'home-network-outline', description: 'Allow LAN / private IP ranges', yaml: 'ipAllowList:\n  sourceRange:\n    - "10.0.0.0/8"\n    - "172.16.0.0/12"\n    - "192.168.0.0/16"\n    - "127.0.0.1/32"' },
+  { id: 'cors-headers', name: 'CORS', icon: 'web', description: 'Cross-origin resource sharing headers', yaml: 'headers:\n  accessControlAllowMethods:\n    - GET\n    - POST\n    - PUT\n    - DELETE\n    - PATCH\n    - OPTIONS\n  accessControlAllowOriginList:\n    - "*"\n  accessControlAllowHeaders:\n    - "*"\n  accessControlMaxAge: 100\n  addVaryHeader: true' },
   { id: 'redirect-regex', name: 'Redirect Regex', icon: 'arrow-decision-outline', description: 'Redirect using a regex pattern', yaml: 'redirectRegex:\n  regex: "^http://(.*)"\n  replacement: "https://${1}"\n  permanent: true' },
+  { id: 'strip-prefix', name: 'Strip Prefix', icon: 'scissors-cutting', description: 'Remove a URL path prefix', yaml: 'stripPrefix:\n  prefixes:\n    - "/api"\n    - "/v1"' },
+  { id: 'add-prefix', name: 'Add Prefix', icon: 'plus-box-outline', description: 'Prepend a URL path prefix', yaml: 'addPrefix:\n  prefix: "/api"' },
+  { id: 'replace-path', name: 'Replace Path', icon: 'find-replace', description: 'Replace request URL path', yaml: 'replacePath:\n  path: "/foo"' },
+  { id: 'compress', name: 'Compress', icon: 'zip-box-outline', description: 'Enable gzip / brotli compression', yaml: 'compress:\n  minResponseBodyBytes: 1200' },
+  { id: 'retry', name: 'Retry', icon: 'refresh', description: 'Retry failed requests', yaml: 'retry:\n  attempts: 4\n  initialInterval: "100ms"' },
+  { id: 'circuit-breaker', name: 'Circuit Breaker', icon: 'electric-switch-closed', description: 'Stop traffic when error rate is high', yaml: 'circuitBreaker:\n  expression: "NetworkErrorRatio() > 0.5"' },
+  { id: 'buffering', name: 'Buffering', icon: 'buffer', description: 'Buffer request and response bodies', yaml: 'buffering:\n  maxRequestBodyBytes: 10485760\n  maxResponseBodyBytes: 10485760' },
+  { id: 'in-flight-req', name: 'In-Flight Req', icon: 'counter', description: 'Limit concurrent requests', yaml: 'inFlightReq:\n  amount: 10' },
   { id: 'chain', name: 'Chain', icon: 'link-variant', description: 'Combine multiple middlewares', yaml: 'chain:\n  middlewares:\n    - middleware1@file\n    - middleware2@file' },
 ];
 
 const TEMPLATE_COLORS: Record<string, string> = {
   'blank': 'muted', 'https-redirect': 'blue', 'basic-auth': 'yellow',
-  'security-headers': 'green', 'rate-limit': 'red', 'forward-auth': 'purple',
-  'strip-prefix': 'orange', 'add-prefix': 'orange', 'compress': 'muted',
-  'ip-allowlist': 'blue', 'redirect-regex': 'blue', 'chain': 'purple',
+  'digest-auth': 'yellow', 'security-headers': 'green', 'rate-limit': 'red',
+  'forward-auth': 'purple', 'forward-auth-authentik': 'purple',
+  'forward-auth-authelia': 'purple', 'forward-auth-gatekeeper': 'purple',
+  'ip-allowlist': 'blue', 'ip-allowlist-private': 'blue', 'cors-headers': 'green',
+  'redirect-regex': 'blue', 'strip-prefix': 'orange', 'add-prefix': 'orange',
+  'replace-path': 'orange', 'compress': 'muted', 'retry': 'orange',
+  'circuit-breaker': 'red', 'buffering': 'muted', 'in-flight-req': 'red',
+  'chain': 'purple',
 };
 
 type Colors = ReturnType<typeof useThemeStore.getState>['colors'];
@@ -57,16 +74,19 @@ export default function NewMiddlewareScreen() {
   const configDirSet     = configs.data?.configDirSet ?? false;
   const showConfigPicker = configFiles.length > 1 || configDirSet;
 
-  const [step,        setStep]        = useState<'pick' | 'form'>('pick');
-  const [fName,       setFName]       = useState('');
-  const [fYaml,       setFYaml]       = useState('');
-  const [fConfigFile, setFConfigFile] = useState('');
-  const [saving,      setSaving]      = useState(false);
-  const [saveErr,     setSaveErr]     = useState('');
-
+  const [step,             setStep]             = useState<'pick' | 'form'>('pick');
+  const [fName,            setFName]            = useState('');
+  const [fYaml,            setFYaml]            = useState('');
+  const [fConfigFile,      setFConfigFile]      = useState('');
+  const [saving,           setSaving]           = useState(false);
+  const [saveErr,          setSaveErr]          = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [wizardMode,       setWizardMode]       = useState(true);
 
   const selectTemplate = (t: Template) => {
     setFYaml(t.yaml);
+    setSelectedTemplate(t.id);
+    setWizardMode(true);
     setStep('form');
   };
 
@@ -164,21 +184,47 @@ export default function NewMiddlewareScreen() {
             style={{ backgroundColor: c.bg }}
           />
 
-          <TextInput
-            label="Config (YAML)"
-            value={fYaml}
-            onChangeText={setFYaml}
-            multiline
-            numberOfLines={10}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder={'redirectScheme:\n  scheme: https\n  permanent: true'}
-            mode="outlined"
-            style={{ backgroundColor: c.bg, fontFamily: 'monospace', minHeight: 200 }}
-          />
+          {WIZARD_TEMPLATES.has(selectedTemplate) && (
+            <View style={[styles.modeToggle, { backgroundColor: c.card, borderColor: c.border }]}>
+              <TouchableOpacity
+                style={[styles.modeBtn, wizardMode && { backgroundColor: c.blue + '18' }]}
+                onPress={() => setWizardMode(true)}
+              >
+                <Text style={[styles.modeBtnText, { color: wizardMode ? c.blue : c.muted }]}>Simple</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modeBtn, !wizardMode && { backgroundColor: c.blue + '18' }]}
+                onPress={() => setWizardMode(false)}
+              >
+                <Text style={[styles.modeBtnText, { color: !wizardMode ? c.blue : c.muted }]}>YAML</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {WIZARD_TEMPLATES.has(selectedTemplate) && wizardMode ? (
+            <MiddlewareWizard
+              key={selectedTemplate}
+              template={selectedTemplate}
+              onYamlChange={setFYaml}
+              c={c}
+            />
+          ) : (
+            <TextInput
+              label="Config (YAML)"
+              value={fYaml}
+              onChangeText={setFYaml}
+              multiline
+              numberOfLines={10}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder={'redirectScheme:\n  scheme: https\n  permanent: true'}
+              mode="outlined"
+              style={{ backgroundColor: c.bg, fontFamily: 'monospace', minHeight: 200 }}
+            />
+          )}
 
           {showConfigPicker && (
-            <View style={styles.formGroup}>
+            <View>
               <Text style={{ fontSize: 12, fontWeight: '500', color: c.muted, marginBottom: 4 }}>Config File</Text>
               <ConfigFilePicker
                 files={configFiles}
@@ -223,4 +269,16 @@ const styles = StyleSheet.create({
   // Form
   scrollContent: { padding: spacing.md, gap: spacing.md },
   errTxt:        { fontSize: font.sm },
+  modeToggle: {
+    flexDirection: 'row',
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  modeBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  modeBtnText: { fontSize: font.sm, fontWeight: '600' },
 });
