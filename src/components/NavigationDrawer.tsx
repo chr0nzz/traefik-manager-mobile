@@ -68,9 +68,10 @@ export function NavigationDrawer() {
   const { isOpen, close } = useDrawerStore();
   const { baseUrl, demoMode } = useConnection();
   const appLockEnabled = useAppLock(s => s.enabled);
-  const showLogsTab    = useTabsStore(s => s.showLogsTab);
-  const showCertsTab   = useTabsStore(s => s.showCertsTab);
-  const showPluginsTab = useTabsStore(s => s.showPluginsTab);
+  const showLogsTab      = useTabsStore(s => s.showLogsTab);
+  const showCertsTab     = useTabsStore(s => s.showCertsTab);
+  const showPluginsTab   = useTabsStore(s => s.showPluginsTab);
+  const showCrowdSecTab  = useTabsStore(s => s.showCrowdSecTab);
   const { data: backups } = useBackups();
   const { data: settings } = useSettings();
   const backupCount = backups?.length ?? 0;
@@ -183,6 +184,13 @@ export function NavigationDrawer() {
             label="Plugins"
             value={showPluginsTab ? 'Enabled' : 'Disabled'}
             onPress={() => navigate('/settings/plugins')}
+            c={c}
+          />
+          <DrawerItem
+            icon="shield-bug-outline"
+            label="CrowdSec"
+            value={showCrowdSecTab ? 'Enabled' : 'Disabled'}
+            onPress={() => navigate('/settings/crowdsec')}
             c={c}
           />
 

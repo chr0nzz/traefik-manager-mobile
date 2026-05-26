@@ -26,9 +26,10 @@ const PRIMARY_TABS = [
 ];
 
 const ALL_OPTIONAL_TABS = [
-  { name: 'logs',    icon: 'console-line',        activeIcon: 'console-line',       label: 'Logs'    },
-  { name: 'certs',   icon: 'certificate-outline', activeIcon: 'certificate-outline', label: 'Certs'   },
-  { name: 'plugins', icon: 'puzzle-outline',      activeIcon: 'puzzle',             label: 'Plugins' },
+  { name: 'logs',      icon: 'console-line',        activeIcon: 'console-line',        label: 'Logs'      },
+  { name: 'certs',     icon: 'certificate-outline', activeIcon: 'certificate-outline', label: 'Certs'     },
+  { name: 'plugins',   icon: 'puzzle-outline',      activeIcon: 'puzzle',              label: 'Plugins'   },
+  { name: 'crowdsec',  icon: 'shield-bug-outline',  activeIcon: 'shield-bug',          label: 'CrowdSec'  },
 ] as const;
 
 
@@ -42,11 +43,12 @@ function useFocused() {
 }
 
 function useEnabledOptional() {
-  const { showLogsTab, showCertsTab, showPluginsTab } = useTabsStore();
+  const { showLogsTab, showCertsTab, showPluginsTab, showCrowdSecTab } = useTabsStore();
   return ALL_OPTIONAL_TABS.filter(t => {
-    if (t.name === 'logs')    return showLogsTab;
-    if (t.name === 'certs')   return showCertsTab;
-    if (t.name === 'plugins') return showPluginsTab;
+    if (t.name === 'logs')      return showLogsTab;
+    if (t.name === 'certs')     return showCertsTab;
+    if (t.name === 'plugins')   return showPluginsTab;
+    if (t.name === 'crowdsec')  return showCrowdSecTab;
     return false;
   });
 }
@@ -202,7 +204,7 @@ export default function TabsLayout() {
   const windowIsWide = useIsWide();
   const [layoutWide, setLayoutWide] = useState<boolean | null>(null);
   const isWide       = layoutWide ?? windowIsWide;
-  const { showLogsTab, showCertsTab, showPluginsTab } = useTabsStore();
+  const { showLogsTab, showCertsTab, showPluginsTab, showCrowdSecTab } = useTabsStore();
   const setIsWide    = useDrawerStore(s => s.setIsWide);
 
   return (
@@ -221,9 +223,10 @@ export default function TabsLayout() {
           <Tabs.Screen name="routes"      options={{ title: 'Routes'    }} />
           <Tabs.Screen name="middlewares" options={{ title: 'Middleware' }} />
           <Tabs.Screen name="live"        options={{ title: 'Services'  }} />
-          <Tabs.Screen name="logs"     options={{ title: 'Logs',         href: showLogsTab    ? undefined : null }} />
-          <Tabs.Screen name="certs"    options={{ title: 'Certificates', href: showCertsTab   ? undefined : null }} />
-          <Tabs.Screen name="plugins"  options={{ title: 'Plugins',      href: showPluginsTab ? undefined : null }} />
+          <Tabs.Screen name="logs"      options={{ title: 'Logs',         href: showLogsTab     ? undefined : null }} />
+          <Tabs.Screen name="certs"    options={{ title: 'Certificates', href: showCertsTab    ? undefined : null }} />
+          <Tabs.Screen name="plugins"  options={{ title: 'Plugins',      href: showPluginsTab  ? undefined : null }} />
+          <Tabs.Screen name="crowdsec" options={{ title: 'CrowdSec',     href: showCrowdSecTab ? undefined : null }} />
           <Tabs.Screen name="backups"  options={{ href: null }} />
           <Tabs.Screen name="settings" options={{ href: null }} />
         </Tabs>

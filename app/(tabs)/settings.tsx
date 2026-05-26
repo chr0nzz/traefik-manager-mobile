@@ -68,11 +68,13 @@ export default function SettingsScreen() {
   const router      = useRouter();
   const { baseUrl } = useConnection();
   const { mode }    = useThemeStore();
-  const showLogsTab       = useTabsStore(s => s.showLogsTab);
-  const showCertsTab      = useTabsStore(s => s.showCertsTab);
-  const showPluginsTab    = useTabsStore(s => s.showPluginsTab);
-  const setShowCertsTab   = useTabsStore(s => s.setShowCertsTab);
-  const setShowPluginsTab = useTabsStore(s => s.setShowPluginsTab);
+  const showLogsTab          = useTabsStore(s => s.showLogsTab);
+  const showCertsTab         = useTabsStore(s => s.showCertsTab);
+  const showPluginsTab       = useTabsStore(s => s.showPluginsTab);
+  const showCrowdSecTab    = useTabsStore(s => s.showCrowdSecTab);
+  const setShowCertsTab    = useTabsStore(s => s.setShowCertsTab);
+  const setShowPluginsTab  = useTabsStore(s => s.setShowPluginsTab);
+  const setShowCrowdSecTab = useTabsStore(s => s.setShowCrowdSecTab);
   const c           = useThemeStore(s => s.colors);
   const appLockEnabled = useAppLock(s => s.enabled);
   const swipe       = useTabSwipe('settings');
@@ -150,10 +152,15 @@ export default function SettingsScreen() {
             <Text style={[styles.navLabel, { color: c.text }]}>Certificates</Text>
             <Switch value={showCertsTab} onValueChange={setShowCertsTab} />
           </View>
-          <View style={styles.toggleRow}>
+          <View style={[styles.toggleRow, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
             <MaterialCommunityIcons name="puzzle-outline" size={18} color={c.blue} style={styles.navIcon} />
             <Text style={[styles.navLabel, { color: c.text }]}>Plugins</Text>
             <Switch value={showPluginsTab} onValueChange={setShowPluginsTab} />
+          </View>
+          <View style={styles.toggleRow}>
+            <MaterialCommunityIcons name="shield-bug-outline" size={18} color={c.blue} style={styles.navIcon} />
+            <Text style={[styles.navLabel, { color: c.text }]}>CrowdSec</Text>
+            <Switch value={showCrowdSecTab} onValueChange={setShowCrowdSecTab} />
           </View>
         </NavGroup>
 
