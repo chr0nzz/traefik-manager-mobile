@@ -229,8 +229,8 @@ export default function RouteDetailScreen() {
       }
       setFSubdomain(subdomain);
       setFDomains(matchedDomains.length > 0 ? matchedDomains : editDomains.slice(0, 1));
-      setFEntryPoints(r.entryPoints ?? ['https']);
-      setFMws(r.middlewares ?? []);
+      setFEntryPoints(Array.isArray(r.entryPoints) ? r.entryPoints : r.entryPoints ? [r.entryPoints as unknown as string] : ['https']);
+      setFMws(Array.isArray(r.middlewares) ? r.middlewares : []);
       setFScheme((r.target || '').startsWith('https://') ? 'https' : 'http');
       setFPassHost(r.passHostHeader !== false);
       setFInsecure(!!r.insecureSkipVerify);
@@ -238,10 +238,10 @@ export default function RouteDetailScreen() {
       setFCertResolver(cr ? cr : (r.tls ? '__none__' : '__disabled__'));
     } else if (proto === 'tcp') {
       setFTcpRule(r.rule ?? '');
-      setFTcpEntryPoints(r.entryPoints ?? []);
+      setFTcpEntryPoints(Array.isArray(r.entryPoints) ? r.entryPoints : r.entryPoints ? [r.entryPoints as unknown as string] : []);
       setFCertResolver(r.certResolver ?? resolvers[0] ?? '');
     } else if (proto === 'udp') {
-      const eps = r.entryPoints ?? [];
+      const eps = Array.isArray(r.entryPoints) ? r.entryPoints : r.entryPoints ? [r.entryPoints as unknown as string] : [];
       setFUdpEntryPoints(eps);
       setFUdpEntryPoint(eps[0] ?? '');
     }

@@ -43,7 +43,7 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
 
   const st     = route.enabled ? 'ok' : 'unknown';
   const domain = domainFromRule(route.rule);
-  const mws    = route.middlewares ?? [];
+  const mws    = Array.isArray(route.middlewares) ? route.middlewares : [];
 
   const openUrl = () => {
     if (!domain) return;
