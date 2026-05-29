@@ -19,17 +19,23 @@ export default function TraefikSettingsScreen() {
   const { data: settings, isLoading } = useSettings();
   const { mutate: save, isPending: saving } = useSaveSettings();
 
-  const [domains, setDomains]     = useState('');
-  const [resolvers, setResolvers] = useState('');
-  const [apiUrl, setApiUrl]       = useState('');
+  const [domains, setDomains]       = useState('');
+  const [resolvers, setResolvers]   = useState('');
+  const [apiUrl, setApiUrl]         = useState('');
+  const [apiUser, setApiUser]       = useState('');
+  const [apiPassword, setApiPassword] = useState('');
+  const [passwordSet, setPasswordSet] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
-  const [testing, setTesting]     = useState(false);
+  const [testing, setTesting]       = useState(false);
 
   useEffect(() => {
     if (settings) {
       setDomains(settings.domains.join(', '));
       setResolvers(settings.cert_resolver);
       setApiUrl(settings.traefik_api_url);
+      setApiUser(settings.traefik_api_user ?? '');
+      setPasswordSet(settings.traefik_api_password_set ?? false);
     }
   }, [settings]);
 
@@ -43,17 +49,26 @@ export default function TraefikSettingsScreen() {
       Alert.alert('Validation', 'Traefik API URL must start with http:// or https://');
       return;
     }
-    save(
-      { domains: parsedDomains, cert_resolver: resolvers.trim(), traefik_api_url: apiUrl.trim() },
-      { onSuccess: () => router.back() },
-    );
+    const payload: Parameters<typeof save>[0] = {
+      domains: parsedDomains,
+      cert_resolver: resolvers.trim(),
+      traefik_api_url: apiUrl.trim(),
+      traefik_api_user: apiUser.trim(),
+    };
+    if (apiPassword) payload.traefik_api_password = apiPassword;
+    save(payload, {
+      onSuccess: () => {
+        if (apiPassword) { setApiPassword(''); setPasswordSet(true); }
+        router.back();
+      },
+    });
   };
 
   const handleTest = async () => {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await testTraefikUrl(apiUrl.trim());
+      const res = await testTraefikUrl(apiUrl.trim(), apiUser.trim(), apiPassword);
       setTestResult(res.ok
         ? { ok: true, msg: `Connected - Traefik ${res.version ?? ''}` }
         : { ok: false, msg: res.error ?? 'Connection failed' });
@@ -118,6 +133,36 @@ export default function TraefikSettingsScreen() {
             mode="outlined"
             style={{ backgroundColor: c.bg, fontFamily: 'monospace' }}
           />
+
+          <TextInput
+            label="API Username"
+            value={apiUser}
+            onChangeText={setApiUser}
+            placeholder="Leave blank if no auth"
+            autoCapitalize="none"
+            autoCorrect={false}
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+          />
+
+          <TextInput
+            label={passwordSet && !apiPassword ? 'API Password (set - leave blank to keep)' : 'API Password'}
+            value={apiPassword}
+            onChangeText={setApiPassword}
+            placeholder={passwordSet ? '••••••••' : 'Leave blank if no auth'}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            mode="outlined"
+            style={{ backgroundColor: c.bg }}
+            right={
+              <TextInput.Icon
+                icon={showPassword ? 'eye-off' : 'eye'}
+                onPress={() => setShowPassword(v => !v)}
+              />
+            }
+          />
+
           <TouchableOpacity
             onPress={handleTest}
             disabled={testing || !apiUrl}
