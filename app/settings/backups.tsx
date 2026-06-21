@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { BackupItem } from '../../src/components/BackupItem';
-import { useBackupMutations, useBackups } from '../../src/hooks/useBackups';
+import { useBackupMutations, useBackups, useGitStatus } from '../../src/hooks/useBackups';
 import { useThemeStore } from '../../src/store/theme';
 import { Backup } from '../../src/api/backups';
 import { font, radius, spacing } from '../../src/theme';
@@ -77,6 +77,7 @@ export default function BackupsScreen() {
 
   const { data, isFetching, isError, refetch } = useBackups();
   const { create, createStatic, restore, remove } = useBackupMutations();
+  const { data: gitStatus } = useGitStatus();
   const [restoringFile, setRestoringFile] = useState<string | null>(null);
 
   const allBackups: Backup[] = data ?? [];
@@ -113,6 +114,29 @@ export default function BackupsScreen() {
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 24 }]}
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={() => refetch()} tintColor={c.blue} />}
       >
+        <TouchableOpacity
+          style={[styles.gitRow, { backgroundColor: c.card, borderColor: c.border }]}
+          onPress={() => router.push('/settings/git-backup' as any)}
+          activeOpacity={0.6}
+        >
+          <View style={styles.gitRowLeft}>
+            <MaterialCommunityIcons name="source-branch" size={18} color={c.blue} />
+            <View>
+              <Text style={[styles.gitRowLabel, { color: c.text }]}>Git Backup</Text>
+              {gitStatus?.enabled && gitStatus.last_push ? (
+                <Text style={[styles.gitRowSub, { color: c.muted }]}>
+                  Last push: {new Date(gitStatus.last_push).toLocaleDateString()}
+                </Text>
+              ) : (
+                <Text style={[styles.gitRowSub, { color: c.muted }]}>
+                  {gitStatus?.enabled ? 'No pushes yet' : 'Not configured'}
+                </Text>
+              )}
+            </View>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={18} color={c.border} />
+        </TouchableOpacity>
+
         <BackupSection
           label="Route Config"
           icon="file-code-outline"
@@ -155,6 +179,13 @@ const styles = StyleSheet.create({
   backBtn:     { padding: 2 },
   headerTitle: { flex: 1, fontSize: font.lg, fontWeight: '700' },
   list:        { padding: spacing.lg, gap: spacing.lg },
+  gitRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: spacing.md, borderRadius: radius.md, borderWidth: 1,
+  },
+  gitRowLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  gitRowLabel: { fontSize: font.md, fontWeight: '600' },
+  gitRowSub:   { fontSize: font.xs, marginTop: 2 },
   section: {
     borderRadius: radius.md,
     borderWidth: 1,

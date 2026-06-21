@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Backup, createBackup, createStaticBackup, deleteBackup, getBackups, restoreBackup } from '../api/backups';
+import { Backup, GitCommit, GitStatus, createBackup, createStaticBackup, deleteBackup, getBackups, getGitCommits, getGitStatus, gitPush, restoreBackup, restoreFromGit } from '../api/backups';
+import { DEMO_GIT_COMMITS, DEMO_GIT_STATUS } from '../demo/data';
 import { useConnection } from '../store/connection';
 
 export function useBackups() {
@@ -27,4 +28,41 @@ export function useBackupMutations() {
   const remove       = useMutation({ mutationFn: demoMode ? noopNamed   : deleteBackup,      onSuccess: demoMode ? undefined : invalidate });
 
   return { create, createStatic, restore, remove };
+}
+
+export function useGitStatus() {
+  const demoMode = useConnection(s => s.demoMode);
+  return useQuery<GitStatus>({
+    queryKey: ['git-status'],
+    queryFn: demoMode ? () => DEMO_GIT_STATUS as GitStatus : getGitStatus,
+    staleTime: 30_000,
+    retry: demoMode ? 0 : 1,
+  });
+}
+
+export function useGitCommits() {
+  const demoMode = useConnection(s => s.demoMode);
+  return useQuery<GitCommit[]>({
+    queryKey: ['git-commits'],
+    queryFn: demoMode ? () => DEMO_GIT_COMMITS as GitCommit[] : getGitCommits,
+    staleTime: 30_000,
+    retry: demoMode ? 0 : 1,
+  });
+}
+
+export function useGitMutations() {
+  const qc = useQueryClient();
+  const demoMode = useConnection(s => s.demoMode);
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['git-status'] });
+    qc.invalidateQueries({ queryKey: ['git-commits'] });
+  };
+
+  const noop      = async (): Promise<{ ok: boolean }> => ({ ok: true });
+  const noopSha   = async (_: string): Promise<{ ok: boolean }> => ({ ok: true });
+
+  const push    = useMutation({ mutationFn: demoMode ? noop : gitPush,                         onSuccess: demoMode ? undefined : invalidate });
+  const restore = useMutation({ mutationFn: demoMode ? noopSha : restoreFromGit,               onSuccess: demoMode ? undefined : invalidate });
+
+  return { push, restore };
 }

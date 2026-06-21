@@ -14,6 +14,8 @@ import { useNavStore } from '../../src/store/nav';
 import { useThemeStore } from '../../src/store/theme';
 import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
+import { useAgentsStore } from '../../src/store/agents';
+import { useAgents } from '../../src/hooks/useAgents';
 import { font, radius, spacing } from '../../src/theme';
 
 const PROTOS = ['All', 'HTTP', 'TCP', 'UDP'];
@@ -30,6 +32,9 @@ export default function RoutesScreen() {
   const setRouteProtoFilter = useNavStore(s => s.setRouteProtoFilter);
   const c                  = useThemeStore(s => s.colors);
   const openDrawer         = useDrawerStore(s => s.open);
+  const activeAgentId      = useAgentsStore(s => s.activeAgentId);
+  const { data: agentList } = useAgents();
+  const agentSubtitle      = activeAgentId ? (agentList?.find(a => a.id === activeAgentId)?.name ?? 'Remote Agent') : undefined;
 
   useEffect(() => {
     if (routeProtoFilter && routeProtoFilter !== 'All') {
@@ -73,6 +78,7 @@ export default function RoutesScreen() {
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar
         title="Routes"
+        subtitle={agentSubtitle}
         scrollAnim={scrollAnim}
         onMenuPress={openDrawer}
         searchValue={search}

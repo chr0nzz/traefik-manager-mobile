@@ -193,6 +193,26 @@ export const DEMO_CROWDSEC_ALERTS = [
   { startAt: '2026-05-22T23:11:09Z', source: { ip: '203.0.113.100' },  scenario: 'crowdsecurity/iptables-scan-multi_ports', decisions: [] },
 ];
 
+export const DEMO_AGENTS_DATA = [
+  { id: 'agent-1', name: 'Server EU-1', url: 'https://eu1.example.com:8090', domains: ['eu1.example.com'] },
+  { id: 'agent-2', name: 'Server US-East', url: 'https://us-east.example.com:8090', domains: ['us-east.example.com'] },
+];
+
+export const DEMO_GIT_STATUS = {
+  enabled: true,
+  repo: 'https://github.com/example/traefik-config',
+  branch: 'main',
+  last_push: '2026-06-13T09:15:00Z',
+};
+
+export const DEMO_GIT_COMMITS = [
+  { sha: 'a1b2c3d', message: 'traefik-manager: update routes at 2026-06-13T09:15:00Z', timestamp: '2026-06-13T09:15:00Z' },
+  { sha: 'e4f5a6b', message: 'traefik-manager: add middleware at 2026-06-12T17:42:11Z', timestamp: '2026-06-12T17:42:11Z' },
+  { sha: 'c7d8e9f', message: 'traefik-manager: update routes at 2026-06-11T14:30:05Z', timestamp: '2026-06-11T14:30:05Z' },
+  { sha: 'f1a2b3c', message: 'traefik-manager: update static config at 2026-06-10T11:00:22Z', timestamp: '2026-06-10T11:00:22Z' },
+  { sha: 'd4e5f6a', message: 'traefik-manager: add routes at 2026-06-09T08:55:17Z', timestamp: '2026-06-09T08:55:17Z' },
+];
+
 export const DEMO_LOGS = {
   lines: [
     '192.168.1.10 - - [06/Apr/2026:12:00:01 +0000] "GET /api/health HTTP/2.0" 200 42 "-" "Go-http-client/2.0" 1 "websecure@internal" "http://backend:8080" 2ms',

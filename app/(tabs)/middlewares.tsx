@@ -12,6 +12,8 @@ import { useLayout } from '../../src/hooks/useLayout';
 import { useThemeStore } from '../../src/store/theme';
 import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
+import { useAgentsStore } from '../../src/store/agents';
+import { useAgents } from '../../src/hooks/useAgents';
 import { font, radius, spacing } from '../../src/theme';
 import { providerOf } from '../../src/utils';
 
@@ -25,6 +27,9 @@ export default function MiddlewaresScreen() {
 
   const c          = useThemeStore(s => s.colors);
   const openDrawer = useDrawerStore(s => s.open);
+  const activeAgentId     = useAgentsStore(s => s.activeAgentId);
+  const { data: agentList } = useAgents();
+  const agentSubtitle     = activeAgentId ? (agentList?.find(a => a.id === activeAgentId)?.name ?? 'Remote Agent') : undefined;
   const qc         = useQueryClient();
   const swipe      = useTabSwipe('middlewares');
   const scrollAnim = useRef(new Animated.Value(0)).current;
@@ -50,6 +55,7 @@ export default function MiddlewaresScreen() {
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar
         title="Middleware"
+        subtitle={agentSubtitle}
         scrollAnim={scrollAnim}
         onMenuPress={openDrawer}
         searchValue={search}

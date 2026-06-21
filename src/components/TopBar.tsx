@@ -69,6 +69,7 @@ function M3OverflowMenu({ visible, onDismiss, sections, anchorY }: MenuProps) {
 
 interface Props {
   title: string;
+  subtitle?: string;
   scrollAnim: Animated.Value;
   onMenuPress?: () => void;
   right?: React.ReactNode;
@@ -82,7 +83,7 @@ interface Props {
   wideFilters?: React.ReactNode;
 }
 
-export function TopBar({ title, scrollAnim, onMenuPress, right, accent, icon, searchValue, onSearchChange, searchPlaceholder, searchAccent, overflowSections, wideFilters }: Props) {
+export function TopBar({ title, subtitle, scrollAnim, onMenuPress, right, accent, icon, searchValue, onSearchChange, searchPlaceholder, searchAccent, overflowSections, wideFilters }: Props) {
   const c        = useThemeStore(s => s.colors);
   const isDark   = useThemeStore(s => s.isDark);
   const insets   = useSafeAreaInsets();
@@ -180,7 +181,10 @@ export function TopBar({ title, scrollAnim, onMenuPress, right, accent, icon, se
               </View>
             ) : null}
 
-            <Text style={[styles.title, { color: c.text }]} numberOfLines={1}>{title}</Text>
+            <View style={styles.titleBlock}>
+              <Text style={[styles.title, { color: c.text }]} numberOfLines={1}>{title}</Text>
+              {subtitle ? <Text style={[styles.subtitle, { color: c.muted }]} numberOfLines={1}>{subtitle}</Text> : null}
+            </View>
 
             <View style={{ flex: 1 }} />
 
@@ -261,11 +265,18 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     borderWidth: 1,
   },
+  titleBlock: {
+    paddingHorizontal: 10,
+  },
   title: {
     fontSize: 22,
     fontWeight: '700',
     letterSpacing: 0,
-    paddingHorizontal: 10,
+  },
+  subtitle: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 1,
   },
   wideInline: {
     flexDirection: 'row',

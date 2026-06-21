@@ -17,6 +17,7 @@ import { useThemeStore } from '../../src/store/theme';
 import { useEntrypoints, useMiddlewares, useSaveRoute } from '../../src/hooks/useRoutes';
 import { useConfigs } from '../../src/hooks/useConfigs';
 import { useSettings } from '../../src/hooks/useSettings';
+import { useTLSOptions } from '../../src/hooks/useTLSOptions';
 import { ConfigFilePicker } from '../../src/components/ConfigFilePicker';
 
 const PROTOCOLS = ['http', 'tcp', 'udp'] as const;
@@ -32,6 +33,7 @@ export default function NewRouteScreen() {
   const { data: settings }     = useSettings();
   const { data: entrypointData } = useEntrypoints();
   const { data: middlewareData } = useMiddlewares();
+  const { data: tlsOptionsList } = useTLSOptions();
   const resolvers   = (settings?.cert_resolver ?? '').split(',').map(r => r.trim()).filter(Boolean);
   const configFiles    = configs.data?.files ?? [];
   const configDirSet   = configs.data?.configDirSet ?? false;
@@ -62,6 +64,12 @@ export default function NewRouteScreen() {
 
   const [fUdpEntryPoint,    setFUdpEntryPoint]    = useState('');
   const [fUdpEntryPoints,   setFUdpEntryPoints]   = useState<string[]>([]);
+
+  const [fWildcardEnabled,  setFWildcardEnabled]  = useState(false);
+  const [fTlsMainDomain,    setFTlsMainDomain]    = useState('');
+  const [fTlsSanInput,      setFTlsSanInput]      = useState('');
+  const [fTlsSans,          setFTlsSans]          = useState<string[]>([]);
+  const [fTlsOptions,       setFTlsOptions]       = useState('');
 
   const domains = settings?.domains ?? [];
 
@@ -121,6 +129,11 @@ export default function NewRouteScreen() {
       data.passHostHeader    = fPassHost;
       data.insecureSkipVerify = fInsecure;
       data.certResolver      = fCertResolver;
+      if (fCertResolver !== '__disabled__' && fWildcardEnabled && fTlsMainDomain.trim()) {
+        data.tlsMainDomain = fTlsMainDomain.trim();
+        data.tlsSans       = fTlsSans;
+      }
+      if (fCertResolver !== '__disabled__' && fTlsOptions) data.tlsOptions = fTlsOptions;
     } else if (fProto === 'tcp') {
       data.tcpRule        = fTcpRule.trim();
       data.tcpEntryPoints = fTcpEntryPoints.join(', ');
@@ -513,6 +526,81 @@ export default function NewRouteScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
+            </>
+          )}
+
+          {(fProto === 'http' || fProto === 'tcp') && fCertResolver !== '__disabled__' && (
+            <>
+              {tlsOptionsList && tlsOptionsList.length > 0 && (
+                <>
+                  <Text style={[styles.fieldLabel, { color: c.muted }]}>TLS Profile</Text>
+                  <View style={styles.chipRow}>
+                    {[{ value: '', label: 'Default' }, ...tlsOptionsList.map(o => ({ value: o.name, label: o.name }))].map(opt => (
+                      <TouchableOpacity
+                        key={opt.value}
+                        onPress={() => setFTlsOptions(opt.value)}
+                        style={[styles.chip, { backgroundColor: fTlsOptions === opt.value ? c.secondaryContainer : 'transparent', borderColor: fTlsOptions === opt.value ? c.blue : c.border }]}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={{ color: fTlsOptions === opt.value ? c.onSecondaryContainer : c.text, fontSize: font.sm, fontWeight: '500' }}>{opt.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[styles.fieldLabel, { color: c.text }]}>Wildcard Certificate Domains</Text>
+                  <Text style={[styles.fieldHint, { color: c.muted }]}>Configure tls.domains for wildcard cert</Text>
+                </View>
+                <Switch value={fWildcardEnabled} onValueChange={setFWildcardEnabled} />
+              </View>
+              {fWildcardEnabled && (
+                <>
+                  <TextInput
+                    label="Main Domain"
+                    value={fTlsMainDomain}
+                    onChangeText={setFTlsMainDomain}
+                    placeholder="example.com"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    mode="outlined"
+                    style={{ backgroundColor: c.bg }}
+                  />
+                  <Text style={[styles.fieldLabel, { color: c.muted }]}>SANs (Subject Alt Names)</Text>
+                  <View style={styles.chipRow}>
+                    {fTlsSans.map(san => (
+                      <TouchableOpacity
+                        key={san}
+                        onPress={() => setFTlsSans(prev => prev.filter(s => s !== san))}
+                        style={[styles.chip, { backgroundColor: c.teal + '18', borderColor: c.teal + '55', flexDirection: 'row', alignItems: 'center', gap: 4 }]}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={{ color: c.teal, fontSize: font.sm, fontWeight: '500' }}>{san}</Text>
+                        <MaterialCommunityIcons name="close" size={12} color={c.teal} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <TextInput
+                      label="Add SAN"
+                      value={fTlsSanInput}
+                      onChangeText={setFTlsSanInput}
+                      placeholder="*.example.com"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      mode="outlined"
+                      style={{ backgroundColor: c.bg, flex: 1 }}
+                    />
+                    <TouchableOpacity
+                      style={[styles.chip, { backgroundColor: c.blue + '18', borderColor: c.blue + '55', alignSelf: 'center' }]}
+                      onPress={() => { if (fTlsSanInput.trim()) { setFTlsSans(prev => [...new Set([...prev, fTlsSanInput.trim()])]); setFTlsSanInput(''); } }}
+                    >
+                      <Text style={{ color: c.blue, fontSize: font.sm, fontWeight: '700' }}>Add</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
             </>
           )}
 

@@ -10,6 +10,8 @@ import { useLayout } from '../../src/hooks/useLayout';
 import { useThemeStore } from '../../src/store/theme';
 import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
+import { useAgentsStore } from '../../src/store/agents';
+import { useAgents } from '../../src/hooks/useAgents';
 import { type CrowdSecDecision, type CrowdSecAlert } from '../../src/api/crowdsec';
 import { font, radius, spacing } from '../../src/theme';
 
@@ -87,6 +89,9 @@ export default function CrowdSecScreen() {
   const c           = useThemeStore(s => s.colors);
   const openDrawer  = useDrawerStore(s => s.open);
   const swipe       = useTabSwipe('crowdsec');
+  const activeAgentId     = useAgentsStore(s => s.activeAgentId);
+  const { data: agentList } = useAgents();
+  const agentSubtitle     = activeAgentId ? (agentList?.find(a => a.id === activeAgentId)?.name ?? 'Remote Agent') : undefined;
   const scrollAnim  = useRef(new Animated.Value(0)).current;
   const qc          = useQueryClient();
   const { contentPadding, contentMaxWidth, listBottomPadding } = useLayout();
@@ -178,6 +183,7 @@ export default function CrowdSecScreen() {
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
       <TopBar
         title="CrowdSec"
+        subtitle={agentSubtitle}
         scrollAnim={scrollAnim}
         accent={c.red}
         icon="shield-bug-outline"

@@ -9,7 +9,7 @@ type Colors = typeof darkColors;
 export const WIZARD_TEMPLATES = new Set([
   'https-redirect', 'basic-auth', 'digest-auth', 'security-headers',
   'rate-limit', 'forward-auth', 'forward-auth-authentik', 'forward-auth-authelia',
-  'forward-auth-gatekeeper', 'ip-allowlist', 'ip-allowlist-private', 'cors-headers',
+  'forward-auth-gatekeeper', 'oidcAuth', 'ip-allowlist', 'ip-allowlist-private', 'cors-headers',
   'redirect-regex', 'strip-prefix', 'add-prefix', 'replace-path',
   'compress', 'retry', 'circuit-breaker', 'buffering', 'in-flight-req',
 ]);
@@ -326,10 +326,11 @@ function AutheliaWizard({ onYamlChange, c }: { onYamlChange: (y: string) => void
 }
 
 function GatekeeperWizard({ onYamlChange, c }: { onYamlChange: (y: string) => void; c: Colors }) {
-  const [baseUrl, setBaseUrl] = useState('');
-  const [policy, setPolicy]   = useState('');
-  const [trust, setTrust]     = useState(false);
-  const [headers, setHeaders] = useState('X-Auth-User\nX-Auth-Email');
+  const [baseUrl, setBaseUrl]         = useState('');
+  const [policy, setPolicy]           = useState('');
+  const [trust, setTrust]             = useState(false);
+  const [headers, setHeaders]         = useState('X-Auth-User\nX-Auth-Email');
+  const [fwdAuthHeader, setFwdHeader] = useState(false);
 
   useEffect(() => {
     const policyStr = policy.trim() ? `?policy=${policy.trim()}` : '';
@@ -342,8 +343,12 @@ function GatekeeperWizard({ onYamlChange, c }: { onYamlChange: (y: string) => vo
       lines.push('  authResponseHeaders:');
       headerLines.forEach(h => lines.push(`    - ${h}`));
     }
+    if (fwdAuthHeader) {
+      lines.push('  authRequestHeaders:');
+      lines.push('    - "Authorization"');
+    }
     onYamlChange(lines.join('\n'));
-  }, [baseUrl, policy, trust, headers]);
+  }, [baseUrl, policy, trust, headers, fwdAuthHeader]);
 
   return (
     <View style={styles.wizard}>
@@ -351,6 +356,91 @@ function GatekeeperWizard({ onYamlChange, c }: { onYamlChange: (y: string) => vo
       <WInput label="Policy (optional)" value={policy} onChange={setPolicy} c={c} placeholder="admin" />
       <WSw label="Trust Forward Header" value={trust} onChange={setTrust} c={c} />
       <WInput label="Response Headers (one per line)" value={headers} onChange={setHeaders} c={c} multiline />
+      <WSw label="Forward Authorization Header" value={fwdAuthHeader} onChange={setFwdHeader} c={c} />
+    </View>
+  );
+}
+
+const OIDC_DEFAULT_SCOPES = ['openid', 'email', 'profile'];
+
+function OIDCAuthWizard({ onYamlChange, c }: { onYamlChange: (y: string) => void; c: Colors }) {
+  const [providerUrl,     setProviderUrl]     = useState('');
+  const [clientId,        setClientId]        = useState('');
+  const [clientSecret,    setClientSecret]    = useState('');
+  const [sessionSecret,   setSessionSecret]   = useState('');
+  const [maxAge,          setMaxAge]          = useState('3600');
+  const [scopes,          setScopes]          = useState(OIDC_DEFAULT_SCOPES);
+  const [scopeInput,      setScopeInput]      = useState('');
+  const [bypassRules,     setBypassRules]     = useState('');
+
+  const toggleScope = (s: string) =>
+    setScopes(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+
+  const addScope = () => {
+    const v = scopeInput.trim();
+    if (v && !scopes.includes(v)) { setScopes(prev => [...prev, v]); setScopeInput(''); }
+  };
+
+  useEffect(() => {
+    const lines = [
+      'plugin:',
+      '  traefik-oidc-auth:',
+      `    provider:`,
+      `      url: "${providerUrl.trim()}"`,
+      `    clientId: "${clientId.trim()}"`,
+      `    clientSecret: "${clientSecret.trim()}"`,
+    ];
+    if (scopes.length > 0) {
+      lines.push('    scopes:');
+      scopes.forEach(s => lines.push(`      - "${s}"`));
+    }
+    lines.push('    session:');
+    lines.push(`      secret: "${sessionSecret.trim()}"`);
+    if (maxAge.trim()) lines.push(`      maxAge: ${parseInt(maxAge, 10) || 3600}`);
+    if (bypassRules.trim()) {
+      lines.push('    bypass:');
+      bypassRules.split('\n').map(s => s.trim()).filter(Boolean).forEach(r => lines.push(`      - "${r}"`));
+    }
+    onYamlChange(lines.join('\n'));
+  }, [providerUrl, clientId, clientSecret, sessionSecret, maxAge, scopes, bypassRules]);
+
+  return (
+    <View style={styles.wizard}>
+      <WInput label="Provider URL" value={providerUrl} onChange={setProviderUrl} c={c} placeholder="https://accounts.google.com" />
+      <WInput label="Client ID" value={clientId} onChange={setClientId} c={c} />
+      <WInput label="Client Secret" value={clientSecret} onChange={setClientSecret} c={c} />
+      <WInput label="Session Secret" value={sessionSecret} onChange={setSessionSecret} c={c} />
+      <WInput label="Session Max Age (seconds)" value={maxAge} onChange={setMaxAge} c={c} keyboardType="numeric" />
+      <Field label="Scopes" c={c}>
+        <View style={styles.chipRow}>
+          {scopes.map(s => (
+            <TouchableOpacity
+              key={s}
+              onPress={() => toggleScope(s)}
+              style={[styles.scopeChip, { backgroundColor: c.blue + '18', borderColor: c.blue + '55' }]}
+            >
+              <Text style={{ color: c.blue, fontSize: font.xs, fontWeight: '600' }}>{s} x</Text>
+            </TouchableOpacity>
+          ))}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <TextInput
+              value={scopeInput}
+              onChangeText={setScopeInput}
+              placeholder="add scope"
+              placeholderTextColor={c.muted}
+              style={{ color: c.text, fontSize: font.xs, minWidth: 80, backgroundColor: 'transparent' }}
+              autoCapitalize="none"
+              autoCorrect={false}
+              onSubmitEditing={addScope}
+              returnKeyType="done"
+            />
+            <TouchableOpacity onPress={addScope}>
+              <Text style={{ color: c.blue, fontSize: font.xs, fontWeight: '700' }}>Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Field>
+      <WInput label="Bypass Rules (one per line, optional)" value={bypassRules} onChange={setBypassRules} c={c} multiline placeholder={'/healthz\n/api/public'} />
     </View>
   );
 }
@@ -609,6 +699,7 @@ export function MiddlewareWizard({
     case 'forward-auth-authentik':  return <AuthentikWizard onYamlChange={onYamlChange} c={c} />;
     case 'forward-auth-authelia':   return <AutheliaWizard onYamlChange={onYamlChange} c={c} />;
     case 'forward-auth-gatekeeper': return <GatekeeperWizard onYamlChange={onYamlChange} c={c} />;
+    case 'oidcAuth':                return <OIDCAuthWizard onYamlChange={onYamlChange} c={c} />;
     case 'ip-allowlist':            return <IpAllowlistWizard onYamlChange={onYamlChange} c={c} />;
     case 'ip-allowlist-private':    return <IpAllowlistPrivateWizard onYamlChange={onYamlChange} c={c} />;
     case 'cors-headers':            return <CorsHeadersWizard onYamlChange={onYamlChange} c={c} />;
@@ -661,4 +752,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addBtnText: { fontSize: font.sm, fontWeight: '600' },
+  chipRow:   { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  scopeChip: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm, borderWidth: 1 },
 });

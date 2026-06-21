@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useTabsStore } from '../store/tabs';
 
-const BASE_TABS = ['index', 'routes', 'middlewares', 'live', 'settings'];
+const BASE_TABS = ['index', 'routes', 'middlewares', 'live'];
 const TABS_WITH_LOGS = ['index', 'routes', 'middlewares', 'live', 'logs'];
 
 export function useTabSwipe(tabName: string) {

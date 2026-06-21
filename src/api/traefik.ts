@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, activeAgentId } from './client';
 
 export interface TraefikOverview {
   http: { routers: { total: number; warnings: number; errors: number };
@@ -35,8 +35,45 @@ export interface TraefikEntrypoint {
   address: string;
 }
 
-export function getOverview(): Promise<TraefikOverview> {
-  return apiFetch('/api/traefik/overview');
+const isFileEntry = (r: any) => ((r?.provider || (r?.name ?? '').split('@')[1] || '') === 'file');
+
+function countStatus(items: any): { total: number; warnings: number; errors: number } {
+  const arr = (Array.isArray(items) ? items : []).filter(isFileEntry);
+  let warnings = 0, errors = 0;
+  for (const it of arr) {
+    const s = String(it?.status ?? '').toLowerCase();
+    if (s === 'warning') warnings++;
+    else if (s === 'error') errors++;
+  }
+  return { total: arr.length, warnings, errors };
+}
+
+export async function getOverview(): Promise<TraefikOverview> {
+  if (!activeAgentId()) {
+    return apiFetch('/api/traefik/overview');
+  }
+  // Agents: build a file-provider overview from the lists, matching the routes/
+  // services/middlewares tabs (Traefik's /api/overview counts all providers).
+  const [routers, services, mws] = await Promise.all([
+    apiFetch<any>('/api/traefik/routers'),
+    apiFetch<any>('/api/traefik/services'),
+    apiFetch<any>('/api/traefik/middlewares'),
+  ]);
+  return {
+    http: {
+      routers:     countStatus(routers?.http),
+      services:    countStatus(services?.http),
+      middlewares: countStatus(mws?.http),
+    },
+    tcp: {
+      routers:  countStatus(routers?.tcp),
+      services: countStatus(services?.tcp),
+    },
+    udp: {
+      routers:  countStatus(routers?.udp),
+      services: countStatus(services?.udp),
+    },
+  } as TraefikOverview;
 }
 
 export async function getServices(): Promise<TraefikService[]> {

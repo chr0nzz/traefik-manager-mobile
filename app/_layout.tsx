@@ -3,7 +3,7 @@ import { useMaterial3Theme } from '@pchmn/expo-material3-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Appearance, AppState, AppStateStatus, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { AppState, AppStateStatus, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider, Text } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import { useConnection } from '../src/store/connection';
 import { useThemeStore } from '../src/store/theme';
 import { useAppLock } from '../src/store/applock';
 import { useTabsStore } from '../src/store/tabs';
+import { useAgentsStore } from '../src/store/agents';
 import { darkColors, lightColors, dynamicColorsFromM3 } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -66,6 +67,7 @@ function ConnectionGate() {
   const { load: loadTheme, applySystem }                    = useThemeStore();
   const { load: loadAppLock }                               = useAppLock();
   const { load: loadTabs }                                  = useTabsStore();
+  const { load: loadAgents }                               = useAgentsStore();
   const router     = useRouter();
   const segments   = useSegments();
   const didRoute   = useRef(false);
@@ -73,8 +75,13 @@ function ConnectionGate() {
   const systemIsDark = colorScheme === 'dark';
 
   useEffect(() => {
-    const initDark = Appearance.getColorScheme() === 'dark';
-    Promise.all([loadConnection(), loadTheme(initDark), loadAppLock(), loadTabs()]).then(() => SplashScreen.hideAsync());
+    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs(), loadAgents()]).then(() => {
+      // Re-assert the live system scheme after the async load so a "system" theme
+      // can't be left on a stale value the one-shot load may have read at cold start.
+      useThemeStore.getState().applySystem(systemIsDark);
+      useTabsStore.getState().selectServer(useAgentsStore.getState().activeAgentId);
+      SplashScreen.hideAsync();
+    });
   }, []);
 
   useEffect(() => {
@@ -224,6 +231,8 @@ export default function RootLayout() {
           <Stack.Screen name="settings/backups" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="settings/about" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="settings/traefik" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/agents" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="settings/git-backup" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="log-detail" options={{ presentation: 'modal', headerShown: false }} />
         </Stack>
         <AppLockGate />

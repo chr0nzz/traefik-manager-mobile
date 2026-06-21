@@ -19,6 +19,8 @@ import { useThemeStore, ThemeMode } from '../store/theme';
 import { useTabsStore } from '../store/tabs';
 import { useConnection } from '../store/connection';
 import { useAppLock } from '../store/applock';
+import { useAgentsStore } from '../store/agents';
+import { useAgents } from '../hooks/useAgents';
 import { useBackups } from '../hooks/useBackups';
 import { useSettings } from '../hooks/useSettings';
 import { font, radius, spacing } from '../theme';
@@ -75,6 +77,12 @@ export function NavigationDrawer() {
   const { data: backups } = useBackups();
   const { data: settings } = useSettings();
   const backupCount = backups?.length ?? 0;
+
+  const activeAgentId = useAgentsStore(s => s.activeAgentId);
+  const { data: agentList } = useAgents();
+  const activeServerLabel = activeAgentId
+    ? (agentList?.find(a => a.id === activeAgentId)?.name ?? 'Remote Agent')
+    : 'Host';
 
   const DRAWER_WIDTH = Math.min(320, width - 56);
 
@@ -160,6 +168,13 @@ export function NavigationDrawer() {
             label="Server"
             value={demoMode ? 'Demo' : baseUrl ? baseUrl.replace(/^https?:\/\//, '') : 'Not connected'}
             onPress={() => navigate('/settings/server')}
+            c={c}
+          />
+          <DrawerItem
+            icon="swap-horizontal"
+            label="Active Server"
+            value={activeServerLabel}
+            onPress={() => navigate('/settings/agents')}
             c={c}
           />
 

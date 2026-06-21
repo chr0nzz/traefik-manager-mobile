@@ -14,7 +14,7 @@ import { Badge, PillIconBtn, ProtocolBadge } from './StatusBadge';
 
 interface Props { middleware: Middleware; editMode?: boolean }
 
-const SKIP_KEYS = new Set(['name', 'type', 'status', 'provider', '_proto']);
+const SKIP_KEYS = new Set(['name', 'type', 'status', 'provider', '_proto', 'usedBy', 'configFile', 'yaml']);
 
 function formatConfig(mw: Middleware): string {
   const entries = Object.entries(mw).filter(([k]) => !SKIP_KEYS.has(k));

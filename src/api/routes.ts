@@ -1,4 +1,4 @@
-import { apiFetch, apiFormPost, apiPost } from './client';
+import { apiFetch, apiFormPost, apiPost, activeAgentId } from './client';
 
 export interface Route {
   id: string;
@@ -30,11 +30,13 @@ export function domainsFromRule(rule: string): string[] {
 }
 
 export function getRoutes(): Promise<{ apps: Route[]; middlewares: unknown[] }> {
-  return apiFetch('/api/routes');
+  const agentId = activeAgentId();
+  return apiFetch(agentId ? `/api/agents/${agentId}/routes` : '/api/routes');
 }
 
 export function toggleRoute(id: string, enable: boolean): Promise<{ ok: boolean; message?: string }> {
-  return apiPost(`/api/routes/${encodeURIComponent(id)}/toggle`, { enable });
+  const agentId = activeAgentId();
+  return apiPost(`/api/routes/${encodeURIComponent(id)}/toggle`, agentId ? { enable, agent_id: agentId } : { enable });
 }
 
 export interface RouteFormData {
@@ -55,6 +57,9 @@ export interface RouteFormData {
   tcpRule?: string;
   tcpEntryPoints?: string;
   udpEntryPoint?: string;
+  tlsMainDomain?: string;
+  tlsSans?: string[];
+  tlsOptions?: string;
 }
 
 export function saveRoute(
@@ -82,10 +87,16 @@ export function saveRoute(
     base.certResolver      = data.certResolver ?? '';
     base.insecureSkipVerify = data.insecureSkipVerify ? 'true' : '';
     if (data.httpRule) base.httpRule = data.httpRule;
+    if (data.tlsMainDomain) base.tls_main_domain = data.tlsMainDomain;
+    if (data.tlsSans && data.tlsSans.length > 0) base['tls_sans[]'] = data.tlsSans;
+    if (data.tlsOptions) base.tls_options = data.tlsOptions;
   } else if (data.protocol === 'tcp') {
     base.tcpRule     = data.tcpRule ?? '';
     base.entryPoints = ['', data.tcpEntryPoints || ''];
     base.certResolver = data.certResolver ?? '';
+    if (data.tlsMainDomain) base.tls_main_domain = data.tlsMainDomain;
+    if (data.tlsSans && data.tlsSans.length > 0) base['tls_sans[]'] = data.tlsSans;
+    if (data.tlsOptions) base.tls_options = data.tlsOptions;
   } else if (data.protocol === 'udp') {
     base.udpEntryPoint = data.udpEntryPoint ?? '';
   }

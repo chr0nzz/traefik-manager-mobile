@@ -228,7 +228,6 @@ export default function TabsLayout() {
           <Tabs.Screen name="plugins"  options={{ title: 'Plugins',      href: showPluginsTab  ? undefined : null }} />
           <Tabs.Screen name="crowdsec" options={{ title: 'CrowdSec',     href: showCrowdSecTab ? undefined : null }} />
           <Tabs.Screen name="backups"  options={{ href: null }} />
-          <Tabs.Screen name="settings" options={{ href: null }} />
         </Tabs>
         {!isWide && <M3NavBar />}
       </View>
