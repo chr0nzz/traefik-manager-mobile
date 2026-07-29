@@ -16,6 +16,11 @@ export interface Route {
   configFile?: string;
   provider?: string;
   insecureSkipVerify?: boolean;
+  servers?: string[];
+  sticky?: Record<string, unknown>;
+  stickyEnabled?: boolean;
+  healthCheck?: Record<string, unknown>;
+  priority?: number | null;
 }
 
 export function domainFromRule(rule: string): string {
@@ -67,10 +72,16 @@ export function saveRoute(
   isEdit = false,
   originalId = '',
 ): Promise<{ ok: boolean; message?: string }> {
+  const slot = data.protocol === 'tcp' ? 1 : data.protocol === 'udp' ? 2 : 0;
+  const ips    = ['', '', ''];
+  const ports  = ['', '', ''];
+  ips[slot]    = data.targetIp;
+  ports[slot]  = data.targetPort;
+
   const base: Record<string, string | string[]> = {
     serviceName: data.serviceName,
-    targetIp:    data.targetIp,
-    targetPort:  data.targetPort,
+    targetIp:    ips,
+    targetPort:  ports,
     protocol:    data.protocol,
     configFile:  data.configFile ?? '',
     isEdit:      isEdit ? 'true' : 'false',

@@ -44,6 +44,8 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
   const st     = route.enabled ? 'ok' : 'unknown';
   const domain = domainFromRule(route.rule);
   const mws    = Array.isArray(route.middlewares) ? route.middlewares : [];
+  const extraBackends = Math.max(0, (route.servers?.length ?? 1) - 1);
+  const hasHealthCheck = !!route.healthCheck && Object.keys(route.healthCheck).length > 0;
 
   const openUrl = () => {
     if (!domain) return;
@@ -117,7 +119,15 @@ export function RouteCard({ route, onToggle, toggling, editMode = false }: Props
       )}
       {!!route.target && (
         <View style={[styles.field, { backgroundColor: c.bg }]}>
-          <Text style={[styles.fieldLabel, { color: c.muted }]}>TARGET</Text>
+          <View style={styles.fieldHeader}>
+            <Text style={[styles.fieldLabel, { color: c.muted }]}>TARGET</Text>
+            <View style={styles.lbBadges}>
+              {extraBackends > 0 && <SmallChip label={`+${extraBackends}`} color={c.muted} c={c} />}
+              {route.stickyEnabled && <SmallChip label="sticky" color={c.muted} c={c} />}
+              {hasHealthCheck && <SmallChip label="health" color={c.muted} c={c} />}
+              {typeof route.priority === 'number' && <SmallChip label={`p${route.priority}`} color={c.muted} c={c} />}
+            </View>
+          </View>
           <Text style={[styles.fieldValue, { color: c.green }]} numberOfLines={1}>{route.target}</Text>
         </View>
       )}
@@ -167,6 +177,8 @@ const styles = StyleSheet.create({
   service:     { fontSize: font.sm },
   field:       { borderRadius: radius.sm, padding: spacing.sm },
   fieldLabel:  { fontSize: font.xs, fontWeight: '700', letterSpacing: 0.5, marginBottom: 2 },
+  fieldHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  lbBadges:    { flexDirection: 'row', gap: 4, alignItems: 'center', marginBottom: 2 },
   fieldValue:  { fontSize: font.sm, fontFamily: 'monospace' },
   mwRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2 },
   mwChip:      { paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.sm, borderWidth: 1 },
