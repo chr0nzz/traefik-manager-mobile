@@ -44,11 +44,35 @@ export function toggleRoute(id: string, enable: boolean): Promise<{ ok: boolean;
   return apiPost(`/api/routes/${encodeURIComponent(id)}/toggle`, agentId ? { enable, agent_id: agentId } : { enable });
 }
 
+export interface Backend {
+  scheme?: string;
+  host: string;
+  port: string;
+}
+
+export interface StickyForm {
+  enabled: boolean;
+  cookieName?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+}
+
+export interface HealthCheckForm {
+  enabled: boolean;
+  path?: string;
+  interval?: string;
+  timeout?: string;
+}
+
 export interface RouteFormData {
   serviceName: string;
   protocol: string;
   targetIp: string;
   targetPort: string;
+  backends?: Backend[];
+  sticky?: StickyForm;
+  healthCheck?: HealthCheckForm;
+  priority?: number | null;
   configFile?: string;
   subdomain?: string;
   domains?: string[];
@@ -77,6 +101,9 @@ export function saveRoute(
   const ports  = ['', '', ''];
   ips[slot]    = data.targetIp;
   ports[slot]  = data.targetPort;
+
+  const extra = (data.backends ?? []).filter(b => b.host.trim());
+  const managesBackends = extra.length > 0;
 
   const base: Record<string, string | string[]> = {
     serviceName: data.serviceName,
@@ -110,6 +137,25 @@ export function saveRoute(
     if (data.tlsOptions) base.tls_options = data.tlsOptions;
   } else if (data.protocol === 'udp') {
     base.udpEntryPoint = data.udpEntryPoint ?? '';
+  }
+
+  if (managesBackends) {
+    const servers = [
+      { scheme: data.scheme ?? 'http', host: data.targetIp, port: data.targetPort },
+      ...extra,
+    ].filter(b => b.host.trim());
+
+    const payload: Record<string, unknown> = { servers };
+    if (data.protocol === 'http') {
+      payload.sticky      = data.sticky      ?? { enabled: false };
+      payload.healthCheck = data.healthCheck ?? { enabled: false };
+    }
+    if (typeof data.priority === 'number') payload.priority = data.priority;
+
+    const field = data.protocol === 'tcp' ? 'backendsJsonTcp'
+                : data.protocol === 'udp' ? 'backendsJsonUdp'
+                : 'backendsJsonHttp';
+    base[field] = JSON.stringify(payload);
   }
 
   return apiFormPost('/save', base);

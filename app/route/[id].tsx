@@ -10,10 +10,11 @@ import {
   View,
 } from 'react-native';
 import { SegmentedButtons, Switch, Text, TextInput } from 'react-native-paper';
+import BackendRows from '../../src/components/BackendRows';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RouteFormData, domainFromRule, domainsFromRule } from '../../src/api/routes';
+import { Backend, HealthCheckForm, RouteFormData, StickyForm, domainFromRule, domainsFromRule } from '../../src/api/routes';
 import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
 import { useRoutes, useDeleteRoute, useSaveRoute, useToggleRoute, useEntrypoints, useMiddlewares } from '../../src/hooks/useRoutes';
@@ -28,12 +29,17 @@ import { ConfirmDialog } from '../../src/components/ConfirmDialog';
 
 function parseTarget(target: string): { ip: string; port: string } {
   if (!target) return { ip: '', port: '' };
-  try {
-    const u = new URL(target);
-    return { ip: u.hostname, port: u.port || '' };
-  } catch {
-    return { ip: target, port: '' };
+  const bare     = target.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+  const slash    = bare.indexOf('/');
+  const hostPort = slash >= 0 ? bare.slice(0, slash) : bare;
+  const v6       = hostPort.match(/^(\[[^\]]+\]):(\d+)$/);
+  if (v6) return { ip: v6[1], port: v6[2] };
+  if (hostPort.startsWith('[')) return { ip: hostPort, port: '' };
+  const i = hostPort.lastIndexOf(':');
+  if (i > 0 && /^\d+$/.test(hostPort.slice(i + 1))) {
+    return { ip: hostPort.slice(0, i), port: hostPort.slice(i + 1) };
   }
+  return { ip: hostPort, port: '' };
 }
 
 const PROTOCOLS = ['http', 'tcp', 'udp'] as const;
@@ -148,6 +154,10 @@ export default function RouteDetailScreen() {
   const [fIp,             setFIp]             = useState('');
   const [fPort,           setFPort]           = useState('');
   const [fConfigFile,     setFConfigFile]     = useState('');
+  const [fBackends,       setFBackends]       = useState<Backend[]>([]);
+  const [fSticky,         setFSticky]         = useState<StickyForm | undefined>(undefined);
+  const [fHealthCheck,    setFHealthCheck]    = useState<HealthCheckForm | undefined>(undefined);
+  const [fPriority,       setFPriority]       = useState<number | null>(null);
   const [saving,          setSaving]          = useState(false);
   const [saveErr,         setSaveErr]         = useState('');
   const [confirmDelete,   setConfirmDelete]   = useState(false);
@@ -203,6 +213,21 @@ export default function RouteDetailScreen() {
     setFProto(proto);
     setFIp(p.ip);
     setFPort(p.port);
+    setFBackends((r.servers ?? []).slice(1).map((srv: string) => {
+      const q = parseTarget(srv);
+      return { scheme: srv.startsWith('https') ? 'https' : 'http', host: q.ip, port: q.port };
+    }));
+    const cookie = (r.sticky ?? {}) as Record<string, unknown>;
+    setFSticky(r.stickyEnabled
+      ? { enabled: true, cookieName: String(cookie.name ?? ''),
+          secure: !!cookie.secure, httpOnly: !!cookie.httpOnly }
+      : undefined);
+    const hc = (r.healthCheck ?? {}) as Record<string, unknown>;
+    setFHealthCheck(hc && Object.keys(hc).length > 0
+      ? { enabled: true, path: String(hc.path ?? ''),
+          interval: String(hc.interval ?? ''), timeout: String(hc.timeout ?? '') }
+      : undefined);
+    setFPriority(typeof r.priority === 'number' ? r.priority : null);
     setFConfigFile(r.configFile || configFiles[0]?.label || '');
     setSaveErr('');
 
@@ -300,6 +325,10 @@ export default function RouteDetailScreen() {
       serviceName: fName.trim(),
       protocol:    fProto,
       targetIp:    fIp.trim(),
+      backends:    fBackends,
+      sticky:      fSticky,
+      healthCheck: fHealthCheck,
+      priority:    fPriority,
       targetPort:  fPort.trim(),
       configFile:  fConfigFile,
     };
@@ -561,6 +590,8 @@ export default function RouteDetailScreen() {
               placeholder="e.g. 192.168.1.10" keyboardType="url" />
             <FormField label="TARGET PORT" value={fPort} onChange={setFPort} c={c}
               placeholder="e.g. 8080" keyboardType="numeric" />
+
+            <BackendRows backends={fBackends} onChange={setFBackends} protocol={fProto} upper />
 
             {fProto === 'http' && !entrypointData?.length && (
               <FormField label="ENTRY POINTS (comma-separated)" value={fEntryPoints.join(', ')} onChange={v => setFEntryPoints(v.split(',').map(s => s.trim()).filter(Boolean))} c={c}

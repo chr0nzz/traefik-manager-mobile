@@ -8,10 +8,11 @@ import {
   View,
 } from 'react-native';
 import { Button, SegmentedButtons, Switch, Text, TextInput } from 'react-native-paper';
+import BackendRows from '../../src/components/BackendRows';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RouteFormData } from '../../src/api/routes';
+import { Backend, RouteFormData } from '../../src/api/routes';
 import { font, radius, spacing } from '../../src/theme';
 import { useThemeStore } from '../../src/store/theme';
 import { useEntrypoints, useMiddlewares, useSaveRoute } from '../../src/hooks/useRoutes';
@@ -52,6 +53,7 @@ export default function NewRouteScreen() {
   const [fEntryPoints,      setFEntryPoints]      = useState<string[]>([]);
   const [fMws,              setFMws]              = useState<string[]>([]);
   const [fScheme,           setFScheme]           = useState('http');
+  const [fBackends,         setFBackends]         = useState<Backend[]>([]);
   const [fPassHost,         setFPassHost]         = useState(true);
   const [fInsecure,         setFInsecure]         = useState(false);
   const [fCertResolver,     setFCertResolver]     = useState('');
@@ -113,6 +115,7 @@ export default function NewRouteScreen() {
       serviceName: fName.trim(),
       protocol:    fProto,
       targetIp:    fIp.trim(),
+      backends:    fBackends,
       targetPort:  fPort.trim(),
       configFile:  fConfigFile,
     };
@@ -301,6 +304,8 @@ export default function NewRouteScreen() {
             mode="outlined"
             style={{ backgroundColor: c.bg }}
           />
+
+          <BackendRows backends={fBackends} onChange={setFBackends} protocol={fProto} />
 
           {fProto === 'http' && (
             <>
