@@ -24,7 +24,7 @@ export function useAgentHealth(id: string) {
   const demoMode = useConnection(s => s.demoMode);
   return useQuery<AgentHealth>({
     queryKey: ['agent-health', id],
-    queryFn: demoMode ? () => ({ ok: true, version: '1.5.0', latency_ms: 12 }) : () => getAgentHealth(id),
+    queryFn: demoMode ? () => ({ ok: true, version: '1.9.0', latency_ms: 12 }) : () => getAgentHealth(id),
     staleTime: 30_000,
     refetchInterval: 30_000,
     retry: 1,
