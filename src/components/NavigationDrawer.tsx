@@ -177,6 +177,12 @@ export function NavigationDrawer() {
             onPress={() => navigate('/settings/agents')}
             c={c}
           />
+          <DrawerItem
+            icon="ip-network-outline"
+            label="Client IP"
+            onPress={() => navigate('/settings/client-ip')}
+            c={c}
+          />
 
           <SectionLabel title="Tabs" c={c} />
 

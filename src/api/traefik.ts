@@ -99,6 +99,23 @@ export function getManagerVersion(): Promise<ManagerVersion> {
   return apiFetch('/api/manager/version');
 }
 
+export type IpClass = 'public' | 'private' | 'cgnat' | 'loopback' | 'link-local' | 'unknown';
+
+export interface ClientIpDiagnostic {
+  effective_ip: string;
+  effective_class: IpClass;
+  socket_peer: string;
+  socket_peer_class: IpClass;
+  proxy_hops: number;
+  forwarded_for_chain: string[];
+  headers: Record<string, string>;
+  classes: Record<string, IpClass>;
+}
+
+export function getClientIpDiagnostic(): Promise<ClientIpDiagnostic> {
+  return apiFetch('/api/diagnostics/client-ip');
+}
+
 export function getEntrypoints(): Promise<TraefikEntrypoint[]> {
   return apiFetch('/api/traefik/entrypoints');
 }
