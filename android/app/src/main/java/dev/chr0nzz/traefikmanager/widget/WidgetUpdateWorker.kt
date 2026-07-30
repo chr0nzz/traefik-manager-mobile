@@ -171,7 +171,6 @@ class WidgetUpdateWorker(ctx: Context, params: WorkerParameters) : CoroutineWork
         ids.forEach { id ->
             updateAppWidgetState(ctx, id) { prefs ->
                 prefs[StatusWidget.offlineKey] = true
-                prefs[StatusWidget.updatedAtKey] = System.currentTimeMillis()
             }
         }
         StatusWidget().updateAll(ctx)
