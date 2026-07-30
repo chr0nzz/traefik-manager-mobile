@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -84,8 +84,6 @@ private fun Color.toArgb(): Int = android.graphics.Color.argb(
 class StatusWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        WidgetUpdateWorker.enqueueImmediate(context)
-
         val glanceColors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             ColorProviders(
                 light = dynamicLightColorScheme(context),
@@ -105,13 +103,16 @@ class StatusWidget : GlanceAppWidget() {
     @Composable
     private fun WidgetContent() {
         val prefs      = currentState<Preferences>()
-        val ok         = prefs[okKey]         ?: -1
-        val warn       = prefs[warnKey]       ?: -1
-        val errorCount = prefs[errorCountKey] ?: -1
+        val servers    = parseServers(prefs[serversJsonKey])
         val offline    = prefs[offlineKey]    ?: false
         val updatedAt  = prefs[updatedAtKey]
-        val hasData    = ok >= 0
-        val total      = if (hasData) (ok + warn + errorCount).coerceAtLeast(0) else 0
+        val hasData    = servers != null
+        val reachable  = servers.orEmpty().filter { it.reachable }
+        val down       = servers.orEmpty().count { !it.reachable }
+        val ok         = reachable.sumOf { it.ok }
+        val warn       = reachable.sumOf { it.warn }
+        val errorCount = reachable.sumOf { it.err }
+        val total      = (ok + warn + errorCount).coerceAtLeast(0)
         fun pct(n: Int) = if (total > 0) "${n * 100 / total}%" else "0%"
 
         val ctx    = LocalContext.current
@@ -143,11 +144,18 @@ class StatusWidget : GlanceAppWidget() {
                                 fontWeight = FontWeight.Bold,
                             )
                         )
-                        if (offline && hasData) {
+                        val sub = when {
+                            offline && hasData                    -> "offline"
+                            down > 0 && (servers?.size ?: 0) > 1  -> "${servers!!.size} servers \u00b7 $down down"
+                            down > 0                              -> "offline"
+                            (servers?.size ?: 0) > 1              -> "${servers!!.size} servers"
+                            else                                  -> null
+                        }
+                        if (sub != null) {
                             Text(
-                                "offline",
+                                sub,
                                 style = TextStyle(
-                                    color    = ColorProvider(wc.tertiary),
+                                    color    = ColorProvider(if (down > 0 || offline) wc.tertiary else wc.onBgMuted),
                                     fontSize = 9.sp,
                                 )
                             )
@@ -267,10 +275,27 @@ class StatusWidget : GlanceAppWidget() {
     }
 
     companion object {
-        val okKey         = intPreferencesKey("ok")
-        val warnKey       = intPreferencesKey("warn")
-        val errorCountKey = intPreferencesKey("error_count")
-        val offlineKey    = booleanPreferencesKey("offline")
-        val updatedAtKey  = longPreferencesKey("updated_at")
+        val serversJsonKey = stringPreferencesKey("servers_json")
+        val offlineKey     = booleanPreferencesKey("offline")
+        val updatedAtKey   = longPreferencesKey("updated_at")
+
+        fun parseServers(json: String?): List<ServerStatus>? {
+            if (json.isNullOrEmpty()) return null
+            return try {
+                val arr = org.json.JSONArray(json)
+                (0 until arr.length()).mapNotNull { i ->
+                    val o = arr.optJSONObject(i) ?: return@mapNotNull null
+                    ServerStatus(
+                        name      = o.optString("name", "?"),
+                        ok        = o.optInt("ok", 0),
+                        warn      = o.optInt("warn", 0),
+                        err       = o.optInt("err", 0),
+                        reachable = o.optBoolean("reachable", false),
+                    )
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 }

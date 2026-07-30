@@ -53,6 +53,7 @@ class MainApplication : Application(), ReactApplication {
     }
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
     WidgetUpdateWorker.enqueuePeriodicWork(this)
+    WidgetUpdateWorker.enqueueImmediate(this)
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
