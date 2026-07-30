@@ -9,6 +9,9 @@ import { useLogs } from '../../src/hooks/useLogs';
 import { useLayout } from '../../src/hooks/useLayout';
 import { useTabsStore } from '../../src/store/tabs';
 import { useThemeStore } from '../../src/store/theme';
+import { useGeoIp } from '../../src/hooks/useGeoIp';
+import { flagEmoji } from '../../src/api/geoip';
+import CountryStrip from '../../src/components/CountryStrip';
 import { useDrawerStore } from '../../src/store/drawer';
 import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useRouter } from 'expo-router';
@@ -29,7 +32,38 @@ interface ParsedLog {
   raw: string;
 }
 
+function fmtDuration(ns: number): string {
+  if (!ns) return '';
+  if (ns >= 1e9) return (ns / 1e9).toFixed(2) + 's';
+  if (ns >= 1e6) return Math.round(ns / 1e6) + 'ms';
+  if (ns >= 1e3) return Math.round(ns / 1e3) + '\u00b5s';
+  return ns + 'ns';
+}
+
 function parseLogLine(line: string): ParsedLog | null {
+  const trimmed = line.trimStart();
+  if (trimmed.startsWith('{')) {
+    try {
+      const j = JSON.parse(trimmed);
+      if (j.RequestMethod || j.RequestPath || j.DownstreamStatus) {
+        const durNs = typeof j.Duration === 'number' ? j.Duration : parseInt(j.Duration, 10) || 0;
+        const size  = j.DownstreamContentSize != null ? j.DownstreamContentSize
+                    : (j.OriginContentSize != null ? j.OriginContentSize : '');
+        return {
+          ip:         j.ClientHost || String(j.ClientAddr || '').split(':')[0] || '',
+          date:       String(j.StartUTC || j.StartLocal || j.time || '').replace('T', ' ').split('.')[0],
+          method:     j.RequestMethod || '',
+          path:       j.RequestPath || '',
+          status:     parseInt(j.DownstreamStatus, 10) || parseInt(j.OriginStatus, 10) || 0,
+          size:       String(size) === '' ? '\u2014' : String(size),
+          service:    j.ServiceName || '',
+          serviceUrl: j.ServiceURL || j.ServiceAddr || '',
+          duration:   fmtDuration(durNs),
+          raw:        line,
+        };
+      }
+    } catch {}
+  }
   // Full Traefik CLF+extra: ... "referer" "ua" count "router@provider" "serviceURL" duration
   const full = line.match(
     /^(\S+) \S+ \S+ \[([^\]]+)\] "(\w+) (\S+)[^"]*" (\d+) (\S+) "[^"]*" "[^"]*" \S+ "([^"]*)" "([^"]*)" (\S+)/
@@ -79,7 +113,7 @@ function methodColor(method: string, colors: ReturnType<typeof useThemeStore.get
   }
 }
 
-function LogCard({ item, c, onPress }: { item: string; c: ReturnType<typeof useThemeStore.getState>['colors']; onPress: () => void }) {
+function LogCard({ item, c, onPress, flag }: { item: string; c: ReturnType<typeof useThemeStore.getState>['colors']; onPress: () => void; flag?: string }) {
   const parsed = parseLogLine(item);
 
   if (!parsed) {
@@ -107,7 +141,7 @@ function LogCard({ item, c, onPress }: { item: string; c: ReturnType<typeof useT
         </Text>
       </View>
       <View style={styles.cardBottom}>
-        <Text style={[styles.meta, { color: c.muted }]}>{parsed.ip}</Text>
+        <Text style={[styles.meta, { color: c.muted }]}>{!!flag && flag + ' '}{parsed.ip}</Text>
         <Text style={[styles.metaDot, { color: c.border }]}>·</Text>
         <Text style={[styles.meta, { color: c.muted }]}>{parsed.date}</Text>
         {!!parsed.size && parsed.size !== '—' && (
@@ -152,12 +186,22 @@ export default function LogsScreen() {
   const lines = data?.lines ?? [];
   const error = data?.error;
 
+  const lineIps = useMemo(() => lines.map(l => parseLogLine(l)?.ip ?? ''), [lines]);
+  const geo = useGeoIp(lineIps);
+  const [geoCountry, setGeoCountry] = useState<string | null>(null);
+
   const displayLines = useMemo(() => {
     const reversed = [...lines].reverse();
-    if (!search.trim()) return reversed;
-    const q = search.toLowerCase();
-    return reversed.filter(l => l.toLowerCase().includes(q));
-  }, [lines, search]);
+    const q = search.trim().toLowerCase();
+    return reversed.filter(l => {
+      if (q && !l.toLowerCase().includes(q)) return false;
+      if (geoCountry) {
+        const ip = parseLogLine(l)?.ip ?? '';
+        if (geo.results[ip]?.country_code !== geoCountry) return false;
+      }
+      return true;
+    });
+  }, [lines, search, geoCountry, geo.results]);
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]} {...swipe}>
@@ -218,6 +262,9 @@ export default function LogsScreen() {
         <Animated.FlatList
           data={displayLines}
           keyExtractor={(_, i) => String(i)}
+          ListHeaderComponent={geo.enabled ? (
+            <CountryStrip countries={geo.countries} active={geoCountry} onSelect={setGeoCountry} />
+          ) : null}
           contentContainerStyle={[styles.listContent, { paddingHorizontal: contentPadding, paddingBottom: listBottomPadding, alignSelf: 'center', width: '100%', maxWidth: contentMaxWidth }]}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
@@ -231,7 +278,7 @@ export default function LogsScreen() {
               tintColor={c.blue}
             />
           }
-          renderItem={({ item }) => <LogCard item={item} c={c} onPress={() => router.push({ pathname: '/log-detail', params: { raw: item } })} />}
+          renderItem={({ item }) => <LogCard item={item} c={c} flag={flagEmoji(geo.results[parseLogLine(item)?.ip ?? '']?.country_code ?? '')} onPress={() => router.push({ pathname: '/log-detail', params: { raw: item } })} />}
         />
       )}
     </View>

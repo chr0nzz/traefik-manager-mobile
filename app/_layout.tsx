@@ -3,7 +3,7 @@ import { useMaterial3Theme } from '@pchmn/expo-material3-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Appearance, AppState, AppStateStatus, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider, Text } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -75,10 +75,10 @@ function ConnectionGate() {
   const systemIsDark = colorScheme === 'dark';
 
   useEffect(() => {
-    Promise.all([loadConnection(), loadTheme(systemIsDark), loadAppLock(), loadTabs(), loadAgents()]).then(() => {
+    Promise.all([loadConnection(), loadTheme(Appearance.getColorScheme() === 'dark'), loadAppLock(), loadTabs(), loadAgents()]).then(() => {
       // Re-assert the live system scheme after the async load so a "system" theme
       // can't be left on a stale value the one-shot load may have read at cold start.
-      useThemeStore.getState().applySystem(systemIsDark);
+      useThemeStore.getState().applySystem(Appearance.getColorScheme() === 'dark');
       useTabsStore.getState().selectServer(useAgentsStore.getState().activeAgentId);
       SplashScreen.hideAsync();
     });
@@ -87,6 +87,15 @@ function ConnectionGate() {
   useEffect(() => {
     applySystem(systemIsDark);
   }, [systemIsDark]);
+
+  useEffect(() => {
+    const apply = () => useThemeStore.getState().applySystem(Appearance.getColorScheme() === 'dark');
+    const appearance = Appearance.addChangeListener(apply);
+    const appState   = AppState.addEventListener('change', next => {
+      if (next === 'active') apply();
+    });
+    return () => { appearance.remove(); appState.remove(); };
+  }, []);
 
   useEffect(() => {
     if (!ready) return;

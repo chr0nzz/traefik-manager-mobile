@@ -113,7 +113,7 @@ export default function AgentsScreen() {
   const handleSwitch = async (id: string | null) => {
     await setActiveAgent(id);
     useTabsStore.getState().selectServer(id);
-    qc.clear();
+    qc.resetQueries();
     router.back();
   };
 

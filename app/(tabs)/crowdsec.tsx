@@ -6,6 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { TopBar } from '../../src/components/TopBar';
 import { DemoBanner } from '../../src/components/DemoBanner';
 import { useCrowdSecDecisions, useCrowdSecAlerts, useDeleteDecision } from '../../src/hooks/useCrowdSec';
+import { useGeoIp } from '../../src/hooks/useGeoIp';
+import { flagEmoji } from '../../src/api/geoip';
+import CountryStrip from '../../src/components/CountryStrip';
 import { useLayout } from '../../src/hooks/useLayout';
 import { useThemeStore } from '../../src/store/theme';
 import { useDrawerStore } from '../../src/store/drawer';
@@ -33,12 +36,13 @@ function StatCard({ label, count, color }: { label: string; count: number; color
 }
 
 function DecisionRow({
-  decision, onDelete, deletingId, c,
+  decision, onDelete, deletingId, c, flag,
 }: {
   decision: CrowdSecDecision;
   onDelete: (id: number) => void;
   deletingId: number | null;
   c: Colors;
+  flag?: string;
 }) {
   const typeColor = TYPE_COLORS[decision.type]?.(c) ?? c.muted;
   const isDeleting = deletingId === decision.id;
@@ -46,7 +50,9 @@ function DecisionRow({
     <Surface style={[styles.decisionCard, { backgroundColor: c.card }]} elevation={1}>
       <View style={styles.decisionMain}>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={[styles.decisionIp, { color: c.text }]} numberOfLines={1}>{decision.value}</Text>
+          <Text style={[styles.decisionIp, { color: c.text }]} numberOfLines={1}>
+            {!!flag && flag + ' '}{decision.value}
+          </Text>
           <Text style={[styles.decisionScenario, { color: c.muted }]} numberOfLines={1}>{decision.scenario}</Text>
         </View>
         <View style={[styles.typeBadge, { backgroundColor: typeColor + '22', borderColor: typeColor + '55' }]}>
@@ -108,11 +114,15 @@ export default function CrowdSecScreen() {
   const decisions = decisionsQuery.data ?? [];
   const alerts    = alertsQuery.data ?? [];
 
+  const geo = useGeoIp(decisions.map(d => d.value));
+  const [geoCountry, setGeoCountry] = useState<string | null>(null);
+
   const filtered = decisions.filter(d => {
     const matchesType   = typeFilter === 'All' || d.type === typeFilter.toLowerCase();
     const q = search.trim().toLowerCase();
     const matchesSearch = !q || d.value.includes(q) || d.scenario.toLowerCase().includes(q);
-    return matchesType && matchesSearch;
+    const matchesGeo    = !geoCountry || geo.results[d.value]?.country_code === geoCountry;
+    return matchesType && matchesSearch && matchesGeo;
   });
 
   const bans     = decisions.filter(d => d.type === 'ban').length;
@@ -140,6 +150,9 @@ export default function CrowdSecScreen() {
         <StatCard label="Captchas" count={captchas} color={c.yellow} />
         <StatCard label="Bypasses" count={bypasses} color={c.green} />
       </View>
+      {geo.enabled && (
+        <CountryStrip countries={geo.countries} active={geoCountry} onSelect={setGeoCountry} />
+      )}
       <View style={styles.filterRow}>
         {TYPE_FILTERS.map(f => {
           const active = typeFilter === f;
@@ -221,6 +234,7 @@ export default function CrowdSecScreen() {
               onDelete={handleDelete}
               deletingId={deletingId}
               c={c}
+              flag={flagEmoji(geo.results[item.value]?.country_code ?? '')}
             />
           )}
           contentContainerStyle={[
