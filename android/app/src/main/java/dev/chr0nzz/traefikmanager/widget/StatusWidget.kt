@@ -153,12 +153,11 @@ class StatusWidget : GlanceAppWidget() {
 
         Column(modifier = GlanceModifier.fillMaxSize()) {
             Header(dotColor = agg.stateColor(offline), title = "Servers")
-            Spacer(GlanceModifier.height(5.dp))
-            Box(GlanceModifier.fillMaxWidth().height(1.dp).background(P.border)) {}
-            Spacer(GlanceModifier.height(4.dp))
+            Box(modifier = GlanceModifier.fillMaxWidth().padding(top = 5.dp, bottom = 4.dp)) {
+                Box(GlanceModifier.fillMaxWidth().height(1.dp).background(P.border)) {}
+            }
             shown.forEach { s ->
                 ServerRow(s, showBars, fullChips)
-                Spacer(GlanceModifier.height(2.dp))
             }
             Spacer(GlanceModifier.defaultWeight())
             Footer(servers.size, more, offline, updatedAt, compact = false)
@@ -168,7 +167,8 @@ class StatusWidget : GlanceAppWidget() {
     @Composable
     private fun ServerRow(s: ServerStatus, showBar: Boolean, fullChips: Boolean) {
         Row(
-            modifier = GlanceModifier.fillMaxWidth().clickable(actionRunCallback<OpenAppAction>()),
+            modifier = GlanceModifier.fillMaxWidth().padding(bottom = 2.dp)
+                .clickable(actionRunCallback<OpenServersAction>()),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Dot(if (!s.reachable) P.muted else if (s.err > 0) P.red else if (s.warn > 0) P.yellow else P.green)
@@ -229,8 +229,10 @@ class StatusWidget : GlanceAppWidget() {
         if (more > 0) parts.add("+$more more")
         if (!compact && total > 1) parts.add("$total servers")
         if (updatedAt != null) {
+            val age = System.currentTimeMillis() - updatedAt
             parts.add(
-                android.text.format.DateUtils.getRelativeTimeSpanString(
+                if (age < 60_000) "just now"
+                else android.text.format.DateUtils.getRelativeTimeSpanString(
                     updatedAt,
                     System.currentTimeMillis(),
                     android.text.format.DateUtils.MINUTE_IN_MILLIS
