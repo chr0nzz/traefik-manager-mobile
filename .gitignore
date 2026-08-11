@@ -12,3 +12,5 @@ keystore.properties
 captures/
 .DS_Store
 .env
+
+signing/

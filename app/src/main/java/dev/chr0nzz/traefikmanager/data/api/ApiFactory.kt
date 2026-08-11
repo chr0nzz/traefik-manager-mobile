@@ -14,8 +14,8 @@ class ApiFactory @Inject constructor(
     private val json: Json,
 ) {
 
-    fun retrofit(baseUrl: String, apiKey: String?): Retrofit {
-        val authedClient = client.newBuilder()
+    fun create(baseUrl: String, apiKey: String?, agentId: String?): TmApi {
+        val scoped = client.newBuilder()
             .addInterceptor { chain ->
                 val builder = chain.request().newBuilder()
                     .header("X-Requested-With", "fetch")
@@ -24,14 +24,13 @@ class ApiFactory @Inject constructor(
                 }
                 chain.proceed(builder.build())
             }
+            .addInterceptor(AgentProxyInterceptor(agentId))
             .build()
         return Retrofit.Builder()
             .baseUrl(baseUrl.trimEnd('/') + "/")
-            .client(authedClient)
+            .client(scoped)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
+            .create(TmApi::class.java)
     }
-
-    fun managerApi(baseUrl: String, apiKey: String?): ManagerApi =
-        retrofit(baseUrl, apiKey).create(ManagerApi::class.java)
 }
