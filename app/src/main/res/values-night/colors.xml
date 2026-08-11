@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splashscreen_background">#0d1117</color>
+    <color name="window_bg">#0d1117</color>
+    <color name="widget_bg">#161b22</color>
+    <color name="widget_border">#30363d</color>
+    <color name="chip_green_fill">#2022c55e</color>
+    <color name="chip_green_stroke">#5522c55e</color>
+    <color name="chip_yellow_fill">#20f59e0b</color>
+    <color name="chip_yellow_stroke">#55f59e0b</color>
+    <color name="chip_red_fill">#20ef4444</color>
+    <color name="chip_red_stroke">#55ef4444</color>
+</resources>

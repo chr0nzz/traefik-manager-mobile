@@ -1,0 +1,2 @@
+-keepattributes Signature, InnerClasses, EnclosingMethod, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
