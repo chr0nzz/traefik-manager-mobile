@@ -6,15 +6,27 @@ import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.ManagerVersion
 import dev.chr0nzz.traefikmanager.data.model.OkResponse
+import dev.chr0nzz.traefikmanager.data.model.PingResult
+import dev.chr0nzz.traefikmanager.data.model.RawRoute
+import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.RoutesResponse
+import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
+import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
+import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
+import dev.chr0nzz.traefikmanager.data.model.ServerSettings
+import dev.chr0nzz.traefikmanager.data.model.StaticConfigResponse
 import dev.chr0nzz.traefikmanager.data.model.ToggleRequest
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
+import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
+import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface TmApi {
 
@@ -53,6 +65,51 @@ interface TmApi {
         @Path("routeId", encoded = false) routeId: String,
         @Body body: ToggleRequest,
     ): OkResponse
+
+    @POST("save")
+    suspend fun saveRoute(@Body body: RequestBody): OkResponse
+
+    @POST("delete/{routeId}")
+    suspend fun deleteRoute(
+        @Path("routeId", encoded = false) routeId: String,
+        @Body body: RequestBody,
+    ): OkResponse
+
+    @GET("api/routes/{routeId}/raw")
+    suspend fun routeRaw(@Path("routeId", encoded = false) routeId: String): RawRoute
+
+    @POST("api/routes/{routeId}/raw")
+    suspend fun saveRouteRaw(
+        @Path("routeId", encoded = false) routeId: String,
+        @Body body: RawRouteSave,
+    ): OkResponse
+
+    @GET("api/ping")
+    suspend fun ping(
+        @Query("url") url: String,
+        @Query("fallback") fallback: String? = null,
+    ): PingResult
+
+    @GET("api/agents/{agentId}/cert-resolvers")
+    suspend fun agentCertResolvers(@Path("agentId") agentId: String): CertResolversResponse
+
+    @GET("api/static/config")
+    suspend fun staticConfig(): StaticConfigResponse
+
+    @GET("api/settings/ui")
+    suspend fun uiPrefs(): UiPrefsResponse
+
+    @GET("api/dashboard/config")
+    suspend fun dashboardConfig(@Query("server") server: String? = null): DashboardConfig
+
+    @GET("api/settings")
+    suspend fun settings(): ServerSettings
+
+    @GET("api/configs")
+    suspend fun configs(): ConfigsResponse
+
+    @GET("api/tls-options")
+    suspend fun tlsOptions(@Query("server") server: String? = null): List<TlsOptionProfile>
 
     @GET("api/agents")
     suspend fun agents(): AgentsResponse

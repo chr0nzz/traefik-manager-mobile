@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager.ui.nav
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,12 +16,17 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.contentDescription
@@ -32,17 +38,37 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import android.net.Uri
 import dev.chr0nzz.traefikmanager.data.api.ApiState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.PlaceholderScreen
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
 import dev.chr0nzz.traefikmanager.ui.dashboard.DashboardScreen
+import dev.chr0nzz.traefikmanager.ui.routes.RouteFormScreen
+import dev.chr0nzz.traefikmanager.ui.routes.RouteRawScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RoutesScreen
 import kotlinx.coroutines.launch
 
+private const val ROUTE_FORM = "route_form"
+private const val ROUTE_RAW = "route_raw"
+
 @Composable
-fun TmApp(apiState: ApiState) {
+fun TmApp(
+    apiState: ApiState,
+    migrationNotice: String? = null,
+    onNoticeShown: () -> Unit = {},
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(migrationNotice) {
+        val notice = migrationNotice ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message = notice, withDismissAction = true)
+        onNoticeShown()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -53,6 +79,12 @@ fun TmApp(apiState: ApiState) {
             ApiState.Disconnected -> ConnectScreen()
             is ApiState.Ready -> ConnectedApp()
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .safeDrawingPadding(),
+        )
     }
 }
 
@@ -144,7 +176,42 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                 )
             }
             composable(TmDestination.Routes.route) {
-                RoutesScreen(onOpenDrawer = { scope.launch { drawerState.open() } })
+                RoutesScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                    onCreateRoute = { navController.navigate(ROUTE_FORM) },
+                    onEditRoute = { routeId ->
+                        navController.navigate("$ROUTE_FORM?routeId=${Uri.encode(routeId)}")
+                    },
+                    onEditYaml = { routeId ->
+                        navController.navigate("$ROUTE_RAW/${Uri.encode(routeId)}")
+                    },
+                )
+            }
+            composable(
+                route = "$ROUTE_FORM?routeId={routeId}",
+                arguments = listOf(
+                    navArgument("routeId") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                RouteFormScreen(
+                    routeId = entry.arguments?.getString("routeId"),
+                    onClose = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "$ROUTE_RAW/{routeId}",
+                arguments = listOf(navArgument("routeId") { type = NavType.StringType }),
+            ) { entry ->
+                RouteRawScreen(
+                    routeId = entry.arguments?.getString("routeId").orEmpty(),
+                    onClose = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
             }
             composable(TmDestination.Middlewares.route) {
                 PlaceholderScreen(title = TmDestination.Middlewares.label)

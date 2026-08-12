@@ -1,11 +1,12 @@
 package dev.chr0nzz.traefikmanager.ui.routes
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ArrowOutward
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LockOpen
@@ -13,18 +14,20 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
@@ -43,10 +46,9 @@ fun Route.status(): TmStatus = when {
 fun RouteCard(
     route: Route,
     selected: Boolean,
-    toggling: Boolean,
     onClick: () -> Unit,
-    onToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    iconUrl: String? = null,
 ) {
     val palette = LocalTmPalette.current
     val status = route.status()
@@ -60,7 +62,7 @@ fun RouteCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            dev.chr0nzz.traefikmanager.ui.components.StatusDot(status)
+            RouteLeading(status = status, iconUrl = iconUrl)
             if (route.protocol != "http") {
                 Text(
                     text = route.protocol.uppercase(),
@@ -82,31 +84,6 @@ fun RouteCard(
             if (route.protocol != "udp") {
                 if (route.tlsEnabled) Glyph(Icons.Outlined.Lock, palette.muted)
                 else Glyph(Icons.Outlined.LockOpen, palette.yellow)
-            }
-            if (route.provider == "file") {
-                Switch(
-                    checked = route.enabled,
-                    onCheckedChange = { onToggle() },
-                    enabled = !toggling,
-                    thumbContent = if (route.enabled) {
-                        {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    } else {
-                        null
-                    },
-                    modifier = Modifier.semantics {
-                        contentDescription = if (route.enabled) {
-                            "Disable ${route.name}"
-                        } else {
-                            "Enable ${route.name}"
-                        }
-                    },
-                )
             }
         }
 
@@ -145,6 +122,34 @@ fun RouteCard(
                 modifier = Modifier.padding(top = TmSpacing.xs),
             )
         }
+    }
+}
+
+@Composable
+private fun RouteLeading(status: TmStatus, iconUrl: String?) {
+    if (iconUrl == null) {
+        dev.chr0nzz.traefikmanager.ui.components.StatusDot(status)
+        return
+    }
+    var failed by remember(iconUrl) { mutableStateOf(false) }
+    if (failed) {
+        dev.chr0nzz.traefikmanager.ui.components.StatusDot(status)
+        return
+    }
+    Box(modifier = Modifier.size(22.dp)) {
+        AsyncImage(
+            model = iconUrl,
+            contentDescription = null,
+            onError = { failed = true },
+            modifier = Modifier
+                .size(20.dp)
+                .clip(RoundedCornerShape(4.dp)),
+        )
+        dev.chr0nzz.traefikmanager.ui.components.StatusDot(
+            status = status,
+            size = 7.dp,
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 }
 

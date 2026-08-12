@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class NavBadges(
     val routes: Int = 0,
@@ -32,9 +33,13 @@ data class NavBadges(
 @HiltViewModel
 class RootViewModel @Inject constructor(
     apiProvider: ApiProvider,
-    preferencesStore: PreferencesStore,
+    private val preferencesStore: PreferencesStore,
     dashboardRepository: DashboardRepository,
 ) : ViewModel() {
+
+    fun onMigrationNoticeShown() {
+        viewModelScope.launch { preferencesStore.setMigrationNotice(null) }
+    }
 
     val apiState: StateFlow<ApiState> = apiProvider.state
 

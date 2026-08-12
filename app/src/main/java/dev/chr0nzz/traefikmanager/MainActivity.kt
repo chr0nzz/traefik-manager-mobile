@@ -32,7 +32,11 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.System -> isSystemInDarkTheme()
             }
             TmTheme(darkTheme = darkTheme, dynamicColor = preferences.dynamicColor) {
-                TmApp(apiState = apiState)
+                TmApp(
+                    apiState = apiState,
+                    migrationNotice = preferences.migrationNotice,
+                    onNoticeShown = viewModel::onMigrationNoticeShown,
+                )
             }
         }
     }

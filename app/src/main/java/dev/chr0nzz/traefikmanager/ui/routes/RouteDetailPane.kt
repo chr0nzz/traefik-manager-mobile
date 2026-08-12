@@ -1,28 +1,38 @@
 package dev.chr0nzz.traefikmanager.ui.routes
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.DoorFront
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -31,13 +41,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import dev.chr0nzz.traefikmanager.ui.components.TooltipIconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
@@ -48,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
+import dev.chr0nzz.traefikmanager.ui.components.HealthLabel
 import dev.chr0nzz.traefikmanager.ui.components.MessageState
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.StatusDot
@@ -66,6 +82,11 @@ fun RouteDetailPane(
     onBack: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
     onToggle: (Route) -> Unit = {},
+    onEdit: (Route) -> Unit = {},
+    onDelete: (Route) -> Unit = {},
+    onEditYaml: (Route) -> Unit = {},
+    onPing: (Route) -> Unit = {},
+    ping: PingState? = null,
     modifier: Modifier = Modifier,
 ) {
     if (route == null) {
@@ -91,7 +112,7 @@ fun RouteDetailPane(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(contentPadding)
-            .padding(TmSpacing.lg),
+            .padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.lg, bottom = 76.dp),
         verticalArrangement = Arrangement.spacedBy(TmSpacing.md),
     ) {
         Row(
@@ -119,10 +140,62 @@ fun RouteDetailPane(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
             )
+            if (route.provider == "file") {
+                Switch(
+                    checked = route.enabled,
+                    onCheckedChange = { onToggle(route) },
+                    thumbContent = if (route.enabled) {
+                        {
+                            Icon(
+                                imageVector = Icons.Outlined.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier.semantics {
+                        contentDescription = if (route.enabled) {
+                            "Disable ${'$'}{route.name}"
+                        } else {
+                            "Enable ${'$'}{route.name}"
+                        }
+                    },
+                )
+            }
         }
 
         TrafficFlow(route)
+
+        if (route.protocol == "http" && route.hosts.isNotEmpty()) {
+            TmCard {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    SectionLabel("Reachability", modifier = Modifier.weight(1f))
+                    when {
+                        ping?.running == true -> Text(
+                            text = "Checking",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.muted,
+                        )
+                        ping?.ok == true -> HealthLabel(TmStatus.Ok, ping.detail.ifEmpty { "reachable" })
+                        ping?.ok == false -> HealthLabel(TmStatus.Error, ping.detail.ifEmpty { "unreachable" })
+                        else -> TextButton(onClick = { onPing(route) }) { Text("Ping") }
+                    }
+                    if (ping != null && ping.running.not()) {
+                        IconButton(onClick = { onPing(route) }) {
+                            Icon(Icons.Outlined.Refresh, contentDescription = "Ping again")
+                        }
+                    }
+                }
+            }
+        }
 
         DetailSection("Router Details", Icons.Outlined.Info, palette.blue) {
             DetailRow("Status", if (route.enabled) "Enabled" else "Disabled", status = if (route.enabled) TmStatus.Ok else TmStatus.Disabled)
@@ -178,12 +251,7 @@ fun RouteDetailPane(
             }
         }
 
-        Text(
-            text = "Editing arrives in a later v2 stage.",
-            style = MaterialTheme.typography.bodySmall,
-            color = palette.muted,
-            modifier = Modifier.padding(bottom = 72.dp),
-        )
+        Spacer(modifier = Modifier.height(72.dp))
     }
 
         HorizontalFloatingToolbar(
@@ -194,11 +262,20 @@ fun RouteDetailPane(
                 .padding(bottom = TmSpacing.lg),
         ) {
             if (route.provider == "file") {
-                val label = if (route.enabled) "Disable route" else "Enable route"
                 TooltipIconButton(
-                    label = label,
-                    icon = if (route.enabled) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
-                    onClick = { onToggle(route) },
+                    label = "Edit route",
+                    icon = Icons.Outlined.Edit,
+                    onClick = { onEdit(route) },
+                )
+                TooltipIconButton(
+                    label = "Delete route",
+                    icon = Icons.Outlined.Delete,
+                    onClick = { onDelete(route) },
+                )
+                TooltipIconButton(
+                    label = "Edit raw YAML",
+                    icon = Icons.Outlined.Code,
+                    onClick = { onEditYaml(route) },
                 )
             }
             val host = route.hosts.firstOrNull()
@@ -221,46 +298,56 @@ fun RouteDetailPane(
 @Composable
 private fun TrafficFlow(route: Route) {
     val palette = LocalTmPalette.current
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        SectionLabel("Traffic flow", modifier = Modifier.align(Alignment.Start))
-        FlowBox(
-            label = "Entry point",
-            title = route.entryPointNames.firstOrNull() ?: "none",
-            detail = if (route.tlsEnabled) "TLS" else null,
-            highlighted = false,
-            modifier = Modifier.padding(top = TmSpacing.sm),
-        )
-        FlowArrow()
-        FlowBox(
-            label = "Router",
-            title = route.name,
-            detail = if (route.enabled) "Enabled" else "Disabled",
-            detailColor = if (route.enabled) palette.green else palette.muted,
-            highlighted = true,
-        )
-        FlowArrow()
-        FlowBox(
-            label = "Service",
-            title = route.serviceName.ifEmpty { "none" },
-            detail = route.target.takeIf { it.isNotEmpty() && it != "N/A" },
-            detailMono = true,
-            highlighted = false,
-        )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SectionLabel("Traffic flow")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = TmSpacing.sm),
+        ) {
+            FlowBox(
+                label = "Entry point",
+                title = (route.entryPointNames.firstOrNull() ?: "none").uppercase(),
+                lines = listOfNotNull(
+                    route.entryPointNames.getOrNull(1)?.let { "+${route.entryPointNames.size - 1} more" },
+                    if (route.tlsEnabled) "TLS" else null,
+                ),
+                lineColor = palette.green,
+                modifier = Modifier.weight(1f),
+            )
+            FlowArrow()
+            FlowBox(
+                label = "Router",
+                title = route.name,
+                lines = listOfNotNull(
+                    if (route.tlsEnabled) "TLS" else null,
+                    if (route.enabled) "Enabled" else "Disabled",
+                ),
+                lineColor = if (route.enabled) palette.green else palette.muted,
+                highlighted = true,
+                modifier = Modifier.weight(1f),
+            )
+            FlowArrow()
+            FlowBox(
+                label = "Service",
+                title = route.serviceName.ifEmpty { "none" },
+                mono = route.target.takeIf { it.isNotEmpty() && it != "N/A" },
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 
 @Composable
 private fun FlowArrow() {
     Icon(
-        imageVector = Icons.Outlined.ArrowDownward,
+        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
         contentDescription = null,
         tint = LocalTmPalette.current.muted,
         modifier = Modifier
-            .size(16.dp)
-            .padding(vertical = 1.dp),
+            .size(14.dp)
+            .padding(horizontal = 1.dp),
     )
 }
 
@@ -268,58 +355,63 @@ private fun FlowArrow() {
 private fun FlowBox(
     label: String,
     title: String,
-    detail: String?,
     modifier: Modifier = Modifier,
-    detailColor: Color? = null,
-    detailMono: Boolean = false,
+    lines: List<String> = emptyList(),
+    lineColor: Color? = null,
+    mono: String? = null,
     highlighted: Boolean = false,
 ) {
     val palette = LocalTmPalette.current
-    Box(
+    val shape = RoundedCornerShape(TmRadius.sm)
+    Column(
         modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = palette.bg,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(TmRadius.sm),
-            )
+            .clip(shape)
+            .background(if (highlighted) palette.blue.copy(alpha = 0.08f) else palette.bg)
             .then(
-                if (highlighted) {
-                    Modifier.background(
-                        color = palette.blue.copy(alpha = 0.08f),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(TmRadius.sm),
-                    )
-                } else {
-                    Modifier
-                },
+                if (highlighted) Modifier.border(1.dp, palette.blue, shape) else Modifier,
             )
-            .padding(TmSpacing.sm),
+            .padding(vertical = TmSpacing.sm, horizontal = TmSpacing.xs),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            SectionLabel(label)
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+            color = if (highlighted) palette.blue else palette.muted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 3.dp),
+        )
+        lines.forEach { line ->
             Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                text = line,
+                style = MaterialTheme.typography.labelSmall,
+                color = lineColor ?: palette.muted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 2.dp),
             )
-            if (detail != null) {
-                Text(
-                    text = detail,
-                    style = if (detailMono) {
-                        MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily)
-                    } else {
-                        MaterialTheme.typography.labelSmall
-                    },
-                    color = detailColor ?: palette.muted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+        }
+        if (mono != null) {
+            Text(
+                text = mono,
+                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                color = palette.green,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(top = 3.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(palette.card)
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+            )
         }
     }
 }

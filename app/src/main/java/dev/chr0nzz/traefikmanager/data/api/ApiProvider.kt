@@ -25,6 +25,7 @@ sealed interface ApiState {
         val baseUrl: String,
         val demo: Boolean,
         val agentId: String?,
+        val apiKey: String? = null,
     ) : ApiState
 }
 
@@ -52,6 +53,7 @@ class ApiProvider @Inject constructor(
                         baseUrl = connection.baseUrl,
                         demo = false,
                         agentId = agentId,
+                        apiKey = connection.apiKey,
                     )
                 }
             },

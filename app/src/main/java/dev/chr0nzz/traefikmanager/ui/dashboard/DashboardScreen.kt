@@ -165,12 +165,16 @@ fun DashboardScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        VerdictLine(
-                            verdict = snapshot.verdict,
-                            providers = snapshot.providers,
-                            activeProvider = snapshot.providerFilter,
-                            onProviderClick = viewModel::onProviderClick,
-                        )
+                        VerdictLine(snapshot.verdict)
+                    }
+                    if (snapshot.providers.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            ProvidersBar(
+                                providers = snapshot.providers,
+                                activeProvider = snapshot.providerFilter,
+                                onProviderClick = viewModel::onProviderClick,
+                            )
+                        }
                     }
                     snapshot.cards.chunked(if (compact) 2 else 2).forEach { pair ->
                         item(span = { GridItemSpan(maxLineSpan) }, key = pair.first().key) {
@@ -208,12 +212,7 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun VerdictLine(
-    verdict: Verdict,
-    providers: List<ProviderCount>,
-    activeProvider: String?,
-    onProviderClick: (String) -> Unit,
-) {
+private fun VerdictLine(verdict: Verdict) {
     val palette = LocalTmPalette.current
     TmCard(accent = verdict.status) {
         Row(
@@ -233,14 +232,6 @@ private fun VerdictLine(
             color = palette.muted,
             modifier = Modifier.padding(top = 2.dp),
         )
-        if (providers.isNotEmpty()) {
-            ProviderRow(
-                providers = providers,
-                activeProvider = activeProvider,
-                onProviderClick = onProviderClick,
-                modifier = Modifier.padding(top = TmSpacing.sm),
-            )
-        }
     }
 }
 
@@ -310,7 +301,7 @@ private fun SignalCardView(
             maxCells = if (compact) 60 else 150,
             modifier = Modifier.padding(top = if (compact) TmSpacing.xs else TmSpacing.sm),
         )
-        if (card.providers.isNotEmpty() && !compact) {
+        if (card.providers.isNotEmpty()) {
             CardDivider(modifier = Modifier.padding(top = TmSpacing.sm))
             ProviderRow(
                 providers = card.providers,
@@ -333,6 +324,27 @@ private fun providerIcon(name: String): ImageVector = when {
         name.startsWith("zookeeper") -> Icons.Outlined.Storage
     name.startsWith("plugin") -> Icons.Outlined.Extension
     else -> Icons.Outlined.Power
+}
+
+@Composable
+private fun ProvidersBar(
+    providers: List<ProviderCount>,
+    activeProvider: String?,
+    onProviderClick: (String) -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        SectionLabel("Providers")
+        ProviderRow(
+            providers = providers,
+            activeProvider = activeProvider,
+            onProviderClick = onProviderClick,
+            modifier = Modifier.weight(1f),
+        )
+    }
 }
 
 @Composable

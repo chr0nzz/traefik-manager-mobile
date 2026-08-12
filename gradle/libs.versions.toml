@@ -25,10 +25,14 @@ coil = "3.5.0"
 materialKolor = "5.0.0"
 junit = "4.13.2"
 coroutinesTest = "1.10.2"
+robolectric = "4.16.1"
+androidxTestCore = "1.7.0"
 
 [libraries]
 material-kolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-test-core = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTestCore" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

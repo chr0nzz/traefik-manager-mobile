@@ -5,18 +5,31 @@ import dev.chr0nzz.traefikmanager.data.model.AgentHealth
 import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.ConfigError
+import dev.chr0nzz.traefikmanager.data.model.ConfigFile
+import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
+import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
+import okhttp3.RequestBody
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.EntrypointHttp
 import dev.chr0nzz.traefikmanager.data.model.EntrypointTls
 import dev.chr0nzz.traefikmanager.data.model.ManagerVersion
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.data.model.OkResponse
+import dev.chr0nzz.traefikmanager.data.model.PingResult
+import dev.chr0nzz.traefikmanager.data.model.RawRoute
+import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.OverviewCounts
 import dev.chr0nzz.traefikmanager.data.model.OverviewSection
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.data.model.RoutesResponse
+import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
+import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
+import dev.chr0nzz.traefikmanager.data.model.UiPrefs
+import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
+import dev.chr0nzz.traefikmanager.data.model.ServerSettings
+import dev.chr0nzz.traefikmanager.data.model.StaticConfigResponse
 import dev.chr0nzz.traefikmanager.data.model.ToggleRequest
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
@@ -147,6 +160,55 @@ class DemoApi : TmApi {
         if (body.enable) disabled.remove(routeId) else disabled.add(routeId)
         return OkResponse(ok = true)
     }
+
+    override suspend fun saveRoute(body: RequestBody): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun deleteRoute(routeId: String, body: RequestBody): OkResponse {
+        settle()
+        disabled.remove(routeId)
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun agentCertResolvers(agentId: String) =
+        CertResolversResponse(resolvers = listOf("letsencrypt"))
+
+    override suspend fun staticConfig() = StaticConfigResponse()
+
+    override suspend fun routeRaw(routeId: String) = RawRoute(
+        raw = "http:\n  routers:\n    demo:\n      rule: Host(`demo.example.com`)\n      service: demo\n",
+        configFile = "routes.yml",
+        proto = "http",
+    )
+
+    override suspend fun saveRouteRaw(routeId: String, body: RawRouteSave) = OkResponse(ok = true)
+
+    override suspend fun ping(url: String, fallback: String?) =
+        PingResult(ok = true, latencyMs = 24, statusCode = 200)
+
+    override suspend fun uiPrefs() = UiPrefsResponse(uiPrefs = UiPrefs(showRouteIcons = true))
+
+    override suspend fun dashboardConfig(server: String?) = DashboardConfig()
+
+    override suspend fun settings(): ServerSettings = ServerSettings(
+        domains = listOf("example.com", "xyzlab.dev"),
+        certResolver = "letsencrypt,cloudflare",
+    )
+
+    override suspend fun configs(): ConfigsResponse = ConfigsResponse(
+        files = listOf(
+            ConfigFile(label = "routes.yml", path = "/app/config/routes.yml"),
+            ConfigFile(label = "extra.yml", path = "/app/config/extra.yml"),
+        ),
+        configDirSet = true,
+    )
+
+    override suspend fun tlsOptions(server: String?): List<TlsOptionProfile> = listOf(
+        TlsOptionProfile(name = "default", configFile = "routes.yml", minVersion = "VersionTLS12"),
+        TlsOptionProfile(name = "modern", configFile = "routes.yml", minVersion = "VersionTLS13"),
+    )
 
     override suspend fun agents(): AgentsResponse = AgentsResponse(
         agents = listOf(

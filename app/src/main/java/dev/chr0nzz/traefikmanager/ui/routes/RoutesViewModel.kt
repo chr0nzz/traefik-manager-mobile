@@ -11,6 +11,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,7 +23,16 @@ enum class StatusFilter(val label: String) {
     All("All"), Active("Active"), Inactive("Inactive")
 }
 
+data class PingState(
+    val running: Boolean = false,
+    val ok: Boolean? = null,
+    val latencyMs: Int? = null,
+    val detail: String = "",
+)
+
 data class RoutesUiState(
+    val pingResults: Map<String, PingState> = emptyMap(),
+    val icons: dev.chr0nzz.traefikmanager.data.repo.IconContext = dev.chr0nzz.traefikmanager.data.repo.IconContext(),
     val loading: Boolean = true,
     val refreshing: Boolean = false,
     val routes: List<Route> = emptyList(),
@@ -68,7 +78,14 @@ class RoutesViewModel @Inject constructor(
     val state: StateFlow<RoutesUiState> = _state.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            val icons = runCatching { repository.iconContext() }.getOrNull() ?: return@launch
+            _state.update { it.copy(icons = icons) }
+        }
         load(initial = true)
+        viewModelScope.launch {
+            repository.changes.drop(1).collect { load(initial = false) }
+        }
     }
 
     fun refresh() = load(initial = false)
@@ -78,6 +95,38 @@ class RoutesViewModel @Inject constructor(
     fun onProtocolChange(value: ProtocolFilter) = _state.update { it.copy(protocol = value) }
 
     fun onStatusChange(value: StatusFilter) = _state.update { it.copy(status = value) }
+
+    fun ping(route: Route) {
+        _state.update { it.copy(pingResults = it.pingResults + (route.id to PingState(running = true))) }
+        viewModelScope.launch {
+            val result = runCatching { repository.ping(route) }
+            val next = result.fold(
+                onSuccess = { ping ->
+                    PingState(
+                        running = false,
+                        ok = ping.ok,
+                        latencyMs = ping.latencyMs,
+                        detail = when {
+                            ping.self -> "this server"
+                            ping.ok -> listOfNotNull(
+                                ping.statusCode?.let { code -> "HTTP $code" },
+                                ping.latencyMs?.let { ms -> "${ms}ms" },
+                            ).joinToString(" · ")
+                            else -> ping.error ?: "No response"
+                        },
+                    )
+                },
+                onFailure = { throwable ->
+                    PingState(running = false, ok = false, detail = throwable.message ?: "Ping failed")
+                },
+            )
+            _state.update { it.copy(pingResults = it.pingResults + (route.id to next)) }
+        }
+    }
+
+    fun pingAll() {
+        _state.value.visible.forEach(::ping)
+    }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
@@ -107,6 +156,32 @@ class RoutesViewModel @Inject constructor(
         }
     }
 
+    fun delete(route: Route) {
+        _state.update { it.copy(togglingId = route.id) }
+        viewModelScope.launch {
+            runCatching { repository.delete(route) }.fold(
+                onSuccess = {
+                    _state.update { it.copy(togglingId = null, message = "${route.name} deleted") }
+                    load(initial = false)
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(togglingId = null, message = throwable.message ?: "Could not delete the route")
+                    }
+                },
+            )
+        }
+    }
+
+    private fun describeLoadFailure(throwable: Throwable): String {
+        val detail = throwable.message ?: throwable::class.simpleName ?: "unknown error"
+        return when (throwable) {
+            is kotlinx.serialization.SerializationException ->
+                "The server sent a route the app could not read: $detail"
+            else -> detail
+        }
+    }
+
     private fun load(initial: Boolean) {
         _state.update { it.copy(loading = initial && it.routes.isEmpty(), refreshing = !initial, error = null) }
         viewModelScope.launch {
@@ -127,7 +202,7 @@ class RoutesViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = throwable.message ?: "Could not load routes",
+                            error = describeLoadFailure(throwable),
                         )
                     }
                 },

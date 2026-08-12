@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,7 +26,14 @@ data class DashboardUiState(
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val repository: DashboardRepository,
+    routesRepository: dev.chr0nzz.traefikmanager.data.repo.RoutesRepository,
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            routesRepository.changes.drop(1).collect { load(initial = false) }
+        }
+    }
 
     private val providerFilter = MutableStateFlow<String?>(null)
     private val loadState = MutableStateFlow(DashboardUiState())

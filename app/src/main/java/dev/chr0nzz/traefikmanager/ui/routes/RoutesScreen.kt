@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -26,7 +30,7 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.ui.components.ClearFiltersChip
+import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
 import dev.chr0nzz.traefikmanager.ui.components.FilterChipRow
 import dev.chr0nzz.traefikmanager.ui.components.FilterMenuChip
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -60,6 +65,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun RoutesScreen(
     onOpenDrawer: () -> Unit = {},
+    onCreateRoute: () -> Unit = {},
+    onEditRoute: (String) -> Unit,
+    onEditYaml: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: RoutesViewModel = hiltViewModel(),
 ) {
@@ -67,8 +75,9 @@ fun RoutesScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingDelete by remember { mutableStateOf<Route?>(null) }
     val searchBarState = rememberSearchBarState()
-    val searchScrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+    val searchScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val queryState = viewModel.queryState
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -89,6 +98,19 @@ fun RoutesScreen(
 
     val detailOnly = navigator.canNavigateBack()
 
+    pendingDelete?.let { route ->
+        ConfirmDeleteDialog(
+            routeName = route.name,
+            onDismiss = { pendingDelete = null },
+            onConfirm = {
+                pendingDelete = null
+                selectedId = null
+                scope.launch { navigator.navigateBack() }
+                viewModel.delete(route)
+            },
+        )
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -96,9 +118,16 @@ fun RoutesScreen(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (!detailOnly) {
+                FloatingActionButton(onClick = onCreateRoute) {
+                    Icon(Icons.Outlined.Add, contentDescription = "New route")
+                }
+            }
+        },
         topBar = {
             if (!detailOnly) {
-                RoutesSearchBar(
+                RoutesTopBar(
                     onOpenDrawer = onOpenDrawer,
                     searchBarState = searchBarState,
                     queryState = queryState,
@@ -139,6 +168,11 @@ fun RoutesScreen(
                         contentPadding = insets,
                         onBack = { scope.launch { navigator.navigateBack() } },
                         onToggle = viewModel::toggle,
+                        onEdit = { route -> onEditRoute(route.id) },
+                        onDelete = { route -> pendingDelete = route },
+                        onEditYaml = { route -> onEditYaml(route.id) },
+                        onPing = viewModel::ping,
+                        ping = state.pingResults[selectedId],
                     )
                 }
             },
@@ -188,7 +222,7 @@ private fun RoutesListPane(
         ) {
             when {
                 state.loading -> LoadingState()
-                state.error != null && state.routes.isEmpty() -> ErrorState(
+                state.error != null -> ErrorState(
                     headline = "Could not load routes",
                     body = state.error,
                     onRetry = onRefresh,
@@ -219,9 +253,16 @@ private fun RoutesListPane(
                             RouteCard(
                                 route = route,
                                 selected = route.id == selectedId,
-                                toggling = state.togglingId == route.id,
                                 onClick = { onSelect(route) },
-                                onToggle = { onToggle(route) },
+                                iconUrl = if (state.icons.enabled) {
+                                    dev.chr0nzz.traefikmanager.data.model.RouteIcons.urlFor(
+                                        route = route,
+                                        config = state.icons.config,
+                                        baseUrl = state.icons.baseUrl,
+                                    )
+                                } else {
+                                    null
+                                },
                                 modifier = Modifier.animateItem(),
                             )
                         }

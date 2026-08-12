@@ -11,10 +11,15 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class CryptoManager @Inject constructor() {
+interface CredentialCipher {
+    fun encrypt(plain: String): String
+    fun decrypt(encoded: String): String?
+}
 
-    private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+@Singleton
+class CryptoManager @Inject constructor() : CredentialCipher {
+
+    private val keyStore by lazy { KeyStore.getInstance("AndroidKeyStore").apply { load(null) } }
 
     private fun secretKey(): SecretKey {
         val existing = keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.SecretKeyEntry
@@ -32,14 +37,14 @@ class CryptoManager @Inject constructor() {
         return generator.generateKey()
     }
 
-    fun encrypt(plain: String): String {
+    override fun encrypt(plain: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey())
         val encrypted = cipher.doFinal(plain.toByteArray(Charsets.UTF_8))
         return Base64.encodeToString(cipher.iv + encrypted, Base64.NO_WRAP)
     }
 
-    fun decrypt(encoded: String): String? = runCatching {
+    override fun decrypt(encoded: String): String? = runCatching {
         val bytes = Base64.decode(encoded, Base64.NO_WRAP)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val spec = GCMParameterSpec(128, bytes, 0, IV_SIZE)
