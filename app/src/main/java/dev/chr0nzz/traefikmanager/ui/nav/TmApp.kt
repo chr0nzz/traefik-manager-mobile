@@ -54,6 +54,7 @@ import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.PlaceholderScreen
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
 import dev.chr0nzz.traefikmanager.ui.certs.CertificatesScreen
+import dev.chr0nzz.traefikmanager.ui.backups.BackupsScreen
 import dev.chr0nzz.traefikmanager.ui.crowdsec.CrowdSecScreen
 import dev.chr0nzz.traefikmanager.ui.dashboard.DashboardScreen
 import dev.chr0nzz.traefikmanager.ui.logs.LogsScreen
@@ -371,6 +372,9 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                     onClose = { navController.popBackStack() },
                     biometricAvailable = biometricAvailable,
                 )
+            }
+            composable(TmDestination.Backups.route) {
+                BackupsScreen(onOpenDrawer = { scope.launch { drawerState.open() } })
             }
             composable(TmDestination.CrowdSec.route) {
                 CrowdSecScreen(

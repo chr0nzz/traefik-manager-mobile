@@ -70,6 +70,16 @@ import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
 import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
+import dev.chr0nzz.traefikmanager.data.model.AgentBackup
+import dev.chr0nzz.traefikmanager.data.model.AgentBackupsResponse
+import dev.chr0nzz.traefikmanager.data.model.CreateBackupResponse
+import dev.chr0nzz.traefikmanager.data.model.GitCommit
+import dev.chr0nzz.traefikmanager.data.model.GitDiff
+import dev.chr0nzz.traefikmanager.data.model.GitDiffFile
+import dev.chr0nzz.traefikmanager.data.model.GitPushRequest
+import dev.chr0nzz.traefikmanager.data.model.GitStatus
+import dev.chr0nzz.traefikmanager.data.model.HubBackup
+import dev.chr0nzz.traefikmanager.data.model.RestoreResponse
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestResult
@@ -550,6 +560,86 @@ class DemoApi : TmApi {
             ),
         ),
     )
+
+    override suspend fun hubBackups(): List<HubBackup> {
+        settle()
+        return listOf(
+            HubBackup("dynamic.yml.20260812_143001.bak", 2048, "2026-08-12 14:30:01", "routes"),
+            HubBackup("traefik.yml.20260812_090012.bak", 1104, "2026-08-12 09:00:12", "static"),
+            HubBackup("dynamic.yml.20260811_221500.bak", 1990, "2026-08-11 22:15:00", "routes"),
+        )
+    }
+
+    override suspend fun agentBackups(): AgentBackupsResponse {
+        settle()
+        return AgentBackupsResponse(
+            backups = listOf(AgentBackup("dynamic.yml.20260812_143001.bak", 2048, "2026-08-12T14:30:01Z", "routes")),
+            staticConfigured = true,
+        )
+    }
+
+    override suspend fun createBackup(): CreateBackupResponse {
+        settle()
+        return CreateBackupResponse(success = true, names = listOf("dynamic.yml.20260812_150000.bak"), count = 1)
+    }
+
+    override suspend fun createStaticBackup(): CreateBackupResponse {
+        settle()
+        return CreateBackupResponse(success = true, names = listOf("traefik.yml.20260812_150000.bak"), count = 1)
+    }
+
+    override suspend fun deleteBackup(filename: String): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun restoreBackup(filename: String): RestoreResponse {
+        settle()
+        return RestoreResponse(success = true)
+    }
+
+    override suspend fun restartTraefik(): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun gitStatus(agentId: String?): GitStatus {
+        settle()
+        return GitStatus(enabled = true, configured = true, lastSha = "a1b2c3d4", lastPush = "2026-08-12 05:15:00 +0000")
+    }
+
+    override suspend fun gitCommits(agentId: String?): List<GitCommit> {
+        settle()
+        return listOf(
+            GitCommit("a1b2c3d4e5f6", "a1b2c3d4", "2026-08-12 05:15:00 +0000", "Config backup 2026-08-12 05:15"),
+            GitCommit("99887766aabb", "99887766", "2026-08-11 05:15:00 +0000", "Config backup 2026-08-11 05:15"),
+        )
+    }
+
+    override suspend fun gitDiff(sha: String, agentId: String?): GitDiff {
+        settle()
+        return GitDiff(
+            stat = " config/dynamic.yml | 4 ++--\n 1 file changed, 2 insertions(+), 2 deletions(-)",
+            files = listOf(
+                GitDiffFile(
+                    filename = "config/dynamic.yml",
+                    status = "M",
+                    old = "http:\n  routers:\n    blog:\n      rule: Host(`blog.example.com`)\n",
+                    new = "http:\n  routers:\n    blog:\n      rule: Host(`blog.example.dev`)\n",
+                ),
+            ),
+        )
+    }
+
+    override suspend fun gitPush(body: GitPushRequest, agentId: String?): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun gitRestore(sha: String, agentId: String?): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
 
     override suspend fun deleteNotification(body: DeleteNotificationRequest): OkResponse {
         settle()

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.outlined.AltRoute
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Shield
@@ -61,6 +62,12 @@ enum class TmDestination(
         icon = Icons.Outlined.Extension,
         section = TmSection.Infrastructure,
         serverTab = "plugins",
+    ),
+    Backups(
+        route = "backups",
+        label = "Backups",
+        icon = Icons.Outlined.Inventory2,
+        section = TmSection.System,
     ),
     Settings("settings", "Settings", Icons.Outlined.Settings, TmSection.System),
     ;

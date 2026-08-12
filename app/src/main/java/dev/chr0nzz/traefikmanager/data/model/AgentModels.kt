@@ -77,6 +77,9 @@ data class AgentConfig(
     @SerialName("crowdsec_client_key") val crowdsecClientKey: String = "",
     @SerialName("crowdsec_ca_cert") val crowdsecCaCert: String = "",
     @SerialName("git_backup_enabled") val gitBackupEnabled: Boolean = false,
+    /** This agent is backed up into the Host's repo, on its own branch, by the hub. */
+    @SerialName("git_host_backup") val gitHostBackup: Boolean = false,
+    @SerialName("git_host_branch") val gitHostBranch: String = "",
     @SerialName("git_backup_repo") val gitBackupRepo: String = "",
     @SerialName("git_backup_branch") val gitBackupBranch: String = "main",
     @SerialName("git_backup_username") val gitBackupUsername: String = "",

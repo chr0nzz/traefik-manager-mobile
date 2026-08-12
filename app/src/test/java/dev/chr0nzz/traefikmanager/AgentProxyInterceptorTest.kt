@@ -60,6 +60,38 @@ class AgentProxyInterceptorTest {
     }
 
     @Test
+    fun `a call that already names an agent stays on the hub`() {
+        // Git backup for a host-backed agent lives in the hub's repo on the agent's own branch,
+        // so proxying it to the agent would read a different repo, or none.
+        assertEquals(
+            "/api/backup/git/status?agent_id=a1",
+            requestPath("a1", "/api/backup/git/status?agent_id=a1"),
+        )
+        assertEquals(
+            "/api/backup/git/commits?agent_id=a1",
+            requestPath("a1", "/api/backup/git/commits?agent_id=a1"),
+        )
+    }
+
+    @Test
+    fun `git backup without an agent id still reaches the agent`() {
+        // An autonomous agent keeps its own repo, so the proxied call is the right one.
+        assertEquals(
+            "/api/agents/proxy/a1/backup/git/status",
+            requestPath("a1", "/api/backup/git/status"),
+        )
+    }
+
+    @Test
+    fun `restore and backup writes follow the selected server`() {
+        assertEquals(
+            "/api/agents/proxy/a1/restore/dynamic.yml.20260812_143001.bak",
+            requestPath("a1", "/api/restore/dynamic.yml.20260812_143001.bak"),
+        )
+        assertEquals("/api/agents/proxy/a1/backup/create", requestPath("a1", "/api/backup/create"))
+    }
+
+    @Test
     fun `subpath installs keep their prefix`() {
         assertEquals(
             "/tm/api/agents/proxy/a1/traefik/routers",

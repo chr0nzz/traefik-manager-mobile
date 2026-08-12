@@ -13,6 +13,11 @@ class AgentProxyInterceptor(private val agentId: String?) : Interceptor {
         val index = path.indexOf(API_MARKER)
         if (index == -1) return chain.proceed(request)
 
+        // A call that already names an agent is a question for the hub about that agent, not a
+        // call to the agent: Git backup on a host-backed agent lives in the hub's repo, on the
+        // agent's own branch (core/git.py:194-196). Proxying it would reach the wrong repo.
+        if (request.url.queryParameter(AGENT_QUERY) != null) return chain.proceed(request)
+
         val prefix = path.substring(0, index)
         val tail = path.substring(index + API_MARKER.length)
         if (!shouldProxy(tail)) return chain.proceed(request)
@@ -33,6 +38,7 @@ class AgentProxyInterceptor(private val agentId: String?) : Interceptor {
 
     private companion object {
         const val API_MARKER = "/api/"
+        const val AGENT_QUERY = "agent_id"
         val PROXIED = setOf("traefik", "backups", "backup", "restore", "crowdsec", "static", "configs")
     }
 }

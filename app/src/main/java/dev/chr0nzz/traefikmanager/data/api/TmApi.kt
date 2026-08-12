@@ -43,6 +43,14 @@ import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
 import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
+import dev.chr0nzz.traefikmanager.data.model.AgentBackupsResponse
+import dev.chr0nzz.traefikmanager.data.model.CreateBackupResponse
+import dev.chr0nzz.traefikmanager.data.model.GitCommit
+import dev.chr0nzz.traefikmanager.data.model.GitDiff
+import dev.chr0nzz.traefikmanager.data.model.GitPushRequest
+import dev.chr0nzz.traefikmanager.data.model.GitStatus
+import dev.chr0nzz.traefikmanager.data.model.HubBackup
+import dev.chr0nzz.traefikmanager.data.model.RestoreResponse
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestResult
@@ -212,6 +220,50 @@ interface TmApi {
 
     @GET("api/dashboard/config")
     suspend fun dashboardConfig(@Query("server") server: String? = null): DashboardConfig
+
+    /** The hub answers a bare array here; an agent answers an object. Pick by active server. */
+    @GET("api/backups")
+    suspend fun hubBackups(): List<HubBackup>
+
+    @GET("api/backups")
+    suspend fun agentBackups(): AgentBackupsResponse
+
+    @POST("api/backup/create")
+    suspend fun createBackup(): CreateBackupResponse
+
+    /** Host only: the hub's plain create never touches the static file, an agent's always does. */
+    @POST("api/static/backup/create")
+    suspend fun createStaticBackup(): CreateBackupResponse
+
+    @POST("api/backup/delete/{filename}")
+    suspend fun deleteBackup(@Path("filename") filename: String): OkResponse
+
+    @POST("api/restore/{filename}")
+    suspend fun restoreBackup(@Path("filename") filename: String): RestoreResponse
+
+    @POST("api/static/restart")
+    suspend fun restartTraefik(): OkResponse
+
+    @GET("api/backup/git/status")
+    suspend fun gitStatus(@Query("agent_id") agentId: String? = null): GitStatus
+
+    @GET("api/backup/git/commits")
+    suspend fun gitCommits(@Query("agent_id") agentId: String? = null): List<GitCommit>
+
+    @GET("api/backup/git/commit/{sha}/diff")
+    suspend fun gitDiff(@Path("sha") sha: String, @Query("agent_id") agentId: String? = null): GitDiff
+
+    @POST("api/backup/git/push")
+    suspend fun gitPush(
+        @Body body: GitPushRequest,
+        @Query("agent_id") agentId: String? = null,
+    ): OkResponse
+
+    @POST("api/backup/git/restore/{sha}")
+    suspend fun gitRestore(
+        @Path("sha") sha: String,
+        @Query("agent_id") agentId: String? = null,
+    ): OkResponse
 
     @GET("api/notifications")
     suspend fun notifications(): List<TmNotification>
