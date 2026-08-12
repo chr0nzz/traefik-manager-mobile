@@ -85,7 +85,7 @@ fun LogDetailPane(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(contentPadding)
-                .padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.lg, bottom = 76.dp),
+                .padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.lg, bottom = 88.dp),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.md),
         ) {
             Row(

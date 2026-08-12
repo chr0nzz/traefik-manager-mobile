@@ -13,6 +13,7 @@ import dev.chr0nzz.traefikmanager.data.model.LogFormat
 import dev.chr0nzz.traefikmanager.data.model.LogLine
 import dev.chr0nzz.traefikmanager.data.model.LogParser
 import dev.chr0nzz.traefikmanager.data.model.LogWindow
+import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.GeoRepository
 import dev.chr0nzz.traefikmanager.data.repo.LogsRepository
 import javax.inject.Inject
@@ -21,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -156,6 +158,7 @@ object LogFacets {
 class LogsViewModel @Inject constructor(
     private val repository: LogsRepository,
     private val geoRepository: GeoRepository,
+    private val serverScope: ServerScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LogsUiState())
@@ -167,6 +170,7 @@ class LogsViewModel @Inject constructor(
 
     init {
         load(initial = true)
+        watchServerChanges()
     }
 
     override fun onCleared() {
@@ -264,6 +268,16 @@ class LogsViewModel @Inject constructor(
             }
             val codes = geoRepository.lookup(entries.map { it.ip })
             _state.update { it.copy(geoEnabled = true, countryByIp = it.countryByIp + codes) }
+        }
+    }
+
+    /** A different server means different data: drop what is on screen and refetch. */
+    private fun watchServerChanges() {
+        viewModelScope.launch {
+            serverScope.generation.drop(1).collect {
+                _state.value = LogsUiState(lineCount = _state.value.lineCount)
+                load(initial = true)
+            }
         }
     }
 }

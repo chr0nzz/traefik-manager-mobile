@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.logs
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -52,14 +52,10 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,14 +74,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.window.core.layout.WindowSizeClass
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Countries
 import dev.chr0nzz.traefikmanager.data.model.LogLine
 import dev.chr0nzz.traefikmanager.data.model.LogParser
+import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.CountryStrip
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
+import dev.chr0nzz.traefikmanager.ui.components.ModalSideSheet
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.components.only
@@ -94,10 +93,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3AdaptiveApi::class,
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogsScreen(
     onOpenDrawer: () -> Unit = {},
@@ -105,23 +101,27 @@ fun LogsScreen(
     viewModel: LogsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
     val scope = rememberCoroutineScope()
     var selectedIndex by rememberSaveable { mutableStateOf<Int?>(null) }
     val searchBarState = rememberSearchBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val palette = LocalTmPalette.current
 
+    // The signal desk and the log rows both want the full width, so a tablet keeps the list
+    // whole and shows the record in a side sheet instead of halving the screen.
+    val wide = currentWindowAdaptiveInfo().windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    val selected = state.lines.firstOrNull { it.index == selectedIndex }
+    val detailFullScreen = !wide && selected != null
+
     LaunchedEffect(viewModel.queryState) {
         snapshotFlow { viewModel.queryState.text.toString() }.collect(viewModel::onQueryChange)
     }
 
-    val select: (LogLine) -> Unit = { line ->
-        selectedIndex = line.index
-        scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, line.index) }
-    }
+    val select: (LogLine) -> Unit = { line -> selectedIndex = line.index }
+    val closeDetail: () -> Unit = { selectedIndex = null }
 
-    val detailOnly = navigator.canNavigateBack()
+    if (detailFullScreen) BackHandler(onBack = closeDetail)
 
     Scaffold(
         modifier = modifier
@@ -130,7 +130,7 @@ fun LogsScreen(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            if (!detailOnly) {
+            if (!detailFullScreen) {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background,
@@ -172,35 +172,40 @@ fun LogsScreen(
             matches = state.visible.size,
         )
 
-        NavigableListDetailPaneScaffold(
-            navigator = navigator,
-            modifier = Modifier
-                .fillMaxSize()
-                .consumeWindowInsets(insets),
-            listPane = {
-                AnimatedPane {
-                    LogsListPane(
-                        state = state,
-                        viewModel = viewModel,
-                        contentPadding = insets,
-                        selectedIndex = selectedIndex,
-                        onSelect = select,
-                    )
-                }
-            },
-            detailPane = {
-                AnimatedPane {
-                    LogDetailPane(
-                        line = state.lines.firstOrNull { it.index == selectedIndex },
-                        country = state.lines.firstOrNull { it.index == selectedIndex }
-                            ?.entry?.let { state.countryByIp[it.ip] },
-                        showBack = navigator.canNavigateBack(),
-                        contentPadding = insets,
-                        onBack = { scope.launch { navigator.navigateBack() } },
-                    )
-                }
-            },
-        )
+        if (detailFullScreen) {
+            LogDetailPane(
+                line = selected,
+                country = selected?.entry?.let { state.countryByIp[it.ip] },
+                showBack = true,
+                contentPadding = insets,
+                onBack = closeDetail,
+            )
+            return@Scaffold
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            LogsListPane(
+                state = state,
+                viewModel = viewModel,
+                contentPadding = insets,
+                selectedIndex = selectedIndex,
+                onSelect = select,
+            )
+
+            ModalSideSheet(
+                visible = selected != null,
+                onDismiss = closeDetail,
+                scrimLabel = "Close the log record",
+            ) {
+                LogDetailPane(
+                    line = selected,
+                    country = selected?.entry?.let { state.countryByIp[it.ip] },
+                    showBack = true,
+                    contentPadding = insets,
+                    onBack = closeDetail,
+                )
+            }
+        }
     }
 }
 
@@ -322,12 +327,17 @@ private fun LogsListPane(
                 }
 
                 items(state.visible.reversed(), key = { it.index }) { line ->
-                    LogRow(
-                        line = line,
-                        country = line.entry?.let { state.countryByIp[it.ip] },
-                        selected = line.index == selectedIndex,
-                        onClick = { onSelect(line) },
-                    )
+                    Column {
+                        LogRow(
+                            line = line,
+                            country = line.entry?.let { state.countryByIp[it.ip] },
+                            selected = line.index == selectedIndex,
+                            onClick = { onSelect(line) },
+                        )
+                        // The web rules a line under every access-log entry; without it the rows
+                        // run together once the list is dense.
+                        CardDivider()
+                    }
                 }
 
                 if (state.visible.isEmpty()) {
