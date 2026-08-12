@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,10 +38,14 @@ fun SignalCard(
     heroUnit: String? = null,
     trailing: String? = null,
     trailingColor: Color? = null,
+    /** Tinted glyph in the card head, as the web renders one per card. */
+    glyph: ImageVector? = null,
+    /** Overrides the rail when the card is reporting a problem. */
+    health: Color? = null,
     content: @Composable (() -> Unit)? = null,
 ) {
     val palette = LocalTmPalette.current
-    TmCard(modifier = modifier, accentColor = accent) {
+    TmCard(modifier = modifier, accentColor = health ?: accent) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
@@ -48,6 +56,16 @@ fun SignalCard(
                     text = trailing,
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                     color = trailingColor ?: palette.muted,
+                )
+            }
+            if (glyph != null) {
+                Icon(
+                    imageVector = glyph,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier
+                        .padding(start = TmSpacing.xs)
+                        .size(14.dp),
                 )
             }
         }
@@ -107,6 +125,9 @@ fun RankedRow(
     warn: String? = null,
     warnSevere: Boolean = false,
     trailing: String? = null,
+    /** A coloured rail on the leading edge, as the web puts on every ranked row. */
+    rail: Color? = null,
+    leading: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val palette = LocalTmPalette.current
@@ -118,6 +139,16 @@ fun RankedRow(
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(vertical = 3.dp),
     ) {
+        if (rail != null) {
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(1.dp))
+                    .background(rail),
+            )
+        }
+        if (leading != null) leading()
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),

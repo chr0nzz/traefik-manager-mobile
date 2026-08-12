@@ -40,7 +40,10 @@ class DashboardViewModel @Inject constructor(
 
     val state: StateFlow<DashboardUiState> =
         combine(repository.raw, providerFilter, loadState) { raw, filter, load ->
-            load.copy(snapshot = raw?.let { DashboardBuilder.build(it, filter) })
+            load.copy(
+                snapshot = raw?.let { DashboardBuilder.build(it, filter) },
+                loading = load.loading || (raw == null && load.error == null),
+            )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 
     init {

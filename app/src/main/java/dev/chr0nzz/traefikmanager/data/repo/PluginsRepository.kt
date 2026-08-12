@@ -20,7 +20,12 @@ data class PluginsSnapshot(
 class PluginsRepository @Inject constructor(
     private val apiProvider: ApiProvider,
     private val routesRepository: RoutesRepository,
+    private val navCounts: NavCountsStore,
 ) {
+
+    /** Just the total, for the nav badge: skips the route fetch that usage counts would need. */
+    suspend fun count(): Int = apiProvider.api().plugins().plugins.size
+        .also { navCounts.report(NavCountsStore.PLUGINS, it) }
 
     suspend fun load(): PluginsSnapshot = coroutineScope {
         val pluginsCall = async { apiProvider.api().plugins() }
@@ -28,6 +33,7 @@ class PluginsRepository @Inject constructor(
         val response = pluginsCall.await()
         val middlewares = middlewaresCall.await()
         val plugins = response.plugins.sortedBy { it.name.lowercase() }
+        navCounts.report(NavCountsStore.PLUGINS, plugins.size)
         PluginsSnapshot(
             plugins = plugins,
             usage = PluginUsage.countsFor(plugins, middlewares),

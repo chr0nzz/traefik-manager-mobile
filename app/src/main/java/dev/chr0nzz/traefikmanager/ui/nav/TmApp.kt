@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager.ui.nav
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.animation.core.tween
@@ -20,10 +21,15 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,7 +47,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.window.core.layout.WindowSizeClass
 import androidx.navigation.navArgument
 import android.net.Uri
 import dev.chr0nzz.traefikmanager.data.api.ApiState
@@ -59,6 +64,16 @@ import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewaresScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RouteFormScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RouteRawScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RoutesScreen
+import dev.chr0nzz.traefikmanager.ui.settings.AppearanceScreen
+import dev.chr0nzz.traefikmanager.ui.settings.ConnectionSettingsScreen
+import dev.chr0nzz.traefikmanager.ui.settings.SettingsRoutes
+import dev.chr0nzz.traefikmanager.ui.settings.AboutScreen
+import dev.chr0nzz.traefikmanager.ui.settings.AuthSettingsScreen
+import dev.chr0nzz.traefikmanager.ui.settings.DiagnosticsScreen
+import dev.chr0nzz.traefikmanager.ui.settings.NotificationHistoryScreen
+import dev.chr0nzz.traefikmanager.ui.settings.NotificationsScreen
+import dev.chr0nzz.traefikmanager.ui.settings.ServersScreen
+import dev.chr0nzz.traefikmanager.ui.settings.SettingsScreen
 import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
 
@@ -107,8 +122,19 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
     val currentDestination = backStackEntry?.destination
     val badges by viewModel.badges.collectAsStateWithLifecycle()
     val destinations by viewModel.destinations.collectAsStateWithLifecycle()
+    val servers by viewModel.servers.collectAsStateWithLifecycle()
+    val activeServer by viewModel.activeServer.collectAsStateWithLifecycle()
+    val switchingServer by viewModel.switching.collectAsStateWithLifecycle()
+    var serverListExpanded by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val biometricAvailable = remember(context) { AppLock.available(context) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // Health goes stale fast, so re-probe whenever the drawer is opened.
+    LaunchedEffect(drawerState.isOpen) {
+        if (drawerState.isOpen) viewModel.loadServers()
+    }
 
     val goTo: (TmDestination) -> Unit = { destination ->
         navController.navigate(destination.route) {
@@ -118,14 +144,28 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
         }
     }
 
+    // Ask for the layout the suite will actually use: a short window puts the items in a bar even
+    // when it is wide, and a bar has room for neither nine destinations nor a count on each.
+    val suiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+    val bar = suiteType == NavigationSuiteType.ShortNavigationBarCompact ||
+        suiteType == NavigationSuiteType.ShortNavigationBarMedium ||
+        suiteType == NavigationSuiteType.NavigationBar
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(drawerState = drawerState) {
-                Text(
-                    text = "Traefik Manager",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 18.dp),
+                ServerSwitcherHeader(
+                    servers = servers,
+                    active = activeServer,
+                    expanded = serverListExpanded,
+                    switching = switchingServer,
+                    onToggle = { serverListExpanded = !serverListExpanded },
+                    onSelect = { id ->
+                        serverListExpanded = false
+                        viewModel.switchServer(id)
+                        scope.launch { drawerState.close() }
+                    },
                 )
                 TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
                     Text(
@@ -135,15 +175,11 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                         modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 6.dp),
                     )
                     destinations.filter { it.section == section }.forEach { destination ->
-                    val alerts = badges.forRoute(destination.route)
+                    val badge = badges.forRoute(destination.route)
                     NavigationDrawerItem(
                         label = { Text(destination.label) },
                         icon = { Icon(destination.icon, contentDescription = null) },
-                        badge = if (alerts > 0) {
-                            { Text(if (alerts > 99) "99+" else alerts.toString()) }
-                        } else {
-                            null
-                        },
+                        badge = drawerBadge(badge),
                         selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
                         onClick = {
                             scope.launch { drawerState.close() }
@@ -157,10 +193,8 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
         },
     ) {
 
-    val compact = !currentWindowAdaptiveInfo().windowSizeClass
-        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
-    // Compact keeps five slots: primaries first, then whatever else the server exposes.
-    val suiteDestinations = if (compact) {
+    // A bar keeps five slots: primaries first, then whatever else the server exposes.
+    val suiteDestinations = if (bar) {
         val primary = destinations.filter { it.primary }
         (primary + destinations.filterNot { it.primary }).take(5)
     } else {
@@ -175,24 +209,17 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
 
     NavigationSuiteScaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        navigationSuiteItems = {
+        navigationSuiteType = suiteType,
+        navigationItemVerticalArrangement = Arrangement.Center,
+        navigationItems = {
             suiteDestinations.forEach { destination ->
-                val alerts = badges.forRoute(destination.route)
-                item(
+                NavigationSuiteItem(
                     selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
                     onClick = { goTo(destination) },
                     icon = { Icon(destination.icon, contentDescription = null) },
                     label = { Text(destination.label) },
-                    badge = if (alerts > 0) {
-                        {
-                            val plural = if (alerts == 1) "1 alert" else "$alerts alerts"
-                            Badge(
-                                modifier = Modifier.semantics { contentDescription = plural },
-                            ) { Text(if (alerts > 99) "99+" else alerts.toString()) }
-                        }
-                    } else {
-                        null
-                    },
+                    navigationSuiteType = suiteType,
+                    badge = railBadge(badges.forRoute(destination.route), counted = !bar),
                 )
             }
         },
@@ -211,6 +238,7 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                 DashboardScreen(
                     onOpenRoutes = { goTo(TmDestination.Routes) },
                     onOpenDrawer = { scope.launch { drawerState.open() } },
+                    onOpenNotifications = { navController.navigate(SettingsRoutes.NOTIFICATION_HISTORY) },
                 )
             }
             composable(TmDestination.Routes.route) {
@@ -298,6 +326,42 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                 )
             }
+            composable(TmDestination.Settings.route) {
+                SettingsScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                    onOpen = { route -> navController.navigate(route) },
+                    onDisconnect = { viewModel.disconnect() },
+                    activeServerName = activeServer?.name ?: "Host",
+                    hostSelected = activeServer?.isHost ?: true,
+                )
+            }
+            composable(SettingsRoutes.DIAGNOSTICS) {
+                DiagnosticsScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.ABOUT) {
+                AboutScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.AUTH) {
+                AuthSettingsScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.NOTIFICATION_HISTORY) {
+                NotificationHistoryScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.NOTIFICATIONS) {
+                NotificationsScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.AGENTS) {
+                ServersScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.CONNECTION) {
+                ConnectionSettingsScreen(onClose = { navController.popBackStack() })
+            }
+            composable(SettingsRoutes.APPEARANCE) {
+                AppearanceScreen(
+                    onClose = { navController.popBackStack() },
+                    biometricAvailable = biometricAvailable,
+                )
+            }
             composable(TmDestination.CrowdSec.route) {
                 CrowdSecScreen(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
@@ -307,3 +371,58 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
     }
     }
 }
+
+private fun badgeLabel(value: Int): String = if (value > 999) "999+" else value.toString()
+
+/**
+ * The drawer prints the total the way the web sidebar does, as a quiet trailing number, and
+ * swaps in a filled badge when that entry has something wrong with it.
+ */
+private fun drawerBadge(badge: NavBadge): (@Composable () -> Unit)? = when {
+    badge.alerts > 0 -> {
+        {
+            Badge(modifier = Modifier.semantics { contentDescription = alertLabel(badge.alerts) }) {
+                Text(badgeLabel(badge.alerts))
+            }
+        }
+    }
+    badge.count > 0 -> {
+        {
+            Text(
+                text = badgeLabel(badge.count),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.semantics { contentDescription = "${badge.count} total" },
+            )
+        }
+    }
+    else -> null
+}
+
+/**
+ * The rail has room for a number, the bottom bar does not: only alerts survive the compact
+ * layout, and totals ride a neutral badge so a big count never reads as a big problem.
+ */
+private fun railBadge(badge: NavBadge, counted: Boolean): (@Composable () -> Unit)? = when {
+    badge.alerts > 0 -> {
+        {
+            Badge(modifier = Modifier.semantics { contentDescription = alertLabel(badge.alerts) }) {
+                Text(badgeLabel(badge.alerts))
+            }
+        }
+    }
+    counted && badge.count > 0 -> {
+        {
+            Badge(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.semantics { contentDescription = "${badge.count} total" },
+            ) {
+                Text(badgeLabel(badge.count))
+            }
+        }
+    }
+    else -> null
+}
+
+private fun alertLabel(alerts: Int): String = if (alerts == 1) "1 alert" else "$alerts alerts"

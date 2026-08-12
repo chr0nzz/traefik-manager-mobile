@@ -7,11 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.CertHealth
 import dev.chr0nzz.traefikmanager.data.model.CertRow
 import dev.chr0nzz.traefikmanager.data.model.CertRows
+import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.CertificatesRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -40,6 +42,7 @@ data class CertificatesUiState(
 @HiltViewModel
 class CertificatesViewModel @Inject constructor(
     private val repository: CertificatesRepository,
+    private val serverScope: ServerScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CertificatesUiState())
@@ -49,6 +52,7 @@ class CertificatesViewModel @Inject constructor(
 
     init {
         load(initial = true)
+        watchServerChanges()
     }
 
     fun refresh() = load(initial = false)
@@ -80,6 +84,16 @@ class CertificatesViewModel @Inject constructor(
                     }
                 },
             )
+        }
+    }
+
+    /** A different server means different data: drop what is on screen and refetch. */
+    private fun watchServerChanges() {
+        viewModelScope.launch {
+            serverScope.generation.drop(1).collect {
+                _state.value = CertificatesUiState()
+                load(initial = true)
+            }
         }
     }
 }

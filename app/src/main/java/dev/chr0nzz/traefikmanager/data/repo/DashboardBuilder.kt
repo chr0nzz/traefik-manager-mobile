@@ -287,11 +287,15 @@ object DashboardBuilder {
         val warn = signals.count { it.state == ObjectState.Warn }
         val idle = signals.count { it.state == ObjectState.Idle }
         val ok = signals.count { it.state == ObjectState.Ok }
+        // Traefik's overview counts every provider and its own internal objects, while the
+        // tabs list only what this app manages. When the list is present the list is the truth,
+        // otherwise the card would contradict the screen it links to.
         val total = when {
-            listed -> maxOf(signals.size, overviewTotal ?: 0)
+            listed -> signals.size
             overviewTotal != null -> overviewTotal
             else -> null
         }
+        val hidden = if (listed && overviewTotal != null) (overviewTotal - signals.size).coerceAtLeast(0) else 0
 
         val flags = buildList {
             if (err > 0) add(SignalFlag(err, "disabled", TmStatus.Error))
@@ -303,6 +307,7 @@ object DashboardBuilder {
             !listed && total == null -> "Traefik API unreachable"
             !listed -> "total from overview, the list is unavailable"
             total == 0 -> emptyLabel
+            hidden > 0 && err == 0 && warn == 0 -> "${okSub(ok)} · +$hidden internal or other providers"
             err > 0 -> signals.first { it.state == ObjectState.Err }.let { "${it.name}: ${it.reason}" }
             warn > 0 -> signals.first { it.state == ObjectState.Warn }.let { "${it.name}: ${it.reason}" }
             else -> okSub(ok)

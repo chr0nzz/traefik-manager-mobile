@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Power
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
@@ -98,6 +99,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 fun DashboardScreen(
     onOpenRoutes: () -> Unit,
     onOpenDrawer: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
@@ -124,6 +126,9 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenNotifications) {
+                        Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
+                    }
                     IconButton(onClick = viewModel::refresh) {
                         Icon(Icons.Outlined.Refresh, contentDescription = "Refresh overview")
                     }
@@ -148,11 +153,12 @@ fun DashboardScreen(
             .consumeWindowInsets(contentPadding),
     ) {
         when {
-            state.loading -> LoadingState()
+            state.loading -> LoadingState(modifier = Modifier.padding(contentPadding))
             state.snapshot == null -> ErrorState(
                 headline = "Could not load the overview",
                 body = state.error,
                 onRetry = viewModel::refresh,
+                modifier = Modifier.padding(contentPadding),
             )
             else -> {
                 val snapshot = state.snapshot ?: return@PullToRefreshBox
