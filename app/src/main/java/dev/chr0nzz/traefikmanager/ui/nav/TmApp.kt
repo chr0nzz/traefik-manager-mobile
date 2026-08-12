@@ -40,19 +40,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.window.core.layout.WindowSizeClass
 import androidx.navigation.navArgument
 import android.net.Uri
 import dev.chr0nzz.traefikmanager.data.api.ApiState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.PlaceholderScreen
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
+import dev.chr0nzz.traefikmanager.ui.certs.CertificatesScreen
+import dev.chr0nzz.traefikmanager.ui.crowdsec.CrowdSecScreen
 import dev.chr0nzz.traefikmanager.ui.dashboard.DashboardScreen
+import dev.chr0nzz.traefikmanager.ui.logs.LogsScreen
+import dev.chr0nzz.traefikmanager.ui.plugins.PluginsScreen
 import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewareFormScreen
 import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewareTemplatesScreen
 import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewaresScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RouteFormScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RouteRawScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RoutesScreen
+import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
 
 private const val ROUTE_FORM = "route_form"
@@ -99,6 +106,7 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     val badges by viewModel.badges.collectAsStateWithLifecycle()
+    val destinations by viewModel.destinations.collectAsStateWithLifecycle()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -119,7 +127,14 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 28.dp, vertical = 18.dp),
                 )
-                TmDestination.entries.forEach { destination ->
+                TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
+                    Text(
+                        text = section.label.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 6.dp),
+                    )
+                    destinations.filter { it.section == section }.forEach { destination ->
                     val alerts = badges.forRoute(destination.route)
                     NavigationDrawerItem(
                         label = { Text(destination.label) },
@@ -136,14 +151,32 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                         },
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
+                    }
                 }
             }
         },
     ) {
 
+    val compact = !currentWindowAdaptiveInfo().windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    // Compact keeps five slots: primaries first, then whatever else the server exposes.
+    val suiteDestinations = if (compact) {
+        val primary = destinations.filter { it.primary }
+        (primary + destinations.filterNot { it.primary }).take(5)
+    } else {
+        destinations
+    }
+
+    LaunchedEffect(destinations, currentDestination?.route) {
+        val route = currentDestination?.route ?: return@LaunchedEffect
+        val known = TmDestination.entries.firstOrNull { it.route == route } ?: return@LaunchedEffect
+        if (known !in destinations) goTo(TmDestination.Home)
+    }
+
     NavigationSuiteScaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         navigationSuiteItems = {
-            TmDestination.entries.forEach { destination ->
+            suiteDestinations.forEach { destination ->
                 val alerts = badges.forRoute(destination.route)
                 item(
                     selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
@@ -246,7 +279,29 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                 MiddlewareTemplatesScreen(onClose = { navController.popBackStack() })
             }
             composable(TmDestination.Services.route) {
-                PlaceholderScreen(title = TmDestination.Services.label)
+                ServicesScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                )
+            }
+            composable(TmDestination.Certificates.route) {
+                CertificatesScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                )
+            }
+            composable(TmDestination.Plugins.route) {
+                PluginsScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                )
+            }
+            composable(TmDestination.Logs.route) {
+                LogsScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                )
+            }
+            composable(TmDestination.CrowdSec.route) {
+                CrowdSecScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                )
             }
         }
     }

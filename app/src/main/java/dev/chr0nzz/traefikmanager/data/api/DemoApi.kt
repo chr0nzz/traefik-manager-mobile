@@ -27,7 +27,28 @@ import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.OverviewCounts
 import dev.chr0nzz.traefikmanager.data.model.OverviewSection
+import dev.chr0nzz.traefikmanager.data.model.CertEntry
+import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
+import dev.chr0nzz.traefikmanager.data.model.CertsResponse
+import dev.chr0nzz.traefikmanager.data.model.CsAlert
+import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import dev.chr0nzz.traefikmanager.data.model.CsMetaEntry
+import dev.chr0nzz.traefikmanager.data.model.CsSource
+import retrofit2.Response
+import dev.chr0nzz.traefikmanager.data.model.GeoLookupRequest
+import dev.chr0nzz.traefikmanager.data.model.GeoLookupResponse
+import dev.chr0nzz.traefikmanager.data.model.GeoStatus
+import dev.chr0nzz.traefikmanager.data.model.LogsResponse
+import dev.chr0nzz.traefikmanager.data.model.PluginEntry
+import dev.chr0nzz.traefikmanager.data.model.PluginsResponse
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
+import dev.chr0nzz.traefikmanager.data.model.ServiceLoadBalancer
+import dev.chr0nzz.traefikmanager.data.model.ServiceServer
+import dev.chr0nzz.traefikmanager.data.model.TraefikService
+import dev.chr0nzz.traefikmanager.data.model.WeightedChild
+import dev.chr0nzz.traefikmanager.data.model.WeightedService
+import kotlinx.serialization.json.JsonObject
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.data.model.RoutesResponse
 import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
@@ -115,21 +136,57 @@ class DemoApi : TmApi {
         )
     }
 
-    override suspend fun services(): ProtoEnvelope {
+    override suspend fun services(): ServiceEnvelope {
         settle()
-        return ProtoEnvelope(
+        return ServiceEnvelope(
             http = DEMO_ROUTES.filter { it.protocol == "http" }.map { route ->
-                TraefikObject(
+                val servers = if (route.name == "media") {
+                    listOf("http://10.0.0.9:8096", "http://10.0.0.10:8096")
+                } else {
+                    listOf(route.target)
+                }
+                TraefikService(
                     name = "${route.serviceName}@file",
                     provider = "file",
                     status = if (route.name == "broken-app") "disabled" else "enabled",
                     type = "loadbalancer",
+                    usedBy = listOf("${route.name}@file"),
                     serverStatus = if (route.name == "media") mapOf(
                         "http://10.0.0.9:8096" to "UP",
                         "http://10.0.0.10:8096" to "DOWN",
                     ) else mapOf(route.target to "UP"),
+                    loadBalancer = ServiceLoadBalancer(
+                        servers = servers.map { ServiceServer(url = it) },
+                        passHostHeader = true,
+                        healthCheck = if (route.name == "media") JsonObject(emptyMap()) else null,
+                    ),
                 )
-            },
+            } + TraefikService(
+                name = "media-pool@file",
+                provider = "file",
+                status = "enabled",
+                type = "weighted",
+                usedBy = listOf("media@file"),
+                weighted = WeightedService(
+                    services = listOf(
+                        WeightedChild("media@file", 3),
+                        WeightedChild("media-backup@file", 1),
+                    ),
+                ),
+            ),
+            tcp = listOf(
+                TraefikService(
+                    name = "postgres@file",
+                    provider = "file",
+                    status = "enabled",
+                    type = "loadbalancer",
+                    usedBy = listOf("postgres@file"),
+                    serverStatus = mapOf("10.0.0.20:5432" to "UP"),
+                    loadBalancer = ServiceLoadBalancer(
+                        servers = listOf(ServiceServer(address = "10.0.0.20:5432")),
+                    ),
+                ),
+            ),
         )
     }
 
@@ -142,6 +199,163 @@ class DemoApi : TmApi {
                 TraefikObject("basic-auth@file", "file", "enabled", type = "basicauth"),
                 TraefikObject("rate-limit@file", "file", "enabled", type = "ratelimit", usedBy = listOf("api@file")),
                 TraefikObject("redirect-https@file", "file", "enabled", type = "redirectscheme", usedBy = listOf("blog@file")),
+            ),
+        )
+    }
+
+    override suspend fun crowdSecDecisions(full: String?): Response<List<CsDecision>> {
+        settle()
+        val demo = listOf(
+            CsDecision(1, "213.209.159.154", "ban", "Ip", "cscli", "manual ban from Traefik Manager", "590h47m11s"),
+            CsDecision(2, "45.148.10.238", "ban", "Ip", "crowdsec", "crowdsecurity/http-probing", "3h57m11s"),
+            CsDecision(3, "62.210.142.174", "ban", "Ip", "CAPI", "community blocklist", "167h2m4s"),
+            CsDecision(4, "185.220.101.0/24", "ban", "Range", "lists", "firehol_level1", "23h11m9s"),
+        )
+        return Response.success(demo)
+    }
+
+    override suspend fun crowdSecAlerts(): Response<List<CsAlert>> {
+        settle()
+        val now = java.time.Instant.now()
+        val demo = listOf(
+            demoAlert(1, "45.148.10.125", "crowdsecurity/http-sensitive-files", "NL", "Techoff Srv Limited", 5, now.minusSeconds(120), listOf("/.env")),
+            demoAlert(2, "62.210.142.174", "crowdsecurity/http-technology-probing", "FR", "Scaleway S.a.s.", 1, now.minusSeconds(1440), listOf("/remote/login")),
+            demoAlert(3, "212.87.212.246", "crowdsecurity/http-probing", "DE", "ITP-Solutions GmbH", 11, now.minusSeconds(3600), listOf("/")),
+            demoAlert(4, "45.142.193.221", "crowdsecurity/http-cve-probing", "RO", "Skynet Network", 1, now.minusSeconds(25200), listOf("/global-protect/login.esp")),
+        )
+        return Response.success(demo)
+    }
+
+    private fun demoAlert(
+        id: Long,
+        ip: String,
+        scenario: String,
+        country: String,
+        asName: String,
+        events: Int,
+        at: java.time.Instant,
+        uris: List<String>,
+    ) = CsAlert(
+        uuid = "demo-$id",
+        id = id,
+        scenario = scenario,
+        eventsCount = events,
+        capacity = 5,
+        leakspeed = "10s",
+        machineId = "demo-machine",
+        startAt = at.toString(),
+        source = CsSource(ip = ip, value = ip, scope = "Ip", cn = country, asName = asName, asNumber = "12876"),
+        meta = listOf(
+            CsMetaEntry("target_uri", uris.joinToString(prefix = "[\"", postfix = "\"]", separator = "\",\"")),
+            CsMetaEntry("method", "GET"),
+            CsMetaEntry("user_agent", "Mozilla/5.0 (compatible; scanner)"),
+        ),
+    )
+
+    override suspend fun crowdSecAddDecision(body: AddDecisionRequest): Response<OkResponse> {
+        settle()
+        return Response.success(OkResponse(ok = true))
+    }
+
+    override suspend fun crowdSecDeleteDecision(id: Long): Response<OkResponse> {
+        settle()
+        return Response.success(OkResponse(ok = true))
+    }
+
+    override suspend fun logs(lines: Int): LogsResponse {
+        settle()
+        val now = java.time.Instant.now()
+        val sample = listOf(
+            Triple("GET", "/", 200),
+            Triple("GET", "/api/routes", 200),
+            Triple("POST", "/api/crowdsec/decisions", 201),
+            Triple("GET", "/.env", 404),
+            Triple("GET", "/favicon.ico", 404),
+            Triple("HEAD", "/", 403),
+            Triple("GET", "/api/health", 200),
+            Triple("GET", "/media/stream/12345", 206),
+            Triple("GET", "/wp-admin/setup-config.php", 404),
+            Triple("GET", "/api/agents/proxy/1/traefik/overview", 502),
+        )
+        val ips = listOf("62.210.142.174", "18.218.118.203", "212.87.212.246", "100.87.28.37", "45.148.10.125")
+        val services = listOf("tma@docker", "dash-service@file", "gk-auth-service@file")
+        val generated = (0 until minOf(lines, 120)).map { index ->
+            val (method, path, status) = sample[index % sample.size]
+            val stamp = now.minusSeconds((120L - index) * 37)
+            val durationNs = listOf(421_000L, 1_200_000L, 2_400_000L, 96_000_000L, 3_570_000_000L)[index % 5]
+            """{"ClientHost":"${ips[index % ips.size]}","RequestMethod":"$method","RequestPath":"$path",""" +
+                """"DownstreamStatus":$status,"OriginStatus":${if (status == 404) 0 else status},""" +
+                """"Duration":$durationNs,"DownstreamContentSize":${status * 7},""" +
+                """"RequestHost":"kwa.xyzlab.app","RequestScheme":"https","entryPointName":"websecure",""" +
+                """"RouterName":"tma@docker","ServiceName":"${services[index % services.size]}",""" +
+                """"ServiceURL":"http://172.18.0.3:8090","TLSVersion":"1.3","RetryAttempts":0,""" +
+                """"StartUTC":"$stamp"}"""
+        }
+        return LogsResponse(lines = generated)
+    }
+
+    override suspend fun geoStatus(): GeoStatus = GeoStatus(
+        enabled = true,
+        available = true,
+        dbPath = "/app/geoip/dbip-country-lite.mmdb",
+        dbDate = "2026-08-01",
+    )
+
+    override suspend fun geoLookup(body: GeoLookupRequest): GeoLookupResponse {
+        val codes = body.ips.associateWith { ip ->
+            when ((ip.substringBefore('.').toIntOrNull() ?: 0) % 5) {
+                0 -> "US"
+                1 -> "DE"
+                2 -> "FR"
+                3 -> "NL"
+                else -> "RO"
+            }
+        }
+        return GeoLookupResponse(enabled = true, available = true, codes = codes)
+    }
+
+    override suspend fun certs(): CertsResponse {
+        settle()
+        return CertsResponse(
+            certs = listOf(
+                CertEntry(
+                    resolver = "letsencrypt",
+                    main = "example.com",
+                    sans = listOf("example.com", "www.example.com", "api.example.com", "blog.example.com"),
+                    notAfter = isoDaysFromNow(64),
+                    source = "acme.json",
+                ),
+                CertEntry(
+                    resolver = "letsencrypt",
+                    main = "media.example.com",
+                    notAfter = isoDaysFromNow(21),
+                    source = "acme.json",
+                ),
+                CertEntry(
+                    resolver = "cloudflare",
+                    main = "vpn.example.com",
+                    notAfter = isoDaysFromNow(3),
+                    source = "cloudflare.json",
+                ),
+                CertEntry(
+                    resolver = "file",
+                    main = "chain.pem",
+                    certFile = "/etc/traefik/certs/chain.pem",
+                ),
+            ),
+        )
+    }
+
+    override suspend fun plugins(): PluginsResponse {
+        settle()
+        return PluginsResponse(
+            plugins = listOf(
+                PluginEntry(
+                    name = "crowdsec-bouncer",
+                    moduleName = "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin",
+                    version = "v1.3.5",
+                ),
+                PluginEntry(name = "geoblock", moduleName = "plugins-local/geoblock", version = ""),
             ),
         )
     }
@@ -233,6 +447,8 @@ class DemoApi : TmApi {
     override suspend fun settings(): ServerSettings = ServerSettings(
         domains = listOf("example.com", "xyzlab.dev"),
         certResolver = "letsencrypt,cloudflare",
+        visibleTabs = mapOf("certs" to true, "plugins" to true, "logs" to true, "crowdsec" to true),
+        crowdsecEnabled = true,
     )
 
     override suspend fun configs(): ConfigsResponse = ConfigsResponse(
@@ -298,4 +514,9 @@ class DemoApi : TmApi {
             route("wireguard", "", "10.0.0.32:51820", protocol = "udp", entryPoint = "wireguard", tls = false),
         )
     }
+
+    private fun isoDaysFromNow(days: Long): String = java.time.Instant.now()
+        .plus(java.time.Duration.ofDays(days))
+        .truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+        .toString()
 }

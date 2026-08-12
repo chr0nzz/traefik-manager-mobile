@@ -31,6 +31,7 @@ import coil3.compose.AsyncImage
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
+import dev.chr0nzz.traefikmanager.ui.components.ValueRow
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -161,41 +162,4 @@ private fun Glyph(icon: ImageVector, tint: androidx.compose.ui.graphics.Color) {
         tint = tint,
         modifier = Modifier.size(14.dp),
     )
-}
-
-@Composable
-private fun ValueRow(
-    icon: ImageVector,
-    value: String,
-    color: androidx.compose.ui.graphics.Color,
-    extra: String? = null,
-) {
-    val palette = LocalTmPalette.current
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-        modifier = Modifier.padding(top = TmSpacing.xs),
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = palette.muted,
-            modifier = Modifier.size(13.dp),
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
-            color = color,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
-        )
-        if (extra != null) {
-            Text(
-                text = extra,
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                color = palette.muted,
-            )
-        }
-    }
 }

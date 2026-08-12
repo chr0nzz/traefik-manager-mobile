@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.api.ApiState
 import dev.chr0nzz.traefikmanager.data.repo.DashboardRepository
+import dev.chr0nzz.traefikmanager.data.repo.ServerSettingsRepository
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
 import dev.chr0nzz.traefikmanager.data.store.PreferencesStore
 import dev.chr0nzz.traefikmanager.data.store.TmPreferences
@@ -35,7 +36,24 @@ class RootViewModel @Inject constructor(
     apiProvider: ApiProvider,
     private val preferencesStore: PreferencesStore,
     dashboardRepository: DashboardRepository,
+    serverSettingsRepository: ServerSettingsRepository,
 ) : ViewModel() {
+
+    /** Destinations the server has switched on. Unknown settings mean "show everything". */
+    val destinations: StateFlow<List<TmDestination>> = serverSettingsRepository.settings
+        .map { settings ->
+            TmDestination.entries.filter { destination ->
+                val tab = destination.serverTab ?: return@filter true
+                if (settings == null) return@filter true
+                val visible = settings.tabVisible(tab)
+                if (destination == TmDestination.CrowdSec) visible && settings.crowdsecEnabled else visible
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, TmDestination.entries.toList())
+
+    init {
+        serverSettingsRepository.refresh()
+    }
 
     fun onMigrationNoticeShown() {
         viewModelScope.launch { preferencesStore.setMigrationNotice(null) }

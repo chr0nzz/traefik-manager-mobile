@@ -131,7 +131,7 @@ fun SignalStrip(
     val shown = sorted.take(maxCells)
     val overflow = sorted.size - shown.size
     val summary = sorted.groupingBy { it.label() }.eachCount()
-        .entries.joinToString(", ") { "${'$'}{it.value} ${'$'}{it.key}" }
+        .entries.joinToString(", ") { "${it.value} ${it.key}" }
     FlowRow(
         modifier = modifier
             .fillMaxWidth()

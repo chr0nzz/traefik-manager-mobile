@@ -55,7 +55,7 @@ fun RouteRawScreen(
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
                 title = { Text("Raw YAML") },
                 navigationIcon = {

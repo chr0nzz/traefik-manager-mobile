@@ -81,6 +81,7 @@ import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.HealthLabel
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.MonoText
+import dev.chr0nzz.traefikmanager.ui.components.ProviderRow
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.SignalStrip
 import dev.chr0nzz.traefikmanager.ui.components.StatusDot
@@ -114,7 +115,7 @@ fun DashboardScreen(
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
                 title = { Text("Overview") },
                 navigationIcon = {
@@ -314,19 +315,6 @@ private fun SignalCardView(
 }
 
 @Composable
-private fun providerIcon(name: String): ImageVector = when {
-    name.startsWith("docker") || name.startsWith("swarm") -> Icons.Outlined.Inventory2
-    name.startsWith("kubernetes") -> Icons.Outlined.Hub
-    name.startsWith("file") -> Icons.Outlined.Description
-    name.startsWith("internal") -> Icons.Outlined.Settings
-    name.startsWith("http") -> Icons.Outlined.Link
-    name.startsWith("consul") || name.startsWith("redis") || name.startsWith("etcd") ||
-        name.startsWith("zookeeper") -> Icons.Outlined.Storage
-    name.startsWith("plugin") -> Icons.Outlined.Extension
-    else -> Icons.Outlined.Power
-}
-
-@Composable
 private fun ProvidersBar(
     providers: List<ProviderCount>,
     activeProvider: String?,
@@ -344,61 +332,6 @@ private fun ProvidersBar(
             onProviderClick = onProviderClick,
             modifier = Modifier.weight(1f),
         )
-    }
-}
-
-@Composable
-private fun ProviderRow(
-    providers: List<ProviderCount>,
-    activeProvider: String?,
-    onProviderClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val palette = LocalTmPalette.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-    ) {
-        providers.forEach { provider ->
-            val active = provider.name == activeProvider
-            val tint = when {
-                provider.worst == TmStatus.Error -> palette.red
-                provider.worst == TmStatus.Warn -> palette.yellow
-                active -> palette.blue
-                else -> palette.muted
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(TmRadius.sm))
-                    .background(if (active) palette.blue.copy(alpha = 0.14f) else Color.Transparent)
-                    .clickable { onProviderClick(provider.name) }
-                    .padding(horizontal = TmSpacing.sm, vertical = 3.dp),
-            ) {
-                Icon(
-                    imageVector = providerIcon(provider.name),
-                    contentDescription = null,
-                    tint = tint,
-                    modifier = Modifier.size(13.dp),
-                )
-                Text(
-                    text = provider.name,
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                    color = if (active) palette.blue else palette.muted,
-                )
-                Text(
-                    text = provider.count.toString(),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontFamily = MonoFamily,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    color = if (active) palette.blue else MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        }
     }
 }
 

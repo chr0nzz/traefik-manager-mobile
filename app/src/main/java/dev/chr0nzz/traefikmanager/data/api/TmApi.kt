@@ -17,7 +17,17 @@ import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.RoutesResponse
+import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
+import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
+import dev.chr0nzz.traefikmanager.data.model.CertsResponse
+import dev.chr0nzz.traefikmanager.data.model.CsAlert
+import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import dev.chr0nzz.traefikmanager.data.model.GeoLookupRequest
+import dev.chr0nzz.traefikmanager.data.model.GeoLookupResponse
+import dev.chr0nzz.traefikmanager.data.model.GeoStatus
+import dev.chr0nzz.traefikmanager.data.model.LogsResponse
+import dev.chr0nzz.traefikmanager.data.model.PluginsResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
@@ -27,6 +37,7 @@ import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
 import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
 import okhttp3.RequestBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.DELETE
@@ -55,8 +66,35 @@ interface TmApi {
     @GET("api/traefik/routers")
     suspend fun routers(): ProtoEnvelope
 
+    @GET("api/crowdsec/decisions")
+    suspend fun crowdSecDecisions(@Query("full") full: String? = null): Response<List<CsDecision>>
+
+    @GET("api/crowdsec/alerts")
+    suspend fun crowdSecAlerts(): Response<List<CsAlert>>
+
+    @POST("api/crowdsec/decisions")
+    suspend fun crowdSecAddDecision(@Body body: AddDecisionRequest): Response<OkResponse>
+
+    @DELETE("api/crowdsec/decisions/{id}")
+    suspend fun crowdSecDeleteDecision(@Path("id") id: Long): Response<OkResponse>
+
+    @GET("api/traefik/logs")
+    suspend fun logs(@Query("lines") lines: Int): LogsResponse
+
+    @GET("api/geoip/status")
+    suspend fun geoStatus(): GeoStatus
+
+    @POST("api/geoip/lookup")
+    suspend fun geoLookup(@Body body: GeoLookupRequest): GeoLookupResponse
+
+    @GET("api/traefik/certs")
+    suspend fun certs(): CertsResponse
+
+    @GET("api/traefik/plugins")
+    suspend fun plugins(): PluginsResponse
+
     @GET("api/traefik/services")
-    suspend fun services(): ProtoEnvelope
+    suspend fun services(): ServiceEnvelope
 
     @GET("api/traefik/middlewares")
     suspend fun middlewares(): ProtoEnvelope

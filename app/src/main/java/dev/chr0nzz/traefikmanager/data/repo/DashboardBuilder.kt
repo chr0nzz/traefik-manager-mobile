@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager.data.repo
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.toProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 
@@ -81,7 +82,7 @@ object DashboardBuilder {
         overview = raw.overview,
         entrypoints = raw.entrypoints,
         routers = raw.routers?.filterProvider(providerFilter),
-        services = raw.services?.filterProvider(providerFilter),
+        services = raw.services?.toProtoEnvelope()?.filterProvider(providerFilter),
         middlewares = raw.middlewares?.filterProvider(providerFilter),
         runtime = RuntimeInfo(
             version = raw.version?.version,
@@ -93,7 +94,7 @@ object DashboardBuilder {
         providerFilter = providerFilter,
         allProviders = providerCounts(
             (raw.routers?.all.orEmpty().map(::classifyRouter)) +
-                (raw.services?.all.orEmpty().map(::classifyService)) +
+                (raw.services?.toProtoEnvelope()?.all.orEmpty().map(::classifyService)) +
                 (raw.middlewares?.all.orEmpty().map { classifyMiddleware(it, emptySet()) }),
         ),
     )

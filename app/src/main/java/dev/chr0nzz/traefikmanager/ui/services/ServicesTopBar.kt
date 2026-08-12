@@ -1,14 +1,14 @@
-package dev.chr0nzz.traefikmanager.ui.routes
+package dev.chr0nzz.traefikmanager.ui.services
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -38,8 +38,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -47,7 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.data.model.ServiceProtocol
+import dev.chr0nzz.traefikmanager.data.model.ServiceRow
 import dev.chr0nzz.traefikmanager.ui.components.StatusDot
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -56,24 +57,23 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutesTopBar(
+fun ServicesTopBar(
     onOpenDrawer: () -> Unit,
     searchBarState: SearchBarState,
     queryState: TextFieldState,
-    results: List<Route>,
-    protocol: ProtocolFilter,
-    status: StatusFilter,
+    results: List<ServiceRow>,
+    state: ServicesUiState,
     scrollBehavior: TopAppBarScrollBehavior,
-    onProtocolChange: (ProtocolFilter) -> Unit,
-    onStatusChange: (StatusFilter) -> Unit,
-    onResultClick: (Route) -> Unit,
+    onStatusChange: (ServiceStatusFilter) -> Unit,
+    onProtocolChange: (ServiceProtocol?) -> Unit,
+    onClearFilters: () -> Unit,
+    onResultClick: (ServiceRow) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
     val palette = LocalTmPalette.current
     var filterMenuOpen by remember { mutableStateOf(false) }
-    val filtersActive = protocol != ProtocolFilter.All || status != StatusFilter.All
 
     TopAppBar(
         modifier = modifier,
@@ -81,7 +81,7 @@ fun RoutesTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text("Routes") },
+        title = { Text("Services") },
         navigationIcon = {
             IconButton(onClick = onOpenDrawer) {
                 Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
@@ -89,13 +89,13 @@ fun RoutesTopBar(
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search routes")
+                Icon(Icons.Outlined.Search, contentDescription = "Search services")
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
                     Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
                 }
-                if (filtersActive) {
+                if (state.filtersActive) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -105,18 +105,17 @@ fun RoutesTopBar(
                             .background(palette.blue),
                     )
                 }
-                FilterMenu(
+                ServiceFilterMenu(
                     expanded = filterMenuOpen,
-                    protocol = protocol,
-                    status = status,
-                    filtersActive = filtersActive,
+                    state = state,
                     onDismiss = { filterMenuOpen = false },
-                    onProtocolChange = onProtocolChange,
                     onStatusChange = onStatusChange,
+                    onProtocolChange = onProtocolChange,
+                    onClearFilters = onClearFilters,
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh routes")
+                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh services")
             }
         },
         scrollBehavior = scrollBehavior,
@@ -129,7 +128,7 @@ fun RoutesTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search routes") },
+                placeholder = { Text("Search services") },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
@@ -148,31 +147,33 @@ fun RoutesTopBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (results.isEmpty()) {
                 Text(
-                    text = "No routes match",
+                    text = "No services match",
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted,
                     modifier = Modifier.padding(TmSpacing.lg),
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(results, key = { it.id }) { route ->
+                    items(results, key = { it.key }) { service ->
                         ListItem(
-                            headlineContent = { Text(route.name) },
+                            headlineContent = { Text(service.shortName) },
                             supportingContent = {
                                 Text(
-                                    text = route.hosts.firstOrNull() ?: route.target,
+                                    text = service.servers.firstOrNull()?.target
+                                        ?: service.composite.firstOrNull()
+                                        ?: service.provider,
                                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                                 )
                             },
-                            leadingContent = { StatusDot(route.status()) },
-                            trailingContent = if (route.protocol != "http") {
-                                { Text(route.protocol.uppercase(), style = MaterialTheme.typography.labelSmall) }
+                            leadingContent = { StatusDot(service.health.asTmStatus()) },
+                            trailingContent = if (service.proto != ServiceProtocol.Http) {
+                                { Text(service.proto.label, style = MaterialTheme.typography.labelSmall) }
                             } else {
                                 null
                             },
                             modifier = Modifier.clickable {
                                 scope.launch { searchBarState.animateToCollapsed() }
-                                onResultClick(route)
+                                onResultClick(service)
                             },
                         )
                     }
@@ -183,14 +184,13 @@ fun RoutesTopBar(
 }
 
 @Composable
-private fun FilterMenu(
+private fun ServiceFilterMenu(
     expanded: Boolean,
-    protocol: ProtocolFilter,
-    status: StatusFilter,
-    filtersActive: Boolean,
+    state: ServicesUiState,
     onDismiss: () -> Unit,
-    onProtocolChange: (ProtocolFilter) -> Unit,
-    onStatusChange: (StatusFilter) -> Unit,
+    onStatusChange: (ServiceStatusFilter) -> Unit,
+    onProtocolChange: (ServiceProtocol?) -> Unit,
+    onClearFilters: () -> Unit,
 ) {
     val palette = LocalTmPalette.current
     DropdownMenu(
@@ -198,42 +198,15 @@ private fun FilterMenu(
         onDismissRequest = onDismiss,
         modifier = Modifier.widthIn(min = 240.dp),
     ) {
-        Text(
-            text = "PROTOCOL",
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-            modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
-        )
-        ProtocolFilter.entries.forEach { option ->
-            DropdownMenuItem(
-                text = { Text(option.label) },
-                onClick = {
-                    onProtocolChange(option)
-                    onDismiss()
-                },
-                trailingIcon = if (option == protocol) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
-                } else {
-                    null
-                },
-                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
-            )
-        }
-        HorizontalDivider()
-        Text(
-            text = "STATUS",
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-            modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
-        )
-        StatusFilter.entries.forEach { option ->
+        MenuSectionLabel("STATUS")
+        ServiceStatusFilter.entries.forEach { option ->
             DropdownMenuItem(
                 text = { Text(option.label) },
                 onClick = {
                     onStatusChange(option)
                     onDismiss()
                 },
-                trailingIcon = if (option == status) {
+                trailingIcon = if (option == state.status) {
                     { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
                 } else {
                     null
@@ -241,18 +214,66 @@ private fun FilterMenu(
                 contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
             )
         }
-        if (filtersActive) {
+        val protocols = state.protocols
+        if (protocols.size > 1) {
+            HorizontalDivider()
+            MenuSectionLabel("PROTOCOL")
+            DropdownMenuItem(
+                text = { Text("All") },
+                onClick = {
+                    onProtocolChange(null)
+                    onDismiss()
+                },
+                trailingIcon = if (state.protocol == null) {
+                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                } else {
+                    null
+                },
+                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
+            )
+            protocols.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.label) },
+                    onClick = {
+                        onProtocolChange(option)
+                        onDismiss()
+                    },
+                    trailingIcon = if (option == state.protocol) {
+                        { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                    } else {
+                        null
+                    },
+                    contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
+                )
+            }
+        }
+        if (state.filtersActive) {
             HorizontalDivider()
             DropdownMenuItem(
                 text = { Text("Clear filters") },
                 leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
                 contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
                 onClick = {
-                    onProtocolChange(ProtocolFilter.All)
-                    onStatusChange(StatusFilter.All)
+                    onClearFilters()
                     onDismiss()
                 },
             )
         }
     }
+}
+
+@Composable
+private fun MenuSectionLabel(text: String) {
+    val palette = LocalTmPalette.current
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = palette.muted,
+        modifier = Modifier.padding(
+            start = TmSpacing.lg,
+            end = TmSpacing.lg,
+            top = TmSpacing.sm,
+            bottom = TmSpacing.xs,
+        ),
+    )
 }

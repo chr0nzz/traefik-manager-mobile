@@ -39,7 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareTemplates
-import dev.chr0nzz.traefikmanager.ui.components.CardDivider
+import dev.chr0nzz.traefikmanager.ui.components.DetailRow
 import dev.chr0nzz.traefikmanager.ui.components.MessageState
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
@@ -189,33 +189,4 @@ fun MiddlewareDetailPane(
             )
         }
     }
-}
-
-@Composable
-private fun DetailRow(
-    label: String,
-    value: String,
-    mono: Boolean = false,
-    last: Boolean = false,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = TmSpacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(TmSpacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        SectionLabel(label, modifier = Modifier.weight(0.42f))
-        Text(
-            text = value,
-            style = if (mono) {
-                MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily)
-            } else {
-                MaterialTheme.typography.bodyMedium
-            },
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(0.58f),
-        )
-    }
-    if (!last) CardDivider()
 }

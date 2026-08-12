@@ -25,3 +25,19 @@ object LenientStringSerializer : KSerializer<String> {
 
     override fun serialize(encoder: Encoder, value: String) = encoder.encodeString(value)
 }
+
+object LenientIntSerializer : KSerializer<Int> {
+
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("LenientInt", PrimitiveKind.INT)
+
+    override fun deserialize(decoder: Decoder): Int {
+        val input = decoder as? JsonDecoder ?: return decoder.decodeInt()
+        return when (val element = input.decodeJsonElement()) {
+            is JsonPrimitive -> element.content.trim().toDoubleOrNull()?.toInt() ?: 0
+            else -> 0
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: Int) = encoder.encodeInt(value)
+}

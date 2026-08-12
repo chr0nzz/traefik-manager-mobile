@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager
 
+import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.data.model.RoutesResponse
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -103,5 +104,20 @@ class RouteParsingTest {
         assertTrue(route.middlewareNames.isEmpty())
         assertEquals("http", route.protocol)
         assertTrue(route.enabled)
+    }
+
+    @Test
+    fun `a plain host rule is recognised so the simple editor stays available`() {
+        val single = Route(id = "a", name = "a", rule = "Host(`app.example.com`)")
+        assertTrue(single.isPlainHostRule)
+
+        val multi = Route(id = "b", name = "b", rule = "Host(`a.example.com`) || Host(`b.example.com`)")
+        assertTrue(multi.isPlainHostRule)
+
+        val advanced = Route(id = "c", name = "c", rule = "Host(`a.example.com`) && PathPrefix(`/api`)")
+        assertFalse(advanced.isPlainHostRule)
+
+        val ruleless = Route(id = "d", name = "d", rule = "")
+        assertFalse(ruleless.isPlainHostRule)
     }
 }

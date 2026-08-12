@@ -159,9 +159,9 @@ fun RouteDetailPane(
                     },
                     modifier = Modifier.semantics {
                         contentDescription = if (route.enabled) {
-                            "Disable ${'$'}{route.name}"
+                            "Disable ${route.name}"
                         } else {
-                            "Enable ${'$'}{route.name}"
+                            "Enable ${route.name}"
                         }
                     },
                 )

@@ -4,6 +4,7 @@ import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
 import dev.chr0nzz.traefikmanager.di.ApplicationScope
 import javax.inject.Inject
@@ -22,7 +23,7 @@ data class RawDashboard(
     val overview: Overview? = null,
     val entrypoints: List<Entrypoint>? = null,
     val routers: ProtoEnvelope? = null,
-    val services: ProtoEnvelope? = null,
+    val services: ServiceEnvelope? = null,
     val middlewares: ProtoEnvelope? = null,
     val version: TraefikVersion? = null,
 )

@@ -54,7 +54,7 @@ data class Route(
     val hosts: List<String> get() = HOST_REGEX.findAll(rule).map { it.groupValues[1] }.toList()
 
     val isPlainHostRule: Boolean
-        get() = hosts.isNotEmpty() && rule == hosts.joinToString(" || ") { "Host(`${'$'}it`)" }
+        get() = hosts.isNotEmpty() && rule == hosts.joinToString(" || ") { "Host(`$it`)" }
 
     val tlsPassthrough: Boolean
         get() = (tls as? JsonObject)?.get("passthrough")?.let { (it as? JsonPrimitive)?.booleanOrNull } == true
