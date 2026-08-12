@@ -14,7 +14,13 @@ import dev.chr0nzz.traefikmanager.data.model.EntrypointHttp
 import dev.chr0nzz.traefikmanager.data.model.EntrypointTls
 import dev.chr0nzz.traefikmanager.data.model.ManagerVersion
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
+import dev.chr0nzz.traefikmanager.data.model.DigestRequest
+import dev.chr0nzz.traefikmanager.data.model.HtpasswdRequest
+import dev.chr0nzz.traefikmanager.data.model.HtpasswdResponse
+import dev.chr0nzz.traefikmanager.data.model.MiddlewareTemplate
+import dev.chr0nzz.traefikmanager.data.model.MiddlewareTemplatesResponse
 import dev.chr0nzz.traefikmanager.data.model.OkResponse
+import dev.chr0nzz.traefikmanager.data.model.TemplateBody
 import dev.chr0nzz.traefikmanager.data.model.PingResult
 import dev.chr0nzz.traefikmanager.data.model.RawRoute
 import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
@@ -176,6 +182,38 @@ class DemoApi : TmApi {
         CertResolversResponse(resolvers = listOf("letsencrypt"))
 
     override suspend fun staticConfig() = StaticConfigResponse()
+
+    private val demoTemplates = mutableListOf(
+        MiddlewareTemplate(id = "demo-1", name = "Secure Headers", yaml = "headers:\n  sslRedirect: true\n"),
+    )
+
+    override suspend fun saveMiddleware(body: RequestBody) = OkResponse(ok = true)
+
+    override suspend fun deleteMiddleware(name: String, body: RequestBody) = OkResponse(ok = true)
+
+    override suspend fun middlewareTemplates() = MiddlewareTemplatesResponse(demoTemplates.toList())
+
+    override suspend fun createMiddlewareTemplate(body: TemplateBody): OkResponse {
+        demoTemplates += MiddlewareTemplate(id = "demo-${demoTemplates.size + 1}", name = body.name, yaml = body.yaml)
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun updateMiddlewareTemplate(id: String, body: TemplateBody): OkResponse {
+        val index = demoTemplates.indexOfFirst { it.id == id }
+        if (index >= 0) demoTemplates[index] = MiddlewareTemplate(id, body.name, body.yaml)
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun deleteMiddlewareTemplate(id: String): OkResponse {
+        demoTemplates.removeAll { it.id == id }
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun htpasswd(body: HtpasswdRequest) =
+        HtpasswdResponse(ok = true, entry = "${body.username}:\$apr1\$demo\$hash")
+
+    override suspend fun digestAuth(body: DigestRequest) =
+        HtpasswdResponse(ok = true, entry = "${body.username}:${body.realm}:demodigesthash")
 
     override suspend fun routeRaw(routeId: String) = RawRoute(
         raw = "http:\n  routers:\n    demo:\n      rule: Host(`demo.example.com`)\n      service: demo\n",

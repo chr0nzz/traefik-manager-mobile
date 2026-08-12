@@ -24,6 +24,7 @@ fun ConfirmDeleteDialog(
     routeName: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    consequence: String = "This removes the router and its service from the config file.",
 ) {
     var typed by remember { mutableStateOf("") }
     val palette = LocalTmPalette.current
@@ -34,8 +35,7 @@ fun ConfirmDeleteDialog(
         text = {
             Column {
                 Text(
-                    text = "This removes the router and its service from the config file. " +
-                        "Type $CONFIRM_WORD to confirm.",
+                    text = "$consequence Type $CONFIRM_WORD to confirm.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 OutlinedTextField(

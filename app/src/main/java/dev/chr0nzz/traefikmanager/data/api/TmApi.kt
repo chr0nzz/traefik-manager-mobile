@@ -5,7 +5,12 @@ import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.ManagerVersion
+import dev.chr0nzz.traefikmanager.data.model.DigestRequest
+import dev.chr0nzz.traefikmanager.data.model.HtpasswdRequest
+import dev.chr0nzz.traefikmanager.data.model.HtpasswdResponse
+import dev.chr0nzz.traefikmanager.data.model.MiddlewareTemplatesResponse
 import dev.chr0nzz.traefikmanager.data.model.OkResponse
+import dev.chr0nzz.traefikmanager.data.model.TemplateBody
 import dev.chr0nzz.traefikmanager.data.model.PingResult
 import dev.chr0nzz.traefikmanager.data.model.RawRoute
 import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
@@ -24,7 +29,9 @@ import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
 import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.DELETE
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -74,6 +81,36 @@ interface TmApi {
         @Path("routeId", encoded = false) routeId: String,
         @Body body: RequestBody,
     ): OkResponse
+
+    @POST("save-middleware")
+    suspend fun saveMiddleware(@Body body: RequestBody): OkResponse
+
+    @POST("delete-middleware/{name}")
+    suspend fun deleteMiddleware(
+        @Path("name", encoded = false) name: String,
+        @Body body: RequestBody,
+    ): OkResponse
+
+    @GET("api/mw/templates")
+    suspend fun middlewareTemplates(): MiddlewareTemplatesResponse
+
+    @POST("api/mw/templates")
+    suspend fun createMiddlewareTemplate(@Body body: TemplateBody): OkResponse
+
+    @PUT("api/mw/templates/{id}")
+    suspend fun updateMiddlewareTemplate(
+        @Path("id") id: String,
+        @Body body: TemplateBody,
+    ): OkResponse
+
+    @DELETE("api/mw/templates/{id}")
+    suspend fun deleteMiddlewareTemplate(@Path("id") id: String): OkResponse
+
+    @POST("api/tools/htpasswd")
+    suspend fun htpasswd(@Body body: HtpasswdRequest): HtpasswdResponse
+
+    @POST("api/tools/digestauth")
+    suspend fun digestAuth(@Body body: DigestRequest): HtpasswdResponse
 
     @GET("api/routes/{routeId}/raw")
     suspend fun routeRaw(@Path("routeId", encoded = false) routeId: String): RawRoute

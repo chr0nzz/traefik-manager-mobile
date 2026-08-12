@@ -44,6 +44,8 @@ class RoutesRepository @Inject constructor(
     private val _changes = MutableStateFlow(0)
     val changes: StateFlow<Int> = _changes.asStateFlow()
 
+    fun notifyChangedExternally() = notifyChanged()
+
     private fun notifyChanged() {
         _changes.value = _changes.value + 1
     }

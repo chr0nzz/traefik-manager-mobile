@@ -47,6 +47,9 @@ import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.PlaceholderScreen
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
 import dev.chr0nzz.traefikmanager.ui.dashboard.DashboardScreen
+import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewareFormScreen
+import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewareTemplatesScreen
+import dev.chr0nzz.traefikmanager.ui.middlewares.MiddlewaresScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RouteFormScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RouteRawScreen
 import dev.chr0nzz.traefikmanager.ui.routes.RoutesScreen
@@ -54,6 +57,8 @@ import kotlinx.coroutines.launch
 
 private const val ROUTE_FORM = "route_form"
 private const val ROUTE_RAW = "route_raw"
+private const val MW_FORM = "middleware_form"
+private const val MW_TEMPLATES = "middleware_templates"
 
 @Composable
 fun TmApp(
@@ -214,7 +219,31 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                 )
             }
             composable(TmDestination.Middlewares.route) {
-                PlaceholderScreen(title = TmDestination.Middlewares.label)
+                MiddlewaresScreen(
+                    onOpenDrawer = { scope.launch { drawerState.open() } },
+                    onCreate = { navController.navigate(MW_FORM) },
+                    onEdit = { name -> navController.navigate("$MW_FORM?name=${Uri.encode(name)}") },
+                    onOpenTemplates = { navController.navigate(MW_TEMPLATES) },
+                )
+            }
+            composable(
+                route = "$MW_FORM?name={name}",
+                arguments = listOf(
+                    navArgument("name") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                MiddlewareFormScreen(
+                    middlewareName = entry.arguments?.getString("name"),
+                    onClose = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
+            }
+            composable(MW_TEMPLATES) {
+                MiddlewareTemplatesScreen(onClose = { navController.popBackStack() })
             }
             composable(TmDestination.Services.route) {
                 PlaceholderScreen(title = TmDestination.Services.label)

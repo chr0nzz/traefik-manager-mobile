@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 fun TmCard(
     modifier: Modifier = Modifier,
     accent: TmStatus? = null,
+    accentColor: Color? = null,
     dimmed: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -64,12 +66,13 @@ fun TmCard(
                 .fillMaxHeight()
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         ) {
-            if (accent != null) {
+            val rail = accentColor ?: accent?.let { statusColor(it) }
+            if (rail != null) {
                 Spacer(
                     modifier = Modifier
                         .width(TmSize.accentBar)
                         .fillMaxHeight()
-                        .background(statusColor(accent)),
+                        .background(rail),
                 )
             }
             Column(
