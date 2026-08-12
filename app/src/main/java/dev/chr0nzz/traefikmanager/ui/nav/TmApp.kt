@@ -70,6 +70,7 @@ import dev.chr0nzz.traefikmanager.ui.settings.SettingsRoutes
 import dev.chr0nzz.traefikmanager.ui.settings.AboutScreen
 import dev.chr0nzz.traefikmanager.ui.settings.AuthSettingsScreen
 import dev.chr0nzz.traefikmanager.ui.settings.DiagnosticsScreen
+import dev.chr0nzz.traefikmanager.ui.settings.AgentConfigScreen
 import dev.chr0nzz.traefikmanager.ui.settings.NotificationHistoryScreen
 import dev.chr0nzz.traefikmanager.ui.settings.NotificationsScreen
 import dev.chr0nzz.traefikmanager.ui.settings.ServersScreen
@@ -351,7 +352,16 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
                 NotificationsScreen(onClose = { navController.popBackStack() })
             }
             composable(SettingsRoutes.AGENTS) {
-                ServersScreen(onClose = { navController.popBackStack() })
+                ServersScreen(
+                    onClose = { navController.popBackStack() },
+                    onConfigure = { agentId -> navController.navigate(SettingsRoutes.agentConfig(agentId)) },
+                )
+            }
+            composable(
+                route = SettingsRoutes.AGENT_CONFIG,
+                arguments = listOf(navArgument("agentId") { type = NavType.StringType }),
+            ) {
+                AgentConfigScreen(onClose = { navController.popBackStack() })
             }
             composable(SettingsRoutes.CONNECTION) {
                 ConnectionSettingsScreen(onClose = { navController.popBackStack() })

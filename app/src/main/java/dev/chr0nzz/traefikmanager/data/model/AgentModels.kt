@@ -71,6 +71,8 @@ data class AgentConfig(
     @SerialName("signal_file_path") val signalFilePath: String = "",
     @SerialName("crowdsec_lapi_url") val crowdsecLapiUrl: String = "",
     @SerialName("crowdsec_machine_id") val crowdsecMachineId: String = "",
+    @SerialName("crowdsec_api_key") val crowdsecApiKey: String = "",
+    @SerialName("crowdsec_machine_password") val crowdsecMachinePassword: String = "",
     @SerialName("crowdsec_client_cert") val crowdsecClientCert: String = "",
     @SerialName("crowdsec_client_key") val crowdsecClientKey: String = "",
     @SerialName("crowdsec_ca_cert") val crowdsecCaCert: String = "",
@@ -83,6 +85,16 @@ data class AgentConfig(
     @SerialName("tma_rate_limit") @Serializable(with = LenientStringSerializer::class) val tmaRateLimit: String = "",
     val domains: List<String> = emptyList(),
     @SerialName("visible_tabs") val visibleTabs: Map<String, Boolean> = emptyMap(),
+) {
+    /** The server redacts a stored secret to "***" and sends "" when there is none. */
+    val crowdsecApiKeySet: Boolean get() = crowdsecApiKey.isNotEmpty()
+
+    val crowdsecMachinePasswordSet: Boolean get() = crowdsecMachinePassword.isNotEmpty()
+}
+
+@Serializable
+data class AgentConfigsResponse(
+    val agents: List<AgentConfig> = emptyList(),
 )
 
 @Serializable

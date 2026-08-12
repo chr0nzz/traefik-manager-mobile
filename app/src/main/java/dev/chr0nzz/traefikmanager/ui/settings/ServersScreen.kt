@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Terminal
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,6 +72,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 @Composable
 fun ServersScreen(
     onClose: () -> Unit,
+    onConfigure: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ServersViewModel = hiltViewModel(),
 ) {
@@ -333,6 +335,13 @@ fun ServersScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                         IconButton(onClick = { renameTarget = entry }) {
                             Icon(Icons.Outlined.Edit, contentDescription = "Rename ${entry.name}", modifier = Modifier.size(18.dp))
+                        }
+                        IconButton(onClick = { entry.id?.let(onConfigure) }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Tune,
+                                contentDescription = "Configure ${entry.name}",
+                                modifier = Modifier.size(18.dp),
+                            )
                         }
                         IconButton(onClick = { composeTarget = entry }) {
                             Icon(Icons.Outlined.Terminal, contentDescription = "Install snippet", modifier = Modifier.size(18.dp))

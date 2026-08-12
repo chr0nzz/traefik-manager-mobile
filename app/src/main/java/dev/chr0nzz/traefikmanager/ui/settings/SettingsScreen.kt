@@ -60,6 +60,9 @@ object SettingsRoutes {
     const val DIAGNOSTICS = "settings/diagnostics"
     const val ABOUT = "settings/about"
     const val NOTIFICATION_HISTORY = "notifications"
+    const val AGENT_CONFIG = "settings/agents/{agentId}"
+
+    fun agentConfig(agentId: String): String = "settings/agents/$agentId"
 }
 
 private val SERVER_ENTRIES = listOf(
@@ -78,7 +81,7 @@ private val SERVER_ENTRIES = listOf(
     SettingsEntry(
         route = SettingsRoutes.AUTH,
         title = "Authentication",
-        subtitle = "Password, two-factor and API keys",
+        subtitle = "Login status and API keys",
         icon = Icons.Outlined.Security,
     ),
     SettingsEntry(

@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager.data.repo
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.Agent
+import dev.chr0nzz.traefikmanager.data.model.AgentConfig
 import dev.chr0nzz.traefikmanager.data.model.AgentHealth
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.store.PreferencesStore
@@ -79,6 +80,10 @@ class ServersRepository @Inject constructor(
      * Sends only the changed keys. Blank name or url would make the hub drop the record on the
      * next read, so those two are refused here rather than silently deleting the server.
      */
+    /** Every configurable field for one agent, as the server holds it. */
+    suspend fun config(id: String): AgentConfig? =
+        apiProvider.api().agentConfigs().agents.firstOrNull { it.id == id }
+
     suspend fun update(id: String, changes: Map<String, JsonElement>) {
         val name = (changes["name"] as? JsonPrimitive)?.content
         val url = (changes["url"] as? JsonPrimitive)?.content
