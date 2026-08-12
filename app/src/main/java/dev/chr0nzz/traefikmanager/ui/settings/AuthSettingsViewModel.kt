@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyEntry
-import dev.chr0nzz.traefikmanager.data.model.ChangePasswordRequest
 import dev.chr0nzz.traefikmanager.data.model.GenerateKeyRequest
 import dev.chr0nzz.traefikmanager.data.model.RevokeKeyRequest
 import javax.inject.Inject
@@ -16,10 +15,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.booleanOrNull
+
+/** What the server reports about how it lets people in. Read-only: the app never changes it. */
+data class AuthStatus(
+    val authEnabled: Boolean = false,
+    val noAuth: Boolean = false,
+    val hasPassword: Boolean = false,
+    val envForced: Boolean = false,
+    val oidcEnabled: Boolean = false,
+    val oidcActive: Boolean = false,
+    val otpEnabled: Boolean = false,
+)
 
 data class AuthSettingsUiState(
     val loading: Boolean = true,
     val keys: List<ApiKeyEntry> = emptyList(),
+    val status: AuthStatus = AuthStatus(),
     val otpEnabled: Boolean = false,
     val busy: Boolean = false,
     val issuedKey: String? = null,
@@ -30,6 +42,7 @@ data class AuthSettingsUiState(
 @HiltViewModel
 class AuthSettingsViewModel @Inject constructor(
     private val apiProvider: ApiProvider,
+    private val settingsRepository: dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthSettingsUiState())
@@ -46,16 +59,28 @@ class AuthSettingsViewModel @Inject constructor(
                 coroutineScope {
                     val api = apiProvider.api()
                     val keys = async { api.apiKeyStatus() }
-                    val otp = async { runCatching { api.otpStatus() }.getOrNull() }
-                    keys.await() to otp.await()
+                    val settings = async { runCatching { settingsRepository.raw() }.getOrNull() }
+                    keys.await() to settings.await()
                 }
             }.fold(
-                onSuccess = { (status, otp) ->
+                onSuccess = { (keyStatus, settings) ->
+                    val status = settings?.let { raw ->
+                        AuthStatus(
+                            authEnabled = raw.flag("auth_enabled"),
+                            noAuth = raw.flag("no_auth"),
+                            hasPassword = raw.flag("has_password"),
+                            envForced = raw.flag("auth_env_forced"),
+                            oidcEnabled = raw.flag("oidc_enabled"),
+                            oidcActive = raw.flag("oidc_active"),
+                            otpEnabled = raw.flag("otp_enabled"),
+                        )
+                    }
                     _state.update {
                         it.copy(
                             loading = false,
-                            keys = status.keys,
-                            otpEnabled = otp?.otpEnabled ?: it.otpEnabled,
+                            keys = keyStatus.keys,
+                            status = status ?: it.status,
+                            otpEnabled = status?.otpEnabled ?: it.otpEnabled,
                         )
                     }
                 },
@@ -66,28 +91,6 @@ class AuthSettingsViewModel @Inject constructor(
                 },
             )
         }
-    }
-
-    fun changePassword(current: String, new: String, confirm: String) {
-        val problem = when {
-            current.isEmpty() || new.isEmpty() || confirm.isEmpty() -> "Please fill in all fields."
-            new.length < 8 -> "New password must be at least 8 characters."
-            new != confirm -> "Passwords do not match."
-            else -> null
-        }
-        if (problem != null) {
-            _state.update { it.copy(message = problem) }
-            return
-        }
-        run("Password changed") {
-            val response = apiProvider.api().changePassword(ChangePasswordRequest(current, new, confirm))
-            if (!response.worked) error(response.error ?: "Could not change the password")
-        }
-    }
-
-    fun disableOtp() = run("Two-factor authentication disabled") {
-        val response = apiProvider.api().disableOtp()
-        if (!response.worked) error(response.error ?: "Could not disable two-factor authentication")
     }
 
     fun generateKey(deviceName: String) = run("API key created") {
@@ -119,4 +122,13 @@ class AuthSettingsViewModel @Inject constructor(
             )
         }
     }
+}
+
+
+/** The settings payload mixes real booleans with "true"/"1" strings, so read both. */
+private fun kotlinx.serialization.json.JsonObject.flag(key: String): Boolean {
+    val element = this[key] ?: return false
+    val primitive = element as? kotlinx.serialization.json.JsonPrimitive ?: return false
+    primitive.booleanOrNull?.let { return it }
+    return primitive.content.lowercase() in setOf("true", "1", "yes", "on")
 }

@@ -71,22 +71,13 @@ fun AuthSettingsScreen(
     val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var currentPassword by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
     var newKeyName by remember { mutableStateOf("") }
     var revokeTarget by remember { mutableStateOf<ApiKeyEntry?>(null) }
-    var disableOtpOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
         snackbarHostState.showSnackbar(message)
         viewModel.consumeMessage()
-        if (message == "Password changed") {
-            currentPassword = ""
-            newPassword = ""
-            confirmPassword = ""
-        }
         if (message == "API key created") newKeyName = ""
     }
 
@@ -142,23 +133,6 @@ fun AuthSettingsScreen(
         )
     }
 
-    if (disableOtpOpen) {
-        AlertDialog(
-            onDismissRequest = { disableOtpOpen = false },
-            title = { Text("Turn off two-factor authentication?") },
-            text = { Text("The web login will stop asking for a code. This app is unaffected either way.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.disableOtp()
-                        disableOtpOpen = false
-                    },
-                ) { Text("Turn off") }
-            },
-            dismissButton = { TextButton(onClick = { disableOtpOpen = false }) { Text("Cancel") } },
-        )
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Color.Transparent,
@@ -196,87 +170,70 @@ fun AuthSettingsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("Web password") }
+            item { SectionLabel("How this server lets people in") }
             item {
+                val status = state.status
                 TmCard {
-                    OutlinedTextField(
-                        value = currentPassword,
-                        onValueChange = { currentPassword = it },
-                        label = { Text("Current password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        value = newPassword,
-                        onValueChange = { newPassword = it },
-                        label = { Text("New password") },
-                        supportingText = { Text("At least 8 characters.") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = TmSpacing.sm),
-                    )
-                    OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm new password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        isError = confirmPassword.isNotEmpty() && confirmPassword != newPassword,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = TmSpacing.sm),
-                    )
-                    Button(
-                        onClick = { viewModel.changePassword(currentPassword, newPassword, confirmPassword) },
-                        enabled = !state.busy,
-                        modifier = Modifier.padding(top = TmSpacing.sm),
-                    ) {
-                        Text("Change password")
-                    }
-                    Text(
-                        text = "This is the browser login. The app authenticates with its API key.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.muted,
-                        modifier = Modifier.padding(top = TmSpacing.xs),
-                    )
-                }
-            }
-
-            item { SectionLabel("Two-factor authentication", modifier = Modifier.padding(top = TmSpacing.sm)) }
-            item {
-                TmCard {
-                    Text(
-                        text = if (state.otpEnabled) "Enabled for the web login" else "Not enabled",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = if (state.otpEnabled) {
-                            "It protects the browser login only - this app authenticates with its API key."
-                        } else {
-                            "Set it up in the web UI. Enrolment needs a browser session, and it protects " +
-                                "the browser login only."
+                    AuthFact(
+                        label = "Authentication",
+                        value = when {
+                            status.noAuth -> "Off"
+                            status.authEnabled -> "On"
+                            else -> "Disabled"
                         },
+                        tone = when {
+                            status.noAuth -> palette.red
+                            status.authEnabled -> palette.green
+                            else -> palette.yellow
+                        },
+                        note = when {
+                            status.envForced -> "Forced off by AUTH_ENABLED in the environment"
+                            status.noAuth && !status.hasPassword -> "No password is set, so the web UI is open"
+                            status.noAuth -> "Anyone who can reach the web UI is let straight in"
+                            else -> "The browser login is required"
+                        },
+                    )
+                    CardDivider()
+                    AuthFact(
+                        label = "Two-factor",
+                        value = if (status.otpEnabled) "Enabled" else "Disabled",
+                        tone = if (status.otpEnabled) palette.green else palette.muted,
+                        note = "Covers the browser login. This app authenticates with its API key.",
+                    )
+                    CardDivider()
+                    AuthFact(
+                        label = "OIDC",
+                        value = when {
+                            status.oidcActive -> "Active"
+                            status.oidcEnabled -> "Configured"
+                            else -> "Off"
+                        },
+                        tone = if (status.oidcActive) palette.green else palette.muted,
+                        note = if (status.oidcEnabled && !status.oidcActive) {
+                            "Switched on but not answering, so the password login still applies"
+                        } else {
+                            "Single sign-on for the browser login"
+                        },
+                        last = true,
+                    )
+                    Text(
+                        text = "Read-only here. Passwords, two-factor and OIDC are changed in the web UI.",
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
-                        modifier = Modifier.padding(top = TmSpacing.xs),
+                        modifier = Modifier.padding(top = TmSpacing.sm),
                     )
-                    if (state.otpEnabled) {
-                        OutlinedButton(
-                            onClick = { disableOtpOpen = true },
-                            enabled = !state.busy,
-                            modifier = Modifier.padding(top = TmSpacing.sm),
-                        ) {
-                            Text("Turn off")
-                        }
-                    }
                 }
             }
 
             item { SectionLabel("API keys ${state.keys.size}", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item {
+                Text(
+                    text = "Each device that talks to this server needs its own key. Revoking one only " +
+                        "locks out that device.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.muted,
+                )
+            }
             item {
                 TmCard {
                     OutlinedTextField(
@@ -346,5 +303,38 @@ fun AuthSettingsScreen(
                 }
             }
         }
+    }
+}
+
+/** One read-only line of auth state: what it is, and what that means. */
+@Composable
+private fun AuthFact(
+    label: String,
+    value: String,
+    tone: Color,
+    note: String,
+    last: Boolean = false,
+) {
+    val palette = LocalTmPalette.current
+    Column(modifier = Modifier.padding(vertical = TmSpacing.xs)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelLarge.copy(fontFamily = MonoFamily),
+                color = tone,
+            )
+        }
+        Text(
+            text = note,
+            style = MaterialTheme.typography.labelSmall,
+            color = palette.muted,
+            modifier = Modifier.padding(top = 2.dp),
+        )
     }
 }
