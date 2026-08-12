@@ -65,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -110,6 +111,8 @@ fun MiddlewaresScreen(
         viewModel.consumeMessage()
     }
 
+    val detailOnly = navigator.canNavigateBack()
+
     pendingDelete?.let { middleware ->
         ConfirmDeleteDialog(
             routeName = middleware.name,
@@ -124,29 +127,33 @@ fun MiddlewaresScreen(
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            MiddlewaresTopBar(
-                onOpenDrawer = onOpenDrawer,
-                searchBarState = searchBarState,
-                queryState = queryState,
-                results = state.visible,
-                filter = state.filter,
-                scrollBehavior = scrollBehavior,
-                onFilterChange = viewModel::onFilterChange,
-                onResultClick = { middleware ->
-                    selectedName = middleware.name
-                    scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, middleware.name) }
-                },
-                onRefresh = viewModel::refresh,
-                onOpenTemplates = onOpenTemplates,
-            )
+            if (!detailOnly) {
+                MiddlewaresTopBar(
+                    onOpenDrawer = onOpenDrawer,
+                    searchBarState = searchBarState,
+                    queryState = queryState,
+                    results = state.visible,
+                    filter = state.filter,
+                    scrollBehavior = scrollBehavior,
+                    onFilterChange = viewModel::onFilterChange,
+                    onResultClick = { middleware ->
+                        selectedName = middleware.name
+                        scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, middleware.name) }
+                    },
+                    onRefresh = viewModel::refresh,
+                    onOpenTemplates = onOpenTemplates,
+                )
+            }
         },
         floatingActionButton = {
-            if (!navigator.canNavigateBack()) {
+            if (!detailOnly) {
                 FloatingActionButton(onClick = onCreate) {
                     Icon(Icons.Outlined.Add, contentDescription = "Add middleware")
                 }
