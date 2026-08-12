@@ -28,6 +28,9 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
+/** An icon-and-number chip, the web's sig-flag. */
+data class SignalChip(val icon: ImageVector?, val text: String, val color: Color? = null)
+
 @Composable
 fun SignalCard(
     label: String,
@@ -36,6 +39,10 @@ fun SignalCard(
     subtitle: String,
     modifier: Modifier = Modifier,
     heroUnit: String? = null,
+    /** Chips beside the hero, right aligned, as the web puts its sig-flags. */
+    flags: List<SignalChip> = emptyList(),
+    /** The card's foot: quiet counts that break the hero down. */
+    footer: List<SignalChip> = emptyList(),
     trailing: String? = null,
     trailingColor: Color? = null,
     /** Tinted glyph in the card head, as the web renders one per card. */
@@ -45,7 +52,7 @@ fun SignalCard(
     content: @Composable (() -> Unit)? = null,
 ) {
     val palette = LocalTmPalette.current
-    TmCard(modifier = modifier, accentColor = health ?: accent) {
+    TmCard(modifier = modifier, accentColor = health) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
@@ -69,7 +76,12 @@ fun SignalCard(
                 )
             }
         }
-        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(top = 2.dp)) {
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 2.dp),
+        ) {
             Text(
                 text = hero,
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -83,6 +95,17 @@ fun SignalCard(
                     modifier = Modifier.padding(start = 2.dp, bottom = 4.dp),
                 )
             }
+            if (flags.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm, Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = TmSpacing.sm, bottom = 3.dp),
+                ) {
+                    flags.forEach { ChipView(it) }
+                }
+            }
         }
         Text(
             text = subtitle,
@@ -95,6 +118,40 @@ fun SignalCard(
             CardDivider(modifier = Modifier.padding(top = TmSpacing.sm, bottom = TmSpacing.xs))
             content()
         }
+        if (footer.isNotEmpty()) {
+            CardDivider(modifier = Modifier.padding(top = TmSpacing.xs, bottom = TmSpacing.xs))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                footer.forEach { ChipView(it) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChipView(chip: SignalChip) {
+    val palette = LocalTmPalette.current
+    val tint = chip.color ?: palette.muted
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        if (chip.icon != null) {
+            Icon(
+                imageVector = chip.icon,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(11.dp),
+            )
+        }
+        Text(
+            text = chip.text,
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+            color = tint,
+        )
     }
 }
 
@@ -110,7 +167,7 @@ fun SignalCells(cells: List<Color>, modifier: Modifier = Modifier, cap: Int = 16
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .clip(RoundedCornerShape(1.dp))
+                    .clip(RoundedCornerShape(1.5.dp))
                     .background(color),
             )
         }
@@ -124,6 +181,7 @@ fun RankedRow(
     modifier: Modifier = Modifier,
     warn: String? = null,
     warnSevere: Boolean = false,
+    warnIcon: ImageVector? = null,
     trailing: String? = null,
     /** A coloured rail on the leading edge, as the web puts on every ranked row. */
     rail: Color? = null,
@@ -158,11 +216,25 @@ fun RankedRow(
             modifier = Modifier.weight(1f),
         )
         if (warn != null) {
-            Text(
-                text = warn,
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                color = if (warnSevere) palette.red else palette.yellow,
-            )
+            val tint = if (warnSevere) palette.red else palette.yellow
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                if (warnIcon != null) {
+                    Icon(
+                        imageVector = warnIcon,
+                        contentDescription = null,
+                        tint = tint,
+                        modifier = Modifier.size(11.dp),
+                    )
+                }
+                Text(
+                    text = warn,
+                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                    color = tint,
+                )
+            }
         }
         Text(
             text = count,
@@ -170,7 +242,7 @@ fun RankedRow(
                 fontFamily = MonoFamily,
                 fontWeight = FontWeight.Bold,
             ),
-            color = palette.muted,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         if (trailing != null) {
             Text(

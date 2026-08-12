@@ -43,6 +43,7 @@ data class CrowdSecUiState(
     val message: String? = null,
     val loadError: String? = null,
     val notConfigured: Boolean = false,
+    val readAt: Long? = null,
 ) {
     val alerts: List<CsAlert> get() = snapshot.alertList
 
@@ -145,6 +146,7 @@ class CrowdSecViewModel @Inject constructor(
                 snapshot = cached,
                 notConfigured = false,
                 loadError = null,
+                readAt = repository.cachedAge()?.let { age -> System.currentTimeMillis() - age },
             )
         }
         load(initial = false, full = false)
@@ -224,6 +226,7 @@ class CrowdSecViewModel @Inject constructor(
                                 snapshot = snapshot,
                                 notConfigured = notConfigured,
                                 loadError = null,
+                                readAt = System.currentTimeMillis(),
                             )
                         }
                         resolveCountries(snapshot)

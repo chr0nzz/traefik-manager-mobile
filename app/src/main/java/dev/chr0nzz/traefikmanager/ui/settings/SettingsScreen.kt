@@ -78,7 +78,7 @@ private val SERVER_ENTRIES = listOf(
     SettingsEntry(
         route = SettingsRoutes.AUTH,
         title = "Authentication",
-        subtitle = "Password, two-factor, API keys and OIDC",
+        subtitle = "Password, two-factor and API keys",
         icon = Icons.Outlined.Security,
     ),
     SettingsEntry(

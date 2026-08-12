@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,10 +31,23 @@ import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.SmartToy
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.automirrored.outlined.CallMissedOutgoing
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.automirrored.outlined.ListAlt
+import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExpandedFullScreenSearchBar
@@ -81,6 +95,7 @@ import dev.chr0nzz.traefikmanager.data.model.Countries
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import androidx.compose.ui.graphics.vector.ImageVector
 import dev.chr0nzz.traefikmanager.data.model.CsRanked
 import dev.chr0nzz.traefikmanager.data.model.LogParser
 import dev.chr0nzz.traefikmanager.ui.components.CountryStrip
@@ -88,9 +103,11 @@ import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.RankedRow
+import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.SignalCard
 import dev.chr0nzz.traefikmanager.ui.components.SignalCells
+import dev.chr0nzz.traefikmanager.ui.components.SignalChip
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -300,55 +317,15 @@ private fun CrowdSecBody(
         verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
-                Text(
-                    text = when {
-                        !state.alertsOk -> "Alerts unavailable"
-                        alerts.isEmpty() -> "Nothing probing right now"
-                        else -> "Actively probed"
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (alerts.isEmpty()) palette.green else palette.yellow,
-                )
-                Text(
-                    text = buildString {
-                        append(if (state.alertsOk) "retained ${alerts.size} alerts" else "retained $UNKNOWN alerts")
-                        span?.let { append(" · span ${LogParser.spanText(it)}") }
-                        append(
-                            if (state.decisionsOk) {
-                                " · ${LogParser.formatCount(state.decisions.size)} bans"
-                            } else {
-                                " · $UNKNOWN bans"
-                            },
-                        )
-                    },
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                    color = palette.muted,
-                )
-                if (state.snapshot.alertsCapped == true) {
-                    Text(
-                        text = "showing the newest ${state.snapshot.alertLimit ?: alerts.size} alerts, " +
-                            "the LAPI holds more (CROWDSEC_ALERT_LIMIT)",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.yellow,
-                    )
-                }
-                if (!state.decisionsOk) {
-                    Text(
-                        text = state.decisionsError.orEmpty(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.red,
-                    )
-                }
-                if (!state.alertsOk) {
-                    Text(
-                        text = state.alertsError.orEmpty(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.red,
-                    )
-                }
-            }
+            CrowdSecVerdictCard(
+                state = state,
+                sources = sources,
+                scenarios = scenarios,
+                span = span,
+            )
         }
+
+        item { CrowdSecWindowRow(state = state, span = span) }
 
         if (state.filtersActive) {
             item {
@@ -375,85 +352,181 @@ private fun CrowdSecBody(
         item {
             // The web lays the desk out in columns that grow with the viewport; a phone gets two
             // across, a tablet three, in the same worst-first order.
-            val columns = if (wide) 3 else 2
-            val cards: List<@Composable (Modifier) -> Unit> = listOf(
-                { cardModifier ->
+            // The web's desk grid: two columns on a phone, four on a tablet, with the ranked-list
+            // cards spanning two of them (app.css:197, 258, 377).
+            val columns = if (wide) 4 else 2
+            val loose = sources.filter { it.open > 0 }
+            val repeats = sources.filter { it.count > 1 }
+            val bannedSources = sources.size - loose.size
+            val alertTotal = alerts.size
+
+            val cards: List<DeskCard> = listOf(
+                DeskCard(1) { cardModifier ->
                     SignalCard(
                         label = "Attacking sources",
-                        hero = if (state.alertsOk) sources.size.toString() else "-",
+                        hero = if (state.alertsOk) LogParser.formatCount(sources.size) else "-",
                         accent = palette.red,
                         glyph = Icons.Outlined.GpsFixed,
-                        health = if (sources.any { it.open > 0 }) palette.red else null,
-                        subtitle = if (!state.alertsOk) {
-                            "needs a watcher login"
-                        } else {
-                            sources.firstOrNull()?.let { "worst ${it.key} · ${it.weight} events" }
-                                ?: "nothing to rank"
+                        health = when {
+                            loose.any { it.count > 1 } -> palette.red
+                            loose.isNotEmpty() -> palette.yellow
+                            else -> null
                         },
-                        trailing = sources.count { it.open == 0 }.takeIf { it > 0 }?.let { "$it banned" },
-                        trailingColor = palette.green,
+                        subtitle = if (!state.alertsOk) {
+                            "sources are only listed on /v1/alerts"
+                        } else {
+                            sources.firstOrNull()
+                                ?.let { "worst ${it.key} ${LogParser.formatCount(it.weight)} events" }
+                                ?: "no sources"
+                        },
+                        flags = when {
+                            !state.alertsOk -> listOf(SignalChip(Icons.Outlined.Info, "ban state unknown"))
+                            !state.decisionsOk -> listOf(SignalChip(Icons.Outlined.Info, "ban state unknown"))
+                            loose.isNotEmpty() -> listOf(
+                                SignalChip(
+                                    Icons.Outlined.LockOpen,
+                                    "${LogParser.formatCount(loose.size)} loose",
+                                    if (loose.any { it.count > 1 }) palette.red else palette.yellow,
+                                ),
+                                SignalChip(Icons.Outlined.Block, "${LogParser.formatCount(bannedSources)} banned"),
+                            )
+                            sources.isEmpty() -> emptyList()
+                            else -> listOf(SignalChip(Icons.Outlined.CheckCircle, "every source banned", palette.green))
+                        },
+                        footer = if (sources.isEmpty()) {
+                            emptyList()
+                        } else {
+                            listOf(
+                                SignalChip(Icons.Outlined.Repeat, "${LogParser.formatCount(repeats.size)} repeat"),
+                                SignalChip(
+                                    Icons.AutoMirrored.Outlined.CallMissedOutgoing,
+                                    "${LogParser.formatCount(sources.size - repeats.size)} one-shot",
+                                ),
+                            )
+                        },
                         modifier = cardModifier,
                     ) {
-                        SignalCells(cells = sources.map { if (it.open == 0) palette.green else palette.red })
+                        SignalCells(
+                            cells = sources.map {
+                                when {
+                                    it.open > 0 && it.count > 1 -> palette.red
+                                    it.open > 0 -> palette.yellow
+                                    else -> palette.muted.copy(alpha = 0.30f)
+                                }
+                            },
+                        )
                     }
                 },
-                { cardModifier ->
+                DeskCard(1) { cardModifier ->
                     RankCard(
                         label = "Networks",
                         accent = palette.purple,
                         glyph = Icons.Outlined.Public,
                         rows = networks,
                         blind = !state.alertsOk,
-                        blindReason = "needs a watcher login",
+                        blindReason = "AS names ride on alert.source",
                         emptyReason = "this agent reports ip only",
+                        thing = "networks",
+                        subtitle = networks.firstOrNull()
+                            ?.let { "worst ${it.label} ${LogParser.formatCount(it.count)} alerts" },
+                        rowGlyph = { row ->
+                            if (row.extra.isNotEmpty()) {
+                                Text(
+                                    text = Countries.flag(row.extra),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        },
                         modifier = cardModifier,
                     )
                 },
-                { cardModifier ->
+                DeskCard(2) { cardModifier ->
                     RankCard(
                         label = "Scenarios",
                         accent = palette.orange,
                         glyph = Icons.Outlined.Bolt,
                         rows = scenarios,
                         blind = !state.alertsOk,
-                        blindReason = "needs a watcher login",
+                        blindReason = "scenarios come from /v1/alerts",
                         emptyReason = "nothing to rank in the retained window",
+                        hero = LogParser.formatCount(alertTotal),
+                        heroUnit = "alerts",
+                        thing = "scenarios",
+                        subtitle = scenarios.firstOrNull()?.let {
+                            "worst ${it.label} · ${LogParser.formatCount(alerts.sumOf { a -> a.eventsCount })} " +
+                                "events rolled up"
+                        },
                         onRowClick = onScenarioClick,
+                        rowGlyph = {
+                            Icon(
+                                imageVector = Icons.Outlined.Bolt,
+                                contentDescription = null,
+                                tint = palette.muted,
+                                modifier = Modifier.size(11.dp),
+                            )
+                        },
                         modifier = cardModifier,
                     )
                 },
-                { cardModifier ->
-                    val targeting = if (paths.isNotEmpty() || accounts.isEmpty()) paths else accounts
+                DeskCard(2) { cardModifier ->
+                    val onPaths = paths.isNotEmpty() || accounts.isEmpty()
+                    val targeting = if (onPaths) paths else accounts
                     RankCard(
-                        label = if (paths.isNotEmpty() || accounts.isEmpty()) {
-                            "Targeted paths"
-                        } else {
-                            "Targeted accounts"
-                        },
+                        label = if (onPaths) "Targeted paths" else "Targeted accounts",
                         accent = palette.blue,
                         glyph = Icons.Outlined.MyLocation,
                         rows = targeting,
                         blind = !state.alertsOk,
-                        blindReason = "needs a watcher login",
+                        blindReason = if (onPaths) "paths live in alert.meta[]" else "accounts live in alert.meta[]",
                         emptyReason = "no meta reported",
+                        hero = LogParser.formatCount(targeting.size),
+                        heroUnit = if (onPaths) "paths" else "accounts",
                         noun = "hits",
+                        thing = if (onPaths) "paths" else "accounts",
+                        subtitle = targeting.firstOrNull()?.let { "most wanted ${it.label}" },
+                        rowGlyph = {
+                            Icon(
+                                imageVector = if (onPaths) {
+                                    Icons.Outlined.Description
+                                } else {
+                                    Icons.Outlined.PersonOutline
+                                },
+                                contentDescription = null,
+                                tint = palette.muted,
+                                modifier = Modifier.size(11.dp),
+                            )
+                        },
                         modifier = cardModifier,
                     )
                 },
-                { cardModifier ->
+                DeskCard(1) { cardModifier ->
                     RankCard(
                         label = "Tooling",
                         accent = palette.teal,
                         glyph = Icons.Outlined.SmartToy,
                         rows = tooling,
                         blind = !state.alertsOk,
-                        blindReason = "needs a watcher login",
+                        blindReason = "user agents live in alert.meta[]",
                         emptyReason = "no HTTP scenario fired here",
                         noun = "hits",
+                        thing = "agents",
+                        subtitle = tooling.firstOrNull()?.let { "worst ${it.label}" },
+                        flags = listOf(
+                            SignalChip(Icons.Outlined.Code, "${LogParser.formatCount(tooling.size)} tools"),
+                        ),
+                        rowGlyph = {
+                            Icon(
+                                imageVector = Icons.Outlined.Code,
+                                contentDescription = null,
+                                tint = palette.muted,
+                                modifier = Modifier.size(11.dp),
+                            )
+                        },
                         modifier = cardModifier,
                     )
                 },
-                { cardModifier ->
+                DeskCard(1) { cardModifier ->
+                    val perCell = ((state.decisions.size + CELL_CAP - 1) / CELL_CAP).coerceAtLeast(1)
                     SignalCard(
                         label = "Bans in force",
                         hero = if (state.decisionsOk) LogParser.formatCount(state.decisions.size) else "-",
@@ -461,22 +534,53 @@ private fun CrowdSecBody(
                         glyph = Icons.Outlined.Shield,
                         health = if (!state.decisionsOk) palette.red else null,
                         subtitle = if (!state.decisionsOk) {
-                            "LAPI unreachable, this card reports the read failure instead of the zero " +
-                                "it would invent"
+                            "nothing was read from /v1/decisions"
                         } else {
-                            "${state.ownBans} from this host · ${state.subscribedBans} subscribed"
+                            "${LogParser.formatCount(state.ownBans)} from this host · " +
+                                "${LogParser.formatCount(state.subscribedBans)} subscribed"
+                        },
+                        flags = if (state.decisionsOk) {
+                            listOf(
+                                SignalChip(
+                                    Icons.Outlined.Block,
+                                    "${LogParser.formatCount(state.decisions.size)} ban",
+                                ),
+                            )
+                        } else {
+                            emptyList()
+                        },
+                        footer = origins.map { origin ->
+                            SignalChip(
+                                icon = when (origin.origin) {
+                                    "crowdsec" -> Icons.Outlined.GpsFixed
+                                    "cscli" -> Icons.Outlined.Code
+                                    "capi" -> Icons.Outlined.People
+                                    "lists" -> Icons.AutoMirrored.Outlined.ListAlt
+                                    else -> Icons.Outlined.MoreHoriz
+                                },
+                                text = "${LogParser.formatCount(origin.count)} ${origin.origin}",
+                                color = if (origin.origin == "cscli") palette.yellow else null,
+                            )
                         },
                         modifier = cardModifier,
                     ) {
-                        origins.take(4).forEach { origin ->
-                            RankedRow(
-                                label = origin.origin,
-                                count = LogParser.formatCount(origin.count),
-                                rail = if (origin.origin in setOf("capi", "lists")) {
-                                    palette.muted
+                        SignalCells(
+                            cells = List((state.decisions.size + perCell - 1) / perCell) { index ->
+                                val ownCells = (state.ownBans + perCell - 1) / perCell
+                                if (index < ownCells) {
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.42f)
                                 } else {
-                                    palette.green
-                                },
+                                    palette.muted.copy(alpha = 0.30f)
+                                }
+                            },
+                            cap = CELL_CAP,
+                        )
+                        if (perCell > 1) {
+                            Text(
+                                text = "1 cell = ${LogParser.formatCount(perCell)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.muted,
+                                modifier = Modifier.padding(top = 2.dp),
                             )
                         }
                     }
@@ -484,21 +588,20 @@ private fun CrowdSecBody(
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
-                cards.chunked(columns).forEach { row ->
+                packRows(cards, columns).forEach { row ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                         modifier = Modifier.height(IntrinsicSize.Min),
                     ) {
                         row.forEach { card ->
-                            card(
+                            card.content(
                                 Modifier
-                                    .weight(1f)
+                                    .weight(card.span.toFloat())
                                     .fillMaxHeight(),
                             )
                         }
-                        repeat(columns - row.size) {
-                            Box(modifier = Modifier.weight(1f))
-                        }
+                        val used = row.sumOf { it.span }
+                        if (used < columns) Box(modifier = Modifier.weight((columns - used).toFloat()))
                     }
                 }
             }
@@ -589,52 +692,70 @@ private fun RankCard(
     emptyReason: String,
     modifier: Modifier = Modifier,
     noun: String = "alerts",
+    thing: String = "networks",
+    hero: String? = null,
+    heroUnit: String? = null,
+    subtitle: String? = null,
+    flags: List<SignalChip> = emptyList(),
     glyph: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    rowGlyph: (@Composable (CsRanked) -> Unit)? = null,
     onRowClick: ((String) -> Unit)? = null,
 ) {
     val palette = LocalTmPalette.current
-    val total = rows.sumOf { it.count }
-    val open = rows.count { it.open > 0 }
+    val shown = rows.take(ROW_CAP)
     SignalCard(
         label = label,
         hero = when {
             blind -> "-"
             rows.isEmpty() -> "0"
-            else -> rows.size.toString()
+            else -> hero ?: rows.size.toString()
         },
+        heroUnit = heroUnit?.takeIf { !blind && rows.isNotEmpty() },
         accent = accent,
         glyph = glyph,
-        trailing = open.takeIf { it > 0 && !blind }?.let { "$it open" },
-        trailingColor = palette.yellow,
+        flags = if (blind || rows.isEmpty()) emptyList() else flags,
         subtitle = when {
             blind -> blindReason
             rows.isEmpty() -> emptyReason
-            else -> "worst ${rows.first().key}"
+            else -> subtitle ?: "worst ${rows.first().key}"
         },
         modifier = modifier,
     ) {
-        CrowdSecAnalytics.top(rows).forEach { row ->
+        shown.forEachIndexed { index, row ->
             RankedRow(
                 label = row.label,
-                count = row.count.toString(),
-                warn = row.weight.takeIf { it > row.count }?.let { "$it events" },
-                warnSevere = false,
-                trailing = CrowdSecAnalytics.percent(row.count, total),
-                rail = if (row.open > 0) palette.red else palette.green,
+                count = LogParser.formatCount(row.count),
+                warn = row.open.takeIf { it > 0 }?.let { LogParser.formatCount(it) },
+                warnSevere = row.open == row.count,
+                warnIcon = Icons.Outlined.LockOpen,
+                rail = when {
+                    row.open == row.count -> palette.red
+                    row.open > 0 -> palette.yellow
+                    else -> null
+                },
+                leading = rowGlyph?.let { glyphFor -> { glyphFor(row) } },
                 onClick = onRowClick?.let { click -> { click(row.key) } },
             )
+            if (index < shown.lastIndex) CardDivider()
         }
-        if (rows.size > 6) {
-            val remaining = rows.drop(6).sumOf { it.count }
+        if (rows.size > ROW_CAP) {
+            val rest = rows.drop(ROW_CAP)
             Text(
-                text = "+$remaining $noun across ${rows.size - 6} more",
+                text = "+${LogParser.formatCount(rest.sumOf { it.count })} $noun across " +
+                    "${LogParser.formatCount(rest.size)} more $thing",
                 style = MaterialTheme.typography.labelSmall,
-                color = LocalTmPalette.current.muted,
+                color = palette.muted,
                 modifier = Modifier.padding(top = 2.dp),
             )
         }
     }
 }
+
+/** The web's compact desk shows four ranked rows and counts the tail off the same cut. */
+private const val ROW_CAP = 4
+
+/** The web draws at most 240 cells and prints what one cell stands for (crowdsec.js:1). */
+private const val CELL_CAP = 240
 
 @Composable
 private fun AlertRow(
@@ -840,4 +961,198 @@ private fun CrowdSecSearchBar(
             modifier = Modifier.padding(TmSpacing.lg),
         )
     }
+}
+
+/**
+ * The web's banner: what the LAPI is seeing right now, boxed and accented by how bad it is, with
+ * the window's totals underneath. Same shape as the logs verdict so the two screens read alike.
+ */
+@Composable
+private fun CrowdSecVerdictCard(
+    state: CrowdSecUiState,
+    sources: List<CsRanked>,
+    scenarios: List<CsRanked>,
+    span: Long?,
+) {
+    val palette = LocalTmPalette.current
+    val alerts = state.alerts
+    val events = remember(alerts) { alerts.sumOf { it.eventsCount } }
+    val unbanned = sources.count { it.open > 0 }
+
+    val healthy = state.alertsOk && alerts.isEmpty()
+    val accent = when {
+        !state.alertsOk || !state.decisionsOk -> palette.red
+        alerts.isEmpty() -> palette.green
+        else -> palette.yellow
+    }
+    val headline = when {
+        !state.alertsOk -> "Alerts unavailable"
+        alerts.isEmpty() -> "Nothing probing right now"
+        else -> "Actively probed"
+    }
+
+    TmCard(accentColor = accent) {
+        Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                imageVector = if (healthy) Icons.Outlined.CheckCircle else Icons.Outlined.Warning,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier
+                    .padding(top = 2.dp, end = TmSpacing.sm)
+                    .size(16.dp),
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = headline,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier.padding(top = 2.dp),
+                ) {
+                    if (state.alertsOk) {
+                        CrowdSecVerdictItem(
+                            icon = Icons.Outlined.GpsFixed,
+                            text = "${sources.size} " + if (sources.size == 1) "source" else "sources",
+                            color = palette.muted,
+                        )
+                        CrowdSecVerdictItem(
+                            icon = Icons.Outlined.Bolt,
+                            text = "${scenarios.size} " + if (scenarios.size == 1) "scenario" else "scenarios",
+                            color = palette.muted,
+                        )
+                        CrowdSecVerdictItem(
+                            icon = Icons.Outlined.Timeline,
+                            text = "${LogParser.formatCount(events)} " + if (events == 1) "event" else "events",
+                            color = palette.muted,
+                        )
+                    }
+                    if (unbanned > 0) {
+                        CrowdSecVerdictItem(
+                            icon = Icons.Outlined.LockOpen,
+                            text = "$unbanned no active ban",
+                            color = palette.yellow,
+                        )
+                    }
+                    if (state.alertsOk && alerts.isEmpty()) {
+                        Text(
+                            text = "no alerts in the retained window",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted,
+                        )
+                    }
+                }
+            }
+        }
+
+        val stamp = buildString {
+            span?.let { append("${LogParser.spanText(it)} of alerts") }
+            state.readAt?.let { read ->
+                if (isNotEmpty()) append(" · ")
+                append("read ${LogParser.spanText((System.currentTimeMillis() - read).coerceAtLeast(0))} ago")
+            }
+        }
+        if (stamp.isNotEmpty()) {
+            Text(
+                text = stamp,
+                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                color = palette.muted,
+                modifier = Modifier.align(Alignment.End),
+            )
+        }
+
+        if (state.snapshot.alertsCapped == true) {
+            Text(
+                text = "showing the newest ${state.snapshot.alertLimit ?: alerts.size} alerts, " +
+                    "the LAPI holds more (CROWDSEC_ALERT_LIMIT)",
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.yellow,
+            )
+        }
+        if (!state.decisionsOk) {
+            Text(
+                text = state.decisionsError.orEmpty(),
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.red,
+            )
+        }
+        if (!state.alertsOk) {
+            Text(
+                text = state.alertsError.orEmpty(),
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.red,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CrowdSecVerdictItem(icon: ImageVector, text: String, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(11.dp))
+        Text(text = text, style = MaterialTheme.typography.labelSmall, color = color)
+    }
+}
+
+/**
+ * The web keeps this outside the banner: what the window holds, and the note that the alert feed
+ * is local detections rather than everything the community has seen.
+ */
+@Composable
+private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
+    val palette = LocalTmPalette.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = TmSpacing.xs),
+    ) {
+        SectionLabel("Window")
+        Text(
+            text = buildString {
+                append(if (state.alertsOk) "retained ${state.alerts.size} alerts" else "retained $UNKNOWN alerts")
+                span?.let { append(" · span ${LogParser.spanText(it)}") }
+                append(
+                    if (state.decisionsOk) {
+                        " · ${LogParser.formatCount(state.decisions.size)} bans"
+                    } else {
+                        " · $UNKNOWN bans"
+                    },
+                )
+            },
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+            color = palette.muted,
+            maxLines = 2,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = TmSpacing.sm),
+        )
+    }
+}
+
+/** A desk card and how many grid columns it takes, mirroring the web's lg-wide. */
+private data class DeskCard(val span: Int, val content: @Composable (Modifier) -> Unit)
+
+/** Fills each row up to [columns] in order, starting a new row when the next card will not fit. */
+private fun packRows(cards: List<DeskCard>, columns: Int): List<List<DeskCard>> {
+    val rows = mutableListOf<List<DeskCard>>()
+    var row = mutableListOf<DeskCard>()
+    var used = 0
+    cards.forEach { card ->
+        val span = card.span.coerceAtMost(columns)
+        if (used + span > columns && row.isNotEmpty()) {
+            rows += row
+            row = mutableListOf()
+            used = 0
+        }
+        row += card
+        used += span
+    }
+    if (row.isNotEmpty()) rows += row
+    return rows
 }

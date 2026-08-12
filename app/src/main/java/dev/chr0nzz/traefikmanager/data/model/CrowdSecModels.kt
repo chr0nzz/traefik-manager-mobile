@@ -187,7 +187,8 @@ object CrowdSecAnalytics {
         rank(alerts, banned) { listOf(it.ip) }
 
     fun networks(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        rank(alerts, banned) { alert ->
+        // The web flags each network with the country of its first alert (crowdsec.js:766).
+        rank(alerts, banned, extraOf = { rows -> rows.firstOrNull()?.countryCode.orEmpty() }) { alert ->
             val name = alert.source.asName.ifEmpty { alert.source.asNumber }
             if (name.isEmpty()) emptyList() else listOf(name)
         }
@@ -213,6 +214,7 @@ object CrowdSecAnalytics {
     fun rank(
         alerts: List<CsAlert>,
         banned: Set<String>,
+        extraOf: (List<CsAlert>) -> String = { "" },
         keysOf: (CsAlert) -> List<String>,
     ): List<CsRanked> {
         val buckets = mutableMapOf<String, MutableList<CsAlert>>()
@@ -228,6 +230,7 @@ object CrowdSecAnalytics {
                 count = rows.size,
                 weight = rows.sumOf { it.eventsCount },
                 open = rows.count { it.ip !in banned },
+                extra = extraOf(rows),
             )
         }.sortedWith(
             compareByDescending<CsRanked> { it.open }
