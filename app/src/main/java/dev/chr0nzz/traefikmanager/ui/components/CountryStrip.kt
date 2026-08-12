@@ -27,6 +27,7 @@ fun CountryStrip(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
     limit: Int = 6,
+    showMap: Boolean = true,
 ) {
     val palette = LocalTmPalette.current
     val total = countries.sumOf { it.count }.coerceAtLeast(1)
@@ -38,6 +39,13 @@ fun CountryStrip(
                 text = if (countries.size == 1) "1 country" else "${countries.size} countries",
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
+            )
+        }
+        if (showMap && countries.isNotEmpty()) {
+            WorldMap(
+                counts = countries.associate { it.code to it.count },
+                selected = selected,
+                modifier = Modifier.padding(vertical = TmSpacing.xs),
             )
         }
         countries.take(limit).forEach { country ->

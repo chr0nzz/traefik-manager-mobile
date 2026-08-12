@@ -24,6 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Menu
@@ -51,6 +57,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +75,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.window.core.layout.WindowSizeClass
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Countries
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
@@ -224,7 +232,8 @@ fun CrowdSecScreen(
 
                 state.notConfigured -> EmptyState(
                     headline = "CrowdSec is not configured",
-                    body = "Set CROWDSEC_LAPI_URL and a bouncer API key on this server to see decisions and alerts.",
+                    body = "Set CROWDSEC_LAPI_URL and a bouncer API key on this server, then recreate " +
+                        "the container, to see decisions and alerts.",
                 )
 
                 state.loadError != null -> ErrorState(
@@ -267,6 +276,8 @@ private fun CrowdSecBody(
     onDelete: (CsDecision) -> Unit,
 ) {
     val palette = LocalTmPalette.current
+    val wide = currentWindowAdaptiveInfo().windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val alerts = state.alerts
     val banned = state.snapshot.bannedIps
     val sources = remember(alerts, banned) { CrowdSecAnalytics.sources(alerts, banned) }
@@ -362,106 +373,135 @@ private fun CrowdSecBody(
         }
 
         item {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                modifier = Modifier.height(IntrinsicSize.Min),
-            ) {
-                SignalCard(
-                    label = "Attacking sources",
-                    hero = if (state.alertsOk) sources.size.toString() else "-",
-                    accent = palette.red,
-                    subtitle = if (!state.alertsOk) {
-                        "needs a watcher login"
-                    } else {
-                        sources.firstOrNull()?.let { "worst ${it.key} · ${it.weight} events" } ?: "nothing to rank"
-                    },
-                    trailing = sources.count { it.open == 0 }.takeIf { it > 0 }?.let { "$it banned" },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                ) {
-                    SignalCells(
-                        cells = sources.map { if (it.open == 0) palette.green else palette.red },
+            // The web lays the desk out in columns that grow with the viewport; a phone gets two
+            // across, a tablet three, in the same worst-first order.
+            val columns = if (wide) 3 else 2
+            val cards: List<@Composable (Modifier) -> Unit> = listOf(
+                { cardModifier ->
+                    SignalCard(
+                        label = "Attacking sources",
+                        hero = if (state.alertsOk) sources.size.toString() else "-",
+                        accent = palette.red,
+                        glyph = Icons.Outlined.GpsFixed,
+                        health = if (sources.any { it.open > 0 }) palette.red else null,
+                        subtitle = if (!state.alertsOk) {
+                            "needs a watcher login"
+                        } else {
+                            sources.firstOrNull()?.let { "worst ${it.key} · ${it.weight} events" }
+                                ?: "nothing to rank"
+                        },
+                        trailing = sources.count { it.open == 0 }.takeIf { it > 0 }?.let { "$it banned" },
+                        trailingColor = palette.green,
+                        modifier = cardModifier,
+                    ) {
+                        SignalCells(cells = sources.map { if (it.open == 0) palette.green else palette.red })
+                    }
+                },
+                { cardModifier ->
+                    RankCard(
+                        label = "Networks",
+                        accent = palette.purple,
+                        glyph = Icons.Outlined.Public,
+                        rows = networks,
+                        blind = !state.alertsOk,
+                        blindReason = "needs a watcher login",
+                        emptyReason = "this agent reports ip only",
+                        modifier = cardModifier,
                     )
-                }
+                },
+                { cardModifier ->
+                    RankCard(
+                        label = "Scenarios",
+                        accent = palette.orange,
+                        glyph = Icons.Outlined.Bolt,
+                        rows = scenarios,
+                        blind = !state.alertsOk,
+                        blindReason = "needs a watcher login",
+                        emptyReason = "nothing to rank in the retained window",
+                        onRowClick = onScenarioClick,
+                        modifier = cardModifier,
+                    )
+                },
+                { cardModifier ->
+                    val targeting = if (paths.isNotEmpty() || accounts.isEmpty()) paths else accounts
+                    RankCard(
+                        label = if (paths.isNotEmpty() || accounts.isEmpty()) {
+                            "Targeted paths"
+                        } else {
+                            "Targeted accounts"
+                        },
+                        accent = palette.blue,
+                        glyph = Icons.Outlined.MyLocation,
+                        rows = targeting,
+                        blind = !state.alertsOk,
+                        blindReason = "needs a watcher login",
+                        emptyReason = "no meta reported",
+                        noun = "hits",
+                        modifier = cardModifier,
+                    )
+                },
+                { cardModifier ->
+                    RankCard(
+                        label = "Tooling",
+                        accent = palette.teal,
+                        glyph = Icons.Outlined.SmartToy,
+                        rows = tooling,
+                        blind = !state.alertsOk,
+                        blindReason = "needs a watcher login",
+                        emptyReason = "no HTTP scenario fired here",
+                        noun = "hits",
+                        modifier = cardModifier,
+                    )
+                },
+                { cardModifier ->
+                    SignalCard(
+                        label = "Bans in force",
+                        hero = if (state.decisionsOk) LogParser.formatCount(state.decisions.size) else "-",
+                        accent = palette.green,
+                        glyph = Icons.Outlined.Shield,
+                        health = if (!state.decisionsOk) palette.red else null,
+                        subtitle = if (!state.decisionsOk) {
+                            "LAPI unreachable, this card reports the read failure instead of the zero " +
+                                "it would invent"
+                        } else {
+                            "${state.ownBans} from this host · ${state.subscribedBans} subscribed"
+                        },
+                        modifier = cardModifier,
+                    ) {
+                        origins.take(4).forEach { origin ->
+                            RankedRow(
+                                label = origin.origin,
+                                count = LogParser.formatCount(origin.count),
+                                rail = if (origin.origin in setOf("capi", "lists")) {
+                                    palette.muted
+                                } else {
+                                    palette.green
+                                },
+                            )
+                        }
+                    }
+                },
+            )
 
-                SignalCard(
-                    label = "Bans in force",
-                    hero = if (state.decisionsOk) LogParser.formatCount(state.decisions.size) else "-",
-                    accent = palette.green,
-                    subtitle = if (!state.decisionsOk) {
-                        "LAPI unreachable, this card reports the read failure instead of the zero it would invent"
-                    } else {
-                        "${state.ownBans} from this host · ${state.subscribedBans} subscribed"
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                ) {
-                    origins.take(4).forEach { origin ->
-                        RankedRow(
-                            label = origin.origin,
-                            count = LogParser.formatCount(origin.count),
-                        )
+            Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
+                cards.chunked(columns).forEach { row ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                        modifier = Modifier.height(IntrinsicSize.Min),
+                    ) {
+                        row.forEach { card ->
+                            card(
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                            )
+                        }
+                        repeat(columns - row.size) {
+                            Box(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
-        }
-
-        item {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                modifier = Modifier.height(IntrinsicSize.Min),
-            ) {
-                RankCard(
-                    label = "Networks",
-                    accent = palette.purple,
-                    rows = networks,
-                    blind = !state.alertsOk,
-                    blindReason = "needs a watcher login",
-                    emptyReason = "this agent reports ip only",
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
-                RankCard(
-                    label = "Scenarios",
-                    accent = palette.orange,
-                    rows = scenarios,
-                    blind = !state.alertsOk,
-                    blindReason = "needs a watcher login",
-                    emptyReason = "nothing to rank in the retained window",
-                    onRowClick = onScenarioClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
-            }
-        }
-
-        item {
-            val targeting = if (paths.isNotEmpty() || accounts.isEmpty()) paths else accounts
-            RankCard(
-                label = if (paths.isNotEmpty() || accounts.isEmpty()) "Targeted paths" else "Targeted accounts",
-                accent = palette.blue,
-                rows = targeting,
-                blind = !state.alertsOk,
-                blindReason = "needs a watcher login",
-                emptyReason = "no meta reported",
-                noun = "hits",
-            )
-        }
-
-        item {
-            RankCard(
-                label = "Tooling",
-                accent = palette.teal,
-                rows = tooling,
-                blind = !state.alertsOk,
-                blindReason = "needs a watcher login",
-                emptyReason = "no HTTP scenario fired here",
-                noun = "hits",
-            )
         }
 
         if (state.countries.isNotEmpty()) {
@@ -549,9 +589,12 @@ private fun RankCard(
     emptyReason: String,
     modifier: Modifier = Modifier,
     noun: String = "alerts",
+    glyph: androidx.compose.ui.graphics.vector.ImageVector? = null,
     onRowClick: ((String) -> Unit)? = null,
 ) {
+    val palette = LocalTmPalette.current
     val total = rows.sumOf { it.count }
+    val open = rows.count { it.open > 0 }
     SignalCard(
         label = label,
         hero = when {
@@ -560,6 +603,9 @@ private fun RankCard(
             else -> rows.size.toString()
         },
         accent = accent,
+        glyph = glyph,
+        trailing = open.takeIf { it > 0 && !blind }?.let { "$it open" },
+        trailingColor = palette.yellow,
         subtitle = when {
             blind -> blindReason
             rows.isEmpty() -> emptyReason
@@ -571,7 +617,10 @@ private fun RankCard(
             RankedRow(
                 label = row.label,
                 count = row.count.toString(),
+                warn = row.weight.takeIf { it > row.count }?.let { "$it events" },
+                warnSevere = false,
                 trailing = CrowdSecAnalytics.percent(row.count, total),
+                rail = if (row.open > 0) palette.red else palette.green,
                 onClick = onRowClick?.let { click -> { click(row.key) } },
             )
         }

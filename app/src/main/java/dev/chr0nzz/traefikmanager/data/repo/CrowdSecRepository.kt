@@ -16,10 +16,26 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import retrofit2.Response
 
+/** The last snapshot seen for one server, kept so switching back is instant. */
+private data class CachedRead(val snapshot: CrowdSecSnapshot, val loadedAt: Long)
+
 @Singleton
 class CrowdSecRepository @Inject constructor(
     private val apiProvider: ApiProvider,
+    private val serverScope: ServerScope,
+    private val navCounts: NavCountsStore,
 ) {
+
+    private val cache = mutableMapOf<String, CachedRead>()
+
+    private fun key(): String = serverScope.activeAgentId.value ?: HOST_KEY
+
+    /** What was last read for the selected server, if anything. */
+    fun cached(): CrowdSecSnapshot? = cache[key()]?.snapshot
+
+    fun cachedAge(): Long? = cache[key()]?.let { System.currentTimeMillis() - it.loadedAt }
+
+    fun forget() = cache.clear()
 
     suspend fun load(full: Boolean): CrowdSecSnapshot = coroutineScope {
         val api = apiProvider.api()
@@ -39,12 +55,19 @@ class CrowdSecRepository @Inject constructor(
         )
         val headers = alertsResponse.getOrNull()?.headers()
 
-        CrowdSecSnapshot(
+        val snapshot = CrowdSecSnapshot(
             decisions = decisions.withHint(),
             alerts = alerts,
             alertLimit = headers?.get("X-CS-Alert-Limit")?.toIntOrNull(),
             alertsCapped = headers?.get("X-CS-Alert-Capped")?.let { it == "1" },
         )
+        // Only keep a read that actually answered; a failed one must not mask the last good data
+        // for this server, and must never leak into another server's entry.
+        if (snapshot.decisions.ok || snapshot.alerts.ok) {
+            cache[key()] = CachedRead(snapshot, System.currentTimeMillis())
+        }
+        snapshot.decisions.valueOrNull()?.let { navCounts.report(NavCountsStore.CROWDSEC, it.size) }
+        snapshot
     }
 
     suspend fun addDecision(request: AddDecisionRequest) {
@@ -75,6 +98,10 @@ class CrowdSecRepository @Inject constructor(
                 "token is refused there, so CROWDSEC_API_KEY has to be set as well.",
             status = failed.status,
         )
+    }
+
+    private companion object {
+        const val HOST_KEY = "__host__"
     }
 
     private fun errorMessage(response: Response<*>): String? {

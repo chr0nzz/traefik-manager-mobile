@@ -12,12 +12,14 @@ import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
 import dev.chr0nzz.traefikmanager.data.model.CsRead
+import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.CrowdSecRepository
 import dev.chr0nzz.traefikmanager.data.repo.GeoRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -106,6 +108,7 @@ data class CrowdSecUiState(
 class CrowdSecViewModel @Inject constructor(
     private val repository: CrowdSecRepository,
     private val geoRepository: GeoRepository,
+    private val serverScope: ServerScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CrowdSecUiState())
@@ -116,10 +119,36 @@ class CrowdSecViewModel @Inject constructor(
     private val loadLock = Mutex()
 
     init {
-        load(initial = true, full = false)
+        showCachedThenRevalidate()
+        watchServerChanges()
     }
 
+    /** Pull-to-refresh is the one gesture that forces a full LAPI resync. */
     fun refresh() = load(initial = false, full = true)
+
+    /**
+     * Paints the last snapshot for this server straight away, then revalidates in the background.
+     * The revalidation is a delta read: the manager keeps a decisions stream cache and only asks
+     * the LAPI for what changed, so this is cheap even on an instance with tens of thousands of
+     * bans. Alerts have no such feed and always come whole.
+     */
+    private fun showCachedThenRevalidate() {
+        val cached = repository.cached()
+        if (cached == null) {
+            load(initial = true, full = false)
+            return
+        }
+        _state.update {
+            it.copy(
+                loading = false,
+                refreshing = true,
+                snapshot = cached,
+                notConfigured = false,
+                loadError = null,
+            )
+        }
+        load(initial = false, full = false)
+    }
 
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
@@ -226,6 +255,17 @@ class CrowdSecViewModel @Inject constructor(
             }
             val codes = geoRepository.lookup(alerts.map { it.ip })
             _state.update { it.copy(geoEnabled = true, countryByIp = it.countryByIp + codes) }
+        }
+    }
+
+    /** A different server means different data: drop what is on screen and refetch. */
+    private fun watchServerChanges() {
+        viewModelScope.launch {
+            serverScope.generation.drop(1).collect {
+                // Keep only the parts of the screen that are not server data.
+                _state.value = CrowdSecUiState(view = _state.value.view)
+                showCachedThenRevalidate()
+            }
         }
     }
 }
