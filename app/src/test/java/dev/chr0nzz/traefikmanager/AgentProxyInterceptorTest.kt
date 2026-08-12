@@ -74,4 +74,21 @@ class AgentProxyInterceptorTest {
             requestPath("a1", "/api/traefik/logs?lines=200"),
         )
     }
+
+    @Test
+    fun `the raw yaml editor is proxied so it never writes the host config`() {
+        assertEquals(
+            "/api/agents/proxy/a1/routes/routes.yml::media/raw",
+            requestPath("a1", "/api/routes/routes.yml::media/raw"),
+        )
+    }
+
+    @Test
+    fun `the route list itself is not proxied - it has its own agent endpoint`() {
+        assertEquals("/api/routes", requestPath("a1", "/api/routes"))
+        assertEquals(
+            "/api/routes/routes.yml::media/toggle",
+            requestPath("a1", "/api/routes/routes.yml::media/toggle"),
+        )
+    }
 }

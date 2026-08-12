@@ -39,10 +39,15 @@ data class RoutesSnapshot(
 @Singleton
 class RoutesRepository @Inject constructor(
     private val apiProvider: ApiProvider,
+    serverScope: ServerScope,
 ) {
 
     private val _changes = MutableStateFlow(0)
     val changes: StateFlow<Int> = _changes.asStateFlow()
+
+    init {
+        serverScope.onServerChanged { notifyChanged() }
+    }
 
     fun notifyChangedExternally() = notifyChanged()
 

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -15,6 +16,7 @@ enum class TmSection(val label: String) {
     Traffic("Traffic"),
     Observability("Observability"),
     Infrastructure("Infrastructure"),
+    System("System"),
 }
 
 enum class TmDestination(
@@ -60,6 +62,7 @@ enum class TmDestination(
         section = TmSection.Infrastructure,
         serverTab = "plugins",
     ),
+    Settings("settings", "Settings", Icons.Outlined.Settings, TmSection.System),
     ;
 
     companion object {

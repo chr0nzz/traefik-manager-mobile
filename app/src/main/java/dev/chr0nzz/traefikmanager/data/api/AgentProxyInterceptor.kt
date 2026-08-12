@@ -15,12 +15,20 @@ class AgentProxyInterceptor(private val agentId: String?) : Interceptor {
 
         val prefix = path.substring(0, index)
         val tail = path.substring(index + API_MARKER.length)
-        if (tail.substringBefore('/') !in PROXIED) return chain.proceed(request)
+        if (!shouldProxy(tail)) return chain.proceed(request)
 
         val proxied = request.url.newBuilder()
             .encodedPath("$prefix/api/agents/proxy/$agentId/$tail")
             .build()
         return chain.proceed(request.newBuilder().url(proxied).build())
+    }
+
+    private fun shouldProxy(tail: String): Boolean {
+        if (tail.substringBefore('/') in PROXIED) return true
+        // The route list comes from /api/agents/{id}/routes, but the raw YAML editor has no such
+        // sibling: unproxied it would read and overwrite the host's config file while an agent is
+        // selected. The agent serves this exact path (agent/main.go:272-276).
+        return tail.startsWith("routes/") && tail.endsWith("/raw")
     }
 
     private companion object {

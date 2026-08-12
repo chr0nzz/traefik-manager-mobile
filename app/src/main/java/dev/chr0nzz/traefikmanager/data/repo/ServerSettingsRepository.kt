@@ -18,11 +18,19 @@ import kotlinx.coroutines.launch
 @Singleton
 class ServerSettingsRepository @Inject constructor(
     private val apiProvider: ApiProvider,
+    serverScope: ServerScope,
     @param:ApplicationScope private val scope: CoroutineScope,
 ) {
 
     private val _settings = MutableStateFlow<ServerSettings?>(null)
     val settings: StateFlow<ServerSettings?> = _settings.asStateFlow()
+
+    init {
+        serverScope.onServerChanged {
+            _settings.value = null
+            refresh()
+        }
+    }
 
     fun refresh() {
         scope.launch { load() }
