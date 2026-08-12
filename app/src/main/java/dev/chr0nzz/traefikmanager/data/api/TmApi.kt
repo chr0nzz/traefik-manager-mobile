@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager.data.api
 
 import dev.chr0nzz.traefikmanager.data.model.AgentHealth
 import dev.chr0nzz.traefikmanager.data.model.AgentMutationResponse
+import dev.chr0nzz.traefikmanager.data.model.AgentConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
@@ -41,6 +42,7 @@ import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
+import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestResult
@@ -214,6 +216,12 @@ interface TmApi {
     @GET("api/notifications")
     suspend fun notifications(): List<TmNotification>
 
+    @POST("api/notifications/delete")
+    suspend fun deleteNotification(@Body body: DeleteNotificationRequest): OkResponse
+
+    @POST("api/notifications/clear")
+    suspend fun clearNotifications(): OkResponse
+
     @POST("api/settings/webhook-test")
     suspend fun testWebhook(@Body body: WebhookTestRequest): WebhookTestResult
 
@@ -238,6 +246,10 @@ interface TmApi {
 
     @GET("api/agents")
     suspend fun agents(): AgentsResponse
+
+    /** The same call, read whole: every configurable field, with secrets redacted to "***". */
+    @GET("api/agents")
+    suspend fun agentConfigs(): AgentConfigsResponse
 
     @POST("api/agents")
     suspend fun createAgent(@Body body: CreateAgentRequest): AgentMutationResponse

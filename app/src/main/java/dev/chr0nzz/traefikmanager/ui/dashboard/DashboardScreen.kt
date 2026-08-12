@@ -43,6 +43,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
@@ -102,8 +104,10 @@ fun DashboardScreen(
     onOpenNotifications: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
+    bellViewModel: NotificationBellViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val unread by bellViewModel.unread.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val refreshState = rememberPullToRefreshState()
 
@@ -127,9 +131,31 @@ fun DashboardScreen(
                 },
                 actions = {
                     IconButton(onClick = onOpenNotifications) {
-                        Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
+                        BadgedBox(
+                            badge = {
+                                if (unread > 0) {
+                                    Badge {
+                                        Text(if (unread > 99) "99+" else unread.toString())
+                                    }
+                                }
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Notifications,
+                                contentDescription = if (unread > 0) {
+                                    if (unread == 1) "Notifications, 1 unread" else "Notifications, $unread unread"
+                                } else {
+                                    "Notifications"
+                                },
+                            )
+                        }
                     }
-                    IconButton(onClick = viewModel::refresh) {
+                    IconButton(
+                        onClick = {
+                            viewModel.refresh()
+                            bellViewModel.refresh()
+                        },
+                    ) {
                         Icon(Icons.Outlined.Refresh, contentDescription = "Refresh overview")
                     }
                 },

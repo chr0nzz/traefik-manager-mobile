@@ -5,6 +5,7 @@ import dev.chr0nzz.traefikmanager.di.SettingsDataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,6 +21,8 @@ data class TmPreferences(
     val activeAgentId: String? = null,
     val migratedFromV1: Boolean = false,
     val migrationNotice: String? = null,
+    /** How many notifications had been seen last time the bell was opened, as the web tracks it. */
+    val notificationsRead: Int = 0,
 )
 
 @Singleton
@@ -36,7 +39,12 @@ class PreferencesStore @Inject constructor(
             activeAgentId = prefs[KEY_ACTIVE_AGENT],
             migratedFromV1 = prefs[KEY_MIGRATED_V1] ?: false,
             migrationNotice = prefs[KEY_MIGRATION_NOTICE],
+            notificationsRead = prefs[KEY_NOTIFICATIONS_READ] ?: 0,
         )
+    }
+
+    suspend fun setNotificationsRead(count: Int) {
+        dataStore.edit { it[KEY_NOTIFICATIONS_READ] = count.coerceAtLeast(0) }
     }
 
     suspend fun setThemeMode(mode: ThemeMode) {
@@ -74,5 +82,6 @@ class PreferencesStore @Inject constructor(
         val KEY_ACTIVE_AGENT = stringPreferencesKey("active_agent")
         val KEY_MIGRATED_V1 = booleanPreferencesKey("migrated_from_v1")
         val KEY_MIGRATION_NOTICE = stringPreferencesKey("migration_notice")
+        val KEY_NOTIFICATIONS_READ = intPreferencesKey("notifications_read")
     }
 }

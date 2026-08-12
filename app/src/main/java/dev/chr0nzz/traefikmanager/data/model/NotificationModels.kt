@@ -10,6 +10,9 @@ import kotlinx.serialization.Serializable
  * the server's local clock formatted without a timezone, and which can repeat within a second.
  */
 @Serializable
+data class DeleteNotificationRequest(val ts: String)
+
+@Serializable
 data class TmNotification(
     val ts: String = "",
     val type: String = "info",

@@ -4,6 +4,7 @@ import dev.chr0nzz.traefikmanager.data.model.Agent
 import dev.chr0nzz.traefikmanager.data.model.AgentHealth
 import dev.chr0nzz.traefikmanager.data.model.AgentConfig
 import dev.chr0nzz.traefikmanager.data.model.AgentMutationResponse
+import dev.chr0nzz.traefikmanager.data.model.AgentConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyEntry
@@ -68,6 +69,7 @@ import dev.chr0nzz.traefikmanager.data.model.UiPrefs
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
+import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestResult
@@ -533,6 +535,30 @@ class DemoApi : TmApi {
             ok = true,
             agent = AgentConfig(id = agentId, apiKeyRaw = "demo-rotated-key-0000000000000000000000"),
         )
+    }
+
+    override suspend fun agentConfigs() = AgentConfigsResponse(
+        agents = listOf(
+            AgentConfig(
+                id = "edge",
+                name = "Edge",
+                url = "http://edge.example.com:8090",
+                traefikApiUrl = "http://traefik:8080",
+                configPath = "/app/config",
+                restartMethod = "proxy",
+                traefikContainer = "traefik",
+            ),
+        ),
+    )
+
+    override suspend fun deleteNotification(body: DeleteNotificationRequest): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun clearNotifications(): OkResponse {
+        settle()
+        return OkResponse(ok = true)
     }
 
     override suspend fun notifications(): List<TmNotification> {

@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
+import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository
 import dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository.Companion.text
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,12 +31,14 @@ data class NotificationsUiState(
     val test: TestState = TestState.Idle,
     val message: String? = null,
     val error: String? = null,
+    val unread: Int = 0,
 )
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
     private val apiProvider: ApiProvider,
     private val settingsRepository: ManagerSettingsRepository,
+    private val preferencesStore: dev.chr0nzz.traefikmanager.data.store.PreferencesStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NotificationsUiState())
@@ -59,6 +63,55 @@ class NotificationsViewModel @Inject constructor(
                     webhookUsername = settings.getOrNull()?.text("webhook_username") ?: current.webhookUsername,
                     error = history.exceptionOrNull()?.message,
                 )
+            }
+            markUnread()
+        }
+    }
+
+    /** Unread is the count the web keeps too: how many arrived since the list was last opened. */
+    private suspend fun markUnread() {
+        val seen = preferencesStore.preferences.first().notificationsRead
+        _state.update { it.copy(unread = (it.notifications.size - seen).coerceAtLeast(0)) }
+    }
+
+    fun markAllRead() {
+        viewModelScope.launch {
+            preferencesStore.setNotificationsRead(_state.value.notifications.size)
+            _state.update { it.copy(unread = 0) }
+        }
+    }
+
+    fun delete(notification: TmNotification) {
+        viewModelScope.launch {
+            val result = runCatching { apiProvider.api().deleteNotification(DeleteNotificationRequest(notification.ts)) }
+            val ok = result.getOrNull()?.ok == true
+            if (ok) {
+                _state.update { current ->
+                    current.copy(
+                        notifications = current.notifications.filterNot { it.ts == notification.ts },
+                        message = "Notification deleted",
+                    )
+                }
+                preferencesStore.setNotificationsRead(_state.value.notifications.size)
+                markUnread()
+            } else {
+                _state.update {
+                    it.copy(message = result.exceptionOrNull()?.message ?: "Could not delete the notification")
+                }
+            }
+        }
+    }
+
+    fun clearAll() {
+        viewModelScope.launch {
+            val result = runCatching { apiProvider.api().clearNotifications() }
+            if (result.getOrNull()?.ok == true) {
+                preferencesStore.setNotificationsRead(0)
+                _state.update { it.copy(notifications = emptyList(), unread = 0, message = "History cleared") }
+            } else {
+                _state.update {
+                    it.copy(message = result.exceptionOrNull()?.message ?: "Could not clear the history")
+                }
             }
         }
     }
