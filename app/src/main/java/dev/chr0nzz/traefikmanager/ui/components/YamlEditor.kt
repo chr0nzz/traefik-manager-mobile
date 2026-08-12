@@ -2,8 +2,10 @@ package dev.chr0nzz.traefikmanager.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalTextStyle
@@ -19,8 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -170,24 +175,30 @@ fun YamlEditor(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .background(palette.bg)
-            .verticalScroll(verticalScroll),
+            .background(palette.bg),
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .width(38.dp)
+                .fillMaxHeight()
                 .background(palette.card)
-                .padding(vertical = TmSpacing.sm),
+                .clipToBounds(),
         ) {
-            repeat(lineCount) { line ->
-                Text(
-                    text = (line + 1).toString(),
-                    style = style.copy(color = palette.muted, fontSize = 12.sp),
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = TmSpacing.sm),
-                )
+            Column(
+                modifier = Modifier
+                    .graphicsLayer { translationY = -verticalScroll.value.toFloat() }
+                    .padding(vertical = TmSpacing.sm),
+            ) {
+                repeat(lineCount) { line ->
+                    Text(
+                        text = (line + 1).toString(),
+                        style = style.copy(color = palette.muted, fontSize = 12.sp),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier
+                            .width(38.dp)
+                            .padding(end = TmSpacing.sm),
+                    )
+                }
             }
         }
 
@@ -196,6 +207,8 @@ fun YamlEditor(
             readOnly = readOnly,
             textStyle = style,
             cursorBrush = SolidColor(palette.blue),
+            lineLimits = TextFieldLineLimits.MultiLine(),
+            scrollState = verticalScroll,
             outputTransformation = OutputTransformation {
                 val highlighted = highlightYaml(toString(), colors)
                 highlighted.spanStyles.forEach { range ->
@@ -203,9 +216,9 @@ fun YamlEditor(
                 }
             },
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .horizontalScroll(horizontalScroll)
-                .padding(start = TmSpacing.sm, end = TmSpacing.md, top = TmSpacing.sm, bottom = TmSpacing.xxl),
+                .padding(start = TmSpacing.sm, end = TmSpacing.md, top = TmSpacing.sm, bottom = TmSpacing.sm),
         )
     }
 }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.text.input.TextFieldState
@@ -78,8 +77,7 @@ fun RouteRawScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(insets)
-                .imePadding(),
+                .padding(insets),
         ) {
             when {
                 state.loading -> LoadingState()
