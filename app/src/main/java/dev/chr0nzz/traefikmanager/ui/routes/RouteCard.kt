@@ -5,17 +5,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ArrowOutward
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
-import androidx.compose.material.icons.outlined.ToggleOff
-import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,13 +84,29 @@ fun RouteCard(
                 else Glyph(Icons.Outlined.LockOpen, palette.yellow)
             }
             if (route.provider == "file") {
-                IconButton(onClick = onToggle, enabled = !toggling) {
-                    Icon(
-                        imageVector = if (route.enabled) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
-                        contentDescription = if (route.enabled) "Disable ${route.name}" else "Enable ${route.name}",
-                        tint = if (route.enabled) palette.green else palette.muted,
-                    )
-                }
+                Switch(
+                    checked = route.enabled,
+                    onCheckedChange = { onToggle() },
+                    enabled = !toggling,
+                    thumbContent = if (route.enabled) {
+                        {
+                            Icon(
+                                imageVector = Icons.Outlined.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier.semantics {
+                        contentDescription = if (route.enabled) {
+                            "Disable ${route.name}"
+                        } else {
+                            "Enable ${route.name}"
+                        }
+                    },
+                )
             }
         }
 

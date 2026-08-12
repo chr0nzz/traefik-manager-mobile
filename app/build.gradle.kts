@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.material.kolor)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

@@ -1,11 +1,19 @@
 package dev.chr0nzz.traefikmanager.ui.dashboard
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,20 +25,43 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AltRoute
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Hub
+import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Power
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.DoorFront
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,8 +69,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import dev.chr0nzz.traefikmanager.data.repo.EntrypointRow
 import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
+import dev.chr0nzz.traefikmanager.data.repo.RuntimeInfo
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
 import dev.chr0nzz.traefikmanager.data.repo.Verdict
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
@@ -56,22 +89,60 @@ import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.components.plus
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
+import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DashboardScreen(
     onOpenRoutes: () -> Unit,
-    contentPadding: PaddingValues = PaddingValues(),
+    onOpenDrawer: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val refreshState = rememberPullToRefreshState()
 
+    Scaffold(
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets.safeDrawing,
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
+                title = { Text("Overview") },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = viewModel::refresh) {
+                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh overview")
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        },
+    ) { contentPadding ->
     PullToRefreshBox(
         isRefreshing = state.refreshing,
         onRefresh = viewModel::refresh,
-        modifier = modifier
+        state = refreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = refreshState,
+                isRefreshing = state.refreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        },
+        modifier = Modifier
             .fillMaxSize()
             .consumeWindowInsets(contentPadding),
     ) {
@@ -84,32 +155,65 @@ fun DashboardScreen(
             )
             else -> {
                 val snapshot = state.snapshot ?: return@PullToRefreshBox
+                val compact = !currentWindowAdaptiveInfo().windowSizeClass
+                    .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 280.dp),
+                    columns = if (compact) GridCells.Fixed(2) else GridCells.Adaptive(minSize = 280.dp),
                     contentPadding = contentPadding + PaddingValues(TmSpacing.lg),
                     horizontalArrangement = Arrangement.spacedBy(TmSpacing.md),
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.md),
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        VerdictLine(snapshot.verdict, snapshot.providers)
+                        VerdictLine(
+                            verdict = snapshot.verdict,
+                            providers = snapshot.providers,
+                            activeProvider = snapshot.providerFilter,
+                            onProviderClick = viewModel::onProviderClick,
+                        )
                     }
-                    items(snapshot.cards, key = { it.key }) { card ->
-                        SignalCardView(card = card, onClick = onOpenRoutes)
+                    snapshot.cards.chunked(if (compact) 2 else 2).forEach { pair ->
+                        item(span = { GridItemSpan(maxLineSpan) }, key = pair.first().key) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(TmSpacing.md),
+                                modifier = Modifier.height(IntrinsicSize.Min),
+                            ) {
+                                pair.forEach { card ->
+                                    SignalCardView(
+                                        card = card,
+                                        onClick = onOpenRoutes,
+                                        compact = compact,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                    )
+                                }
+                                if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
                     }
                     if (snapshot.entrypoints.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             EntrypointsSection(snapshot.entrypoints)
                         }
                     }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        RuntimeFooter(snapshot.runtime)
+                    }
                 }
             }
+        }
         }
     }
 }
 
 @Composable
-private fun VerdictLine(verdict: Verdict, providers: List<ProviderCount>) {
+private fun VerdictLine(
+    verdict: Verdict,
+    providers: List<ProviderCount>,
+    activeProvider: String?,
+    onProviderClick: (String) -> Unit,
+) {
     val palette = LocalTmPalette.current
     TmCard(accent = verdict.status) {
         Row(
@@ -130,13 +234,23 @@ private fun VerdictLine(verdict: Verdict, providers: List<ProviderCount>) {
             modifier = Modifier.padding(top = 2.dp),
         )
         if (providers.isNotEmpty()) {
-            ProviderRow(providers, modifier = Modifier.padding(top = TmSpacing.sm))
+            ProviderRow(
+                providers = providers,
+                activeProvider = activeProvider,
+                onProviderClick = onProviderClick,
+                modifier = Modifier.padding(top = TmSpacing.sm),
+            )
         }
     }
 }
 
 @Composable
-private fun SignalCardView(card: SignalCard, onClick: () -> Unit) {
+private fun SignalCardView(
+    card: SignalCard,
+    onClick: () -> Unit,
+    compact: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
     val palette = LocalTmPalette.current
     val (icon, tint) = when (card.key) {
         "http" -> Icons.Outlined.AltRoute to palette.blue
@@ -144,7 +258,7 @@ private fun SignalCardView(card: SignalCard, onClick: () -> Unit) {
         "services" -> Icons.Outlined.Dns to palette.green
         else -> Icons.Outlined.Extension to palette.purple
     }
-    TmCard(accent = if (card.health == TmStatus.Ok) null else card.health, onClick = onClick) {
+    TmCard(modifier = modifier, accent = if (card.health == TmStatus.Ok) null else card.health, onClick = onClick) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
@@ -165,16 +279,25 @@ private fun SignalCardView(card: SignalCard, onClick: () -> Unit) {
         ) {
             Text(
                 text = card.total?.toString() ?: "-",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = if (compact) {
+                    MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+                } else {
+                    MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold)
+                },
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(modifier = Modifier.weight(1f))
             if (card.flags.isEmpty()) {
-                HealthLabel(status = card.health, text = card.healthLabel)
+                HealthLabel(status = card.health, text = card.healthLabel, compact = compact)
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
-                    card.flags.forEach { flag ->
-                        CountChip(count = flag.count, label = flag.label, status = flag.status)
+                    card.flags.take(if (compact) 1 else 3).forEach { flag ->
+                        CountChip(
+                            count = flag.count,
+                            label = flag.label,
+                            status = flag.status,
+                            showLabel = !compact,
+                        )
                     }
                 }
             }
@@ -183,31 +306,76 @@ private fun SignalCardView(card: SignalCard, onClick: () -> Unit) {
         SignalStrip(
             cells = card.cells,
             emptyLabel = card.stripEmptyLabel,
-            modifier = Modifier.padding(top = TmSpacing.sm),
+            cellSize = if (compact) 4.dp else 6.dp,
+            maxCells = if (compact) 60 else 150,
+            modifier = Modifier.padding(top = if (compact) TmSpacing.xs else TmSpacing.sm),
         )
-        if (card.providers.isNotEmpty()) {
+        if (card.providers.isNotEmpty() && !compact) {
             CardDivider(modifier = Modifier.padding(top = TmSpacing.sm))
-            ProviderRow(card.providers, modifier = Modifier.padding(top = TmSpacing.xs))
+            ProviderRow(
+                providers = card.providers,
+                activeProvider = null,
+                onProviderClick = {},
+                modifier = Modifier.padding(top = TmSpacing.xs),
+            )
         }
     }
 }
 
 @Composable
-private fun ProviderRow(providers: List<ProviderCount>, modifier: Modifier = Modifier) {
+private fun providerIcon(name: String): ImageVector = when {
+    name.startsWith("docker") || name.startsWith("swarm") -> Icons.Outlined.Inventory2
+    name.startsWith("kubernetes") -> Icons.Outlined.Hub
+    name.startsWith("file") -> Icons.Outlined.Description
+    name.startsWith("internal") -> Icons.Outlined.Settings
+    name.startsWith("http") -> Icons.Outlined.Link
+    name.startsWith("consul") || name.startsWith("redis") || name.startsWith("etcd") ||
+        name.startsWith("zookeeper") -> Icons.Outlined.Storage
+    name.startsWith("plugin") -> Icons.Outlined.Extension
+    else -> Icons.Outlined.Power
+}
+
+@Composable
+private fun ProviderRow(
+    providers: List<ProviderCount>,
+    activeProvider: String?,
+    onProviderClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val palette = LocalTmPalette.current
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(TmSpacing.md),
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
     ) {
-        providers.take(4).forEach { provider ->
+        providers.forEach { provider ->
+            val active = provider.name == activeProvider
+            val tint = when {
+                provider.worst == TmStatus.Error -> palette.red
+                provider.worst == TmStatus.Warn -> palette.yellow
+                active -> palette.blue
+                else -> palette.muted
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(TmRadius.sm))
+                    .background(if (active) palette.blue.copy(alpha = 0.14f) else Color.Transparent)
+                    .clickable { onProviderClick(provider.name) }
+                    .padding(horizontal = TmSpacing.sm, vertical = 3.dp),
             ) {
+                Icon(
+                    imageVector = providerIcon(provider.name),
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = Modifier.size(13.dp),
+                )
                 Text(
                     text = provider.name,
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                    color = palette.muted,
+                    color = if (active) palette.blue else palette.muted,
                 )
                 Text(
                     text = provider.count.toString(),
@@ -215,15 +383,29 @@ private fun ProviderRow(providers: List<ProviderCount>, modifier: Modifier = Mod
                         fontFamily = MonoFamily,
                         fontWeight = FontWeight.Bold,
                     ),
-                    color = when (provider.worst) {
-                        TmStatus.Error -> palette.red
-                        TmStatus.Warn -> palette.yellow
-                        else -> MaterialTheme.colorScheme.onSurface
-                    },
+                    color = if (active) palette.blue else MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun RuntimeFooter(runtime: RuntimeInfo) {
+    val palette = LocalTmPalette.current
+    val parts = buildList {
+        runtime.version?.let { add("v$it" + (runtime.codename?.let { c -> " $c" } ?: "")) }
+        add(if (runtime.metrics.isNullOrEmpty()) "metrics off" else "metrics ${runtime.metrics}")
+        add(if (runtime.accessLog == true) "access log on" else "access log off")
+        add(if (runtime.tracing.isNullOrEmpty()) "tracing off" else "tracing ${runtime.tracing}")
+    }
+    if (parts.isEmpty()) return
+    Text(
+        text = parts.joinToString("  ·  "),
+        style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+        color = palette.muted,
+        modifier = Modifier.padding(horizontal = TmSpacing.xs, vertical = TmSpacing.xs),
+    )
 }
 
 @Composable

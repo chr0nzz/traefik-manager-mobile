@@ -57,15 +57,55 @@ data class Verdict(
     val status: TmStatus,
 )
 
+data class RuntimeInfo(
+    val version: String?,
+    val codename: String?,
+    val metrics: String?,
+    val tracing: String?,
+    val accessLog: Boolean?,
+)
+
 data class DashboardSnapshot(
     val verdict: Verdict,
     val cards: List<SignalCard>,
     val entrypoints: List<EntrypointRow>,
     val traefikReachable: Boolean,
     val providers: List<ProviderCount>,
+    val runtime: RuntimeInfo,
+    val providerFilter: String?,
 )
 
 object DashboardBuilder {
+
+    fun build(raw: RawDashboard, providerFilter: String?): DashboardSnapshot = build(
+        overview = raw.overview,
+        entrypoints = raw.entrypoints,
+        routers = raw.routers?.filterProvider(providerFilter),
+        services = raw.services?.filterProvider(providerFilter),
+        middlewares = raw.middlewares?.filterProvider(providerFilter),
+        runtime = RuntimeInfo(
+            version = raw.version?.version,
+            codename = raw.version?.codename,
+            metrics = raw.overview?.features?.metrics,
+            tracing = raw.overview?.features?.tracing,
+            accessLog = raw.overview?.features?.accessLog,
+        ),
+        providerFilter = providerFilter,
+        allProviders = providerCounts(
+            (raw.routers?.all.orEmpty().map(::classifyRouter)) +
+                (raw.services?.all.orEmpty().map(::classifyService)) +
+                (raw.middlewares?.all.orEmpty().map { classifyMiddleware(it, emptySet()) }),
+        ),
+    )
+
+    private fun ProtoEnvelope.filterProvider(provider: String?): ProtoEnvelope {
+        if (provider == null) return this
+        return copy(
+            http = http.filter { it.provider == provider },
+            tcp = tcp.filter { it.provider == provider },
+            udp = udp.filter { it.provider == provider },
+        )
+    }
 
     fun build(
         overview: Overview?,
@@ -73,6 +113,9 @@ object DashboardBuilder {
         routers: ProtoEnvelope?,
         services: ProtoEnvelope?,
         middlewares: ProtoEnvelope?,
+        runtime: RuntimeInfo = RuntimeInfo(null, null, null, null, null),
+        providerFilter: String? = null,
+        allProviders: List<ProviderCount>? = null,
     ): DashboardSnapshot {
         val routersListed = routers != null && routers.reachable
         val servicesListed = services != null && services.reachable
@@ -152,7 +195,10 @@ object DashboardBuilder {
             cards = cards,
             entrypoints = entrypointRows(entrypoints, routers),
             traefikReachable = reachable,
-            providers = providerCounts(httpRouters + streamRouters + allServices + allMiddlewares),
+            providers = allProviders
+                ?: providerCounts(httpRouters + streamRouters + allServices + allMiddlewares),
+            runtime = runtime,
+            providerFilter = providerFilter,
         )
     }
 

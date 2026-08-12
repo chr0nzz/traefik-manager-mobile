@@ -20,7 +20,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -44,16 +46,22 @@ fun TmCard(
 ) {
     val palette = LocalTmPalette.current
     val shape = RoundedCornerShape(TmRadius.md)
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (dimmed) 0.5f else 1f,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        label = "cardDim",
+    )
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .alpha(if (dimmed) 0.5f else 1f),
+            .alpha(contentAlpha),
         shape = shape,
         color = palette.card,
         border = BorderStroke(1.dp, palette.border),
     ) {
         Row(
             modifier = Modifier
+                .fillMaxHeight()
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         ) {
             if (accent != null) {
@@ -177,6 +185,7 @@ fun CountChip(
     label: String,
     status: TmStatus,
     modifier: Modifier = Modifier,
+    showLabel: Boolean = true,
 ) {
     val color = statusColor(status)
     Row(
@@ -192,11 +201,13 @@ fun CountChip(
             style = MaterialTheme.typography.labelMedium.copy(fontFamily = MonoFamily),
             color = color,
         )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-        )
+        if (showLabel) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = color,
+            )
+        }
     }
 }
 

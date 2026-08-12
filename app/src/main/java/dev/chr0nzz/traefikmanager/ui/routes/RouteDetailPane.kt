@@ -16,18 +16,30 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DoorFront
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.TouchApp
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import dev.chr0nzz.traefikmanager.ui.components.TooltipIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -46,12 +58,14 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RouteDetailPane(
     route: Route?,
     showBack: Boolean,
     onBack: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
+    onToggle: (Route) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (route == null) {
@@ -68,8 +82,12 @@ fun RouteDetailPane(
     }
 
     val palette = LocalTmPalette.current
+    val clipboard = LocalClipboardManager.current
+    val uriHandler = LocalUriHandler.current
+
+    Box(modifier = modifier.fillMaxSize()) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(contentPadding)
@@ -164,7 +182,39 @@ fun RouteDetailPane(
             text = "Editing arrives in a later v2 stage.",
             style = MaterialTheme.typography.bodySmall,
             color = palette.muted,
+            modifier = Modifier.padding(bottom = 72.dp),
         )
+    }
+
+        HorizontalFloatingToolbar(
+            expanded = true,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(contentPadding)
+                .padding(bottom = TmSpacing.lg),
+        ) {
+            if (route.provider == "file") {
+                val label = if (route.enabled) "Disable route" else "Enable route"
+                TooltipIconButton(
+                    label = label,
+                    icon = if (route.enabled) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
+                    onClick = { onToggle(route) },
+                )
+            }
+            val host = route.hosts.firstOrNull()
+            if (host != null) {
+                TooltipIconButton(
+                    label = "Open $host",
+                    icon = Icons.Outlined.OpenInNew,
+                    onClick = { uriHandler.openUri("https://$host") },
+                )
+            }
+            TooltipIconButton(
+                label = "Copy target",
+                icon = Icons.Outlined.ContentCopy,
+                onClick = { clipboard.setText(AnnotatedString(route.target.ifEmpty { route.name })) },
+            )
+        }
     }
 }
 
@@ -299,6 +349,7 @@ private fun DetailSection(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.semantics { heading() },
             )
         }
         content()

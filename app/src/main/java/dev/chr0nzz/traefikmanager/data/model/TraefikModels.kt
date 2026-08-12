@@ -17,11 +17,19 @@ data class OverviewSection(
 )
 
 @Serializable
+data class OverviewFeatures(
+    val tracing: String? = null,
+    val metrics: String? = null,
+    val accessLog: Boolean? = null,
+)
+
+@Serializable
 data class Overview(
     val http: OverviewSection? = null,
     val tcp: OverviewSection? = null,
     val udp: OverviewSection? = null,
     val providers: List<String>? = null,
+    val features: OverviewFeatures? = null,
 ) {
     val isBlind: Boolean get() = http == null && tcp == null && udp == null
 }

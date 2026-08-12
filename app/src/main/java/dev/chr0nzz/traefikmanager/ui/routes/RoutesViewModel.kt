@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.routes
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,6 +61,8 @@ data class RoutesUiState(
 class RoutesViewModel @Inject constructor(
     private val repository: RoutesRepository,
 ) : ViewModel() {
+
+    val queryState = TextFieldState()
 
     private val _state = MutableStateFlow(RoutesUiState())
     val state: StateFlow<RoutesUiState> = _state.asStateFlow()

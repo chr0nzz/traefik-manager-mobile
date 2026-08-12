@@ -1,29 +1,62 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
+import dev.chr0nzz.traefikmanager.data.model.Entrypoint
+import dev.chr0nzz.traefikmanager.data.model.Overview
+import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
+import dev.chr0nzz.traefikmanager.di.ApplicationScope
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+
+data class RawDashboard(
+    val overview: Overview? = null,
+    val entrypoints: List<Entrypoint>? = null,
+    val routers: ProtoEnvelope? = null,
+    val services: ProtoEnvelope? = null,
+    val middlewares: ProtoEnvelope? = null,
+    val version: TraefikVersion? = null,
+)
 
 @Singleton
 class DashboardRepository @Inject constructor(
     private val apiProvider: ApiProvider,
+    @param:ApplicationScope private val scope: CoroutineScope,
 ) {
 
-    suspend fun load(): DashboardSnapshot = coroutineScope {
+    private val _raw = MutableStateFlow<RawDashboard?>(null)
+    val raw: StateFlow<RawDashboard?> = _raw.asStateFlow()
+
+    val snapshot: StateFlow<DashboardSnapshot?> = _raw
+        .map { raw -> raw?.let { DashboardBuilder.build(it, providerFilter = null) } }
+        .stateIn(scope, SharingStarted.Eagerly, null)
+
+    suspend fun refresh(): RawDashboard = coroutineScope {
         val api = apiProvider.api()
         val overview = async { runCatching { api.overview() }.getOrNull() }
         val entrypoints = async { runCatching { api.entrypoints() }.getOrNull() }
         val routers = async { runCatching { api.routers() }.getOrNull() }
         val services = async { runCatching { api.services() }.getOrNull() }
         val middlewares = async { runCatching { api.middlewares() }.getOrNull() }
-        DashboardBuilder.build(
+        val version = async { runCatching { api.traefikVersion() }.getOrNull() }
+        val fetched = RawDashboard(
             overview = overview.await(),
             entrypoints = entrypoints.await(),
             routers = routers.await(),
             services = services.await(),
             middlewares = middlewares.await(),
+            version = version.await(),
         )
+        _raw.value = fetched
+        fetched
     }
 }

@@ -21,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,14 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSize
 
 enum class TmStatus { Ok, Warn, Error, Unknown, Disabled }
+
+fun TmStatus.label(): String = when (this) {
+    TmStatus.Ok -> "healthy"
+    TmStatus.Warn -> "degraded"
+    TmStatus.Error -> "down"
+    TmStatus.Unknown -> "unknown"
+    TmStatus.Disabled -> "disabled"
+}
 
 fun TmStatus.severity(): Int = when (this) {
     TmStatus.Error -> 0
@@ -55,12 +66,21 @@ fun StatusDot(
     status: TmStatus,
     modifier: Modifier = Modifier,
     size: Dp = TmSize.statusDot,
+    describe: Boolean = true,
 ) {
+    val description = status.label()
     Spacer(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(statusColor(status)),
+            .background(statusColor(status))
+            .then(
+                if (describe) {
+                    Modifier.semantics { contentDescription = description }
+                } else {
+                    Modifier
+                },
+            ),
     )
 }
 
@@ -69,6 +89,7 @@ fun HealthLabel(
     status: TmStatus,
     text: String,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     val palette = LocalTmPalette.current
     Row(
@@ -76,10 +97,10 @@ fun HealthLabel(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-        StatusDot(status = status, size = 6.dp)
+        StatusDot(status = status, size = 6.dp, describe = false)
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
+            style = if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
             color = if (status == TmStatus.Ok) palette.green else statusColor(status),
         )
     }
@@ -109,8 +130,12 @@ fun SignalStrip(
     val sorted = cells.sortedBy { it.severity() }
     val shown = sorted.take(maxCells)
     val overflow = sorted.size - shown.size
+    val summary = sorted.groupingBy { it.label() }.eachCount()
+        .entries.joinToString(", ") { "${'$'}{it.value} ${'$'}{it.key}" }
     FlowRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clearAndSetSemantics { contentDescription = summary },
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -134,7 +159,7 @@ private fun StripCell(status: TmStatus, size: Dp) {
     val shape = RoundedCornerShape(1.5.dp)
     val base = Modifier.size(size).clip(shape)
     when (status) {
-        TmStatus.Ok -> Spacer(base.background(palette.muted.copy(alpha = 0.30f)))
+        TmStatus.Ok -> Spacer(base.background(palette.muted.copy(alpha = 0.60f)))
         TmStatus.Warn -> Spacer(base.background(palette.yellow))
         TmStatus.Error -> Spacer(base.background(palette.red))
         TmStatus.Unknown, TmStatus.Disabled ->
@@ -161,7 +186,7 @@ fun SegmentBar(
         if (total == 0) return@Row
         Segment(weight = error, color = palette.red)
         Segment(weight = warn, color = palette.yellow)
-        Segment(weight = ok, color = palette.muted.copy(alpha = 0.30f))
+        Segment(weight = ok, color = palette.muted.copy(alpha = 0.60f))
     }
 }
 
