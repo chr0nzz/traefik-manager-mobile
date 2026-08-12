@@ -2,8 +2,18 @@ package dev.chr0nzz.traefikmanager.data.api
 
 import dev.chr0nzz.traefikmanager.data.model.Agent
 import dev.chr0nzz.traefikmanager.data.model.AgentHealth
+import dev.chr0nzz.traefikmanager.data.model.AgentConfig
+import dev.chr0nzz.traefikmanager.data.model.AgentMutationResponse
 import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
+import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
+import dev.chr0nzz.traefikmanager.data.model.ApiKeyEntry
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
+import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
+import dev.chr0nzz.traefikmanager.data.model.ChangePasswordRequest
+import dev.chr0nzz.traefikmanager.data.model.GenerateKeyRequest
+import dev.chr0nzz.traefikmanager.data.model.GenerateKeyResponse
+import dev.chr0nzz.traefikmanager.data.model.OtpStatus
+import dev.chr0nzz.traefikmanager.data.model.RevokeKeyRequest
 import dev.chr0nzz.traefikmanager.data.model.ConfigError
 import dev.chr0nzz.traefikmanager.data.model.ConfigFile
 import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
@@ -30,6 +40,7 @@ import dev.chr0nzz.traefikmanager.data.model.OverviewSection
 import dev.chr0nzz.traefikmanager.data.model.CertEntry
 import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
 import dev.chr0nzz.traefikmanager.data.model.CertsResponse
+import dev.chr0nzz.traefikmanager.data.model.ClientIpDiagnostic
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
 import dev.chr0nzz.traefikmanager.data.model.CsMetaEntry
@@ -55,20 +66,62 @@ import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
 import dev.chr0nzz.traefikmanager.data.model.UiPrefs
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
+import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
+import dev.chr0nzz.traefikmanager.data.model.TmNotification
+import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
+import dev.chr0nzz.traefikmanager.data.model.WebhookTestResult
+import dev.chr0nzz.traefikmanager.data.model.TestConnectionRequest
+import dev.chr0nzz.traefikmanager.data.model.TestConnectionResult
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.put
 import dev.chr0nzz.traefikmanager.data.model.StaticConfigResponse
 import dev.chr0nzz.traefikmanager.data.model.ToggleRequest
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
 import kotlinx.coroutines.delay
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonArray
 
 class DemoApi : TmApi {
 
     private val disabled = mutableSetOf("routes.yml::old-blog")
 
-    override suspend fun apiKeyStatus(): ApiKeyStatus = ApiKeyStatus(enabled = true, count = 1)
+    override suspend fun apiKeyStatus(): ApiKeyStatus = ApiKeyStatus(
+        enabled = true,
+        count = 1,
+        keys = listOf(ApiKeyEntry("This phone", "abcd1234...ef56", "2026-08-01 09:14")),
+    )
+
+    override suspend fun changePassword(body: ChangePasswordRequest) = AuthActionResponse(success = true)
+
+    override suspend fun otpStatus() = OtpStatus(otpEnabled = false)
+
+    override suspend fun disableOtp() = AuthActionResponse(success = true)
+
+    override suspend fun generateApiKey(body: GenerateKeyRequest) =
+        GenerateKeyResponse(ok = true, key = "demo-key-not-a-real-secret-000000000000000")
+
+    override suspend fun revokeApiKey(body: RevokeKeyRequest) = AuthActionResponse(ok = true)
+
+    override suspend fun clientIpDiagnostic() = ClientIpDiagnostic(
+        effectiveIp = "203.0.113.7",
+        effectiveClass = "public",
+        socketPeer = "172.18.0.1",
+        socketPeerClass = "private",
+        headers = mapOf(
+            "X-Forwarded-For" to "203.0.113.7, 172.18.0.1",
+            "X-Real-IP" to "203.0.113.7",
+            "CF-Connecting-IP" to "",
+            "X-Forwarded-Proto" to "https",
+            "X-Forwarded-Host" to "manager.example.com",
+        ),
+        forwardedForChain = listOf("203.0.113.7", "172.18.0.1"),
+        proxyHops = 1,
+        classes = mapOf("203.0.113.7" to "public", "172.18.0.1" to "private"),
+    )
 
     override suspend fun managerVersion() = ManagerVersion(version = "1.10.1", repo = "chr0nzz/traefik-manager")
 
@@ -450,6 +503,74 @@ class DemoApi : TmApi {
         visibleTabs = mapOf("certs" to true, "plugins" to true, "logs" to true, "crowdsec" to true),
         crowdsecEnabled = true,
     )
+
+    override suspend fun createAgent(body: CreateAgentRequest): AgentMutationResponse {
+        settle()
+        return AgentMutationResponse(
+            ok = true,
+            agent = AgentConfig(
+                id = "demo-agent",
+                name = body.name,
+                url = body.url,
+                apiKeyRaw = "demo-key-not-a-real-secret-0000000000000",
+            ),
+        )
+    }
+
+    override suspend fun updateAgent(agentId: String, body: JsonObject): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun deleteAgent(agentId: String): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun rotateAgentKey(agentId: String): AgentMutationResponse {
+        settle()
+        return AgentMutationResponse(
+            ok = true,
+            agent = AgentConfig(id = agentId, apiKeyRaw = "demo-rotated-key-0000000000000000000000"),
+        )
+    }
+
+    override suspend fun notifications(): List<TmNotification> {
+        settle()
+        return listOf(
+            TmNotification("2026-08-12 10:31:04", "warning", "Ping all: 7/8 online - unreachable: bin"),
+            TmNotification("2026-08-12 09:12:44", "success", "Route media saved"),
+            TmNotification("2026-08-11 22:04:01", "info", "Traefik v3.7.10 is available - update now"),
+            TmNotification("2026-08-11 21:58:12", "error", "CrowdSec LAPI unreachable"),
+        )
+    }
+
+    override suspend fun testWebhook(body: WebhookTestRequest): WebhookTestResult {
+        settle()
+        return WebhookTestResult(ok = true)
+    }
+
+    override suspend fun settingsRaw(): JsonObject = buildJsonObject {
+        put("domains", buildJsonArray { add(JsonPrimitive("example.com")); add(JsonPrimitive("xyzlab.dev")) })
+        put("cert_resolver", JsonPrimitive("letsencrypt,cloudflare"))
+        put("traefik_api_url", JsonPrimitive("http://traefik:8080"))
+        put("traefik_api_user", JsonPrimitive("admin"))
+        put("traefik_api_password_set", JsonPrimitive(true))
+        put("acme_json_path", JsonPrimitive("/app/acme.json"))
+        put("access_log_path", JsonPrimitive("/app/logs/access.log"))
+        put("static_config_path", JsonPrimitive("/app/traefik.yml"))
+        put("crowdsec_enabled", JsonPrimitive(true))
+    }
+
+    override suspend fun saveSettings(body: JsonObject): SaveSettingsResponse {
+        settle()
+        return SaveSettingsResponse(success = true)
+    }
+
+    override suspend fun testTraefikConnection(body: TestConnectionRequest): TestConnectionResult {
+        settle()
+        return TestConnectionResult(ok = true, version = "3.7.10")
+    }
 
     override suspend fun configs(): ConfigsResponse = ConfigsResponse(
         files = listOf(

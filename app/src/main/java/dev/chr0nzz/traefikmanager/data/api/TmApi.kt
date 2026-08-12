@@ -1,8 +1,16 @@
 package dev.chr0nzz.traefikmanager.data.api
 
 import dev.chr0nzz.traefikmanager.data.model.AgentHealth
+import dev.chr0nzz.traefikmanager.data.model.AgentMutationResponse
 import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
+import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
+import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
+import dev.chr0nzz.traefikmanager.data.model.ChangePasswordRequest
+import dev.chr0nzz.traefikmanager.data.model.GenerateKeyRequest
+import dev.chr0nzz.traefikmanager.data.model.GenerateKeyResponse
+import dev.chr0nzz.traefikmanager.data.model.OtpStatus
+import dev.chr0nzz.traefikmanager.data.model.RevokeKeyRequest
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.ManagerVersion
 import dev.chr0nzz.traefikmanager.data.model.DigestRequest
@@ -21,6 +29,7 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
 import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
 import dev.chr0nzz.traefikmanager.data.model.CertsResponse
+import dev.chr0nzz.traefikmanager.data.model.ClientIpDiagnostic
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
 import dev.chr0nzz.traefikmanager.data.model.GeoLookupRequest
@@ -30,12 +39,19 @@ import dev.chr0nzz.traefikmanager.data.model.LogsResponse
 import dev.chr0nzz.traefikmanager.data.model.PluginsResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
+import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
+import dev.chr0nzz.traefikmanager.data.model.TmNotification
+import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
+import dev.chr0nzz.traefikmanager.data.model.WebhookTestResult
+import dev.chr0nzz.traefikmanager.data.model.TestConnectionRequest
+import dev.chr0nzz.traefikmanager.data.model.TestConnectionResult
 import dev.chr0nzz.traefikmanager.data.model.StaticConfigResponse
 import dev.chr0nzz.traefikmanager.data.model.ToggleRequest
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
 import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
+import kotlinx.serialization.json.JsonObject
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -50,6 +66,24 @@ interface TmApi {
 
     @GET("api/auth/apikey/status")
     suspend fun apiKeyStatus(): ApiKeyStatus
+
+    @POST("api/auth/change-password")
+    suspend fun changePassword(@Body body: ChangePasswordRequest): AuthActionResponse
+
+    @GET("api/auth/otp/status")
+    suspend fun otpStatus(): OtpStatus
+
+    @POST("api/auth/otp/disable")
+    suspend fun disableOtp(): AuthActionResponse
+
+    @POST("api/auth/apikey/generate")
+    suspend fun generateApiKey(@Body body: GenerateKeyRequest): GenerateKeyResponse
+
+    @POST("api/auth/apikey/revoke")
+    suspend fun revokeApiKey(@Body body: RevokeKeyRequest): AuthActionResponse
+
+    @GET("api/diagnostics/client-ip")
+    suspend fun clientIpDiagnostic(): ClientIpDiagnostic
 
     @GET("api/manager/version")
     suspend fun managerVersion(): ManagerVersion
@@ -177,8 +211,24 @@ interface TmApi {
     @GET("api/dashboard/config")
     suspend fun dashboardConfig(@Query("server") server: String? = null): DashboardConfig
 
+    @GET("api/notifications")
+    suspend fun notifications(): List<TmNotification>
+
+    @POST("api/settings/webhook-test")
+    suspend fun testWebhook(@Body body: WebhookTestRequest): WebhookTestResult
+
     @GET("api/settings")
     suspend fun settings(): ServerSettings
+
+    /** The same document as [settings], untyped, so a save can round-trip keys this app does not model. */
+    @GET("api/settings")
+    suspend fun settingsRaw(): JsonObject
+
+    @POST("api/settings")
+    suspend fun saveSettings(@Body body: JsonObject): SaveSettingsResponse
+
+    @POST("api/settings/test-connection")
+    suspend fun testTraefikConnection(@Body body: TestConnectionRequest): TestConnectionResult
 
     @GET("api/configs")
     suspend fun configs(): ConfigsResponse
@@ -188,6 +238,18 @@ interface TmApi {
 
     @GET("api/agents")
     suspend fun agents(): AgentsResponse
+
+    @POST("api/agents")
+    suspend fun createAgent(@Body body: CreateAgentRequest): AgentMutationResponse
+
+    @PUT("api/agents/{agentId}")
+    suspend fun updateAgent(@Path("agentId") agentId: String, @Body body: JsonObject): OkResponse
+
+    @DELETE("api/agents/{agentId}")
+    suspend fun deleteAgent(@Path("agentId") agentId: String): OkResponse
+
+    @POST("api/agents/{agentId}/rotate-key")
+    suspend fun rotateAgentKey(@Path("agentId") agentId: String): AgentMutationResponse
 
     @GET("api/agents/{agentId}/health")
     suspend fun agentHealth(@Path("agentId") agentId: String): AgentHealth

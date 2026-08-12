@@ -28,3 +28,24 @@ data class StaticConfigResponse(
     val parsed: kotlinx.serialization.json.JsonObject? = null,
     val path: String = "",
 )
+
+@Serializable
+data class SaveSettingsResponse(
+    val success: Boolean = false,
+    val error: String? = null,
+)
+
+@Serializable
+data class TestConnectionRequest(
+    val url: String,
+    val user: String = "",
+    /** Empty means "test against the password already stored on the server". */
+    val password: String = "",
+)
+
+@Serializable
+data class TestConnectionResult(
+    val ok: Boolean = false,
+    val version: String? = null,
+    val error: String? = null,
+)

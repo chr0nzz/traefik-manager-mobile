@@ -1,8 +1,8 @@
 package dev.chr0nzz.traefikmanager
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
@@ -13,11 +13,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chr0nzz.traefikmanager.data.store.ThemeMode
 import dev.chr0nzz.traefikmanager.ui.nav.RootViewModel
+import dev.chr0nzz.traefikmanager.ui.nav.AppLockGate
 import dev.chr0nzz.traefikmanager.ui.nav.TmApp
 import dev.chr0nzz.traefikmanager.ui.theme.TmTheme
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -32,11 +33,13 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.System -> isSystemInDarkTheme()
             }
             TmTheme(darkTheme = darkTheme, dynamicColor = preferences.dynamicColor) {
-                TmApp(
-                    apiState = apiState,
-                    migrationNotice = preferences.migrationNotice,
-                    onNoticeShown = viewModel::onMigrationNoticeShown,
-                )
+                AppLockGate(enabled = preferences.appLock) {
+                    TmApp(
+                        apiState = apiState,
+                        migrationNotice = preferences.migrationNotice,
+                        onNoticeShown = viewModel::onMigrationNoticeShown,
+                    )
+                }
             }
         }
     }

@@ -14,7 +14,50 @@ data class ManagerVersion(
 data class ApiKeyStatus(
     val enabled: Boolean = false,
     val count: Int = 0,
+    val keys: List<ApiKeyEntry> = emptyList(),
 )
+
+@Serializable
+data class ApiKeyEntry(
+    val name: String = "",
+    /** The only handle the revoke endpoint accepts; legacy keys have none and cannot be revoked. */
+    val preview: String = "",
+    @SerialName("created_at") val createdAt: String = "",
+) {
+    val revocable: Boolean get() = preview.isNotEmpty()
+}
+
+@Serializable
+data class GenerateKeyRequest(@SerialName("device_name") val deviceName: String)
+
+@Serializable
+data class GenerateKeyResponse(
+    val ok: Boolean = false,
+    val key: String? = null,
+    val error: String? = null,
+)
+
+@Serializable
+data class RevokeKeyRequest(val preview: String)
+
+@Serializable
+data class OtpStatus(@SerialName("otp_enabled") val otpEnabled: Boolean = false)
+
+@Serializable
+data class ChangePasswordRequest(
+    @SerialName("current_password") val currentPassword: String,
+    @SerialName("new_password") val newPassword: String,
+    @SerialName("confirm_password") val confirmPassword: String,
+)
+
+@Serializable
+data class AuthActionResponse(
+    val success: Boolean = false,
+    val ok: Boolean = false,
+    val error: String? = null,
+) {
+    val worked: Boolean get() = success || ok
+}
 
 @Serializable
 data class TraefikVersion(
