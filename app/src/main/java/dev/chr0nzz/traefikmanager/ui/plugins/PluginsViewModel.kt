@@ -7,11 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.data.model.PluginEntry
 import dev.chr0nzz.traefikmanager.data.model.PluginUsage
+import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.PluginsRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -42,6 +44,7 @@ data class PluginsUiState(
 @HiltViewModel
 class PluginsViewModel @Inject constructor(
     private val repository: PluginsRepository,
+    private val serverScope: ServerScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PluginsUiState())
@@ -51,6 +54,7 @@ class PluginsViewModel @Inject constructor(
 
     init {
         load(initial = true)
+        watchServerChanges()
     }
 
     fun refresh() = load(initial = false)
@@ -84,6 +88,16 @@ class PluginsViewModel @Inject constructor(
                     }
                 },
             )
+        }
+    }
+
+    /** A different server means different data: drop what is on screen and refetch. */
+    private fun watchServerChanges() {
+        viewModelScope.launch {
+            serverScope.generation.drop(1).collect {
+                _state.value = PluginsUiState()
+                load(initial = true)
+            }
         }
     }
 }

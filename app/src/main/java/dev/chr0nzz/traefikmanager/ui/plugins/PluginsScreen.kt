@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.PluginEntry
+import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.DetailRow
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -102,7 +103,9 @@ fun PluginsScreen(
     viewModel: PluginsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val navigator = rememberListDetailPaneScaffoldNavigator<String>(
+        scaffoldDirective = tmPaneScaffoldDirective(),
+    )
     val scope = rememberCoroutineScope()
     var selectedName by rememberSaveable { mutableStateOf<String?>(null) }
     val searchBarState = rememberSearchBarState()
@@ -355,7 +358,7 @@ private fun PluginDetailPane(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(contentPadding)
-                .padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.lg, bottom = 76.dp),
+                .padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.lg, bottom = 88.dp),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.md),
         ) {
             Row(

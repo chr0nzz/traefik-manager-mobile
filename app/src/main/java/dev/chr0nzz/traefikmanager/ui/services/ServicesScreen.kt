@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.ServiceRow
 import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
+import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
@@ -60,7 +61,9 @@ fun ServicesScreen(
     viewModel: ServicesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val navigator = rememberListDetailPaneScaffoldNavigator<String>(
+        scaffoldDirective = tmPaneScaffoldDirective(),
+    )
     val scope = rememberCoroutineScope()
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
     val searchBarState = rememberSearchBarState()

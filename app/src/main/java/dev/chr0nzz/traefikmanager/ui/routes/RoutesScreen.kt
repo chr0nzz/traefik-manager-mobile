@@ -1,10 +1,12 @@
 package dev.chr0nzz.traefikmanager.ui.routes
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,10 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.ClearFiltersChip
 import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
 import dev.chr0nzz.traefikmanager.ui.components.FilterChipRow
@@ -72,7 +76,9 @@ fun RoutesScreen(
     viewModel: RoutesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val paneDirective = tmPaneScaffoldDirective()
+    val navigator = rememberListDetailPaneScaffoldNavigator<String>(scaffoldDirective = paneDirective)
+    val twoPanes = paneDirective.maxHorizontalPartitions > 1
     val scope = rememberCoroutineScope()
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingDelete by remember { mutableStateOf<Route?>(null) }
@@ -117,13 +123,9 @@ fun RoutesScreen(
             .nestedScroll(searchScrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            if (!detailOnly) {
-                FloatingActionButton(onClick = onCreateRoute) {
-                    Icon(Icons.Outlined.Add, contentDescription = "New route")
-                }
-            }
+        snackbarHost = {
+            // The FAB lives in the list pane now, so Scaffold cannot offset this for us.
+            SnackbarHost(snackbarHostState, modifier = Modifier.padding(bottom = 72.dp))
         },
         topBar = {
             if (!detailOnly) {
@@ -150,14 +152,32 @@ fun RoutesScreen(
                 .consumeWindowInsets(insets),
             listPane = {
                 AnimatedPane {
-                    RoutesListPane(
-                        state = state,
-                        selectedId = selectedId,
-                        contentPadding = insets,
-                        onSelect = select,
-                        onToggle = viewModel::toggle,
-                        onRefresh = viewModel::refresh,
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        RoutesListPane(
+                            state = state,
+                            selectedId = selectedId,
+                            contentPadding = insets,
+                            onSelect = select,
+                            onToggle = viewModel::toggle,
+                            onRefresh = viewModel::refresh,
+                        )
+                        FloatingActionButton(
+                            onClick = onCreateRoute,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(
+                                    bottom = insets.calculateBottomPadding(),
+                                    end = if (twoPanes) {
+                                        0.dp
+                                    } else {
+                                        insets.calculateEndPadding(LocalLayoutDirection.current)
+                                    },
+                                )
+                                .padding(TmSpacing.lg),
+                        ) {
+                            Icon(Icons.Outlined.Add, contentDescription = "New route")
+                        }
+                    }
                 }
             },
             detailPane = {
@@ -232,7 +252,7 @@ private fun RoutesListPane(
                         start = TmSpacing.lg,
                         end = TmSpacing.lg,
                         top = TmSpacing.xs,
-                        bottom = contentPadding.calculateBottomPadding() + 24.dp,
+                        bottom = contentPadding.calculateBottomPadding() + 88.dp,
                     ),
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                     modifier = Modifier.fillMaxWidth(),

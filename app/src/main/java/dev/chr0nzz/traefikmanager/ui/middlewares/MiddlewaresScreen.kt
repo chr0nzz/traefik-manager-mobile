@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -68,10 +69,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
+import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -93,7 +96,9 @@ fun MiddlewaresScreen(
     viewModel: MiddlewaresViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val paneDirective = tmPaneScaffoldDirective()
+    val navigator = rememberListDetailPaneScaffoldNavigator<String>(scaffoldDirective = paneDirective)
+    val twoPanes = paneDirective.maxHorizontalPartitions > 1
     val scope = rememberCoroutineScope()
     var selectedName by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingDelete by remember { mutableStateOf<MiddlewareDef?>(null) }
@@ -132,7 +137,10 @@ fun MiddlewaresScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            // The FAB lives in the list pane now, so Scaffold cannot offset this for us.
+            SnackbarHost(snackbarHostState, modifier = Modifier.padding(bottom = 72.dp))
+        },
         topBar = {
             if (!detailOnly) {
                 MiddlewaresTopBar(
@@ -152,13 +160,6 @@ fun MiddlewaresScreen(
                 )
             }
         },
-        floatingActionButton = {
-            if (!detailOnly) {
-                FloatingActionButton(onClick = onCreate) {
-                    Icon(Icons.Outlined.Add, contentDescription = "Add middleware")
-                }
-            }
-        },
     ) { insets ->
         NavigableListDetailPaneScaffold(
             navigator = navigator,
@@ -167,18 +168,36 @@ fun MiddlewaresScreen(
                 .consumeWindowInsets(insets),
             listPane = {
                 AnimatedPane {
-                    MiddlewareListPane(
-                        state = state,
-                        selectedName = selectedName,
-                        contentPadding = insets,
-                        onSelect = { middleware ->
-                            selectedName = middleware.name
-                            scope.launch {
-                                navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, middleware.name)
-                            }
-                        },
-                        onRefresh = viewModel::refresh,
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        MiddlewareListPane(
+                            state = state,
+                            selectedName = selectedName,
+                            contentPadding = insets,
+                            onSelect = { middleware ->
+                                selectedName = middleware.name
+                                scope.launch {
+                                    navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, middleware.name)
+                                }
+                            },
+                            onRefresh = viewModel::refresh,
+                        )
+                        FloatingActionButton(
+                            onClick = onCreate,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(
+                                    bottom = insets.calculateBottomPadding(),
+                                    end = if (twoPanes) {
+                                        0.dp
+                                    } else {
+                                        insets.calculateEndPadding(LocalLayoutDirection.current)
+                                    },
+                                )
+                                .padding(TmSpacing.lg),
+                        ) {
+                            Icon(Icons.Outlined.Add, contentDescription = "Add middleware")
+                        }
+                    }
                 }
             },
             detailPane = {

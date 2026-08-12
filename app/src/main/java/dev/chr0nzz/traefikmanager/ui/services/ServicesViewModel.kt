@@ -8,11 +8,13 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceHealth
 import dev.chr0nzz.traefikmanager.data.model.ServiceProtocol
 import dev.chr0nzz.traefikmanager.data.model.ServiceRow
 import dev.chr0nzz.traefikmanager.data.model.ServiceRows
+import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.ServicesRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -68,6 +70,7 @@ data class ServicesUiState(
 @HiltViewModel
 class ServicesViewModel @Inject constructor(
     private val repository: ServicesRepository,
+    private val serverScope: ServerScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ServicesUiState())
@@ -87,6 +90,7 @@ class ServicesViewModel @Inject constructor(
             }
         }
         load(initial = cached == null)
+        watchServerChanges()
     }
 
     fun refresh() = load(initial = false)
@@ -154,6 +158,16 @@ class ServicesViewModel @Inject constructor(
             is kotlinx.serialization.SerializationException ->
                 "The server sent a service the app could not read: $detail"
             else -> detail
+        }
+    }
+
+    /** A different server means different data: drop what is on screen and refetch. */
+    private fun watchServerChanges() {
+        viewModelScope.launch {
+            serverScope.generation.drop(1).collect {
+                _state.value = ServicesUiState()
+                load(initial = true)
+            }
         }
     }
 }
