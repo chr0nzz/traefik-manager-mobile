@@ -1,41 +1,116 @@
-name: Build Android APK
+name: Release
 
 on:
-  # push:
-  #   tags:
-  #     - 'v*'
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Attach the build to a GitHub release
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  # Every release must be signed with the key v1 shipped with, or nobody can upgrade in place.
+  EXPECTED_CERT_SHA256: 1bf8e08ae76adac0125d67e147d72300eb2d53c2d0fbbc1a60e61961bc6dc6c0
 
 jobs:
   build:
-    name: Build APK (EAS)
+    name: Signed AAB and APK
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      - name: Setup Node
-        uses: actions/setup-node@v4.4.0
+      - name: Set up JDK
+        uses: actions/setup-java@v4.7.1
         with:
-          node-version: 20
+          distribution: temurin
+          java-version: '17'
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4.4.0
 
-      - name: Setup Expo + EAS
-        uses: expo/expo-github-action@v8
+      - name: Restore the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set - the build would be unsigned"
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          cat > keystore.properties <<EOF
+          storeFile=$RUNNER_TEMP/release.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      # The bundle is what Play gets, so it builds first and fails the job fastest if it cannot.
+      - name: Build
+        run: ./gradlew --no-daemon :app:bundleRelease :app:assembleRelease
+
+      - name: Check the signing certificate
+        run: |
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          ACTUAL=$("$BUILD_TOOLS/apksigner" verify --print-certs \
+            app/build/outputs/apk/release/app-release.apk \
+            | awk '/SHA-256 digest/ { print $NF; exit }')
+          echo "signed with $ACTUAL"
+          if [ "$ACTUAL" != "$EXPECTED_CERT_SHA256" ]; then
+            echo "::error::Wrong signing key. Installing this over an existing app would fail."
+            echo "::error::expected $EXPECTED_CERT_SHA256"
+            exit 1
+          fi
+
+      - name: Name the artefacts
+        id: name
+        run: |
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          cp app/build/outputs/bundle/release/app-release.aab "traefik-manager-$VERSION.aab"
+          cp app/build/outputs/apk/release/app-release.apk "traefik-manager-$VERSION.apk"
+          sha256sum "traefik-manager-$VERSION.aab" "traefik-manager-$VERSION.apk" > checksums.txt
+          cat checksums.txt
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4.6.2
         with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-          packager: npm
+          name: release-${{ steps.name.outputs.version }}
+          path: |
+            traefik-manager-*.aab
+            traefik-manager-*.apk
+            checksums.txt
 
-      - name: Build APK (preview)
-        run: eas build --platform android --profile preview --non-interactive
+      # Without this, a crash report from a minified build is unreadable, and the mapping is
+      # gone the moment the runner is recycled.
+      - name: Keep the deobfuscation mapping
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: mapping-${{ steps.name.outputs.version }}
+          path: |
+            app/build/outputs/mapping/release/mapping.txt
+            app/build/outputs/mapping/release/seeds.txt
+            app/build/outputs/mapping/release/usage.txt
+          retention-days: 90
 
-      - name: Build AAB (production)
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: eas build --platform android --profile production --non-interactive
+      # Play takes the AAB from the build artefact; the GitHub release carries the APK, which is
+      # what someone installing outside Play actually needs.
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
+        uses: softprops/action-gh-release@v2.3.4
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            traefik-manager-*.apk
+            checksums.txt
