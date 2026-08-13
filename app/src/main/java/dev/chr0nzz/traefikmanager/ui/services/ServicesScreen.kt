@@ -2,6 +2,8 @@ package dev.chr0nzz.traefikmanager.ui.services
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -46,6 +48,7 @@ import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.ProviderRow
+import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.components.only
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
@@ -158,22 +161,31 @@ private fun ServicesListPane(
             .padding(contentPadding.only(bottom = false)),
     ) {
         if (state.providers.size > 1) {
-            ProviderRow(
-                providers = state.providers.map { provider ->
-                    ProviderCount(
-                        name = provider,
-                        count = state.services.count { it.provider == provider },
-                        worst = worstStatus(state, provider),
-                    )
-                },
-                activeProvider = state.provider,
-                onProviderClick = onProviderClick,
-                modifier = Modifier.padding(
-                    start = TmSpacing.lg,
-                    end = TmSpacing.lg,
-                    bottom = TmSpacing.xs,
-                ),
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = TmSpacing.lg,
+                        end = TmSpacing.lg,
+                        bottom = TmSpacing.xs,
+                    ),
+            ) {
+                SectionLabel("Providers")
+                ProviderRow(
+                    providers = state.providers.map { provider ->
+                        ProviderCount(
+                            name = provider,
+                            count = state.services.count { it.provider == provider },
+                            worst = worstStatus(state, provider),
+                        )
+                    },
+                    activeProvider = state.provider,
+                    onProviderClick = onProviderClick,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
 
         PullToRefreshBox(
