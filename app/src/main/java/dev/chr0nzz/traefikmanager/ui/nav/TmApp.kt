@@ -89,6 +89,9 @@ fun TmApp(
     apiState: ApiState,
     migrationNotice: String? = null,
     onNoticeShown: () -> Unit = {},
+    widgetDestination: String? = null,
+    widgetServerId: String? = null,
+    onWidgetTargetHandled: () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -106,7 +109,11 @@ fun TmApp(
         when (apiState) {
             ApiState.Loading -> LoadingState()
             ApiState.Disconnected -> ConnectScreen()
-            is ApiState.Ready -> ConnectedApp()
+            is ApiState.Ready -> ConnectedApp(
+                widgetDestination = widgetDestination,
+                widgetServerId = widgetServerId,
+                onWidgetTargetHandled = onWidgetTargetHandled,
+            )
         }
         SnackbarHost(
             hostState = snackbarHostState,
@@ -118,7 +125,12 @@ fun TmApp(
 }
 
 @Composable
-private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
+private fun ConnectedApp(
+    widgetDestination: String? = null,
+    widgetServerId: String? = null,
+    onWidgetTargetHandled: () -> Unit = {},
+    viewModel: RootViewModel = hiltViewModel(),
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -201,6 +213,15 @@ private fun ConnectedApp(viewModel: RootViewModel = hiltViewModel()) {
         (primary + destinations.filterNot { it.primary }).take(5)
     } else {
         destinations
+    }
+
+    // A widget tap names both a page and the server it was watching, so the app lands on what the
+    // widget was actually showing rather than on whatever was last selected.
+    LaunchedEffect(widgetDestination, widgetServerId) {
+        val route = widgetDestination ?: return@LaunchedEffect
+        if (widgetServerId != null) viewModel.switchServer(widgetServerId.takeIf { it.isNotEmpty() })
+        TmDestination.entries.firstOrNull { it.route == route }?.let(goTo)
+        onWidgetTargetHandled()
     }
 
     LaunchedEffect(destinations, currentDestination?.route) {

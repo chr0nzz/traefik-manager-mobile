@@ -2,4 +2,8 @@
 <resources>
     <string name="app_name">Traefik Manager</string>
     <string name="widget_description">Traefik router and service status</string>
+    <string name="widget_config_title">Widget setup</string>
+    <string name="widget_small_label">2×2 · one card</string>
+    <string name="widget_wide_label">4×2 · two cards</string>
+    <string name="widget_large_label">4×4 · four cards</string>
 </resources>

@@ -64,4 +64,16 @@ class ApiProvider @Inject constructor(
         state.first { it is ApiState.Ready } as ApiState.Ready
 
     suspend fun api(): TmApi = ready().api
+
+    /**
+     * A client aimed at one particular server, whatever the app has selected. The widgets need
+     * this: a home screen can hold one widget watching the host and another watching an agent,
+     * and neither should move when the app switches.
+     */
+    suspend fun apiFor(agentId: String?): TmApi {
+        val ready = ready()
+        if (ready.demo) return ready.api
+        if (agentId == ready.agentId) return ready.api
+        return factory.create(ready.baseUrl, ready.apiKey, agentId)
+    }
 }
