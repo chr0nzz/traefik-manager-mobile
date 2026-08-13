@@ -23,6 +23,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import dev.chr0nzz.traefikmanager.R
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,11 +57,21 @@ fun ServerSwitcherHeader(
     val hasAgents = servers.size > 1
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Traefik Manager",
-            style = MaterialTheme.typography.titleMedium,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
             modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 18.dp),
-        )
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_tm_logo),
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+            )
+            Text(
+                text = "Traefik Manager",
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
