@@ -1,5 +1,5 @@
 
-<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/mobile-banner.png" alt="Traefik Manager">
+<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/banner.png" alt="Traefik Manager">
 
 # Traefik Manager Mobile
 
