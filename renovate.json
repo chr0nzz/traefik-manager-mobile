@@ -1,0 +1,73 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "baseBranchPatterns": ["main"],
+  "labels": ["dependencies"],
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "matchManagers": ["gradle-wrapper"],
+      "groupName": "Gradle wrapper"
+    },
+    {
+      "matchPackageNames": [
+        "org.jetbrains.kotlin{/,}**",
+        "com.google.devtools.ksp{/,}**"
+      ],
+      "groupName": "Kotlin and KSP",
+      "description": "KSP tracks Kotlin releases, so these are raised together to avoid a build that compiles with one and fails on the other."
+    },
+    {
+      "matchPackageNames": [
+        "com.android.application",
+        "com.android.library",
+        "com.android.tools.build{/,}**"
+      ],
+      "groupName": "Android Gradle Plugin",
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["androidx.compose{/,}**"],
+      "groupName": "Compose"
+    },
+    {
+      "matchPackageNames": ["androidx{/,}**", "!androidx.compose{/,}**"],
+      "groupName": "AndroidX"
+    },
+    {
+      "matchPackageNames": [
+        "com.squareup.retrofit2{/,}**",
+        "com.squareup.okhttp3{/,}**"
+      ],
+      "groupName": "Retrofit and OkHttp"
+    },
+    {
+      "matchPackageNames": ["com.google.dagger{/,}**"],
+      "groupName": "Hilt"
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchCurrentVersion": "/-(alpha|beta|rc)/",
+      "enabled": false,
+      "description": "material3 and glance are pinned to pre-release builds on purpose. Bump those by hand rather than chasing the track."
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["dependencies", "security"],
+    "schedule": ["at any time"],
+    "dependencyDashboardApproval": false
+  },
+  "osvVulnerabilityAlerts": true
+}
