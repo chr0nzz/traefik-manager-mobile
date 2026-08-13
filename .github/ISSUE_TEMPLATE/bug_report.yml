@@ -1,0 +1,109 @@
+name: Bug Report
+description: Report something that isn't working correctly in the app
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting, please check [existing issues](https://github.com/chr0nzz/traefik-manager-mobile/issues) to avoid duplicates.
+        For security vulnerabilities, use [private reporting](https://github.com/chr0nzz/traefik-manager-mobile/security/advisories/new) instead.
+
+        If the problem is with Traefik Manager itself rather than the app, open it on the [server repo](https://github.com/chr0nzz/traefik-manager/issues).
+
+  - type: input
+    id: app_version
+    attributes:
+      label: App version
+      description: Settings - About, or the Play Store listing.
+      placeholder: "e.g. 2.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install_source
+    attributes:
+      label: Where did you install it from?
+      options:
+        - Google Play
+        - APK from GitHub releases
+        - Built from source
+    validations:
+      required: true
+
+  - type: input
+    id: server_version
+    attributes:
+      label: Traefik Manager version
+      description: The server the app connects to. Settings - About in the web UI.
+      placeholder: "e.g. v1.10.1"
+    validations:
+      required: true
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version and device
+      placeholder: "e.g. Android 15, Pixel 8"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: form_factor
+    attributes:
+      label: Form factor
+      options:
+        - Phone
+        - Tablet
+        - Foldable
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: How does the app reach your server?
+      description: Helps rule out network and certificate problems.
+      options:
+        - Public HTTPS domain
+        - Local IP over HTTP
+        - VPN (WireGuard, Tailscale, etc.)
+        - Self-signed or private CA certificate
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Tap...
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, crash traces or screenshots
+      description: |
+        Screenshots or a screen recording help a lot. For a crash, `adb logcat` output is ideal.
+        Redact your API key, hostnames and any IP you would rather not publish.
+      render: shell

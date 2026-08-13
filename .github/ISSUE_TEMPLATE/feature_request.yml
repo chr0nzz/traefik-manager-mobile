@@ -1,0 +1,64 @@
+name: Feature Request
+description: Suggest an idea or improvement for the app
+labels: ["feature request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check [existing issues](https://github.com/chr0nzz/traefik-manager-mobile/issues) first - your idea may already be tracked.
+
+        If the feature belongs in Traefik Manager itself rather than the app, open it on the [server repo](https://github.com/chr0nzz/traefik-manager/issues).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation or workflow that's painful or missing.
+      placeholder: "e.g. When I'm away from my desk I often need to... but currently I have to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would you like to see? Be as specific as you can.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Any other approaches or workarounds you've tried.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this relate to?
+      options:
+        - Overview / home
+        - Routes
+        - Middlewares
+        - Services
+        - Logs
+        - CrowdSec
+        - Certificates
+        - Plugins
+        - Backups
+        - Multi-server / agents
+        - Widgets
+        - Notifications
+        - App lock / biometrics
+        - Theme and layout
+        - Tablet layout
+        - Setup and connection
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, mockups, or links that help explain the request.

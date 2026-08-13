@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/chr0nzz/traefik-manager-mobile/security/advisories/new
+    about: Please report security issues privately using GitHub's vulnerability reporting.
+  - name: Traefik Manager (server) issues
+    url: https://github.com/chr0nzz/traefik-manager/issues
+    about: For bugs in the server itself rather than the Android app.
+  - name: Documentation
+    url: https://traefik-manager.xyzlab.dev/mobile.html
+    about: Check the docs before opening an issue - your question may already be answered.
