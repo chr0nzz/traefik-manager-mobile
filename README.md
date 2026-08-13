@@ -1,5 +1,5 @@
 
-<img src="https://github.com/chr0nzz/traefik-manager/raw/main/docs/public/images/banner.png" alt="Traefik Manager">
+<img src=".github/assets/banner.png" alt="Traefik Manager">
 
 # Traefik Manager Mobile
 
@@ -23,8 +23,8 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://traefik-manager.xyzlab.dev/images/mobile-dark.gif">
-  <img src="https://traefik-manager.xyzlab.dev/images/mobile-light.gif" alt="Traefik Manager Mobile on a phone" width="300" />
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/mobile-dark.gif">
+  <img src=".github/assets/mobile-light.gif" alt="Traefik Manager Mobile on a phone" width="300" />
 </picture>
 
 <sub>Overview · Routes · Middlewares · Services · Logs · CrowdSec · Certificates · Plugins · Backups · Settings</sub>
@@ -32,8 +32,8 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 <br /><br />
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://traefik-manager.xyzlab.dev/images/tablet-dark.gif">
-  <img src="https://traefik-manager.xyzlab.dev/images/tablet-light.gif" alt="Traefik Manager Mobile on a tablet" width="560" />
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/tablet-dark.gif">
+  <img src=".github/assets/tablet-light.gif" alt="Traefik Manager Mobile on a tablet" width="560" />
 </picture>
 
 <sub>The tablet layout swaps the bottom tab bar for a side rail and lays the cards out in two columns.</sub>
