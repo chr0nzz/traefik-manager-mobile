@@ -20,20 +20,28 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 
 ## Screenshots
 
-<!-- Placeholder: these are still v1 shots. Retake against 2.0 before release. -->
 <div align="center">
-  <img src="https://traefik-manager.xyzlab.dev/images/dark-mobile-connect.png"       alt="Connect"     width="130" />
-  <img src="https://traefik-manager.xyzlab.dev/images/dark-mobile-dashboard.png"     alt="Overview"    width="130" />
-  <img src="https://traefik-manager.xyzlab.dev/images/dark-mobile-routes.png"        alt="Routes"      width="130" />
-  <img src="https://traefik-manager.xyzlab.dev/images/dark-mobile-middleware.png"    alt="Middlewares"  width="130" />
-  <img src="https://traefik-manager.xyzlab.dev/images/dark-mobile-services-live.png" alt="Services"    width="130" />
-  <img src="https://traefik-manager.xyzlab.dev/images/dark-mobile-settings.png"      alt="Settings"    width="130" />
-</div>
-<div align="center">
-  <sub>Connect &nbsp;·&nbsp; Overview &nbsp;·&nbsp; Routes &nbsp;·&nbsp; Middlewares &nbsp;·&nbsp; Services &nbsp;·&nbsp; Settings</sub>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://traefik-manager.xyzlab.dev/images/mobile-dark.gif">
+  <img src="https://traefik-manager.xyzlab.dev/images/mobile-light.gif" alt="Traefik Manager Mobile on a phone" width="300" />
+</picture>
 
-[View light & dark screenshots in the docs](https://traefik-manager.xyzlab.dev/ui-examples.html)
+<sub>Overview · Routes · Middlewares · Services · Logs · CrowdSec · Certificates · Plugins · Backups · Settings</sub>
+
+<br /><br />
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://traefik-manager.xyzlab.dev/images/tablet-dark.gif">
+  <img src="https://traefik-manager.xyzlab.dev/images/tablet-light.gif" alt="Traefik Manager Mobile on a tablet" width="560" />
+</picture>
+
+<sub>The tablet layout swaps the bottom tab bar for a side rail and lays the cards out in two columns.</sub>
+
+<br /><br />
+
+[Browse every screen in the docs](https://traefik-manager.xyzlab.dev/ui-examples.html)
+
 </div>
 
 
