@@ -110,11 +110,6 @@ keyAlias=...
 keyPassword=...
 ```
 
-Without that file the release build still compiles, unsigned. CI signs from repository secrets
-(`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`)
-and refuses to publish anything signed with the wrong certificate, since a mismatch would break
-in-place upgrades for everyone who already has the app.
-
 ---
 
 ## Tech Stack
@@ -125,7 +120,3 @@ in-place upgrades for everyone who already has the app.
 - [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) with an encrypted key store
 - [Glance](https://developer.android.com/jetpack/androidx/releases/glance) and WorkManager for the widgets
 - Robolectric and JUnit for tests, R8 with resource shrinking for release builds
-
-> Material 3 is pinned to an alpha for the Expressive components. It is re-checked each release;
-> the screenshot tests are the regression net, and the pin can be dropped back to the last stable
-> if an alpha regresses.
