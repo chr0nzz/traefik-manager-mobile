@@ -286,6 +286,42 @@ object LogParser {
 
     fun providerOf(name: String): String = name.substringAfter('@', "")
 
+    /**
+     * Which side of the internet an address sits on, matching the web's classifyIp
+     * (core.js:843). A log full of private addresses usually means the real client IP is
+     * arriving in a header the proxy is not forwarding.
+     */
+    fun ipClass(ip: String): String {
+        val raw = ip.trim()
+        if (raw.isEmpty()) return "unknown"
+        val v4 = V4.matchEntire(raw)
+        if (v4 != null) {
+            val octets = v4.groupValues.drop(1).map { it.toIntOrNull() ?: 256 }
+            if (octets.any { it > 255 }) return "unknown"
+            val (a, b) = octets
+            return when {
+                a == 127 -> "loopback"
+                a == 169 && b == 254 -> "link-local"
+                a == 10 -> "private"
+                a == 172 && b in 16..31 -> "private"
+                a == 192 && b == 168 -> "private"
+                a == 100 && b in 64..127 -> "cgnat"
+                else -> "public"
+            }
+        }
+        val v6 = raw.removePrefix("[").removeSuffix("]").substringBefore('%').lowercase()
+        if (!v6.contains(':')) return "unknown"
+        return when {
+            v6 == "::1" -> "loopback"
+            v6.startsWith("fe80") -> "link-local"
+            v6.startsWith("fc") || v6.startsWith("fd") -> "private"
+            v6.startsWith("::ffff:") && v6.substring(7).contains('.') -> ipClass(v6.substring(7))
+            else -> "public"
+        }
+    }
+
+    private val V4 = Regex("""^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$""")
+
     fun shortName(name: String): String = name.substringBefore('@')
 
     fun formatCount(value: Int): String = String.format(Locale.US, "%,d", value)

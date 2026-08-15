@@ -72,10 +72,16 @@ fun RoutesScreen(
     onCreateRoute: () -> Unit = {},
     onEditRoute: (String) -> Unit,
     onEditYaml: (String) -> Unit = {},
+    initialStatus: String? = null,
+    initialProto: String? = null,
     modifier: Modifier = Modifier,
     viewModel: RoutesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialStatus, initialProto) {
+        viewModel.applyDeepLink(initialStatus, initialProto)
+    }
     val paneDirective = tmPaneScaffoldDirective()
     val navigator = rememberListDetailPaneScaffoldNavigator<String>(scaffoldDirective = paneDirective)
     val twoPanes = paneDirective.maxHorizontalPartitions > 1

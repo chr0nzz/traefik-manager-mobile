@@ -150,8 +150,8 @@ private fun ConnectedApp(
         if (drawerState.isOpen) viewModel.loadServers()
     }
 
-    val goTo: (TmDestination) -> Unit = { destination ->
-        navController.navigate(destination.route) {
+    val goTo: (TmDestination, String?) -> Unit = { destination, query ->
+        navController.navigate(destination.route + query?.let { "?$it" }.orEmpty()) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
             launchSingleTop = true
             restoreState = true
@@ -194,10 +194,10 @@ private fun ConnectedApp(
                         label = { Text(destination.label) },
                         icon = { Icon(destination.icon, contentDescription = null) },
                         badge = drawerBadge(badge),
-                        selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
+                        selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
                         onClick = {
                             scope.launch { drawerState.close() }
-                            goTo(destination)
+                            goTo(destination, null)
                         },
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
@@ -220,14 +220,14 @@ private fun ConnectedApp(
     LaunchedEffect(widgetDestination, widgetServerId) {
         val route = widgetDestination ?: return@LaunchedEffect
         if (widgetServerId != null) viewModel.switchServer(widgetServerId.takeIf { it.isNotEmpty() })
-        TmDestination.entries.firstOrNull { it.route == route }?.let(goTo)
+        TmDestination.entries.firstOrNull { it.route == route }?.let { goTo(it, null) }
         onWidgetTargetHandled()
     }
 
     LaunchedEffect(destinations, currentDestination?.route) {
         val route = currentDestination?.route ?: return@LaunchedEffect
         val known = TmDestination.entries.firstOrNull { it.route == route } ?: return@LaunchedEffect
-        if (known !in destinations) goTo(TmDestination.Home)
+        if (known !in destinations) goTo(TmDestination.Home, null)
     }
 
     NavigationSuiteScaffold(
@@ -237,8 +237,8 @@ private fun ConnectedApp(
         navigationItems = {
             suiteDestinations.forEach { destination ->
                 NavigationSuiteItem(
-                    selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true,
-                    onClick = { goTo(destination) },
+                    selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
+                    onClick = { goTo(destination, null) },
                     icon = { Icon(destination.icon, contentDescription = null) },
                     label = { Text(destination.label) },
                     navigationSuiteType = suiteType,
@@ -259,13 +259,31 @@ private fun ConnectedApp(
         ) {
             composable(TmDestination.Home.route) {
                 DashboardScreen(
-                    onOpenRoutes = { goTo(TmDestination.Routes) },
+                    onOpenRoutes = { status, proto ->
+                        val query = listOfNotNull(
+                            status?.let { "status=$it" },
+                            proto?.let { "proto=$it" },
+                        ).joinToString("&")
+                        goTo(TmDestination.Routes, query.ifEmpty { null })
+                    },
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                     onOpenNotifications = { navController.navigate(SettingsRoutes.NOTIFICATION_HISTORY) },
+                    onOpenServices = { status ->
+                        goTo(TmDestination.Services, status?.let { "status=$it" })
+                    },
+                    onOpenMiddlewares = { goTo(TmDestination.Middlewares, null) },
                 )
             }
-            composable(TmDestination.Routes.route) {
+            composable(
+                route = "${TmDestination.Routes.route}?status={status}&proto={proto}",
+                arguments = listOf(
+                    navArgument("status") { nullable = true; defaultValue = null },
+                    navArgument("proto") { nullable = true; defaultValue = null },
+                ),
+            ) { entry ->
                 RoutesScreen(
+                    initialStatus = entry.arguments?.getString("status"),
+                    initialProto = entry.arguments?.getString("proto"),
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                     onCreateRoute = { navController.navigate(ROUTE_FORM) },
                     onEditRoute = { routeId ->
@@ -329,9 +347,13 @@ private fun ConnectedApp(
             composable(MW_TEMPLATES) {
                 MiddlewareTemplatesScreen(onClose = { navController.popBackStack() })
             }
-            composable(TmDestination.Services.route) {
+            composable(
+                route = "${TmDestination.Services.route}?status={status}",
+                arguments = listOf(navArgument("status") { nullable = true; defaultValue = null }),
+            ) { entry ->
                 ServicesScreen(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
+                    initialStatus = entry.arguments?.getString("status"),
                 )
             }
             composable(TmDestination.Certificates.route) {

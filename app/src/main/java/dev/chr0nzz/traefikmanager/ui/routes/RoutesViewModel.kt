@@ -92,6 +92,26 @@ class RoutesViewModel @Inject constructor(
 
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
+    /** Arriving from an Overview card, already filtered to whatever the card was reporting. */
+    fun applyDeepLink(status: String?, proto: String?) {
+        if (status == null && proto == null) return
+        _state.update { current ->
+            current.copy(
+                status = when (status) {
+                    "disabled" -> StatusFilter.Inactive
+                    "enabled" -> StatusFilter.Active
+                    else -> current.status
+                },
+                protocol = when (proto) {
+                    "http" -> ProtocolFilter.Http
+                    "tcp" -> ProtocolFilter.Tcp
+                    "udp" -> ProtocolFilter.Udp
+                    else -> current.protocol
+                },
+            )
+        }
+    }
+
     fun onProtocolChange(value: ProtocolFilter) = _state.update { it.copy(protocol = value) }
 
     fun onStatusChange(value: StatusFilter) = _state.update { it.copy(status = value) }

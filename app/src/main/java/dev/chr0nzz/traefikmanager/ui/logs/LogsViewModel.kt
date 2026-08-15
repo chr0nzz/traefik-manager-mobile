@@ -37,7 +37,11 @@ enum class LogFacet(val key: String) {
     Domain("domain"),
     Path("path"),
     Ip("ip"),
+    /** Public, private, CGNAT and the rest: the web's ipclass facet. */
+    IpClass("ipclass"),
     Service("service"),
+    Router("router"),
+    Provider("provider"),
     Duration("dur"),
 }
 
@@ -132,7 +136,10 @@ object LogFacets {
         LogFacet.Domain -> entry.domain == value
         LogFacet.Path -> if (value.startsWith("~")) entry.pattern == value.drop(1) else entry.path == value
         LogFacet.Ip -> entry.ip == value
-        LogFacet.Service -> entry.service.ifEmpty { entry.router } == value
+        LogFacet.IpClass -> LogParser.ipClass(entry.ip) == value
+        LogFacet.Service -> entry.service == value
+        LogFacet.Router -> entry.router == value
+        LogFacet.Provider -> LogParser.providerOf(entry.service.ifEmpty { entry.router }) == value
         LogFacet.Duration -> when {
             entry.durMs == null -> false
             value == "held" -> entry.heldOpen
@@ -149,7 +156,7 @@ object LogFacets {
 
     fun label(facet: LogFacet, value: String): String = when (facet) {
         LogFacet.Path -> value.removePrefix("~")
-        LogFacet.Service -> LogParser.shortName(value)
+        LogFacet.Service, LogFacet.Router -> LogParser.shortName(value)
         else -> value
     }
 }

@@ -189,12 +189,15 @@ fun CountChip(
     status: TmStatus,
     modifier: Modifier = Modifier,
     showLabel: Boolean = true,
+    /** Set when the chip stands for a filter you can open. */
+    onClick: (() -> Unit)? = null,
 ) {
     val color = statusColor(status)
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(TmRadius.sm))
             .background(color.copy(alpha = 0.12f))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = TmSpacing.sm, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
         verticalAlignment = Alignment.CenterVertically,

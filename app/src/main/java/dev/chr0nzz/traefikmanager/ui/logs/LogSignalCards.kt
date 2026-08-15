@@ -30,6 +30,8 @@ import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.SyncAlt
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Router
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.Icon
@@ -37,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -373,6 +376,30 @@ fun LogSignalCards(
                     .fillMaxHeight(),
             ) {
                 RankedRows(window.clients, LogFacet.Ip, facets, onFacet, limit = 3, noun = "clients")
+                val byClass = remember(window.clients) {
+                    window.clients
+                        .groupBy { LogParser.ipClass(it.key) }
+                        .map { (kind, rows) -> kind to rows.sumOf { row -> row.count } }
+                        .sortedByDescending { it.second }
+                        .take(4)
+                }
+                if (byClass.size > 1) {
+                    CardDivider(modifier = Modifier.padding(vertical = TmSpacing.xs))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        byClass.forEach { (kind, count) ->
+                            Counter(
+                                label = ipClassLabel(kind),
+                                count = count,
+                                icon = if (kind == "public") Icons.Outlined.Public else Icons.Outlined.Router,
+                                color = palette.muted,
+                                active = facets[LogFacet.IpClass] == kind,
+                            ) { onFacet(LogFacet.IpClass, kind) }
+                        }
+                    }
+                }
             }
 
             DeskCard(
@@ -405,7 +432,13 @@ fun LogSignalCards(
                         .groupBy { LogParser.providerOf(it.key) }
                         .filterKeys { it.isNotEmpty() }
                     providers.forEach { (provider, rows) ->
-                        Counter(provider, rows.sumOf { it.count }, Icons.Outlined.Dns, palette.muted, false, null)
+                        Counter(
+                            label = provider,
+                            count = rows.sumOf { it.count },
+                            icon = Icons.Outlined.Dns,
+                            color = palette.muted,
+                            active = facets[LogFacet.Provider] == provider,
+                        ) { onFacet(LogFacet.Provider, provider) }
                     }
                 },
             ) {
@@ -785,4 +818,14 @@ private fun RankedRows(
             )
         }
     }
+}
+
+/** The web's wording for each address class (core.js:868). */
+private fun ipClassLabel(kind: String): String = when (kind) {
+    "public" -> "Public"
+    "private" -> "Private"
+    "cgnat" -> "CGNAT"
+    "loopback" -> "Loopback"
+    "link-local" -> "Link-local"
+    else -> "Unknown"
 }

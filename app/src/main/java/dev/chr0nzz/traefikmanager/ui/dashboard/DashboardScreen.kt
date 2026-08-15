@@ -77,6 +77,7 @@ import dev.chr0nzz.traefikmanager.data.repo.EntrypointRow
 import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
 import dev.chr0nzz.traefikmanager.data.repo.RuntimeInfo
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
+import dev.chr0nzz.traefikmanager.data.repo.SignalFlag
 import dev.chr0nzz.traefikmanager.data.repo.Verdict
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.CountChip
@@ -99,7 +100,9 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DashboardScreen(
-    onOpenRoutes: () -> Unit,
+    onOpenRoutes: (status: String?, proto: String?) -> Unit,
+    onOpenServices: (status: String?) -> Unit = {},
+    onOpenMiddlewares: () -> Unit = {},
     onOpenDrawer: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -218,7 +221,7 @@ fun DashboardScreen(
                                 pair.forEach { card ->
                                     SignalCardView(
                                         card = card,
-                                        onClick = onOpenRoutes,
+                                        onOpen = { flag -> openCard(card, flag, onOpenRoutes, onOpenServices, onOpenMiddlewares) },
                                         compact = compact,
                                         modifier = Modifier
                                             .weight(1f)
@@ -271,10 +274,11 @@ private fun VerdictLine(verdict: Verdict) {
 @Composable
 private fun SignalCardView(
     card: SignalCard,
-    onClick: () -> Unit,
+    onOpen: (SignalFlag?) -> Unit,
     compact: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val onClick = { onOpen(null) }
     val palette = LocalTmPalette.current
     val (icon, tint) = when (card.key) {
         "http" -> Icons.Outlined.AltRoute to palette.blue
@@ -321,6 +325,8 @@ private fun SignalCardView(
                             label = flag.label,
                             status = flag.status,
                             showLabel = !compact,
+                            // The web opens the matching list already filtered to this flag.
+                            onClick = { onOpen(flag) },
                         )
                     }
                 }
@@ -488,5 +494,32 @@ private fun EntrypointRowView(row: EntrypointRow) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(start = 46.dp, top = 2.dp),
         )
+    }
+}
+
+/**
+ * Where a card sends you. The web opens the list the card counts, filtered to whatever the
+ * chip you pressed was reporting (dashboard.js:513-516, 772-774) - not always the route list.
+ */
+private fun openCard(
+    card: SignalCard,
+    flag: SignalFlag?,
+    onOpenRoutes: (String?, String?) -> Unit,
+    onOpenServices: (String?) -> Unit,
+    onOpenMiddlewares: () -> Unit,
+) {
+    val disabled = flag?.status == TmStatus.Error
+    when (card.key) {
+        "services" -> onOpenServices(
+            when {
+                flag == null -> null
+                disabled -> "error"
+                flag.status == TmStatus.Warn -> "warning"
+                else -> null
+            },
+        )
+        "middlewares" -> onOpenMiddlewares()
+        "stream" -> onOpenRoutes(if (disabled) "disabled" else null, null)
+        else -> onOpenRoutes(if (disabled) "disabled" else null, "http")
     }
 }
