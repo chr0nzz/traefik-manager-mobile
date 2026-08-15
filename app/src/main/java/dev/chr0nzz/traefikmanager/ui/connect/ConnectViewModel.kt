@@ -63,7 +63,7 @@ class ConnectViewModel @Inject constructor(
                     }
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(connecting = false, error = describe(throwable)) }
+                    _state.update { it.copy(connecting = false, error = describe(throwable, key.isNotEmpty())) }
                 },
             )
         }
@@ -73,10 +73,9 @@ class ConnectViewModel @Inject constructor(
         viewModelScope.launch { connectionStore.enterDemo() }
     }
 
-    private fun describe(throwable: Throwable): String = when (throwable) {
+    private fun describe(throwable: Throwable, keyProvided: Boolean): String = when (throwable) {
         is HttpException -> when (throwable.code()) {
-            401 -> "Invalid API key"
-            302, 303, 307, 308 -> "This server requires an API key"
+            401 -> if (keyProvided) "Invalid API key" else "This server requires an API key"
             else -> "Server error ${throwable.code()}"
         }
         is IOException -> "Could not reach the server. Check the URL, your network, and that the certificate is trusted."
