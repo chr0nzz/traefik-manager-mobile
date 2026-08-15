@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -21,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
@@ -83,6 +86,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
@@ -96,6 +100,7 @@ import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
 import androidx.compose.ui.graphics.vector.ImageVector
+import dev.chr0nzz.traefikmanager.data.model.CsFacet
 import dev.chr0nzz.traefikmanager.data.model.CsRanked
 import dev.chr0nzz.traefikmanager.data.model.LogParser
 import dev.chr0nzz.traefikmanager.ui.components.CountryStrip
@@ -111,6 +116,7 @@ import dev.chr0nzz.traefikmanager.ui.components.SignalChip
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
+import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
 
@@ -270,6 +276,8 @@ fun CrowdSecScreen(
                     onViewChange = viewModel::onViewChange,
                     onCountryClick = viewModel::onCountryChange,
                     onScenarioClick = viewModel::onScenarioChange,
+                    onFacet = viewModel::toggleFacet,
+                    onRemoveFacet = viewModel::removeFacet,
                     onClearFilters = viewModel::clearFilters,
                     onBan = { ip ->
                         addSheetFor = ip
@@ -288,6 +296,8 @@ private fun CrowdSecBody(
     onViewChange: (CrowdSecView) -> Unit,
     onCountryClick: (String) -> Unit,
     onScenarioClick: (String) -> Unit,
+    onFacet: (CsFacet, String) -> Unit,
+    onRemoveFacet: (CsFacet) -> Unit,
     onClearFilters: () -> Unit,
     onBan: (String) -> Unit,
     onDelete: (CsDecision) -> Unit,
@@ -295,7 +305,8 @@ private fun CrowdSecBody(
     val palette = LocalTmPalette.current
     val wide = currentWindowAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
-    val alerts = state.alerts
+    // The cards rank the filtered window, the way the web feeds them sel.alerts (crowdsec.js:1484).
+    val alerts = state.visibleAlerts
     val banned = state.snapshot.bannedIps
     val sources = remember(alerts, banned) { CrowdSecAnalytics.sources(alerts, banned) }
     val networks = remember(alerts, banned) { CrowdSecAnalytics.networks(alerts, banned) }
@@ -328,25 +339,7 @@ private fun CrowdSecBody(
         item { CrowdSecWindowRow(state = state, span = span) }
 
         if (state.filtersActive) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = buildString {
-                            state.country?.let { append("${Countries.flag(it)} ${Countries.name(it)}  ") }
-                            state.scenario?.let { append(it) }
-                        }.ifBlank { "filtered" },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.blue,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = "Clear filters",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.blue,
-                        modifier = Modifier.clickable { onClearFilters() },
-                    )
-                }
-            }
+            item { FilterBar(state = state, onRemove = onRemoveFacet, onClear = onClearFilters) }
         }
 
         item {
@@ -387,8 +380,13 @@ private fun CrowdSecBody(
                                     Icons.Outlined.LockOpen,
                                     "${LogParser.formatCount(loose.size)} loose",
                                     if (loose.any { it.count > 1 }) palette.red else palette.yellow,
+                                    onClick = { onFacet(CsFacet.Outcome, "loose") },
                                 ),
-                                SignalChip(Icons.Outlined.Block, "${LogParser.formatCount(bannedSources)} banned"),
+                                SignalChip(
+                                    Icons.Outlined.Block,
+                                    "${LogParser.formatCount(bannedSources)} banned",
+                                    onClick = { onFacet(CsFacet.Outcome, "banned") },
+                                ),
                             )
                             sources.isEmpty() -> emptyList()
                             else -> listOf(SignalChip(Icons.Outlined.CheckCircle, "every source banned", palette.green))
@@ -423,6 +421,7 @@ private fun CrowdSecBody(
                         accent = palette.purple,
                         glyph = Icons.Outlined.Public,
                         rows = networks,
+                        onRowClick = { onFacet(CsFacet.Asn, it) },
                         blind = !state.alertsOk,
                         blindReason = "AS names ride on alert.source",
                         emptyReason = "this agent reports ip only",
@@ -476,6 +475,7 @@ private fun CrowdSecBody(
                         accent = palette.blue,
                         glyph = Icons.Outlined.MyLocation,
                         rows = targeting,
+                        onRowClick = { onFacet(if (onPaths) CsFacet.Uri else CsFacet.User, it) },
                         blind = !state.alertsOk,
                         blindReason = if (onPaths) "paths live in alert.meta[]" else "accounts live in alert.meta[]",
                         emptyReason = "no meta reported",
@@ -505,6 +505,7 @@ private fun CrowdSecBody(
                         accent = palette.teal,
                         glyph = Icons.Outlined.SmartToy,
                         rows = tooling,
+                        onRowClick = { onFacet(CsFacet.Agent, it) },
                         blind = !state.alertsOk,
                         blindReason = "user agents live in alert.meta[]",
                         emptyReason = "no HTTP scenario fired here",
@@ -544,6 +545,7 @@ private fun CrowdSecBody(
                                 SignalChip(
                                     Icons.Outlined.Block,
                                     "${LogParser.formatCount(state.decisions.size)} ban",
+                                    onClick = { onFacet(CsFacet.Type, "ban") },
                                 ),
                             )
                         } else {
@@ -551,6 +553,7 @@ private fun CrowdSecBody(
                         },
                         footer = origins.map { origin ->
                             SignalChip(
+                                onClick = { onFacet(CsFacet.Origin, origin.origin) },
                                 icon = when (origin.origin) {
                                     "crowdsec" -> Icons.Outlined.GpsFixed
                                     "cscli" -> Icons.Outlined.Code
@@ -649,6 +652,8 @@ private fun CrowdSecBody(
                     handled = state.snapshot.handled(alert),
                     decisionsOk = state.decisionsOk,
                     onBan = { onBan(alert.ip) },
+                    onFilterIp = { onFacet(CsFacet.Ip, alert.ip) },
+                    onFilterScenario = { onFacet(CsFacet.Scenario, alert.scenarioName) },
                 )
             }
             if (state.visibleAlerts.isEmpty()) {
@@ -764,6 +769,8 @@ private fun AlertRow(
     handled: Boolean,
     decisionsOk: Boolean,
     onBan: () -> Unit,
+    onFilterIp: () -> Unit = {},
+    onFilterScenario: () -> Unit = {},
 ) {
     val palette = LocalTmPalette.current
 
@@ -782,6 +789,10 @@ private fun AlertRow(
                             fontWeight = FontWeight.Bold,
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .clickable { onFilterIp() }
+                            .padding(horizontal = 2.dp),
                     )
                     Text(
                         text = LogParser.shortName(alert.scenarioName.substringAfter('/')),
@@ -789,6 +800,10 @@ private fun AlertRow(
                         color = palette.muted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .clickable { onFilterScenario() }
+                            .padding(horizontal = 2.dp),
                     )
                 }
                 Text(
@@ -1155,4 +1170,87 @@ private fun packRows(cards: List<DeskCard>, columns: Int): List<List<DeskCard>> 
     }
     if (row.isNotEmpty()) rows += row
     return rows
+}
+
+/**
+ * What the desk is filtered by right now: one chip per facet, each removable on its own, the way
+ * the web's window row carries them. Every chip applies together.
+ */
+@Composable
+private fun FilterBar(
+    state: CrowdSecUiState,
+    onRemove: (CsFacet) -> Unit,
+    onClear: () -> Unit,
+) {
+    val palette = LocalTmPalette.current
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            SectionLabel("Filtered by", modifier = Modifier.weight(1f))
+            Text(
+                text = "Clear all",
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.blue,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable { onClear() }
+                    .padding(horizontal = TmSpacing.xs, vertical = 2.dp),
+            )
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+            verticalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+            modifier = Modifier.padding(top = TmSpacing.xs),
+        ) {
+            state.facets.active.forEach { (facet, value) ->
+                FacetChip(
+                    label = facet.label,
+                    value = if (facet == CsFacet.Country) {
+                        "${Countries.flag(value)} ${Countries.name(value)}"
+                    } else {
+                        value
+                    },
+                    onRemove = { onRemove(facet) },
+                )
+            }
+            if (state.query.isNotEmpty()) {
+                FacetChip(label = "search", value = state.query, onRemove = null)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FacetChip(label: String, value: String, onRemove: (() -> Unit)?) {
+    val palette = LocalTmPalette.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(TmRadius.sm))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .then(if (onRemove != null) Modifier.clickable { onRemove() } else Modifier)
+            .padding(horizontal = TmSpacing.sm, vertical = 3.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = palette.muted,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = 160.dp),
+        )
+        if (onRemove != null) {
+            Icon(
+                imageVector = Icons.Outlined.Close,
+                contentDescription = "Remove the $label filter",
+                tint = palette.muted,
+                modifier = Modifier.size(12.dp),
+            )
+        }
+    }
 }

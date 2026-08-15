@@ -186,11 +186,20 @@ object CrowdSecAnalytics {
     fun sources(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
         rank(alerts, banned) { listOf(it.ip) }
 
+    /**
+     * Keyed by AS number and labelled with the name, as the web does (crowdsec.js:772): two
+     * networks can share a name, and the number is what a filter has to carry.
+     */
     fun networks(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        // The web flags each network with the country of its first alert (crowdsec.js:766).
-        rank(alerts, banned, extraOf = { rows -> rows.firstOrNull()?.countryCode.orEmpty() }) { alert ->
-            val name = alert.source.asName.ifEmpty { alert.source.asNumber }
-            if (name.isEmpty()) emptyList() else listOf(name)
+        rank(
+            alerts = alerts,
+            banned = banned,
+            // The web flags each network with the country of its first alert (crowdsec.js:766).
+            extraOf = { rows -> rows.firstOrNull()?.countryCode.orEmpty() },
+            labelOf = { key, rows -> rows.firstOrNull()?.source?.asName?.ifEmpty { "AS$key" } ?: "AS$key" },
+        ) { alert ->
+            val number = alert.source.asNumber
+            if (number.isEmpty()) emptyList() else listOf(number)
         }
 
     fun scenarios(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
@@ -215,6 +224,7 @@ object CrowdSecAnalytics {
         alerts: List<CsAlert>,
         banned: Set<String>,
         extraOf: (List<CsAlert>) -> String = { "" },
+        labelOf: (String, List<CsAlert>) -> String = { key, _ -> key },
         keysOf: (CsAlert) -> List<String>,
     ): List<CsRanked> {
         val buckets = mutableMapOf<String, MutableList<CsAlert>>()
@@ -226,7 +236,7 @@ object CrowdSecAnalytics {
         return buckets.map { (key, rows) ->
             CsRanked(
                 key = key,
-                label = key,
+                label = labelOf(key, rows),
                 count = rows.size,
                 weight = rows.sumOf { it.eventsCount },
                 open = rows.count { it.ip !in banned },

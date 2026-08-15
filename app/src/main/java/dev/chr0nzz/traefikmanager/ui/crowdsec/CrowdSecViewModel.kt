@@ -11,6 +11,9 @@ import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import dev.chr0nzz.traefikmanager.data.model.CsReads
+import dev.chr0nzz.traefikmanager.data.model.CsFacets
+import dev.chr0nzz.traefikmanager.data.model.CsFacet
 import dev.chr0nzz.traefikmanager.data.model.CsRead
 import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.CrowdSecRepository
@@ -35,8 +38,7 @@ data class CrowdSecUiState(
     val snapshot: CrowdSecSnapshot = CrowdSecSnapshot(),
     val view: CrowdSecView = CrowdSecView.Evidence,
     val query: String = "",
-    val country: String? = null,
-    val scenario: String? = null,
+    val facets: CsFacets = CsFacets(),
     val countryByIp: Map<String, String> = emptyMap(),
     val geoEnabled: Boolean = false,
     val saving: Boolean = false,
@@ -59,40 +61,63 @@ data class CrowdSecUiState(
     val decisionsError: String?
         get() = (snapshot.decisions as? CsRead.Failed)?.message
 
-    val filtersActive: Boolean get() = country != null || scenario != null || query.isNotEmpty()
+    val filtersActive: Boolean get() = !facets.isEmpty || query.isNotEmpty()
+
+    val country: String? get() = facets[CsFacet.Country]
 
     fun countryOf(alert: CsAlert): String = alert.countryCode.ifEmpty { countryByIp[alert.ip].orEmpty() }
 
+    fun matchesQuery(alert: CsAlert): Boolean {
+        val needle = query.trim().lowercase()
+        if (needle.isEmpty()) return true
+        // The web searches one haystack per alert (crowdsec.js:449).
+        val hay = buildString {
+            append(alert.ip).append(' ')
+            append(alert.scenarioName).append(' ')
+            append(alert.source.asName).append(' ')
+            append(countryOf(alert)).append(' ')
+            append(alert.message).append(' ')
+            append(alert.machineId).append(' ')
+            append(alert.uris.joinToString(" ")).append(' ')
+            append(alert.userAgents.joinToString(" ")).append(' ')
+            append(alert.users.joinToString(" ")).append(' ')
+            append(alert.source.range)
+        }.lowercase()
+        return hay.contains(needle)
+    }
+
+    /** Everything the facets allow, for the alert feed. */
     val visibleAlerts: List<CsAlert>
-        get() {
-            val needle = query.trim().lowercase()
-            return alerts.filter { alert ->
-                val matchesQuery = needle.isEmpty() ||
-                    alert.ip.lowercase().contains(needle) ||
-                    alert.scenarioName.lowercase().contains(needle) ||
-                    alert.source.asName.lowercase().contains(needle) ||
-                    alert.uris.any { it.lowercase().contains(needle) }
-                val matchesCountry = country == null || countryOf(alert) == country
-                val matchesScenario = scenario == null || alert.scenarioName == scenario
-                matchesQuery && matchesCountry && matchesScenario
-            }.sortedByDescending { it.startMillis }
-        }
+        get() = alerts
+            .filter { facets.matches(it, ::countryOf, snapshot::handled) && matchesQuery(it) }
+            .sortedByDescending { it.startMillis }
+
+    /**
+     * The alerts the cards rank. Each card leaves its own facet out, so clicking a row narrows
+     * the rest of the desk without the card collapsing to the single row you just picked.
+     */
+    fun alertsFor(facet: CsFacet): List<CsAlert> = alerts.filter {
+        facets.matches(it, ::countryOf, snapshot::handled, skip = facet) && matchesQuery(it)
+    }
 
     val visibleDecisions: List<CsDecision>
         get() {
             val needle = query.trim().lowercase()
             return decisions.filter { decision ->
-                needle.isEmpty() ||
+                val matchesQuery = needle.isEmpty() ||
                     decision.value.lowercase().contains(needle) ||
                     decision.scenario.lowercase().contains(needle) ||
-                    decision.originKey.contains(needle)
+                    decision.originKey.contains(needle) ||
+                    decision.scope.lowercase().contains(needle) ||
+                    decision.type.lowercase().contains(needle)
+                facets.matches(decision) && matchesQuery
             }.sortedWith(compareByDescending<CsDecision> { it.own }.thenByDescending { it.id })
         }
 
     val countries: List<CountryCount>
         get() {
             val tally = mutableMapOf<String, Int>()
-            alerts.forEach { alert ->
+            alertsFor(CsFacet.Country).forEach { alert ->
                 val code = countryOf(alert)
                 if (code.isNotEmpty()) tally[code] = (tally[code] ?: 0) + 1
             }
@@ -111,6 +136,9 @@ class CrowdSecViewModel @Inject constructor(
     private val geoRepository: GeoRepository,
     private val serverScope: ServerScope,
 ) : ViewModel() {
+
+    /** True while the view was switched by a facet rather than by the user. */
+    private var viewFollowsFacets = false
 
     private val _state = MutableStateFlow(CrowdSecUiState())
     val state: StateFlow<CrowdSecUiState> = _state.asStateFlow()
@@ -154,17 +182,51 @@ class CrowdSecViewModel @Inject constructor(
 
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
-    fun onViewChange(view: CrowdSecView) = _state.update { it.copy(view = view) }
-
-    fun onCountryChange(code: String?) = _state.update {
-        it.copy(country = if (it.country == code) null else code)
+    fun onViewChange(view: CrowdSecView) = _state.update {
+        // An explicit choice sticks; only a facet-driven switch is allowed to bounce back.
+        viewFollowsFacets = false
+        it.copy(view = view)
     }
 
-    fun onScenarioChange(name: String?) = _state.update {
-        it.copy(scenario = if (it.scenario == name) null else name)
+    /**
+     * Clicking a value filters the whole desk by it, and clicking the same value again lets it
+     * go. A facet that only decisions carry moves you to the decisions list, and one that only
+     * alerts carry moves you back, the way the web does it (crowdsec.js:370-381).
+     */
+    fun toggleFacet(facet: CsFacet, value: String) = _state.update { state ->
+        val facets = state.facets.toggle(facet, value)
+        val applied = facets[facet] != null
+        val view = when {
+            !applied -> if (viewFollowsFacets && facets.isEmpty) {
+                viewFollowsFacets = false
+                CrowdSecView.Evidence
+            } else {
+                state.view
+            }
+            facet.reads == CsReads.Decisions && state.view != CrowdSecView.Bans -> {
+                viewFollowsFacets = true
+                CrowdSecView.Bans
+            }
+            facet.reads == CsReads.Alerts && state.view != CrowdSecView.Evidence -> {
+                viewFollowsFacets = true
+                CrowdSecView.Evidence
+            }
+            else -> state.view
+        }
+        state.copy(facets = facets, view = view)
     }
 
-    fun clearFilters() = _state.update { it.copy(country = null, scenario = null) }
+    fun onCountryChange(code: String?) = toggleFacet(CsFacet.Country, code.orEmpty())
+
+    fun onScenarioChange(name: String?) = toggleFacet(CsFacet.Scenario, name.orEmpty())
+
+    fun removeFacet(facet: CsFacet) = _state.update { it.copy(facets = it.facets.without(facet)) }
+
+    fun clearFilters() = _state.update {
+        viewFollowsFacets = false
+        queryState.edit { replace(0, length, "") }
+        it.copy(facets = it.facets.clear())
+    }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 

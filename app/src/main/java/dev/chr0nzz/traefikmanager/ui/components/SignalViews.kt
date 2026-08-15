@@ -28,8 +28,13 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** An icon-and-number chip, the web's sig-flag. */
-data class SignalChip(val icon: ImageVector?, val text: String, val color: Color? = null)
+/** An icon-and-number chip, the web's sig-flag. Clickable when it stands for a filter. */
+data class SignalChip(
+    val icon: ImageVector?,
+    val text: String,
+    val color: Color? = null,
+    val onClick: (() -> Unit)? = null,
+)
 
 @Composable
 fun SignalCard(
@@ -138,6 +143,14 @@ private fun ChipView(chip: SignalChip) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = if (chip.onClick != null) {
+            Modifier
+                .clip(RoundedCornerShape(4.dp))
+                .clickable { chip.onClick.invoke() }
+                .padding(horizontal = 2.dp)
+        } else {
+            Modifier
+        },
     ) {
         if (chip.icon != null) {
             Icon(
