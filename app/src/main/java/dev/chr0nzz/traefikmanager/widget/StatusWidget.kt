@@ -256,9 +256,9 @@ class StatusWidget : GlanceAppWidget() {
         ) {
             Column(modifier = GlanceModifier.fillMaxSize().padding(CARD_PADDING.dp)) {
                 when (panel) {
-                    is Panel.Combined -> CombinedBody(panel.cards, config, stale, fit)
+                    is Panel.Combined -> CombinedBody(panel.cards, config, stale, fit, pages, page)
                     is Panel.Card -> CardBody(panel.card, config, stale, fit, pages, page)
-                    Panel.Overview -> OverviewBody(payload, stale, true, fit)
+                    Panel.Overview -> OverviewBody(payload, config, stale, fit, pages, page)
                     Panel.Loading -> {
                         // Named, so turning to a slot that has not been fetched yet still reads
                         // as this widget rather than an unconfigured one.
@@ -352,9 +352,25 @@ class StatusWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun ColumnScope.OverviewBody(payload: WidgetPayload?, stale: Boolean, showRefresh: Boolean, fit: Fit) {
+    private fun ColumnScope.OverviewBody(
+        payload: WidgetPayload?,
+        config: WidgetConfig,
+        stale: Boolean,
+        fit: Fit,
+        pages: Int = 1,
+        page: Int = 0,
+    ) {
         val rows = payload?.servers.orEmpty()
-        Head("Servers", accentFor("servers"), R.drawable.ic_widget_servers, stale, showRefresh)
+        Head(
+            "Servers",
+            accentFor("servers"),
+            R.drawable.ic_widget_servers,
+            stale,
+            true,
+            config,
+            pages,
+            page,
+        )
         if (rows.isEmpty()) {
             Sub(payload?.note?.ifEmpty { null } ?: "No servers")
             return
@@ -482,10 +498,13 @@ class StatusWidget : GlanceAppWidget() {
         config: WidgetConfig,
         stale: Boolean,
         fit: Fit,
+        pages: Int = 1,
+        page: Int = 0,
     ) {
         val lead = cards.first()
         val rest = cards.drop(1)
-        Head(config.familyTitle, accentFor(lead.key), glyphFor(lead.key), stale, true, config)
+        // The dots belong to the stack, so a combination in a stack has to be told about it too.
+        Head(config.familyTitle, accentFor(lead.key), glyphFor(lead.key), stale, true, config, pages, page)
 
         // A narrow card has no room for two columns, so it falls back to the figures alone.
         if (fit.compact) {
