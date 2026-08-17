@@ -3,7 +3,7 @@
     android:minWidth="110dp"
     android:minHeight="110dp"
     android:minResizeWidth="110dp"
-    android:minResizeHeight="40dp"
+    android:minResizeHeight="100dp"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:targetCellWidth="2"

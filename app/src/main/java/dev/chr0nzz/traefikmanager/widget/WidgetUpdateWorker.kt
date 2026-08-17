@@ -67,11 +67,19 @@ class WidgetUpdateWorker(
                 now - updatedAt >= TimeUnit.MINUTES.toMillis(config.intervalMinutes.toLong())
             if (!due) return@forEach
 
-            val result = runCatching { source.load(config) }
+            // Only the server on screen is fetched; the rest arrive when the user turns to them.
+            val page = readPage(glanceId).coerceIn(0, config.pages.lastIndex)
+            val slot = config.pages[page]
+            val result = runCatching {
+                source.load(config.copy(cards = slot.preset.cards, serverId = slot.serverId))
+            }
             updateAppWidgetState(applicationContext, glanceId) { prefs ->
                 result.fold(
                     onSuccess = { payload ->
-                        prefs[WidgetConfig.PAYLOAD] = WidgetPayload.encode(payload)
+                        val held = WidgetPayloads.decode(prefs[WidgetConfig.PAYLOAD])
+                        prefs[WidgetConfig.PAYLOAD] = WidgetPayloads.encode(
+                            held.copy(byServer = held.byServer + (slot.encode() to payload)),
+                        )
                         prefs[WidgetConfig.UPDATED_AT] = now
                         prefs.remove(WidgetConfig.ERROR)
                     },
@@ -96,6 +104,12 @@ class WidgetUpdateWorker(
             config = WidgetConfig.read(prefs)
         }
         return config
+    }
+
+    private suspend fun readPage(glanceId: GlanceId): Int {
+        var page = 0
+        updateAppWidgetState(applicationContext, glanceId) { prefs -> page = prefs[WidgetConfig.PAGE] ?: 0 }
+        return page
     }
 
     private suspend fun readUpdatedAt(glanceId: GlanceId): Long {

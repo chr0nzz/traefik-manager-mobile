@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager.widget
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.api.TmApi
+import dev.chr0nzz.traefikmanager.data.model.CertRows
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
@@ -43,11 +44,17 @@ class WidgetDataSource @Inject constructor(
         } else {
             null
         }
+        val certs = if (config.cards.contains(WidgetCardType.Certs)) {
+            async { runCatching { certsCard(config.serverId) }.getOrNull() }
+        } else {
+            null
+        }
         val overview = if (config.needsOverview) async { servers() } else null
 
         val built = buildMap {
             dashboard?.await()?.let { putAll(it) }
             crowdsec?.await()?.let { putAll(it) }
+            certs?.await()?.let { put(WidgetCardType.Certs.key, it) }
         }
         val cards = config.cards.mapNotNull { type ->
             if (type == WidgetCardType.Overview) null else built[type.key] ?: unavailable(type)
@@ -88,7 +95,7 @@ class WidgetDataSource @Inject constructor(
                     warn = classified.count { it == TmStatus.Warn },
                     err = classified.count { it == TmStatus.Error },
                     services = services.size,
-                    cells = services.take(24).map { serviceWire(it.status) },
+                    cells = services.take(CELLS).map { serviceWire(it.status) },
                     bans = bans,
                     reachable = routers.reachable,
                 )
@@ -110,9 +117,88 @@ class WidgetDataSource @Inject constructor(
             services = services.await(),
             middlewares = middlewares.await(),
         )
-        DashboardBuilder.build(raw, providerFilter = null).cards.associate { card ->
-            card.key to card.asWidgetCard()
+        val snapshot = DashboardBuilder.build(raw, providerFilter = null)
+        buildMap {
+            snapshot.cards.forEach { put(it.key, it.asWidgetCard()) }
+            put(WidgetCardType.Entrypoints.key, entrypointsCard(snapshot.entrypoints))
         }
+    }
+
+    /** The doors in: what each one is, and how much is bound to it. */
+    private fun entrypointsCard(rows: List<dev.chr0nzz.traefikmanager.data.repo.EntrypointRow>): WidgetCard {
+        val idle = rows.count { it.idle }
+        return WidgetCard(
+            key = WidgetCardType.Entrypoints.key,
+            title = "Entry points",
+            hero = LogParser.formatCount(rows.size),
+            unit = if (rows.size == 1) "entry point" else "entry points",
+            health = when {
+                rows.any { it.health == TmStatus.Error } -> TmStatus.Error
+                idle > 0 -> TmStatus.Warn
+                else -> TmStatus.Ok
+            }.wire(),
+            chips = if (idle > 0) listOf(chip("$idle idle", TmStatus.Warn)) else emptyList(),
+            sub = rows.firstOrNull { !it.idle }
+                ?.let { "busiest ${it.name} · ${it.address}" }
+                ?: "nothing bound",
+            cells = rows.flatMap { row -> row.cells.map { it.wire() } }.take(CELLS),
+            rows = rows.take(ROWS).map { row ->
+                WidgetRow(
+                    name = "${row.name} ${row.address}",
+                    count = row.routerCount?.let { LogParser.formatCount(it) } ?: "-",
+                    health = row.health.wire(),
+                )
+            },
+            listTitle = "ENTRY POINTS",
+        )
+    }
+
+    private suspend fun certsCard(agentId: String?): WidgetCard {
+        // CertRows works out the days left and the ordering the certificates screen uses.
+        val soonest = CertRows.from(
+            certs = apiProvider.apiFor(agentId).certs().certs,
+            nowMillis = System.currentTimeMillis(),
+        )
+        val certs = soonest
+        val expiring = certs.count { (it.daysLeft ?: 999) <= 30 }
+        val critical = certs.count { (it.daysLeft ?: 999) <= 7 }
+        return WidgetCard(
+            key = WidgetCardType.Certs.key,
+            title = "Certificates",
+            hero = LogParser.formatCount(certs.size),
+            unit = if (certs.size == 1) "cert" else "certs",
+            health = when {
+                critical > 0 -> TmStatus.Error
+                expiring > 0 -> TmStatus.Warn
+                else -> TmStatus.Ok
+            }.wire(),
+            chips = buildList {
+                if (critical > 0) add(chip("$critical critical", TmStatus.Error))
+                if (expiring > critical) add(chip("${expiring - critical} expiring", TmStatus.Warn))
+                if (expiring == 0) add(chip("all current", TmStatus.Ok))
+            },
+            sub = soonest.firstOrNull()?.let { first ->
+                first.daysLeft?.let { "soonest ${first.main} · ${it}d left" } ?: "soonest ${first.main}"
+            } ?: "no certificates",
+            cells = soonest.take(CELLS).map {
+                when {
+                    (it.daysLeft ?: 999) <= 7 -> TmStatus.Error
+                    (it.daysLeft ?: 999) <= 30 -> TmStatus.Warn
+                    else -> TmStatus.Ok
+                }.wire()
+            },
+            rows = soonest.take(ROWS).map { cert ->
+                WidgetRow(
+                    name = cert.main,
+                    count = cert.daysLeft?.let { "${it}d" } ?: "-",
+                    health = when {
+                        (cert.daysLeft ?: 999) <= 7 -> TmStatus.Error
+                        (cert.daysLeft ?: 999) <= 30 -> TmStatus.Warn
+                        else -> TmStatus.Ok
+                    }.wire(),
+                )
+            },
+        )
     }
 
     private suspend fun crowdSecCards(agentId: String?): Map<String, WidgetCard> = coroutineScope {
@@ -143,6 +229,7 @@ class WidgetDataSource @Inject constructor(
             key = WidgetCardType.Sources.key,
             title = "Attacking sources",
             hero = LogParser.formatCount(sources.size),
+            unit = if (sources.size == 1) "source" else "sources",
             health = when {
                 severe -> TmStatus.Error
                 loose > 0 -> TmStatus.Warn
@@ -212,6 +299,7 @@ class WidgetDataSource @Inject constructor(
             key = WidgetCardType.Bans.key,
             title = "Bans in force",
             hero = LogParser.formatCount(decisions.size),
+            unit = if (decisions.size == 1) "ban" else "bans",
             health = if (decisions.isEmpty()) TmStatus.Disabled.wire() else TmStatus.Ok.wire(),
             chips = decisions.count { it.type == "ban" }.takeIf { it > 0 }
                 ?.let { listOf(chip("${LogParser.formatCount(it)} ban", TmStatus.Unknown)) }
@@ -258,6 +346,11 @@ class WidgetDataSource @Inject constructor(
         key = key,
         title = title,
         hero = LogParser.formatCount(total ?: cells.size),
+        unit = when {
+            key == "services" -> "services"
+            key == "middlewares" -> "middlewares"
+            else -> "routers"
+        },
         health = health.wire(),
         healthLabel = healthLabel,
         sub = sub,

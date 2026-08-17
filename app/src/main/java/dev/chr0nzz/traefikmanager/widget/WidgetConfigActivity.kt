@@ -5,6 +5,16 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,10 +26,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.getAppWidgetState
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,6 +62,7 @@ import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
+import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import dev.chr0nzz.traefikmanager.ui.theme.TmTheme
 import javax.inject.Inject
@@ -81,6 +97,7 @@ class WidgetConfigActivity : ComponentActivity() {
             TmTheme {
                 WidgetConfigScreen(
                     loadServers = { runCatching { serversRepository.servers(probeHealth = false) }.getOrDefault(emptyList()) },
+                    loadExisting = { readConfig(appWidgetId) },
                     onCancel = { finish() },
                     onSave = { config -> save(appWidgetId, config) },
                 )
@@ -88,11 +105,21 @@ class WidgetConfigActivity : ComponentActivity() {
         }
     }
 
+    /** Reconfiguring shows what the widget is set to, not the defaults. */
+    private suspend fun readConfig(appWidgetId: Int): WidgetConfig? = runCatching {
+        val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
+        WidgetConfig.read(getAppWidgetState(this, PreferencesGlanceStateDefinition, glanceId))
+            .takeIf { it.slots.isNotEmpty() }
+    }.getOrNull()
+
     private fun save(appWidgetId: Int, config: WidgetConfig) {
         lifecycleScope.launch {
             val glanceId = GlanceAppWidgetManager(this@WidgetConfigActivity).getGlanceIdBy(appWidgetId)
             updateAppWidgetState(this@WidgetConfigActivity, glanceId) { prefs ->
                 prefs[WidgetConfig.CARDS] = config.cards.joinToString(",") { it.key }
+                prefs[WidgetConfig.LAYOUT] = config.layout.name
+                prefs[WidgetConfig.SLOTS] = config.slots.joinToString(",") { it.encode() }
+                prefs[WidgetConfig.PAGE] = 0
                 prefs[WidgetConfig.SERVER_ID] = config.serverId.orEmpty()
                 prefs[WidgetConfig.SERVER_NAME] = config.serverName
                 prefs[WidgetConfig.INTERVAL] = config.intervalMinutes
@@ -111,22 +138,34 @@ class WidgetConfigActivity : ComponentActivity() {
 @Composable
 private fun WidgetConfigScreen(
     loadServers: suspend () -> List<ServerEntry>,
+    loadExisting: suspend () -> WidgetConfig?,
     onCancel: () -> Unit,
     onSave: (WidgetConfig) -> Unit,
 ) {
     val palette = LocalTmPalette.current
-    val picked = remember { mutableStateListOf(WidgetCardType.Overview) }
+
     var server by remember { mutableStateOf<ServerEntry?>(null) }
     var interval by remember { mutableStateOf(WidgetConfig.DEFAULT_INTERVAL_MINUTES) }
+    var layout by remember { mutableStateOf(WidgetLayout.Mosaic) }
+    val slots = remember { mutableStateListOf(WidgetSlot(WidgetPreset.CrowdSecStats)) }
     var servers by remember { mutableStateOf<List<ServerEntry>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         servers = loadServers()
-        if (server == null) server = servers.firstOrNull()
+        loadExisting()?.let { saved ->
+            interval = saved.intervalMinutes
+            layout = saved.layout
+            slots.clear()
+            slots.addAll(saved.pages)
+        }
+        if (server == null) {
+            server = servers.firstOrNull { it.id == slots.firstOrNull()?.serverId }
+                ?: servers.firstOrNull()
+        }
     }
 
     // Only the overview reads every server; every other card is about one of them.
-    val needsServer = picked.any { it != WidgetCardType.Overview }
+    val needsServer = slots.any { slot -> slot.preset.cards.any { it != WidgetCardType.Overview } }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -157,78 +196,78 @@ private fun WidgetConfigScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("Cards") }
+            item { SectionLabel("What it shows") }
             item {
                 Text(
-                    text = "Pick up to ${WidgetConfig.MAX_CARDS}. These are the same cards the app " +
-                        "shows: one fills a small widget, two or four fill a larger one.",
+                    text = "Up to ${WidgetSlot.MAX_SLOTS} in a stack. Each one picks a card and a " +
+                        "server, and tapping the widget moves to the next. Only the one on screen " +
+                        "is fetched.",
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
             }
-            item {
+            itemsIndexed(slots) { index, slot ->
                 TmCard {
-                    WidgetCardType.entries.forEachIndexed { index, option ->
-                        val selected = option in picked
-                        val full = picked.size >= WidgetConfig.MAX_CARDS && !selected
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Checkbox(
-                                checked = selected,
-                                enabled = !full,
-                                onCheckedChange = {
-                                    if (selected) picked.remove(option) else picked.add(option)
-                                },
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                            color = palette.muted,
+                        )
+                        Text(
+                            text = slot.preset.label,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = TmSpacing.sm),
+                        )
+                        if (slots.size > 1) {
+                            IconButton(onClick = { slots.removeAt(index) }) {
+                                Icon(Icons.Outlined.Close, contentDescription = "Remove")
+                            }
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
+                            .padding(top = TmSpacing.xs),
+                    ) {
+                        WidgetPreset.entries.forEach { option ->
+                            FilterChip(
+                                selected = slot.preset == option,
+                                onClick = { slots[index] = slot.copy(preset = option) },
+                                label = { Text(option.label) },
                             )
-                            Column(modifier = Modifier.padding(start = TmSpacing.xs)) {
-                                Text(
-                                    text = option.label,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (full) palette.muted else MaterialTheme.colorScheme.onSurface,
-                                )
-                                Text(
-                                    text = option.blurb,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = palette.muted,
+                        }
+                    }
+                    if (servers.size > 1) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                            modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .padding(top = TmSpacing.xs),
+                        ) {
+                            servers.forEach { entry ->
+                                FilterChip(
+                                    selected = slot.serverId == entry.id,
+                                    onClick = { slots[index] = slot.copy(serverId = entry.id) },
+                                    label = { Text(entry.name) },
                                 )
                             }
                         }
-                        if (index < WidgetCardType.entries.lastIndex) CardDivider()
                     }
                 }
             }
-
-            if (needsServer) {
-                item { SectionLabel("Which server", modifier = Modifier.padding(top = TmSpacing.sm)) }
-                item {
-                    TmCard {
-                        if (servers.isEmpty()) {
-                            Text(
-                                text = "No servers yet. Connect the app first.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = palette.muted,
-                            )
-                        }
-                        servers.forEachIndexed { index, entry ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                RadioButton(
-                                    selected = server?.id == entry.id,
-                                    onClick = { server = entry },
-                                )
-                                Text(
-                                    text = entry.name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.padding(start = TmSpacing.xs),
-                                )
-                            }
-                            if (index < servers.lastIndex) CardDivider()
-                        }
+            item {
+                if (slots.size < WidgetSlot.MAX_SLOTS) {
+                    OutlinedButton(
+                        onClick = { slots.add(slots.last().copy()) },
+                        modifier = Modifier.padding(top = TmSpacing.xs),
+                    ) {
+                        Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Text("Add to the stack", modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                 }
             }
@@ -262,14 +301,16 @@ private fun WidgetConfigScreen(
                         val target = if (needsServer) server else null
                         onSave(
                             WidgetConfig(
-                                cards = picked.toList(),
-                                serverId = target?.id,
+                                cards = slots.first().preset.cards,
+                                serverId = slots.first().serverId ?: target?.id,
                                 serverName = target?.name ?: "Host",
                                 intervalMinutes = interval,
+                                layout = slots.first().preset.layout,
+                                slots = slots.toList(),
                             ),
                         )
                     },
-                    enabled = picked.isNotEmpty() && (!needsServer || server != null),
+                    enabled = !needsServer || server != null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = TmSpacing.md),

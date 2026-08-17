@@ -46,28 +46,6 @@
         </activity>
 
         <receiver
-            android:name=".widget.StatusWidgetReceiver"
-            android:exported="true"
-            android:label="@string/widget_small_label">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/status_widget_info" />
-        </receiver>
-        <receiver
-            android:name=".widget.StatusWidgetWideReceiver"
-            android:exported="true"
-            android:label="@string/widget_wide_label">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/status_widget_wide_info" />
-        </receiver>
-        <receiver
             android:name=".widget.StatusWidgetLargeReceiver"
             android:exported="true"
             android:label="@string/widget_large_label">
@@ -77,6 +55,17 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/status_widget_large_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.StatusWidgetReceiver"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/status_widget_info" />
         </receiver>
     </application>
 </manifest>

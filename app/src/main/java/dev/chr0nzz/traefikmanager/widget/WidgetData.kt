@@ -22,6 +22,8 @@ data class WidgetCard(
     val rows: List<WidgetRow> = emptyList(),
     /** The card's foot: providers on a Traefik card, origins on a CrowdSec one. */
     val footer: List<WidgetChip> = emptyList(),
+    /** What the ranked list is called when this card supplies one. */
+    val listTitle: String = "WORST OFFENDERS",
 )
 
 @Serializable
@@ -54,6 +56,24 @@ data class WidgetServerRow(
     val reachable: Boolean = true,
 ) {
     val hasBans: Boolean get() = bans >= 0
+}
+
+/** Payloads keyed by server: "" is the host. Pages read their own entry. */
+@Serializable
+data class WidgetPayloads(val byServer: Map<String, WidgetPayload> = emptyMap()) {
+    companion object {
+        private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+
+        fun encode(value: WidgetPayloads): String = json.encodeToString(value)
+
+        fun decode(raw: String?): WidgetPayloads {
+            if (raw.isNullOrEmpty()) return WidgetPayloads()
+            return runCatching { json.decodeFromString<WidgetPayloads>(raw) }.getOrNull()
+                // A payload written before stacking existed is the host's.
+                ?: WidgetPayload.decode(raw)?.let { WidgetPayloads(mapOf("" to it)) }
+                ?: WidgetPayloads()
+        }
+    }
 }
 
 @Serializable

@@ -26,7 +26,7 @@ class OpenAppAction : ActionCallback {
         }
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(EXTRA_DESTINATION, first.destination)
+            putExtra(EXTRA_DESTINATION, first.destinationRoute)
             serverId?.let { putExtra(EXTRA_SERVER_ID, it) }
         }
         context.startActivity(intent)
@@ -39,9 +39,11 @@ class OpenAppAction : ActionCallback {
 }
 
 /** Where a tap lands, so the widget opens the page whose card it was showing. */
-private val WidgetCardType?.destination: String
+val WidgetCardType?.destinationRoute: String
     get() = when (this) {
         null, WidgetCardType.Overview -> "home"
+        WidgetCardType.Certs -> "certificates"
+        WidgetCardType.Entrypoints -> "home"
         WidgetCardType.Http, WidgetCardType.Stream -> "routes"
         WidgetCardType.Services -> "services"
         WidgetCardType.Middlewares -> "middlewares"

@@ -20,6 +20,7 @@
 -keep class dev.chr0nzz.traefikmanager.widget.StatusWidgetReceiver { *; }
 -keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
 -keep class * extends androidx.glance.appwidget.GlanceAppWidget { *; }
+-keep class * implements androidx.glance.appwidget.action.ActionCallback { *; }
 -keep class * extends androidx.work.Worker { *; }
 -keep class * extends androidx.work.ListenableWorker { public <init>(...); }
 
