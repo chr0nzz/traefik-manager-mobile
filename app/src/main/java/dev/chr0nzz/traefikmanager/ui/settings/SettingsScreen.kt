@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.outlined.Menu
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
@@ -144,9 +145,7 @@ fun SettingsScreen(
                 ),
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-                    }
+                    DrawerButton(onOpenDrawer)
                 },
                 scrollBehavior = scrollBehavior,
             )

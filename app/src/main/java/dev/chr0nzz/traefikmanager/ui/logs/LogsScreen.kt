@@ -79,6 +79,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Countries
 import dev.chr0nzz.traefikmanager.data.model.LogLine
 import dev.chr0nzz.traefikmanager.data.model.LogParser
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.CountryStrip
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -138,9 +139,7 @@ fun LogsScreen(
                     ),
                     title = { Text("Logs") },
                     navigationIcon = {
-                        IconButton(onClick = onOpenDrawer) {
-                            Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-                        }
+                        DrawerButton(onOpenDrawer)
                     },
                     actions = {
                         IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {

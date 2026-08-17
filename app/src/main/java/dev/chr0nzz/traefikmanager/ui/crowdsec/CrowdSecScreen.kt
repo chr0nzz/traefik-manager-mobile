@@ -103,6 +103,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.chr0nzz.traefikmanager.data.model.CsFacet
 import dev.chr0nzz.traefikmanager.data.model.CsRanked
 import dev.chr0nzz.traefikmanager.data.model.LogParser
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CountryStrip
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -209,9 +210,7 @@ fun CrowdSecScreen(
                 ),
                 title = { Text("CrowdSec") },
                 navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-                    }
+                    DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {

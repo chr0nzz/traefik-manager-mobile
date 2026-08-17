@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -317,9 +318,7 @@ private fun MiddlewaresTopBar(
         ),
         title = { Text("Middleware") },
         navigationIcon = {
-            IconButton(onClick = onOpenDrawer) {
-                Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-            }
+            DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {

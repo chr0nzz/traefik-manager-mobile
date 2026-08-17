@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.BackupEntry
 import dev.chr0nzz.traefikmanager.data.model.BackupKind
 import dev.chr0nzz.traefikmanager.data.model.GitCommit
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -175,9 +176,7 @@ fun BackupsScreen(
                 ),
                 title = { Text("Backups") },
                 navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Outlined.Menu, contentDescription = "Open the server menu")
-                    }
+                    DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     IconButton(onClick = viewModel::refresh) {

@@ -29,7 +29,7 @@ data class ServerEntry(
 
     val detail: String
         get() = when {
-            isHost -> "This Traefik Manager"
+            isHost -> "Traefik Manager"
             health == null -> url
             health.ok -> listOfNotNull(
                 health.version?.let { "v$it" },

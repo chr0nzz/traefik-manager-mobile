@@ -62,6 +62,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.CertHealth
 import dev.chr0nzz.traefikmanager.data.model.CertRow
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -116,9 +117,7 @@ fun CertificatesScreen(
                 ),
                 title = { Text("Certificates") },
                 navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-                    }
+                    DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {

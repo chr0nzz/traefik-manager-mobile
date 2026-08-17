@@ -79,6 +79,7 @@ import dev.chr0nzz.traefikmanager.data.repo.RuntimeInfo
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
 import dev.chr0nzz.traefikmanager.data.repo.SignalFlag
 import dev.chr0nzz.traefikmanager.data.repo.Verdict
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.CountChip
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -128,9 +129,7 @@ fun DashboardScreen(
                 ),
                 title = { Text("Overview") },
                 navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-                    }
+                    DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     IconButton(onClick = onOpenNotifications) {

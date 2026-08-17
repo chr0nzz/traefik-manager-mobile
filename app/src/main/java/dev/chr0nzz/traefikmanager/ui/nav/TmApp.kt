@@ -2,6 +2,9 @@ package dev.chr0nzz.traefikmanager.ui.nav
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -17,6 +20,10 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.Icon
+import dev.chr0nzz.traefikmanager.ui.components.ProvideTopBarMenu
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.MaterialTheme
@@ -181,6 +188,9 @@ private fun ConnectedApp(
                         scope.launch { drawerState.close() }
                     },
                 )
+                // A server with every tab on overflows the sheet, so the list scrolls under the
+                // switcher rather than running off the bottom.
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
                     Text(
                         text = section.label.uppercase(),
@@ -202,6 +212,7 @@ private fun ConnectedApp(
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                     }
+                }
                 }
             }
         },
@@ -235,6 +246,16 @@ private fun ConnectedApp(
         navigationSuiteType = suiteType,
         navigationItemVerticalArrangement = Arrangement.Center,
         navigationItems = {
+            // The rail carries the drawer itself, so the top bars do not need a second one.
+            if (!bar) {
+                NavigationSuiteItem(
+                    selected = false,
+                    onClick = { scope.launch { drawerState.open() } },
+                    icon = { Icon(Icons.Outlined.Menu, contentDescription = null) },
+                    label = { Text("Menu") },
+                    navigationSuiteType = suiteType,
+                )
+            }
             suiteDestinations.forEach { destination ->
                 NavigationSuiteItem(
                     selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
@@ -248,6 +269,7 @@ private fun ConnectedApp(
         },
     ) {
         val fade = tween<Float>(durationMillis = 200)
+        ProvideTopBarMenu(bar) {
         NavHost(
             navController = navController,
             startDestination = TmDestination.Home.route,
@@ -424,6 +446,7 @@ private fun ConnectedApp(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                 )
             }
+        }
         }
     }
     }

@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.PluginEntry
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.DetailRow
@@ -137,9 +138,7 @@ fun PluginsScreen(
                     ),
                     title = { Text("Plugins") },
                     navigationIcon = {
-                        IconButton(onClick = onOpenDrawer) {
-                            Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-                        }
+                        DrawerButton(onOpenDrawer)
                     },
                     actions = {
                         IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {

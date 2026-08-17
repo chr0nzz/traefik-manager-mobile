@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.StatusDot
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -83,9 +84,7 @@ fun RoutesTopBar(
         ),
         title = { Text("Routes") },
         navigationIcon = {
-            IconButton(onClick = onOpenDrawer) {
-                Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
-            }
+            DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
