@@ -11,5 +11,6 @@
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:description="@string/widget_launcher_description"
+    android:previewImage="@drawable/widget_preview_launcher"
     android:configure="dev.chr0nzz.traefikmanager.widget.LauncherConfigActivity"
     android:widgetFeatures="reconfigurable" />

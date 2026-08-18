@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Traefik Manager</string>
-    <string name="widget_description">Traefik router and service status</string>
+    <string name="widget_description">Pick a card: CrowdSec, Traefik, all servers, entry points, certificates and more. Resize it freely and it re-flows. Stack up to four and tap to cycle.</string>
     <string name="widget_config_title">Widget setup</string>
     <string name="widget_launcher_label">App launcher</string>
-    <string name="widget_launcher_description">Your dashboard apps, scrollable</string>
+    <string name="widget_launcher_description">Your dashboard apps as a grid. Resize for more columns or rows, and pick which servers it lists.</string>
     <string name="widget_small_label">Traefik Manager</string>
-    <string name="widget_large_label">Traefik Manager · combined</string>
-    <string name="widget_large_description">Several cards from one family in a single card.</string>
+    <string name="widget_large_label">Traefik Manager · large</string>
+    <string name="widget_large_description">The same cards, dropped in at a larger size. Resize it freely and it re-flows. Stack up to four and tap to cycle.</string>
 </resources>
