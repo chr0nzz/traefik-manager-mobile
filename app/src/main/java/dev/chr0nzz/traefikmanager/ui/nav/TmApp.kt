@@ -83,6 +83,7 @@ import dev.chr0nzz.traefikmanager.ui.settings.NotificationHistoryScreen
 import dev.chr0nzz.traefikmanager.ui.settings.NotificationsScreen
 import dev.chr0nzz.traefikmanager.ui.settings.ServersScreen
 import dev.chr0nzz.traefikmanager.ui.settings.SettingsScreen
+import dev.chr0nzz.traefikmanager.ui.routemap.RouteMapScreen
 import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
 
@@ -297,15 +298,17 @@ private fun ConnectedApp(
                 )
             }
             composable(
-                route = "${TmDestination.Routes.route}?status={status}&proto={proto}",
+                route = "${TmDestination.Routes.route}?status={status}&proto={proto}&id={id}",
                 arguments = listOf(
                     navArgument("status") { nullable = true; defaultValue = null },
                     navArgument("proto") { nullable = true; defaultValue = null },
+                    navArgument("id") { nullable = true; defaultValue = null },
                 ),
             ) { entry ->
                 RoutesScreen(
                     initialStatus = entry.arguments?.getString("status"),
                     initialProto = entry.arguments?.getString("proto"),
+                    initialRouteId = entry.arguments?.getString("id"),
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                     onCreateRoute = { navController.navigate(ROUTE_FORM) },
                     onEditRoute = { routeId ->
@@ -387,6 +390,9 @@ private fun ConnectedApp(
                 PluginsScreen(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                 )
+            }
+            composable(TmDestination.RouteMap.route) {
+                RouteMapScreen(onOpenDrawer = { scope.launch { drawerState.open() } })
             }
             composable(TmDestination.Logs.route) {
                 LogsScreen(

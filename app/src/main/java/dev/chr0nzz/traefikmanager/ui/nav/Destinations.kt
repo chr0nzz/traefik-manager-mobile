@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager.ui.nav
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.AltRoute
+import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Home
@@ -33,6 +34,13 @@ enum class TmDestination(
     Routes("routes", "Routes", Icons.Outlined.AltRoute, TmSection.Traffic, primary = true),
     Middlewares("middlewares", "Middleware", Icons.Outlined.Layers, TmSection.Traffic, primary = true),
     Services("services", "Services", Icons.Outlined.Dns, TmSection.Traffic),
+    RouteMap(
+        route = "routemap",
+        label = "Route map",
+        icon = Icons.Outlined.AccountTree,
+        section = TmSection.Traffic,
+        serverTab = "routemap",
+    ),
     Logs(
         route = "logs",
         label = "Logs",

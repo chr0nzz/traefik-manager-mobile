@@ -62,6 +62,8 @@ class RoutesRepository @Inject constructor(
      * The same list for a named server. Widgets need this: one can watch the host while another
      * watches an agent, and neither should follow what the app has selected.
      */
+    private fun isFileRoute(route: Route): Boolean = route.provider.isEmpty() || route.provider == "file"
+
     suspend fun loadFor(agentId: String?, report: Boolean = false): RoutesSnapshot {
         val ready = apiProvider.ready()
         val response = if (agentId != null) {
@@ -69,17 +71,12 @@ class RoutesRepository @Inject constructor(
         } else {
             ready.api.routes()
         }
-        // The web's rule, verbatim (static/js/routes.js:829): the manager's own routes, enabled
-        // ones only. The raw list also carries external routers Traefik knows about and the
-        // disabled routes the hub appends, which is why an agent read one too many.
+        val apps = if (agentId != null) response.apps.filter(::isFileRoute) else response.apps
         if (report) {
-            navCounts.report(
-                NavCountsStore.ROUTES,
-                response.apps.count { (it.provider.isEmpty() || it.provider == "file") && it.enabled },
-            )
+            navCounts.report(NavCountsStore.ROUTES, apps.count { isFileRoute(it) && it.enabled })
             navCounts.report(NavCountsStore.MIDDLEWARES, response.middlewares.size)
         }
-        return RoutesSnapshot(response.apps, response.middlewares, response.configErrors, response.services)
+        return RoutesSnapshot(apps, response.middlewares, response.configErrors, response.services)
     }
 
     suspend fun toggle(routeId: String, enable: Boolean) {

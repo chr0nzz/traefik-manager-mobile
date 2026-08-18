@@ -74,6 +74,7 @@ fun RoutesScreen(
     onEditYaml: (String) -> Unit = {},
     initialStatus: String? = null,
     initialProto: String? = null,
+    initialRouteId: String? = null,
     modifier: Modifier = Modifier,
     viewModel: RoutesViewModel = hiltViewModel(),
 ) {
@@ -88,6 +89,14 @@ fun RoutesScreen(
     val scope = rememberCoroutineScope()
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingDelete by remember { mutableStateOf<Route?>(null) }
+
+    LaunchedEffect(initialRouteId, state.routes.size) {
+        val wanted = initialRouteId ?: return@LaunchedEffect
+        if (selectedId == wanted) return@LaunchedEffect
+        val route = state.routes.firstOrNull { it.id == wanted } ?: return@LaunchedEffect
+        selectedId = route.id
+        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, route.id)
+    }
     val searchBarState = rememberSearchBarState()
     val searchScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val queryState = viewModel.queryState
