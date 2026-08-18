@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.getAppWidgetState
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -39,12 +41,43 @@ class WidgetUpdateWorker(
     @InstallIn(SingletonComponent::class)
     interface Deps {
         fun widgetDataSource(): WidgetDataSource
+
+        fun launcherWidgetSource(): LauncherWidgetSource
+    }
+
+    /**
+     * Launcher widgets keep their own list. Each one is refreshed for the servers it was set to,
+     * and the icons it needs are downloaded once and cached as files Glance can draw.
+     */
+    private suspend fun refreshLaunchers(
+        manager: GlanceAppWidgetManager,
+        ids: List<androidx.glance.GlanceId>,
+    ) {
+        if (ids.isEmpty()) return
+        val source = EntryPointAccessors
+            .fromApplication(applicationContext, Deps::class.java)
+            .launcherWidgetSource()
+        ids.forEach { glanceId ->
+            val prefs = runCatching { getAppWidgetState(applicationContext, PreferencesGlanceStateDefinition, glanceId) }
+                .getOrNull() ?: return@forEach
+            val payload = runCatching { source.load(LauncherWidgetConfig.servers(prefs)) }.getOrNull()
+                ?: return@forEach
+            runCatching {
+                updateAppWidgetState(applicationContext, glanceId) { store ->
+                    store[LauncherWidgetConfig.PAYLOAD] = LauncherWidgetPayload.encode(payload)
+                }
+                LauncherWidget().update(applicationContext, glanceId)
+            }
+        }
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val manager = GlanceAppWidgetManager(applicationContext)
         val ids = runCatching { manager.getGlanceIds(StatusWidget::class.java) }.getOrDefault(emptyList())
-        if (ids.isEmpty()) {
+        val launcherIds = runCatching { manager.getGlanceIds(LauncherWidget::class.java) }
+            .getOrDefault(emptyList())
+        refreshLaunchers(manager, launcherIds)
+        if (ids.isEmpty() && launcherIds.isEmpty()) {
             // Nothing is placed any more, so stop waking up for it.
             cancelPeriodic(applicationContext)
             return@withContext Result.success()

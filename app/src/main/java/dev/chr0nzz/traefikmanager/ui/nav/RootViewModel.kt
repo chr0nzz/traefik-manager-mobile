@@ -46,6 +46,7 @@ class RootViewModel @Inject constructor(
     private val geoRepository: dev.chr0nzz.traefikmanager.data.repo.GeoRepository,
     private val serverScope: ServerScope,
     private val navCountsStore: dev.chr0nzz.traefikmanager.data.repo.NavCountsStore,
+    private val routesRepository: dev.chr0nzz.traefikmanager.data.repo.RoutesRepository,
     private val certificatesRepository: dev.chr0nzz.traefikmanager.data.repo.CertificatesRepository,
     private val pluginsRepository: dev.chr0nzz.traefikmanager.data.repo.PluginsRepository,
 ) : ViewModel() {
@@ -119,6 +120,9 @@ class RootViewModel @Inject constructor(
     private fun loadNavCounts() {
         viewModelScope.launch { runCatching { certificatesRepository.load() } }
         viewModelScope.launch { runCatching { pluginsRepository.count() } }
+        // Reading the route list is what makes the Routes and Middleware badges right; without it
+        // they would sit on Traefik's own totals until the user happened to open that screen.
+        viewModelScope.launch { runCatching { routesRepository.load() } }
     }
 
     /** Forget the server, its API key and every cached page on this device. */
@@ -150,9 +154,14 @@ class RootViewModel @Inject constructor(
         val middlewares = cardsFor("middlewares")
         NavBadges(
             buildMap {
+                // The route list is the truth for what this server manages; the desk total is
+                // only a stand-in until that list has been read once.
                 put(
                     TmDestination.Routes.route,
-                    NavBadge(routers.sumOf(::total), routers.sumOf(::alertCount)),
+                    NavBadge(
+                        counts[NavCountsStore.ROUTES] ?: routers.sumOf(::total),
+                        routers.sumOf(::alertCount),
+                    ),
                 )
                 put(
                     TmDestination.Services.route,
@@ -160,7 +169,10 @@ class RootViewModel @Inject constructor(
                 )
                 put(
                     TmDestination.Middlewares.route,
-                    NavBadge(middlewares.sumOf(::total), middlewares.sumOf(::alertCount)),
+                    NavBadge(
+                        counts[NavCountsStore.MIDDLEWARES] ?: middlewares.sumOf(::total),
+                        middlewares.sumOf(::alertCount),
+                    ),
                 )
                 counts[NavCountsStore.CERTIFICATES]?.let {
                     put(TmDestination.Certificates.route, NavBadge(count = it))

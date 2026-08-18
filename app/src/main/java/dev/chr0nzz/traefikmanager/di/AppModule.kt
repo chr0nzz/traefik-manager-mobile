@@ -58,6 +58,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context,
+    ): coil3.ImageLoader = coil3.SingletonImageLoader.get(context)
+
+    @Provides
+    @Singleton
     @ConnectionDataStore
     fun provideConnectionDataStore(
         @ApplicationContext context: Context,

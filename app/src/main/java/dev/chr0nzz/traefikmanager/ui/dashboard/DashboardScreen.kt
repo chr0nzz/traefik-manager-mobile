@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
@@ -109,10 +110,40 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
     bellViewModel: NotificationBellViewModel = hiltViewModel(),
+    launcherViewModel: LauncherViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val launcher by launcherViewModel.state.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
     val unread by bellViewModel.unread.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    // Group cards follow the window: one across on a phone, more as it widens.
+    val launcherColumns = when {
+        currentWindowAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(1200) -> 3
+        currentWindowAdaptiveInfo().windowSizeClass
+            .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 2
+        else -> 1
+    }
+
+    launcher.editing?.let { app ->
+        CardSettingsSheet(
+            app = app,
+            config = launcher.snapshot.config,
+            baseUrl = launcher.snapshot.baseUrl,
+            onDismiss = { launcherViewModel.edit(null) },
+            onSave = { override -> launcherViewModel.saveOverride(app.id, override) },
+        )
+    }
+    if (launcher.settingsOpen) {
+        DashboardSettingsSheet(
+            config = launcher.snapshot.config,
+            hidden = launcher.snapshot.hidden,
+            onDismiss = { launcherViewModel.openSettings(false) },
+            onAddGroup = launcherViewModel::addGroup,
+            onRemoveGroup = launcherViewModel::removeGroup,
+            onShow = { app -> launcherViewModel.setHidden(app.id, false) },
+        )
+    }
     val refreshState = rememberPullToRefreshState()
 
     Scaffold(
@@ -127,11 +158,16 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Overview") },
+                title = { Text("Dashboard") },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },
                 actions = {
+                    if (launcher.snapshot.groups.isNotEmpty()) {
+                        IconButton(onClick = { launcherViewModel.openSettings(true) }) {
+                            Icon(Icons.Outlined.Tune, contentDescription = "Dashboard settings")
+                        }
+                    }
                     IconButton(onClick = onOpenNotifications) {
                         BadgedBox(
                             badge = {
@@ -167,7 +203,10 @@ fun DashboardScreen(
     ) { contentPadding ->
     PullToRefreshBox(
         isRefreshing = state.refreshing,
-        onRefresh = viewModel::refresh,
+        onRefresh = {
+            viewModel.refresh()
+            launcherViewModel.refresh()
+        },
         state = refreshState,
         indicator = {
             PullToRefreshDefaults.LoadingIndicator(
@@ -238,6 +277,21 @@ fun DashboardScreen(
                     }
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         RuntimeFooter(snapshot.runtime)
+                    }
+                    // The launcher closes the screen, below the runtime line.
+                    if (launcher.snapshot.groups.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            LauncherSection(
+                                groups = launcher.snapshot.groups,
+                                config = launcher.snapshot.config,
+                                baseUrl = launcher.snapshot.baseUrl,
+                                density = launcher.density,
+                                columns = launcherColumns,
+                                onOpen = { app -> app.url?.let { openApp(context, it) } },
+                                onEdit = launcherViewModel::edit,
+                                onInfo = { onOpenRoutes(null, null) },
+                            )
+                        }
                     }
                 }
             }

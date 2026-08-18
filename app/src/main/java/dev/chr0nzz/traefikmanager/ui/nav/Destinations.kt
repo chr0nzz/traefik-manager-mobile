@@ -29,7 +29,7 @@ enum class TmDestination(
     /** Optional-tab key on the server; null means the destination is always available. */
     val serverTab: String? = null,
 ) {
-    Home("home", "Home", Icons.Outlined.Home, TmSection.Traffic, primary = true),
+    Home("home", "Dashboard", Icons.Outlined.Home, TmSection.Traffic, primary = true),
     Routes("routes", "Routes", Icons.Outlined.AltRoute, TmSection.Traffic, primary = true),
     Middlewares("middlewares", "Middleware", Icons.Outlined.Layers, TmSection.Traffic, primary = true),
     Services("services", "Services", Icons.Outlined.Dns, TmSection.Traffic),

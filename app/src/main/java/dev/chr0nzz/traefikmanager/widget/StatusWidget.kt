@@ -52,7 +52,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmPalette
  * The app's palette, read from the same objects the screens use rather than copied, so the home
  * screen cannot drift from the app.
  */
-private object P {
+internal object P {
     val text = pick { it.text }
     val faint = pick { it.border }
     val muted = pick { it.muted }
@@ -88,7 +88,7 @@ private object P {
     }
 }
 
-private val Mono = FontFamily("monospace")
+internal val Mono = FontFamily("monospace")
 
 private val SMALL = DpSize(110.dp, 100.dp)
 private val WIDE = DpSize(250.dp, 100.dp)

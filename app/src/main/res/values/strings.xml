@@ -3,6 +3,8 @@
     <string name="app_name">Traefik Manager</string>
     <string name="widget_description">Traefik router and service status</string>
     <string name="widget_config_title">Widget setup</string>
+    <string name="widget_launcher_label">App launcher</string>
+    <string name="widget_launcher_description">Your dashboard apps, scrollable</string>
     <string name="widget_small_label">Traefik Manager</string>
     <string name="widget_large_label">Traefik Manager · combined</string>
     <string name="widget_large_description">Several cards from one family in a single card.</string>

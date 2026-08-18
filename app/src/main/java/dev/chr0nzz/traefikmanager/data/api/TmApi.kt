@@ -39,6 +39,7 @@ import dev.chr0nzz.traefikmanager.data.model.GeoStatus
 import dev.chr0nzz.traefikmanager.data.model.LogsResponse
 import dev.chr0nzz.traefikmanager.data.model.PluginsResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
+import dev.chr0nzz.traefikmanager.data.model.UiPrefsRequest
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
@@ -218,8 +219,22 @@ interface TmApi {
     @GET("api/settings/ui")
     suspend fun uiPrefs(): UiPrefsResponse
 
+    /** Merges rather than replaces, so one key at a time is safe here (app.py:3432-3433). */
+    @POST("api/settings/ui")
+    suspend fun saveUiPrefs(@Body body: UiPrefsRequest): UiPrefsResponse
+
     @GET("api/dashboard/config")
     suspend fun dashboardConfig(@Query("server") server: String? = null): DashboardConfig
+
+    /**
+     * Read-modify-write over the whole document: the hub replaces custom_groups and
+     * route_overrides with exactly what this body carries (app.py:3926-3942).
+     */
+    @POST("api/dashboard/config")
+    suspend fun saveDashboardConfig(
+        @Body body: DashboardConfig,
+        @Query("server") server: String? = null,
+    ): OkResponse
 
     /** The hub answers a bare array here; an agent answers an object. Pick by active server. */
     @GET("api/backups")

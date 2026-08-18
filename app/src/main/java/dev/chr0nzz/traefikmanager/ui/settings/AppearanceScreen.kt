@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +51,7 @@ fun AppearanceScreen(
 ) {
     val palette = LocalTmPalette.current
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val density by viewModel.density.collectAsStateWithLifecycle()
     val dynamicColorSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     Scaffold(
@@ -109,6 +111,30 @@ fun AppearanceScreen(
                         enabled = dynamicColorSupported,
                         onCheckedChange = viewModel::setDynamicColor,
                     )
+                }
+            }
+
+            item { SectionLabel("Dashboard", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item {
+                TmCard {
+                    Text(
+                        text = "How the launcher on the Overview lists your apps. Shared with the " +
+                            "web, so both show the same.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                        modifier = Modifier.padding(top = TmSpacing.xs),
+                    ) {
+                        listOf("list" to "Rows", "icons" to "Icons").forEach { (key, label) ->
+                            FilterChip(
+                                selected = density == key,
+                                onClick = { viewModel.setDensity(key) },
+                                label = { Text(label) },
+                            )
+                        }
+                    }
                 }
             }
 

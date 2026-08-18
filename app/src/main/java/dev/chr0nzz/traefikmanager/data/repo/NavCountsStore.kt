@@ -29,6 +29,9 @@ class NavCountsStore @Inject constructor(
     }
 
     companion object {
+        const val ROUTES = "routes"
+        const val MIDDLEWARES = "middlewares"
+        const val SERVICES = "services"
         const val CERTIFICATES = "certificates"
         const val PLUGINS = "plugins"
         const val CROWDSEC = "crowdsec"

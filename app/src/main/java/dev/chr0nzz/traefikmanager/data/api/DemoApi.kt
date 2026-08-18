@@ -66,6 +66,7 @@ import dev.chr0nzz.traefikmanager.data.model.RoutesResponse
 import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
 import dev.chr0nzz.traefikmanager.data.model.UiPrefs
+import dev.chr0nzz.traefikmanager.data.model.UiPrefsRequest
 import dev.chr0nzz.traefikmanager.data.model.UiPrefsResponse
 import dev.chr0nzz.traefikmanager.data.model.SaveSettingsResponse
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
@@ -560,6 +561,16 @@ class DemoApi : TmApi {
             ),
         ),
     )
+
+    override suspend fun saveUiPrefs(body: UiPrefsRequest): UiPrefsResponse {
+        settle()
+        return UiPrefsResponse(ok = true, uiPrefs = body.uiPrefs)
+    }
+
+    override suspend fun saveDashboardConfig(body: DashboardConfig, server: String?): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
 
     override suspend fun hubBackups(): List<HubBackup> {
         settle()
