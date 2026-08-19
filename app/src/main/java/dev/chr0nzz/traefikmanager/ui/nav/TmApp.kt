@@ -147,6 +147,7 @@ private fun ConnectedApp(
     val servers by viewModel.servers.collectAsStateWithLifecycle()
     val activeServer by viewModel.activeServer.collectAsStateWithLifecycle()
     val switchingServer by viewModel.switching.collectAsStateWithLifecycle()
+    val preferences by viewModel.preferences.collectAsStateWithLifecycle(RootViewModel.DefaultPreferences)
     var serverListExpanded by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val biometricAvailable = remember(context) { AppLock.available(context) }
@@ -219,12 +220,37 @@ private fun ConnectedApp(
         },
     ) {
 
-    // A bar keeps five slots: primaries first, then whatever else the server exposes.
+    // A bar keeps five slots. Your own picks win; otherwise primaries first, then whatever else
+    // the server exposes.
     val suiteDestinations = if (bar) {
-        val primary = destinations.filter { it.primary }
-        (primary + destinations.filterNot { it.primary }).take(5)
+        val chosen = preferences.navItems
+            .mapNotNull { route -> destinations.firstOrNull { it.route == route } }
+        chosen.ifEmpty {
+            val primary = destinations.filter { it.primary }
+            (primary + destinations.filterNot { it.primary })
+        }.take(5)
     } else {
         destinations
+    }
+    var navEditorOpen by remember { mutableStateOf(false) }
+    val editorRequested by viewModel.navEditorOpen.collectAsStateWithLifecycle()
+    LaunchedEffect(editorRequested) {
+        if (editorRequested) {
+            navEditorOpen = true
+            viewModel.consumeNavEditor()
+        }
+    }
+
+    if (navEditorOpen) {
+        NavBarEditorSheet(
+            available = destinations,
+            chosen = suiteDestinations.map { it.route },
+            onSave = { routes ->
+                navEditorOpen = false
+                scope.launch { viewModel.setNavItems(routes) }
+            },
+            onDismiss = { navEditorOpen = false },
+        )
     }
 
     // A widget tap names both a page and the server it was watching, so the app lands on what the
@@ -244,7 +270,9 @@ private fun ConnectedApp(
 
     NavigationSuiteScaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        navigationSuiteType = suiteType,
+        // Hiding the bar leaves the drawer as the way around, which is why it stays reachable
+        // from every top bar.
+        navigationSuiteType = if (preferences.hideNavBar && bar) NavigationSuiteType.None else suiteType,
         navigationItemVerticalArrangement = Arrangement.Center,
         navigationItems = {
             // The rail carries the drawer itself, so the top bars do not need a second one.

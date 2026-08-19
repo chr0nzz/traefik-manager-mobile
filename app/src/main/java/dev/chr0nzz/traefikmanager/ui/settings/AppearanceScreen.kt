@@ -1,6 +1,7 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
 import android.os.Build
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -111,6 +113,56 @@ fun AppearanceScreen(
                         enabled = dynamicColorSupported,
                         onCheckedChange = viewModel::setDynamicColor,
                     )
+                }
+            }
+
+            item { SectionLabel("Navigation", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item {
+                TmCard {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Hide the navigation bar",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = "Frees the bottom of the screen. The drawer still reaches " +
+                                    "every screen.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.muted,
+                            )
+                        }
+                        Switch(
+                            checked = preferences.hideNavBar,
+                            onCheckedChange = viewModel::setHideNavBar,
+                        )
+                    }
+                    CardDivider(modifier = Modifier.padding(vertical = TmSpacing.sm))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.editNavBar() },
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Choose items",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = "Which screens sit in the bar, and their order.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.muted,
+                            )
+                        }
+                        Icon(
+                            Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = palette.muted,
+                        )
+                    }
                 }
             }
 

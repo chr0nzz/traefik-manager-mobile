@@ -23,6 +23,9 @@ data class TmPreferences(
     val migrationNotice: String? = null,
     /** How many notifications had been seen last time the bell was opened, as the web tracks it. */
     val notificationsRead: Int = 0,
+    /** Routes of the destinations pinned to the bar, in order. Empty means the app decides. */
+    val navItems: List<String> = emptyList(),
+    val hideNavBar: Boolean = false,
 )
 
 @Singleton
@@ -40,7 +43,17 @@ class PreferencesStore @Inject constructor(
             migratedFromV1 = prefs[KEY_MIGRATED_V1] ?: false,
             migrationNotice = prefs[KEY_MIGRATION_NOTICE],
             notificationsRead = prefs[KEY_NOTIFICATIONS_READ] ?: 0,
+            navItems = prefs[KEY_NAV_ITEMS]?.split(',')?.filter { it.isNotBlank() }.orEmpty(),
+            hideNavBar = prefs[KEY_HIDE_NAV_BAR] ?: false,
         )
+    }
+
+    suspend fun setNavItems(routes: List<String>) {
+        dataStore.edit { it[KEY_NAV_ITEMS] = routes.joinToString(",") }
+    }
+
+    suspend fun setHideNavBar(hidden: Boolean) {
+        dataStore.edit { it[KEY_HIDE_NAV_BAR] = hidden }
     }
 
     suspend fun setNotificationsRead(count: Int) {
@@ -83,5 +96,7 @@ class PreferencesStore @Inject constructor(
         val KEY_MIGRATED_V1 = booleanPreferencesKey("migrated_from_v1")
         val KEY_MIGRATION_NOTICE = stringPreferencesKey("migration_notice")
         val KEY_NOTIFICATIONS_READ = intPreferencesKey("notifications_read")
+        val KEY_NAV_ITEMS = stringPreferencesKey("nav_items")
+        val KEY_HIDE_NAV_BAR = booleanPreferencesKey("hide_nav_bar")
     }
 }

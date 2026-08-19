@@ -46,6 +46,7 @@ class RootViewModel @Inject constructor(
     private val geoRepository: dev.chr0nzz.traefikmanager.data.repo.GeoRepository,
     private val serverScope: ServerScope,
     private val navCountsStore: dev.chr0nzz.traefikmanager.data.repo.NavCountsStore,
+    private val navEditorRequests: NavEditorRequests,
     private val routesRepository: dev.chr0nzz.traefikmanager.data.repo.RoutesRepository,
     private val certificatesRepository: dev.chr0nzz.traefikmanager.data.repo.CertificatesRepository,
     private val pluginsRepository: dev.chr0nzz.traefikmanager.data.repo.PluginsRepository,
@@ -133,6 +134,19 @@ class RootViewModel @Inject constructor(
             preferencesStore.setActiveAgent(null)
             connectionStore.clear()
         }
+    }
+
+    /** True when the settings screen has asked for the bar editor. */
+    val navEditorOpen: StateFlow<Boolean> = navEditorRequests.open
+
+    fun consumeNavEditor() = navEditorRequests.consume()
+
+    fun setNavItems(routes: List<String>) {
+        viewModelScope.launch { preferencesStore.setNavItems(routes) }
+    }
+
+    fun setHideNavBar(hidden: Boolean) {
+        viewModelScope.launch { preferencesStore.setHideNavBar(hidden) }
     }
 
     fun onMigrationNoticeShown() {

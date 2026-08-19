@@ -16,10 +16,17 @@ import kotlinx.coroutines.launch
 class AppearanceViewModel @Inject constructor(
     private val preferencesStore: PreferencesStore,
     private val launcherRepository: dev.chr0nzz.traefikmanager.data.repo.LauncherRepository,
+    private val navEditorRequests: dev.chr0nzz.traefikmanager.ui.nav.NavEditorRequests,
 ) : ViewModel() {
 
     /** The launcher's row-or-tile setting. It lives on the hub, so the web follows along. */
     val density: StateFlow<String> = launcherRepository.density
+
+    fun editNavBar() = navEditorRequests.request()
+
+    fun setHideNavBar(hidden: Boolean) {
+        viewModelScope.launch { preferencesStore.setHideNavBar(hidden) }
+    }
 
     fun setDensity(value: String) {
         viewModelScope.launch { runCatching { launcherRepository.setDensity(value) } }
