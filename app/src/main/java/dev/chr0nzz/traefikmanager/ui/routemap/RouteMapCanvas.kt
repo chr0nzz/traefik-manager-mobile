@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -63,6 +64,7 @@ fun RouteMapCanvas(
     var zoom by remember(graph) { mutableFloatStateOf(1f) }
     var offset by remember(graph) { mutableStateOf(Offset.Zero) }
     val scale = fitted * zoom
+    val liveFit by rememberUpdatedState(fitted)
 
     val nodeColour: (MapNode) -> Color = { node ->
         when (node.kind) {
@@ -85,19 +87,20 @@ fun RouteMapCanvas(
             .pointerInput(graph, interactive) {
                 if (!interactive) return@pointerInput
                 detectTransformGestures { centroid, pan, gestureZoom, _ ->
-                    val before = fitted * zoom
+                    val before = liveFit * zoom
                     val next = (zoom * gestureZoom).coerceIn(0.4f, 6f)
-                    val after = fitted * next
+                    val after = liveFit * next
                     offset = (offset + centroid) * (after / before) - centroid - pan * (after / before)
                     zoom = next
                 }
             }
-            .pointerInput(graph, focusIds, interactive) {
+            .pointerInput(graph, interactive) {
                 if (!interactive) return@pointerInput
                 detectTapGestures { position ->
-                    val centreX = ((size.width - graph.width * scale) / 2f).coerceAtLeast(0f)
-                    val centreY = ((size.height - graph.height * scale) / 2f).coerceAtLeast(0f)
-                    val world = (position + offset - Offset(centreX, centreY)) / scale
+                    val live = liveFit * zoom
+                    val centreX = ((size.width - graph.width * live) / 2f).coerceAtLeast(0f)
+                    val centreY = ((size.height - graph.height * live) / 2f).coerceAtLeast(0f)
+                    val world = (position + offset - Offset(centreX, centreY)) / live
                     val hit = graph.nodes.lastOrNull { node ->
                         Rect(node.x, node.y, node.x + node.width, node.y + node.height)
                             .contains(Offset(world.x, world.y))
