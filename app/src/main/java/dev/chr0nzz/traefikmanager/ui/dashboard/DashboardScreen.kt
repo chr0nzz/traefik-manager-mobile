@@ -191,6 +191,7 @@ fun DashboardScreen(
                     IconButton(
                         onClick = {
                             viewModel.refresh()
+                            launcherViewModel.refresh()
                             bellViewModel.refresh()
                         },
                     ) {
@@ -206,13 +207,16 @@ fun DashboardScreen(
         onRefresh = {
             viewModel.refresh()
             launcherViewModel.refresh()
+            bellViewModel.refresh()
         },
         state = refreshState,
         indicator = {
             PullToRefreshDefaults.LoadingIndicator(
                 state = refreshState,
                 isRefreshing = state.refreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = contentPadding.calculateTopPadding()),
             )
         },
         modifier = Modifier
