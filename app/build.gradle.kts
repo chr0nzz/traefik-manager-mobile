@@ -19,6 +19,7 @@ if (hasReleaseKeystore) {
 android {
     namespace = "dev.chr0nzz.traefikmanager"
     compileSdk = 37
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         applicationId = "dev.chr0nzz.traefikmanager"
@@ -43,6 +44,9 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (hasReleaseKeystore) {
                 signingConfig = signingConfigs.getByName("release")
