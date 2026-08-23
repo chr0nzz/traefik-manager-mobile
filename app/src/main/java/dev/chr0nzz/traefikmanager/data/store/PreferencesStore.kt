@@ -23,6 +23,14 @@ data class TmPreferences(
     val migrationNotice: String? = null,
     /** How many notifications had been seen last time the bell was opened, as the web tracks it. */
     val notificationsRead: Int = 0,
+    /** Whether this device asked a UnifiedPush distributor for an endpoint. */
+    val pushEnabled: Boolean = false,
+    /** The endpoint the distributor handed out, which is the URL servers post to. */
+    val pushEndpoint: String = "",
+    /** Base URL of each server that has a channel for this device, and that channel's id. */
+    val pushChannels: Map<String, String> = emptyMap(),
+    /** Why the last registration attempt failed, for the settings screen to explain. */
+    val pushError: String = "",
     /** Routes of the destinations pinned to the bar, in order. Empty means the app decides. */
     val navItems: List<String> = emptyList(),
     val hideNavBar: Boolean = false,
@@ -45,7 +53,31 @@ class PreferencesStore @Inject constructor(
             notificationsRead = prefs[KEY_NOTIFICATIONS_READ] ?: 0,
             navItems = prefs[KEY_NAV_ITEMS]?.split(',')?.filter { it.isNotBlank() }.orEmpty(),
             hideNavBar = prefs[KEY_HIDE_NAV_BAR] ?: false,
+            pushEnabled = prefs[KEY_PUSH_ENABLED] ?: false,
+            pushEndpoint = prefs[KEY_PUSH_ENDPOINT].orEmpty(),
+            pushChannels = decodeChannels(prefs[KEY_PUSH_CHANNELS]),
+            pushError = prefs[KEY_PUSH_ERROR].orEmpty(),
         )
+    }
+
+    suspend fun setPushEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_PUSH_ENABLED] = enabled }
+    }
+
+    suspend fun setPushError(message: String) {
+        dataStore.edit { it[KEY_PUSH_ERROR] = message }
+    }
+
+    suspend fun setPushEndpoint(endpoint: String) {
+        dataStore.edit { it[KEY_PUSH_ENDPOINT] = endpoint }
+    }
+
+    suspend fun setPushChannel(server: String, channelId: String?) {
+        dataStore.edit { prefs ->
+            val current = decodeChannels(prefs[KEY_PUSH_CHANNELS]).toMutableMap()
+            if (channelId == null) current.remove(server) else current[server] = channelId
+            prefs[KEY_PUSH_CHANNELS] = encodeChannels(current)
+        }
     }
 
     suspend fun setNavItems(routes: List<String>) {
@@ -96,7 +128,25 @@ class PreferencesStore @Inject constructor(
         val KEY_MIGRATED_V1 = booleanPreferencesKey("migrated_from_v1")
         val KEY_MIGRATION_NOTICE = stringPreferencesKey("migration_notice")
         val KEY_NOTIFICATIONS_READ = intPreferencesKey("notifications_read")
+        val KEY_PUSH_ENABLED = booleanPreferencesKey("push_enabled")
+        val KEY_PUSH_ENDPOINT = stringPreferencesKey("push_endpoint")
+        val KEY_PUSH_CHANNELS = stringPreferencesKey("push_channels")
+        val KEY_PUSH_ERROR = stringPreferencesKey("push_error")
         val KEY_NAV_ITEMS = stringPreferencesKey("nav_items")
         val KEY_HIDE_NAV_BAR = booleanPreferencesKey("hide_nav_bar")
     }
 }
+
+/** Server to channel id, kept as one string because DataStore has no map type. */
+private fun decodeChannels(raw: String?): Map<String, String> =
+    raw.orEmpty()
+        .split('\n')
+        .filter { it.isNotBlank() }
+        .mapNotNull { line ->
+            val at = line.lastIndexOf('|')
+            if (at <= 0) null else line.take(at) to line.substring(at + 1)
+        }
+        .toMap()
+
+private fun encodeChannels(channels: Map<String, String>): String =
+    channels.entries.joinToString("\n") { "${it.key}|${it.value}" }

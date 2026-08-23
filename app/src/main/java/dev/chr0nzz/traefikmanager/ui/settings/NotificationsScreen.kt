@@ -62,6 +62,12 @@ import dev.chr0nzz.traefikmanager.data.model.ChannelKinds
 import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
 import dev.chr0nzz.traefikmanager.data.model.missingFields
 import dev.chr0nzz.traefikmanager.data.model.summary
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
+import dev.chr0nzz.traefikmanager.push.PushNotifier
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
@@ -75,9 +81,15 @@ fun NotificationsScreen(
     modifier: Modifier = Modifier,
     viewModel: NotificationsViewModel = hiltViewModel(),
     channelsViewModel: ChannelsViewModel = hiltViewModel(),
+    pushViewModel: PushViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val channels by channelsViewModel.state.collectAsStateWithLifecycle()
+    val push by pushViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val askNotifications = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) pushViewModel.enable() else pushViewModel.onPermissionDenied() }
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
     var typeMenuOpen by remember { mutableStateOf(false) }
@@ -104,6 +116,29 @@ fun NotificationsScreen(
             onSave = channelsViewModel::save,
             onTest = channelsViewModel::test,
             onDismiss = channelsViewModel::closeEditor,
+        )
+    }
+
+    if (push.picking) {
+        AlertDialog(
+            onDismissRequest = pushViewModel::cancelPicking,
+            title = { Text("Deliver push through") },
+            text = {
+                Column {
+                    push.distributors.forEach { distributor ->
+                        Text(
+                            text = distributor.label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { pushViewModel.choose(distributor.packageName) }
+                                .padding(vertical = TmSpacing.sm),
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = pushViewModel::cancelPicking) { Text("Cancel") } },
         )
     }
 
@@ -170,6 +205,57 @@ fun NotificationsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
+            if (channels.supported == true) {
+                item { SectionLabel("This device") }
+                item {
+                    TmCard {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Push to this device",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = when {
+                                        push.noDistributor ->
+                                            "Needs a UnifiedPush app such as ntfy. Install one and it appears here."
+                                        push.registered ->
+                                            "Delivered through ${push.currentLabel ?: "your distributor"}, " +
+                                                "as its own channel below."
+                                        push.enabled -> "Waiting for the distributor to hand out an endpoint."
+                                        else -> "Get events on this phone without Google in the way."
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = palette.muted,
+                                )
+                            }
+                            Switch(
+                                checked = push.enabled,
+                                enabled = !push.noDistributor,
+                                onCheckedChange = { on ->
+                                    if (!on) {
+                                        pushViewModel.disable()
+                                    } else if (PushNotifier.allowed(context)) {
+                                        pushViewModel.enable()
+                                    } else {
+                                        askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                },
+                            )
+                        }
+                        if (push.error.isNotBlank()) {
+                            Text(
+                                text = push.error,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.yellow,
+                                modifier = Modifier.padding(top = TmSpacing.xs),
+                            )
+                        }
+                    }
+                }
+            }
+
             if (channels.supported != false) {
                 item { SectionLabel("Channels ${channels.channels.size}") }
                 item {
@@ -192,6 +278,7 @@ fun NotificationsScreen(
                 items(channels.channels, key = { it.id }) { channel ->
                     ChannelRow(
                         channel = channel,
+                        thisDevice = channel.id == channels.pushChannelId,
                         onToggle = { channelsViewModel.toggleEnabled(channel) },
                         onTest = { channelsViewModel.testRow(channel) },
                         onEdit = { channelsViewModel.edit(channel) },
@@ -332,6 +419,7 @@ fun NotificationsScreen(
 @Composable
 private fun ChannelRow(
     channel: NotificationChannel,
+    thisDevice: Boolean,
     onToggle: () -> Unit,
     onTest: () -> Unit,
     onEdit: () -> Unit,
@@ -346,18 +434,34 @@ private fun ChannelRow(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
                 ) {
+                    // The name yields first: a long one must not squeeze the kind and the tag
+                    // into a column of single letters.
                     Text(
                         text = channel.name,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
+                    // The device's own channel is a Generic JSON one underneath, but calling it
+                    // that here explains nothing about what it does.
                     Text(
-                        text = ChannelKinds.label(channel.kind),
+                        text = if (thisDevice) "Push notification" else ChannelKinds.label(channel.kind),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
+                        maxLines = 1,
+                        softWrap = false,
                     )
+                    if (thisDevice) {
+                        Text(
+                            text = "this device",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.blue,
+                            maxLines = 1,
+                            softWrap = false,
+                        )
+                    }
                 }
                 Text(
                     text = if (missing.isEmpty()) channel.summary() else "Needs " + missing.joinToString(", "),

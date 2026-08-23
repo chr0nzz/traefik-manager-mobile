@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.glance.material3)
     implementation(libs.androidx.work)
     implementation(libs.androidx.browser)
+    implementation(libs.unifiedpush.connector)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

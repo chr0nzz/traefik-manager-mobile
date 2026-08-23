@@ -8,6 +8,7 @@ import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
 import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
 import dev.chr0nzz.traefikmanager.data.model.missingFields
 import dev.chr0nzz.traefikmanager.data.repo.NotificationChannelsRepository
+import dev.chr0nzz.traefikmanager.push.PushChannels
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,11 +62,14 @@ data class ChannelsUiState(
     val saving: Boolean = false,
     val test: TestState = TestState.Idle,
     val pendingDelete: NotificationChannel? = null,
+    /** The channel this device pushes through, so the list can say so. */
+    val pushChannelId: String? = null,
 )
 
 @HiltViewModel
 class ChannelsViewModel @Inject constructor(
     private val repository: NotificationChannelsRepository,
+    private val pushChannels: PushChannels,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChannelsUiState())
@@ -80,11 +84,13 @@ class ChannelsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.load() }.fold(
                 onSuccess = { channels ->
+                    val push = runCatching { pushChannels.channelId() }.getOrNull()
                     _state.update {
                         it.copy(
                             loading = false,
                             channels = channels,
                             supported = repository.supported.value,
+                            pushChannelId = push,
                             error = null,
                         )
                     }
