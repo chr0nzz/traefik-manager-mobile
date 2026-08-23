@@ -10,6 +10,11 @@ import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyEntry
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
+import dev.chr0nzz.traefikmanager.data.model.ChannelListResponse
+import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
+import dev.chr0nzz.traefikmanager.data.model.ChannelSaveResponse
+import dev.chr0nzz.traefikmanager.data.model.ChannelTestResult
+import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
 import dev.chr0nzz.traefikmanager.data.model.ChangePasswordRequest
 import dev.chr0nzz.traefikmanager.data.model.GenerateKeyRequest
 import dev.chr0nzz.traefikmanager.data.model.GenerateKeyResponse
@@ -665,10 +670,10 @@ class DemoApi : TmApi {
     override suspend fun notifications(): List<TmNotification> {
         settle()
         return listOf(
-            TmNotification("2026-08-12 10:31:04", "warning", "Ping all: 7/8 online - unreachable: bin"),
-            TmNotification("2026-08-12 09:12:44", "success", "Route media saved"),
-            TmNotification("2026-08-11 22:04:01", "info", "Traefik v3.7.10 is available - update now"),
-            TmNotification("2026-08-11 21:58:12", "error", "CrowdSec LAPI unreachable"),
+            TmNotification("2026-08-12 10:31:04", "warning", "Ping all: 7/8 online - unreachable: bin", "traefik"),
+            TmNotification("2026-08-12 09:12:44", "success", "Route media saved", "config"),
+            TmNotification("2026-08-11 22:04:01", "info", "Traefik v3.7.10 is available - update now", "update"),
+            TmNotification("2026-08-11 21:58:12", "error", "CrowdSec LAPI unreachable", "crowdsec"),
         )
     }
 
@@ -676,6 +681,76 @@ class DemoApi : TmApi {
         settle()
         return WebhookTestResult(ok = true)
     }
+
+    override suspend fun notificationChannels(): ChannelListResponse {
+        settle()
+        return ChannelListResponse(channels = demoChannels.toList())
+    }
+
+    override suspend fun createNotificationChannel(body: ChannelPayload): ChannelSaveResponse {
+        settle()
+        val channel = body.toChannel("ch_" + (demoChannels.size + 1))
+        demoChannels.add(channel)
+        return ChannelSaveResponse(ok = true, channel = channel)
+    }
+
+    override suspend fun updateNotificationChannel(id: String, body: ChannelPayload): ChannelSaveResponse {
+        settle()
+        val index = demoChannels.indexOfFirst { it.id == id }
+        if (index < 0) return ChannelSaveResponse(ok = false, error = "Channel not found")
+        val channel = body.toChannel(id)
+        demoChannels[index] = channel
+        return ChannelSaveResponse(ok = true, channel = channel)
+    }
+
+    override suspend fun deleteNotificationChannel(id: String): OkResponse {
+        settle()
+        demoChannels.removeAll { it.id == id }
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun testNotificationChannel(id: String): ChannelTestResult {
+        settle()
+        return ChannelTestResult(ok = true)
+    }
+
+    private fun ChannelPayload.toChannel(id: String) = NotificationChannel(
+        id = id,
+        name = name.ifBlank { kind.replaceFirstChar { it.uppercase() } },
+        kind = kind,
+        enabled = enabled,
+        url = url,
+        token = if (token.isNotBlank()) "***" else "",
+        token2 = if (token2.isNotBlank()) "***" else "",
+        username = username,
+        password = if (password.isNotBlank()) "***" else "",
+        categories = categories,
+        minSeverity = minSeverity,
+        digest = digest,
+        quietHours = quietHours,
+        breakThrough = breakThrough,
+    )
+
+    private val demoChannels = mutableListOf(
+        NotificationChannel(
+            id = "ch_demo1",
+            name = "Ops Discord",
+            kind = "discord",
+            url = "https://discord.com/api/webhooks/***",
+            categories = listOf("config", "certs", "crowdsec"),
+            minSeverity = "warning",
+        ),
+        NotificationChannel(
+            id = "ch_demo2",
+            name = "Phone",
+            kind = "gotify",
+            url = "https://gotify.example.com",
+            token = "***",
+            minSeverity = "error",
+            quietHours = "23:00-07:00",
+            breakThrough = true,
+        ),
+    )
 
     override suspend fun settingsRaw(): JsonObject = buildJsonObject {
         put("domains", buildJsonArray { add(JsonPrimitive("example.com")); add(JsonPrimitive("xyzlab.dev")) })

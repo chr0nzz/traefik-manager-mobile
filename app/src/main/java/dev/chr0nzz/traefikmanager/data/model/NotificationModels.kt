@@ -17,6 +17,7 @@ data class TmNotification(
     val ts: String = "",
     val type: String = "info",
     val msg: String = "",
+    val category: String = "",
 ) {
     val severity: NotificationSeverity
         get() = when (type.lowercase()) {
@@ -51,5 +52,81 @@ data class WebhookTestRequest(
 @Serializable
 data class WebhookTestResult(
     val ok: Boolean = false,
+    val error: String? = null,
+)
+
+/**
+ * A notification destination. Secrets read back as `***` and the URL of a kind that carries its
+ * token in the path reads back masked, so a channel round-tripped unchanged keeps what is stored.
+ */
+@Serializable
+data class NotificationChannel(
+    val id: String = "",
+    val name: String = "",
+    val kind: String = "",
+    val enabled: Boolean = true,
+    val url: String = "",
+    val token: String = "",
+    val token2: String = "",
+    val username: String = "",
+    val password: String = "",
+    val categories: List<String> = emptyList(),
+    @SerialName("min_severity") val minSeverity: String = "info",
+    val digest: String = "immediate",
+    @SerialName("quiet_hours") val quietHours: String = "",
+    @SerialName("break_through") val breakThrough: Boolean = false,
+)
+
+/**
+ * What a save sends. No property has a default, so every field is on the wire: the server treats
+ * an absent key as "keep what you had", which would silently drop a cleared field.
+ */
+@Serializable
+data class ChannelPayload(
+    val name: String,
+    val kind: String,
+    val enabled: Boolean,
+    val url: String,
+    val token: String,
+    val token2: String,
+    val username: String,
+    val password: String,
+    val categories: List<String>,
+    @SerialName("min_severity") val minSeverity: String,
+    val digest: String,
+    @SerialName("quiet_hours") val quietHours: String,
+    @SerialName("break_through") val breakThrough: Boolean,
+)
+
+fun NotificationChannel.toPayload() = ChannelPayload(
+    name = name,
+    kind = kind,
+    enabled = enabled,
+    url = url,
+    token = token,
+    token2 = token2,
+    username = username,
+    password = password,
+    categories = categories,
+    minSeverity = minSeverity,
+    digest = digest,
+    quietHours = quietHours,
+    breakThrough = breakThrough,
+)
+
+@Serializable
+data class ChannelListResponse(val channels: List<NotificationChannel> = emptyList())
+
+@Serializable
+data class ChannelSaveResponse(
+    val ok: Boolean = false,
+    val channel: NotificationChannel? = null,
+    val error: String? = null,
+)
+
+@Serializable
+data class ChannelTestResult(
+    val ok: Boolean = false,
+    val detail: String = "",
     val error: String? = null,
 )

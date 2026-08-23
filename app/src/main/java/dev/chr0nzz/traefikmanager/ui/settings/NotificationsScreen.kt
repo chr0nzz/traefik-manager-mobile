@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -45,6 +45,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Switch
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import dev.chr0nzz.traefikmanager.data.model.ChannelKinds
+import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
+import dev.chr0nzz.traefikmanager.data.model.missingFields
+import dev.chr0nzz.traefikmanager.data.model.summary
+import dev.chr0nzz.traefikmanager.ui.components.CardDivider
+import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
@@ -55,8 +74,10 @@ fun NotificationsScreen(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: NotificationsViewModel = hiltViewModel(),
+    channelsViewModel: ChannelsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val channels by channelsViewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
     var typeMenuOpen by remember { mutableStateOf(false) }
@@ -67,11 +88,51 @@ fun NotificationsScreen(
         viewModel.consumeMessage()
     }
 
+    LaunchedEffect(channels.message) {
+        val message = channels.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message)
+        channelsViewModel.consumeMessage()
+    }
+
+    channels.editing?.let { draft ->
+        ChannelEditorSheet(
+            draft = draft,
+            saving = channels.saving,
+            test = channels.test,
+            error = channels.editError,
+            onChange = channelsViewModel::onDraftChange,
+            onSave = channelsViewModel::save,
+            onTest = channelsViewModel::test,
+            onDismiss = channelsViewModel::closeEditor,
+        )
+    }
+
+    channels.pendingDelete?.let { channel ->
+        AlertDialog(
+            onDismissRequest = { channelsViewModel.askDelete(null) },
+            title = { Text("Remove channel") },
+            text = { Text("Remove channel \"${channel.name}\"? Events will stop being delivered to it.") },
+            confirmButton = {
+                TextButton(onClick = { channelsViewModel.delete(channel) }) { Text("Remove") }
+            },
+            dismissButton = {
+                TextButton(onClick = { channelsViewModel.askDelete(null) }) { Text("Cancel") }
+            },
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (channels.supported == true) {
+                FloatingActionButton(onClick = channelsViewModel::add) {
+                    Icon(Icons.Outlined.Add, contentDescription = "Add a channel")
+                }
+            }
+        },
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -85,7 +146,9 @@ fun NotificationsScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = viewModel::save, enabled = !state.saving) { Text("Save") }
+                    if (channels.supported == false) {
+                        TextButton(onClick = viewModel::save, enabled = !state.saving) { Text("Save") }
+                    }
                 },
             )
         },
@@ -107,7 +170,53 @@ fun NotificationsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
+            if (channels.supported != false) {
+                item { SectionLabel("Channels ${channels.channels.size}") }
+                item {
+                    Text(
+                        text = "Every enabled channel gets its own copy of an event, filtered by the " +
+                            "categories, severity, digest and quiet hours set on it.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted,
+                    )
+                }
+                if (channels.channels.isEmpty() && !channels.loading) {
+                    item {
+                        EmptyState(
+                            headline = "No channels configured",
+                            body = "Add a channel to get a message when routes change, backups run " +
+                                "or certificates expire.",
+                        )
+                    }
+                }
+                items(channels.channels, key = { it.id }) { channel ->
+                    ChannelRow(
+                        channel = channel,
+                        onToggle = { channelsViewModel.toggleEnabled(channel) },
+                        onTest = { channelsViewModel.testRow(channel) },
+                        onEdit = { channelsViewModel.edit(channel) },
+                        onDelete = { channelsViewModel.askDelete(channel) },
+                    )
+                }
+                channels.error?.let { message ->
+                    item {
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = palette.red,
+                        )
+                    }
+                }
+            } else {
             item { SectionLabel("Webhook") }
+            item {
+                Text(
+                    text = "Channels arrived in Traefik Manager 1.12.0. This server is older, so it " +
+                        "still takes the one webhook.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.muted,
+                )
+            }
             item {
                 TmCard {
                     OutlinedTextField(
@@ -205,12 +314,80 @@ fun NotificationsScreen(
                 }
             }
 
+            }
+
             item {
                 Text(
                     text = "The bell on Home shows what the manager has reported.",
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.sm),
+                )
+            }
+        }
+    }
+}
+
+/** One channel in the list: what it is, what it takes, and the four things you can do to it. */
+@Composable
+private fun ChannelRow(
+    channel: NotificationChannel,
+    onToggle: () -> Unit,
+    onTest: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val palette = LocalTmPalette.current
+    val missing = channel.missingFields()
+    TmCard {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                ) {
+                    Text(
+                        text = channel.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = ChannelKinds.label(channel.kind),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted,
+                    )
+                }
+                Text(
+                    text = if (missing.isEmpty()) channel.summary() else "Needs " + missing.joinToString(", "),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (missing.isEmpty()) palette.muted else palette.yellow,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Switch(checked = channel.enabled, onCheckedChange = { onToggle() })
+        }
+        CardDivider(modifier = Modifier.padding(vertical = TmSpacing.xs))
+        Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
+            IconButton(onClick = onTest) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.Send,
+                    contentDescription = "Send a test to ${channel.name}",
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+            IconButton(onClick = onEdit) {
+                Icon(Icons.Outlined.Edit, contentDescription = "Edit ${channel.name}", modifier = Modifier.size(18.dp))
+            }
+            Box(modifier = Modifier.weight(1f))
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = "Remove ${channel.name}",
+                    tint = palette.red,
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }

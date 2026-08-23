@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.chr0nzz.traefikmanager.data.model.ChannelKinds
 import dev.chr0nzz.traefikmanager.data.model.NotificationSeverity
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
@@ -214,7 +215,10 @@ fun NotificationHistoryScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = notification.stamp,
+                            text = notification.category
+                                .takeIf { it.isNotBlank() }
+                                ?.let { "${notification.stamp}  ${ChannelKinds.categoryLabel(it)}" }
+                                ?: notification.stamp,
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                             color = palette.muted,
                         )

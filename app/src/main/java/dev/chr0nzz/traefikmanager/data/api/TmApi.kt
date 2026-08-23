@@ -4,6 +4,10 @@ import dev.chr0nzz.traefikmanager.data.model.AgentHealth
 import dev.chr0nzz.traefikmanager.data.model.AgentMutationResponse
 import dev.chr0nzz.traefikmanager.data.model.AgentConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.AgentsResponse
+import dev.chr0nzz.traefikmanager.data.model.ChannelListResponse
+import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
+import dev.chr0nzz.traefikmanager.data.model.ChannelSaveResponse
+import dev.chr0nzz.traefikmanager.data.model.ChannelTestResult
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
@@ -291,6 +295,24 @@ interface TmApi {
 
     @POST("api/settings/webhook-test")
     suspend fun testWebhook(@Body body: WebhookTestRequest): WebhookTestResult
+
+    @GET("api/notifications/channels")
+    suspend fun notificationChannels(): ChannelListResponse
+
+    @POST("api/notifications/channels")
+    suspend fun createNotificationChannel(@Body body: ChannelPayload): ChannelSaveResponse
+
+    @PUT("api/notifications/channels/{id}")
+    suspend fun updateNotificationChannel(
+        @Path("id") id: String,
+        @Body body: ChannelPayload,
+    ): ChannelSaveResponse
+
+    @DELETE("api/notifications/channels/{id}")
+    suspend fun deleteNotificationChannel(@Path("id") id: String): OkResponse
+
+    @POST("api/notifications/channels/{id}/test")
+    suspend fun testNotificationChannel(@Path("id") id: String): ChannelTestResult
 
     @GET("api/settings")
     suspend fun settings(): ServerSettings
