@@ -3,7 +3,9 @@ package dev.chr0nzz.traefikmanager.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
+import dev.chr0nzz.traefikmanager.push.PushNotifier
 import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
@@ -36,6 +38,7 @@ data class NotificationsUiState(
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
+    @param:ApplicationContext private val context: android.content.Context,
     private val apiProvider: ApiProvider,
     private val settingsRepository: ManagerSettingsRepository,
     private val preferencesStore: dev.chr0nzz.traefikmanager.data.store.PreferencesStore,
@@ -78,6 +81,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesStore.setNotificationsRead(_state.value.notifications.size)
             _state.update { it.copy(unread = 0) }
+            PushNotifier.clear(context)
         }
     }
 
@@ -107,6 +111,7 @@ class NotificationsViewModel @Inject constructor(
             val result = runCatching { apiProvider.api().clearNotifications() }
             if (result.getOrNull()?.ok == true) {
                 preferencesStore.setNotificationsRead(0)
+                PushNotifier.clear(context)
                 _state.update { it.copy(notifications = emptyList(), unread = 0, message = "History cleared") }
             } else {
                 _state.update {

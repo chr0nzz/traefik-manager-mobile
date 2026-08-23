@@ -68,6 +68,15 @@ object PushNotifier {
         }
     }
 
+    /**
+     * Drop everything this app has in the tray, which is also what clears the launcher's badge:
+     * the dot is derived from active notifications, so reading the history in the app has to take
+     * them away or it stays lit.
+     */
+    fun clear(context: Context) {
+        runCatching { NotificationManagerCompat.from(context).cancelAll() }
+    }
+
     /** Android 13 and up will not show anything until the user has granted this. */
     fun allowed(context: Context): Boolean = ContextCompat.checkSelfPermission(
         context,
