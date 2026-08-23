@@ -72,6 +72,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import dev.chr0nzz.traefikmanager.data.repo.EntrypointRow
@@ -116,6 +117,11 @@ fun DashboardScreen(
     val launcher by launcherViewModel.state.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
     val unread by bellViewModel.unread.collectAsStateWithLifecycle()
+    // Coming back from the history, the server's count can have changed too, not just what was read.
+    LifecycleResumeEffect(Unit) {
+        bellViewModel.refresh()
+        onPauseOrDispose {}
+    }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     // Group cards follow the window: one across on a phone, more as it widens.
     val launcherColumns = when {

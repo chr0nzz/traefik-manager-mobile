@@ -219,12 +219,13 @@ fun NotificationsScreen(
                                 Text(
                                     text = when {
                                         push.noDistributor ->
-                                            "Needs a UnifiedPush app such as ntfy. Install one and it appears here."
+                                            "Needs a UnifiedPush app such as ntfy, NextPush, Sunup or " +
+                                                "Conversations. Install one and it appears here."
                                         push.registered ->
                                             "Delivered through ${push.currentLabel ?: "your distributor"}, " +
                                                 "as its own channel below."
                                         push.enabled -> "Waiting for the distributor to hand out an endpoint."
-                                        else -> "Get events on this phone without Google in the way."
+                                        else -> "Get events on this phone as they happen."
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = palette.muted,

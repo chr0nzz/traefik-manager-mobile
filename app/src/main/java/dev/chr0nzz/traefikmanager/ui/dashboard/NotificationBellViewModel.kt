@@ -7,20 +7,30 @@ import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.store.PreferencesStore
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** How many notifications arrived since the history was last marked read, for the bell's badge. */
+/**
+ * How many notifications arrived since the history was last marked read, for the bell's badge.
+ *
+ * The count is derived rather than snapshotted: marking the history read only writes a preference,
+ * and the badge has to clear on the way back to the dashboard without waiting for a refresh.
+ */
 @HiltViewModel
 class NotificationBellViewModel @Inject constructor(
     private val apiProvider: ApiProvider,
     private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
 
-    private val _unread = MutableStateFlow(0)
-    val unread: StateFlow<Int> = _unread.asStateFlow()
+    private val total = MutableStateFlow(0)
+
+    val unread: StateFlow<Int> =
+        combine(total, preferencesStore.preferences) { total, prefs ->
+            (total - prefs.notificationsRead).coerceAtLeast(0)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     init {
         refresh()
@@ -29,8 +39,7 @@ class NotificationBellViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             val history = runCatching { apiProvider.api().notifications() }.getOrNull() ?: return@launch
-            val seen = preferencesStore.preferences.first().notificationsRead
-            _unread.value = (history.size - seen).coerceAtLeast(0)
+            total.value = history.size
         }
     }
 }
