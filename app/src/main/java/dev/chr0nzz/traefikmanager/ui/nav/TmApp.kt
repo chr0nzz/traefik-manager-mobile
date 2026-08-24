@@ -75,6 +75,7 @@ import dev.chr0nzz.traefikmanager.ui.routes.RoutesScreen
 import dev.chr0nzz.traefikmanager.ui.settings.AppearanceScreen
 import dev.chr0nzz.traefikmanager.ui.settings.ConnectionSettingsScreen
 import dev.chr0nzz.traefikmanager.ui.settings.SettingsRoutes
+import dev.chr0nzz.traefikmanager.ui.settings.StaticConfigScreen
 import dev.chr0nzz.traefikmanager.ui.settings.AboutScreen
 import dev.chr0nzz.traefikmanager.ui.settings.AuthSettingsScreen
 import dev.chr0nzz.traefikmanager.ui.settings.DiagnosticsScreen
@@ -275,7 +276,9 @@ private fun ConnectedApp(
         // Hiding the bar leaves the drawer as the way around, which is why it stays reachable
         // from every top bar.
         navigationSuiteType = if (preferences.hideNavBar && bar) NavigationSuiteType.None else suiteType,
-        navigationItemVerticalArrangement = Arrangement.Center,
+        // The rail's own drawer button belongs at the top where a top bar's would be; a bottom
+        // bar has no such item and stays centred.
+        navigationItemVerticalArrangement = if (bar) Arrangement.Center else Arrangement.Top,
         navigationItems = {
             // The rail carries the drawer itself, so the top bars do not need a second one.
             if (!bar) {
@@ -437,6 +440,9 @@ private fun ConnectedApp(
                     activeServerName = activeServer?.name ?: "Host",
                     hostSelected = activeServer?.isHost ?: true,
                 )
+            }
+            composable(SettingsRoutes.STATIC_CONFIG) {
+                StaticConfigScreen(onClose = { navController.popBackStack() })
             }
             composable(SettingsRoutes.DIAGNOSTICS) {
                 DiagnosticsScreen(onClose = { navController.popBackStack() })

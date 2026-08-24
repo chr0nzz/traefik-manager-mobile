@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Login
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Notifications
@@ -58,6 +59,7 @@ object SettingsRoutes {
     const val AGENTS = "settings/agents"
     const val AUTH = "settings/auth"
     const val NOTIFICATIONS = "settings/notifications"
+    const val STATIC_CONFIG = "settings/static"
     const val DIAGNOSTICS = "settings/diagnostics"
     const val ABOUT = "settings/about"
     const val NOTIFICATION_HISTORY = "notifications"
@@ -88,8 +90,14 @@ private val SERVER_ENTRIES = listOf(
     SettingsEntry(
         route = SettingsRoutes.NOTIFICATIONS,
         title = "Notifications",
-        subtitle = "Webhook delivery and test",
+        subtitle = "Channels, push and the history",
         icon = Icons.Outlined.Notifications,
+    ),
+    SettingsEntry(
+        route = SettingsRoutes.STATIC_CONFIG,
+        title = "Static config",
+        subtitle = "Edit traefik.yml and restart Traefik",
+        icon = Icons.Outlined.Description,
     ),
 )
 
