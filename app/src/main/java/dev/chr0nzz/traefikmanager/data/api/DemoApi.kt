@@ -12,6 +12,13 @@ import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
 import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
 import dev.chr0nzz.traefikmanager.data.model.NotificationState
+import dev.chr0nzz.traefikmanager.data.model.AgentStaticStatus
+import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
+import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
+import dev.chr0nzz.traefikmanager.data.model.StaticAvailable
+import dev.chr0nzz.traefikmanager.data.model.StaticSaveRequest
+import dev.chr0nzz.traefikmanager.data.model.StaticSectionRequest
+import dev.chr0nzz.traefikmanager.data.model.StaticSectionResponse
 import dev.chr0nzz.traefikmanager.data.model.ChannelListResponse
 import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
 import dev.chr0nzz.traefikmanager.data.model.ChannelSaveResponse
@@ -468,7 +475,29 @@ class DemoApi : TmApi {
     override suspend fun agentCertResolvers(agentId: String) =
         CertResolversResponse(resolvers = listOf("letsencrypt"))
 
-    override suspend fun staticConfig() = StaticConfigResponse()
+    override suspend fun staticConfig(server: String?) = StaticConfigResponse(
+        path = "/app/traefik.yml",
+        raw = DEMO_STATIC,
+    )
+
+    override suspend fun staticAvailable() = StaticAvailable(available = true)
+
+    override suspend fun agentStaticStatus() =
+        AgentStaticStatus(configured = true, path = "/etc/traefik/traefik.yml", restartMethod = "proxy")
+
+    override suspend fun installPlugin(body: PluginInstallRequest): PluginInstallResponse {
+        settle()
+        return PluginInstallResponse(ok = true, plugins = listOf("demoPlugin"))
+    }
+
+    override suspend fun staticSection(body: StaticSectionRequest): StaticSectionResponse {
+        settle()
+        return StaticSectionResponse(ok = true, raw = DEMO_STATIC)
+    }
+
+    override suspend fun saveStaticConfig(body: StaticSaveRequest) = OkResponse(ok = true)
+
+    override suspend fun saveAgentStaticConfig(body: StaticSaveRequest) = OkResponse(ok = true)
 
     private val demoTemplates = mutableListOf(
         MiddlewareTemplate(id = "demo-1", name = "Secure Headers", yaml = "headers:\n  sslRedirect: true\n"),
@@ -855,3 +884,25 @@ class DemoApi : TmApi {
         .truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
         .toString()
 }
+
+private val DEMO_STATIC = """
+    api:
+      dashboard: true
+
+    entryPoints:
+      web:
+        address: ":80"
+      websecure:
+        address: ":443"
+
+    providers:
+      file:
+        directory: /app/config/dynamic
+        watch: true
+
+    experimental:
+      plugins:
+        crowdsec:
+          moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+          version: v1.4.5
+""".trimIndent()

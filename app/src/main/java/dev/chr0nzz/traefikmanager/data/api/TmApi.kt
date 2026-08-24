@@ -10,6 +10,13 @@ import dev.chr0nzz.traefikmanager.data.model.ChannelSaveResponse
 import dev.chr0nzz.traefikmanager.data.model.ChannelTestResult
 import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
 import dev.chr0nzz.traefikmanager.data.model.NotificationState
+import dev.chr0nzz.traefikmanager.data.model.AgentStaticStatus
+import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
+import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
+import dev.chr0nzz.traefikmanager.data.model.StaticAvailable
+import dev.chr0nzz.traefikmanager.data.model.StaticSaveRequest
+import dev.chr0nzz.traefikmanager.data.model.StaticSectionRequest
+import dev.chr0nzz.traefikmanager.data.model.StaticSectionResponse
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
@@ -220,7 +227,30 @@ interface TmApi {
     suspend fun agentCertResolvers(@Path("agentId") agentId: String): CertResolversResponse
 
     @GET("api/static/config")
-    suspend fun staticConfig(): StaticConfigResponse
+    suspend fun staticConfig(@Query("server") server: String? = null): StaticConfigResponse
+
+    /** Host only: whether the host itself has a static config to manage. */
+    @GET("api/static/available")
+    suspend fun staticAvailable(): StaticAvailable
+
+    /** Agent only, through the proxy: the same question asked of an agent. */
+    @GET("api/static/status")
+    suspend fun agentStaticStatus(): AgentStaticStatus
+
+    /** Host only, even for an agent's plugins: the agent id rides in the body. */
+    @POST("api/plugins/install")
+    suspend fun installPlugin(@Body body: PluginInstallRequest): PluginInstallResponse
+
+    /** Host only. Transforms a document and returns it; nothing is written. */
+    @POST("api/static/section")
+    suspend fun staticSection(@Body body: StaticSectionRequest): StaticSectionResponse
+
+    @POST("api/static/config")
+    suspend fun saveStaticConfig(@Body body: StaticSaveRequest): OkResponse
+
+    /** The agent's own write path, which has no `/config` on the end. */
+    @POST("api/static")
+    suspend fun saveAgentStaticConfig(@Body body: StaticSaveRequest): OkResponse
 
     @GET("api/settings/ui")
     suspend fun uiPrefs(): UiPrefsResponse

@@ -75,6 +75,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.PluginEntry
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TextButton
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
@@ -122,6 +130,45 @@ fun PluginsScreen(
     }
 
     val detailOnly = navigator.canNavigateBack()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.message) {
+        val message = state.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message)
+        viewModel.consumeMessage()
+    }
+
+    state.installing?.let { draft ->
+        PluginInstallSheet(
+            draft = draft,
+            busy = state.busy,
+            error = state.formError,
+            onChange = viewModel::onInstallChange,
+            onInstall = viewModel::install,
+            onDismiss = viewModel::cancelInstall,
+        )
+    }
+
+    state.editing?.let { draft ->
+        PluginEditSheet(
+            draft = draft,
+            busy = state.busy,
+            error = state.formError,
+            onChange = viewModel::onEditChange,
+            onSave = viewModel::saveEdit,
+            onDismiss = viewModel::cancelEdit,
+        )
+    }
+
+    state.pendingDelete?.let { plugin ->
+        AlertDialog(
+            onDismissRequest = { viewModel.askDelete(null) },
+            title = { Text("Remove plugin") },
+            text = { Text("Remove plugin \"${plugin.name}\"? Traefik keeps running it until it restarts.") },
+            confirmButton = { TextButton(onClick = { viewModel.delete(plugin) }) { Text("Remove") } },
+            dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text("Cancel") } },
+        )
+    }
 
     Scaffold(
         modifier = modifier
@@ -129,6 +176,14 @@ fun PluginsScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (state.canManage && !detailOnly) {
+                FloatingActionButton(onClick = viewModel::startInstall) {
+                    Icon(Icons.Outlined.Add, contentDescription = "Add a plugin")
+                }
+            }
+        },
         topBar = {
             if (!detailOnly) {
                 TopAppBar(
@@ -174,6 +229,10 @@ fun PluginsScreen(
                         contentPadding = insets,
                         onSelect = select,
                         onRefresh = viewModel::refresh,
+                        onEdit = viewModel::startEdit,
+                        onDelete = { viewModel.askDelete(it) },
+                        onRestart = viewModel::restart,
+                        onDismissRestart = viewModel::dismissRestart,
                     )
                 }
             },
@@ -200,6 +259,10 @@ private fun PluginsListPane(
     contentPadding: PaddingValues,
     onSelect: (PluginEntry) -> Unit,
     onRefresh: () -> Unit,
+    onEdit: (PluginEntry) -> Unit,
+    onDelete: (PluginEntry) -> Unit,
+    onRestart: () -> Unit,
+    onDismissRestart: () -> Unit,
 ) {
     val refreshState = rememberPullToRefreshState()
 
@@ -250,12 +313,25 @@ private fun PluginsListPane(
                 ),
                 verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
             ) {
+                if (state.restartPending) {
+                    item {
+                        PluginRestartNotice(
+                            detail = state.restartDetail,
+                            busy = state.restarting,
+                            onRestart = onRestart,
+                            onDismiss = onDismissRestart,
+                        )
+                    }
+                }
                 items(state.visible, key = { it.name }) { plugin ->
                     PluginCard(
                         plugin = plugin,
                         usageCount = state.usageFor(plugin.name),
                         selected = plugin.name == selectedName,
+                        canManage = state.canManage,
                         onClick = { onSelect(plugin) },
+                        onEdit = { onEdit(plugin) },
+                        onDelete = { onDelete(plugin) },
                         modifier = Modifier.animateItem(),
                     )
                 }
@@ -269,7 +345,10 @@ private fun PluginCard(
     plugin: PluginEntry,
     usageCount: Int,
     selected: Boolean,
+    canManage: Boolean,
     onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val palette = LocalTmPalette.current
@@ -309,16 +388,37 @@ private fun PluginCard(
         }
 
         CardDivider(modifier = Modifier.padding(top = TmSpacing.sm))
-        Text(
-            text = when (usageCount) {
-                0 -> "not referenced"
-                1 -> "used by 1 middleware"
-                else -> "used by $usageCount middlewares"
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = if (usageCount == 0) palette.yellow else palette.muted,
-            modifier = Modifier.padding(top = TmSpacing.xs),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = when (usageCount) {
+                    0 -> "not referenced"
+                    1 -> "used by 1 middleware"
+                    else -> "used by $usageCount middlewares"
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = if (usageCount == 0) palette.yellow else palette.muted,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = TmSpacing.xs),
+            )
+            if (canManage) {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Outlined.Edit,
+                        contentDescription = "Edit ${plugin.name}",
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Outlined.Delete,
+                        contentDescription = "Remove ${plugin.name}",
+                        tint = palette.red,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+        }
     }
 }
 

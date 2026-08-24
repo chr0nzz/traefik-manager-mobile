@@ -27,6 +27,9 @@ data class CertResolversResponse(
 data class StaticConfigResponse(
     val parsed: kotlinx.serialization.json.JsonObject? = null,
     val path: String = "",
+    /** The file as text, which is what the editor works on. */
+    val raw: String = "",
+    val error: String? = null,
 )
 
 @Serializable
