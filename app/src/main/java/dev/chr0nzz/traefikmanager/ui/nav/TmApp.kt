@@ -222,15 +222,17 @@ private fun ConnectedApp(
 
     // A bar keeps five slots. Your own picks win; otherwise primaries first, then whatever else
     // the server exposes.
-    val suiteDestinations = if (bar) {
-        val chosen = preferences.navItems
-            .mapNotNull { route -> destinations.firstOrNull { it.route == route } }
-        chosen.ifEmpty {
+    // A chosen set applies to the rail as much as the bar. Left unset, the bar takes the first
+    // five and the rail keeps everything, since it has the room and nothing has been asked for.
+    val chosen = preferences.navItems
+        .mapNotNull { route -> destinations.firstOrNull { it.route == route } }
+    val suiteDestinations = when {
+        chosen.isNotEmpty() -> chosen
+        bar -> {
             val primary = destinations.filter { it.primary }
-            (primary + destinations.filterNot { it.primary })
-        }.take(5)
-    } else {
-        destinations
+            (primary + destinations.filterNot { it.primary }).take(5)
+        }
+        else -> destinations
     }
     var navEditorOpen by remember { mutableStateOf(false) }
     val editorRequested by viewModel.navEditorOpen.collectAsStateWithLifecycle()

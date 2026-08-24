@@ -79,7 +79,7 @@ fun NavBarEditorSheet(
             )
 
             if (picked.isNotEmpty()) {
-                SectionLabel("In the bar ${picked.size}")
+                SectionLabel("Pinned ${picked.size}")
                 TmCard {
                     picked.forEachIndexed { index, route ->
                         val destination = available.firstOrNull { it.route == route } ?: return@forEachIndexed

@@ -152,7 +152,7 @@ fun AppearanceScreen(
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "Which screens sit in the bar, and their order.",
+                                text = "Which screens sit in the bar or the side rail, and their order.",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted,
                             )
