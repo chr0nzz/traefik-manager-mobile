@@ -8,6 +8,8 @@ import dev.chr0nzz.traefikmanager.data.model.ChannelListResponse
 import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
 import dev.chr0nzz.traefikmanager.data.model.ChannelSaveResponse
 import dev.chr0nzz.traefikmanager.data.model.ChannelTestResult
+import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
+import dev.chr0nzz.traefikmanager.data.model.NotificationState
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
@@ -292,6 +294,12 @@ interface TmApi {
 
     @POST("api/notifications/clear")
     suspend fun clearNotifications(): OkResponse
+
+    @GET("api/notifications/state")
+    suspend fun notificationState(): NotificationState
+
+    @POST("api/notifications/read")
+    suspend fun markNotificationsRead(@Body body: MarkReadRequest): OkResponse
 
     @POST("api/settings/webhook-test")
     suspend fun testWebhook(@Body body: WebhookTestRequest): WebhookTestResult

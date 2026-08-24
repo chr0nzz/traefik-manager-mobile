@@ -127,6 +127,18 @@ object ChannelKinds {
             ),
         ),
         ChannelKind(
+            key = "unifiedpush",
+            label = "Mobile app",
+            pickerLabel = "Mobile app",
+            fields = listOf(
+                url.copy(
+                    label = "Device endpoint",
+                    description = "Registered by the Traefik Manager app on your phone. " +
+                        "Editing it stops push to that device.",
+                ),
+            ),
+        ),
+        ChannelKind(
             key = "telegram",
             label = "Telegram",
             pickerLabel = "Telegram",

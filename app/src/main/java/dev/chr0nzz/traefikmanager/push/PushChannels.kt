@@ -13,10 +13,9 @@ import kotlinx.coroutines.flow.first
 /**
  * This device's own channel on the server.
  *
- * Push works by pointing a plain Generic JSON channel at the endpoint a UnifiedPush distributor
- * handed out, so the server needs no idea that a phone is on the other end. The channel is created
- * through the same API the channel list uses, and its id is remembered per server so the list can
- * mark it and turning push off can remove it.
+ * Push works by pointing a Mobile app channel at the endpoint a UnifiedPush distributor handed
+ * out. The channel is created through the same API the channel list uses, and its id is remembered
+ * per server so the list can mark it and turning push off can remove it.
  */
 @Singleton
 class PushChannels @Inject constructor(
@@ -73,7 +72,7 @@ class PushChannels @Inject constructor(
      */
     private fun payload(endpoint: String, existing: NotificationChannel?) = ChannelPayload(
         name = existing?.name?.takeIf { it.isNotBlank() } ?: deviceName,
-        kind = "generic",
+        kind = "unifiedpush",
         enabled = existing?.enabled ?: true,
         url = endpoint,
         token = "",

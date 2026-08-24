@@ -10,6 +10,7 @@ import dev.chr0nzz.traefikmanager.data.model.DeleteNotificationRequest
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository
+import dev.chr0nzz.traefikmanager.data.repo.NotificationsRepository
 import dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository.Companion.text
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,7 @@ data class NotificationsUiState(
 class NotificationsViewModel @Inject constructor(
     @param:ApplicationContext private val context: android.content.Context,
     private val apiProvider: ApiProvider,
+    private val notifications: NotificationsRepository,
     private val settingsRepository: ManagerSettingsRepository,
     private val preferencesStore: dev.chr0nzz.traefikmanager.data.store.PreferencesStore,
 ) : ViewModel() {
@@ -48,18 +50,25 @@ class NotificationsViewModel @Inject constructor(
     val state: StateFlow<NotificationsUiState> = _state.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            notifications.items.collect { list ->
+                if (list != null) _state.update { it.copy(notifications = list) }
+            }
+        }
+        viewModelScope.launch {
+            notifications.unread.collect { count -> _state.update { it.copy(unread = count) } }
+        }
         load()
     }
 
     fun load() {
         _state.update { it.copy(loading = it.notifications.isEmpty(), error = null) }
         viewModelScope.launch {
-            val history = runCatching { apiProvider.api().notifications() }
+            val history = runCatching { notifications.refresh() }
             val settings = runCatching { settingsRepository.raw() }
             _state.update { current ->
                 current.copy(
                     loading = false,
-                    notifications = history.getOrDefault(current.notifications),
                     webhookUrl = settings.getOrNull()?.text("webhook_url") ?: current.webhookUrl,
                     webhookType = settings.getOrNull()?.text("webhook_type")?.ifEmpty { "discord" }
                         ?: current.webhookType,
@@ -67,57 +76,42 @@ class NotificationsViewModel @Inject constructor(
                     error = history.exceptionOrNull()?.message,
                 )
             }
-            markUnread()
         }
-    }
-
-    /** Unread is the count the web keeps too: how many arrived since the list was last opened. */
-    private suspend fun markUnread() {
-        val seen = preferencesStore.preferences.first().notificationsRead
-        _state.update { it.copy(unread = (it.notifications.size - seen).coerceAtLeast(0)) }
     }
 
     fun markAllRead() {
         viewModelScope.launch {
-            preferencesStore.setNotificationsRead(_state.value.notifications.size)
-            _state.update { it.copy(unread = 0) }
+            notifications.markRead()
             PushNotifier.clear(context)
         }
     }
 
     fun delete(notification: TmNotification) {
         viewModelScope.launch {
-            val result = runCatching { apiProvider.api().deleteNotification(DeleteNotificationRequest(notification.ts)) }
-            val ok = result.getOrNull()?.ok == true
-            if (ok) {
-                _state.update { current ->
-                    current.copy(
-                        notifications = current.notifications.filterNot { it.ts == notification.ts },
-                        message = "Notification deleted",
-                    )
-                }
-                preferencesStore.setNotificationsRead(_state.value.notifications.size)
-                markUnread()
-            } else {
-                _state.update {
-                    it.copy(message = result.exceptionOrNull()?.message ?: "Could not delete the notification")
-                }
-            }
+            runCatching { notifications.delete(notification) }.fold(
+                onSuccess = { _state.update { it.copy(message = "Notification deleted") } },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(message = throwable.message ?: "Could not delete the notification")
+                    }
+                },
+            )
         }
     }
 
     fun clearAll() {
         viewModelScope.launch {
-            val result = runCatching { apiProvider.api().clearNotifications() }
-            if (result.getOrNull()?.ok == true) {
-                preferencesStore.setNotificationsRead(0)
-                PushNotifier.clear(context)
-                _state.update { it.copy(notifications = emptyList(), unread = 0, message = "History cleared") }
-            } else {
-                _state.update {
-                    it.copy(message = result.exceptionOrNull()?.message ?: "Could not clear the history")
-                }
-            }
+            runCatching { notifications.clear() }.fold(
+                onSuccess = {
+                    PushNotifier.clear(context)
+                    _state.update { it.copy(message = "History cleared") }
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(message = throwable.message ?: "Could not clear the history")
+                    }
+                },
+            )
         }
     }
 

@@ -146,7 +146,15 @@ fun NotificationsScreen(
         AlertDialog(
             onDismissRequest = { channelsViewModel.askDelete(null) },
             title = { Text("Remove channel") },
-            text = { Text("Remove channel \"${channel.name}\"? Events will stop being delivered to it.") },
+            text = {
+                Text(
+                    if (channel.kind == "unifiedpush") {
+                        "Remove \"${channel.name}\"? Push to that phone stops until the app registers again."
+                    } else {
+                        "Remove channel \"${channel.name}\"? Events will stop being delivered to it."
+                    },
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { channelsViewModel.delete(channel) }) { Text("Remove") }
             },
@@ -445,10 +453,8 @@ private fun ChannelRow(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
                     )
-                    // The device's own channel is a Generic JSON one underneath, but calling it
-                    // that here explains nothing about what it does.
                     Text(
-                        text = if (thisDevice) "Push notification" else ChannelKinds.label(channel.kind),
+                        text = ChannelKinds.label(channel.kind),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         maxLines = 1,

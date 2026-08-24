@@ -215,10 +215,11 @@ fun NotificationHistoryScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = notification.category
-                                .takeIf { it.isNotBlank() }
-                                ?.let { "${notification.stamp}  ${ChannelKinds.categoryLabel(it)}" }
-                                ?: notification.stamp,
+                            text = listOfNotNull(
+                                notification.since() ?: notification.stamp,
+                                notification.category.takeIf { it.isNotBlank() }
+                                    ?.let { ChannelKinds.categoryLabel(it) },
+                            ).joinToString("  "),
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                             color = palette.muted,
                         )

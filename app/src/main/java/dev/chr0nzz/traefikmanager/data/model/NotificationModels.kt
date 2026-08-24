@@ -1,6 +1,8 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,7 +12,18 @@ import kotlinx.serialization.Serializable
  * the server's local clock formatted without a timezone, and which can repeat within a second.
  */
 @Serializable
-data class DeleteNotificationRequest(val ts: String)
+data class DeleteNotificationRequest(val ts: String, val id: Int? = null)
+
+/** Marks everything up to [id] read for every client, not just this one. */
+@Serializable
+data class MarkReadRequest(val id: Int)
+
+@Serializable
+data class NotificationState(
+    @SerialName("read_until") val readUntil: Int = 0,
+    val count: Int = 0,
+    val unread: Int = 0,
+)
 
 @Serializable
 data class TmNotification(
@@ -18,6 +31,10 @@ data class TmNotification(
     val type: String = "info",
     val msg: String = "",
     val category: String = "",
+    /** Stable from manager 1.12.0. Zero on older servers, where [ts] is the only handle. */
+    val id: Int = 0,
+    /** Unix seconds, or zero when the server could not parse its own stamp. */
+    val at: Long = 0,
 ) {
     val severity: NotificationSeverity
         get() = when (type.lowercase()) {
@@ -27,11 +44,30 @@ data class TmNotification(
             else -> NotificationSeverity.Info
         }
 
-    /** Rendered verbatim in server time: there is no endpoint that reports the server's zone. */
+    /**
+     * The reader's own local time when the server sent an epoch, and the raw server-local string
+     * when it did not: without [at] there is no way to know which zone [ts] was written in.
+     */
     val stamp: String
-        get() = runCatching {
-            LocalDateTime.parse(ts, PARSER).format(DISPLAY)
-        }.getOrDefault(ts)
+        get() = if (at > 0) {
+            Instant.ofEpochSecond(at).atZone(ZoneId.systemDefault()).format(DISPLAY)
+        } else {
+            runCatching { LocalDateTime.parse(ts, PARSER).format(DISPLAY) }.getOrDefault(ts)
+        }
+
+    /** "3 min ago" and the like, for anything recent enough to still be interesting. */
+    fun since(now: Instant = Instant.now()): String? {
+        if (at <= 0) return null
+        val seconds = now.epochSecond - at
+        if (seconds < 0) return null
+        return when {
+            seconds < 60 -> "just now"
+            seconds < 3600 -> "${seconds / 60} min ago"
+            seconds < 86400 -> "${seconds / 3600} h ago"
+            seconds < 604800 -> "${seconds / 86400} d ago"
+            else -> null
+        }
+    }
 
     private companion object {
         val PARSER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

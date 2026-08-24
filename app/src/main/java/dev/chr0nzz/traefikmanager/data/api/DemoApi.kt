@@ -10,6 +10,8 @@ import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyEntry
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
+import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
+import dev.chr0nzz.traefikmanager.data.model.NotificationState
 import dev.chr0nzz.traefikmanager.data.model.ChannelListResponse
 import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
 import dev.chr0nzz.traefikmanager.data.model.ChannelSaveResponse
@@ -670,11 +672,21 @@ class DemoApi : TmApi {
     override suspend fun notifications(): List<TmNotification> {
         settle()
         return listOf(
-            TmNotification("2026-08-12 10:31:04", "warning", "Ping all: 7/8 online - unreachable: bin", "traefik"),
-            TmNotification("2026-08-12 09:12:44", "success", "Route media saved", "config"),
-            TmNotification("2026-08-11 22:04:01", "info", "Traefik v3.7.10 is available - update now", "update"),
-            TmNotification("2026-08-11 21:58:12", "error", "CrowdSec LAPI unreachable", "crowdsec"),
+            TmNotification("2026-08-12 10:31:04", "warning", "Ping all: 7/8 online - unreachable: bin", "traefik", 4, 1786026664),
+            TmNotification("2026-08-12 09:12:44", "success", "Route media saved", "config", 3, 1786021964),
+            TmNotification("2026-08-11 22:04:01", "info", "Traefik v3.7.10 is available - update now", "update", 2, 1785981841),
+            TmNotification("2026-08-11 21:58:12", "error", "CrowdSec LAPI unreachable", "crowdsec", 1, 1785981492),
         )
+    }
+
+    override suspend fun notificationState(): NotificationState {
+        settle()
+        return NotificationState(readUntil = 0, count = 4, unread = 2)
+    }
+
+    override suspend fun markNotificationsRead(body: MarkReadRequest): OkResponse {
+        settle()
+        return OkResponse(ok = true)
     }
 
     override suspend fun testWebhook(body: WebhookTestRequest): WebhookTestResult {

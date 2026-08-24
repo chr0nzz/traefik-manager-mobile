@@ -36,10 +36,13 @@ object PushNotifier {
         val parsed = runCatching { json.parseToJsonElement(raw) as? JsonObject }.getOrNull()
         val message = parsed?.text("message")?.takeIf { it.isNotBlank() } ?: raw.take(400)
         val event = parsed?.text("event").orEmpty()
-        show(context, message, event)
+        // The server names the category it came from, which is more use as a title than the
+        // product name repeated on every line of the tray.
+        val source = parsed?.text("source")?.takeIf { it.isNotBlank() } ?: "Traefik Manager"
+        show(context, message, event, source)
     }
 
-    fun show(context: Context, message: String, event: String) {
+    fun show(context: Context, message: String, event: String, source: String = "Traefik Manager") {
         ensureChannel(context)
         if (!allowed(context)) return
 
@@ -52,7 +55,7 @@ object PushNotifier {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Traefik Manager")
+            .setContentTitle(source)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setColor(colourFor(event))
