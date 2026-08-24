@@ -66,7 +66,9 @@ class CrowdSecRepository @Inject constructor(
         if (snapshot.decisions.ok || snapshot.alerts.ok) {
             cache[key()] = CachedRead(snapshot, System.currentTimeMillis())
         }
-        snapshot.decisions.valueOrNull()?.let { navCounts.report(NavCountsStore.CROWDSEC, it.size) }
+        // The badge counts the alerts the tab actually lists, not the decisions behind them:
+        // one alert can carry several decisions, and a decision can outlive its alert.
+        snapshot.alerts.valueOrNull()?.let { navCounts.report(NavCountsStore.CROWDSEC, it.size) }
         snapshot
     }
 

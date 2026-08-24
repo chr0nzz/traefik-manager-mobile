@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 /**
  * One copy of the notification list for the bell and the history screen.
@@ -33,7 +36,8 @@ import kotlinx.coroutines.flow.stateIn
 class NotificationsRepository @Inject constructor(
     private val apiProvider: ApiProvider,
     private val preferencesStore: PreferencesStore,
-    serverScope: ServerScope,
+    private val serverScope: ServerScope,
+    private val json: Json,
     @param:ApplicationScope private val scope: CoroutineScope,
 ) {
 
@@ -44,13 +48,43 @@ class NotificationsRepository @Inject constructor(
     private val _readUntil = MutableStateFlow<Int?>(null)
 
     private val inFlightLock = Any()
+
+    private companion object {
+        const val HOST = "host"
+    }
+
     private var inFlight: Deferred<List<TmNotification>>? = null
 
     init {
+        scope.launch { restore() }
         serverScope.onServerChanged {
             _items.value = null
             _readUntil.value = null
         }
+    }
+
+    private fun key(): String = serverScope.activeAgentId.value ?: HOST
+
+    /**
+     * Draw last night's list while today's is on its way. Only for the server it was written on:
+     * every server keeps its own notifications, and showing one server's under another's name
+     * would be worse than a spinner.
+     */
+    private suspend fun restore() {
+        val prefs = preferencesStore.preferences.first()
+        if (prefs.notificationsCache.isBlank() || prefs.notificationsCacheServer != key()) return
+        val cached = runCatching {
+            json.decodeFromString<List<TmNotification>>(prefs.notificationsCache)
+        }.getOrNull() ?: return
+        if (_items.value == null) {
+            _items.value = cached
+            if (prefs.notificationsReadUntil >= 0) _readUntil.value = prefs.notificationsReadUntil
+        }
+    }
+
+    private suspend fun persist(list: List<TmNotification>) {
+        val payload = runCatching { json.encodeToString(list) }.getOrNull() ?: return
+        preferencesStore.setNotificationsCache(key(), payload, _readUntil.value ?: -1)
     }
 
     val unread: StateFlow<Int> =
@@ -76,6 +110,7 @@ class NotificationsRepository @Inject constructor(
         val list = api.notifications()
         _items.value = list
         _readUntil.value = runCatching { api.notificationState().readUntil }.getOrNull()
+        persist(list)
         return list
     }
 
@@ -87,7 +122,10 @@ class NotificationsRepository @Inject constructor(
         // between the last refresh and this tap has not been read by anyone yet.
         if (_readUntil.value != null && highest > 0) {
             runCatching { apiProvider.api().markNotificationsRead(MarkReadRequest(highest)) }
-                .onSuccess { _readUntil.value = highest }
+                .onSuccess {
+                    _readUntil.value = highest
+                    persist(list)
+                }
         } else {
             preferencesStore.setNotificationsRead(list.size)
         }
@@ -103,6 +141,7 @@ class NotificationsRepository @Inject constructor(
         _items.value = _items.value?.filterNot {
             if (notification.id > 0) it.id == notification.id else it.ts == notification.ts
         }
+        persist(_items.value.orEmpty())
         if (_readUntil.value == null) {
             preferencesStore.setNotificationsRead(_items.value.orEmpty().size)
         }
@@ -111,6 +150,7 @@ class NotificationsRepository @Inject constructor(
     suspend fun clear() {
         apiProvider.api().clearNotifications()
         _items.value = emptyList()
+        persist(emptyList())
         if (_readUntil.value == null) preferencesStore.setNotificationsRead(0)
     }
 

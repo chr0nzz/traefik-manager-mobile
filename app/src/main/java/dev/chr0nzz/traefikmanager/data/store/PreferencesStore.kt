@@ -31,6 +31,12 @@ data class TmPreferences(
     val pushChannels: Map<String, String> = emptyMap(),
     /** Why the last registration attempt failed, for the settings screen to explain. */
     val pushError: String = "",
+    /** The last notification list read, as JSON, so a cold start has something to draw. */
+    val notificationsCache: String = "",
+    /** Which server that cache belongs to, since each one keeps its own notifications. */
+    val notificationsCacheServer: String = "",
+    /** The server's shared read marker as last seen, or -1 on a server without one. */
+    val notificationsReadUntil: Int = -1,
     /** Routes of the destinations pinned to the bar, in order. Empty means the app decides. */
     val navItems: List<String> = emptyList(),
     val hideNavBar: Boolean = false,
@@ -57,11 +63,22 @@ class PreferencesStore @Inject constructor(
             pushEndpoint = prefs[KEY_PUSH_ENDPOINT].orEmpty(),
             pushChannels = decodeChannels(prefs[KEY_PUSH_CHANNELS]),
             pushError = prefs[KEY_PUSH_ERROR].orEmpty(),
+            notificationsCache = prefs[KEY_NOTIFICATIONS_CACHE].orEmpty(),
+            notificationsCacheServer = prefs[KEY_NOTIFICATIONS_CACHE_SERVER].orEmpty(),
+            notificationsReadUntil = prefs[KEY_NOTIFICATIONS_READ_UNTIL] ?: -1,
         )
     }
 
     suspend fun setPushEnabled(enabled: Boolean) {
         dataStore.edit { it[KEY_PUSH_ENABLED] = enabled }
+    }
+
+    suspend fun setNotificationsCache(server: String, payload: String, readUntil: Int) {
+        dataStore.edit {
+            it[KEY_NOTIFICATIONS_CACHE] = payload
+            it[KEY_NOTIFICATIONS_CACHE_SERVER] = server
+            it[KEY_NOTIFICATIONS_READ_UNTIL] = readUntil
+        }
     }
 
     suspend fun setPushError(message: String) {
@@ -132,6 +149,9 @@ class PreferencesStore @Inject constructor(
         val KEY_PUSH_ENDPOINT = stringPreferencesKey("push_endpoint")
         val KEY_PUSH_CHANNELS = stringPreferencesKey("push_channels")
         val KEY_PUSH_ERROR = stringPreferencesKey("push_error")
+        val KEY_NOTIFICATIONS_CACHE = stringPreferencesKey("notifications_cache")
+        val KEY_NOTIFICATIONS_CACHE_SERVER = stringPreferencesKey("notifications_cache_server")
+        val KEY_NOTIFICATIONS_READ_UNTIL = intPreferencesKey("notifications_read_until")
         val KEY_NAV_ITEMS = stringPreferencesKey("nav_items")
         val KEY_HIDE_NAV_BAR = booleanPreferencesKey("hide_nav_bar")
     }
