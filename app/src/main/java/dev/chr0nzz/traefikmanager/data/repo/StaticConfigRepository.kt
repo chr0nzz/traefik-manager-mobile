@@ -6,6 +6,7 @@ import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
 import dev.chr0nzz.traefikmanager.data.model.StaticConfigResponse
 import dev.chr0nzz.traefikmanager.data.model.StaticSaveRequest
 import dev.chr0nzz.traefikmanager.data.model.StaticSectionRequest
+import dev.chr0nzz.traefikmanager.data.model.StaticSectionResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.serialization.json.Json
@@ -69,6 +70,11 @@ class StaticConfigRepository @Inject constructor(
         }
     }
 
+    /** Best effort: no catalogue means no update badges, never an error on the screen. */
+    suspend fun catalog(): Map<String, String> = runCatching {
+        apiProvider.apiFor(null).pluginCatalog().plugins
+    }.getOrDefault(emptyMap())
+
     suspend fun install(
         staticYaml: String,
         middlewareYaml: String,
@@ -104,6 +110,38 @@ class StaticConfigRepository @Inject constructor(
 
     suspend fun removePlugin(name: String) =
         section(action = "remove", name = name, oldName = name, data = JsonObject(emptyMap()))
+
+    /**
+     * Transform the document and hand it back without writing it.
+     *
+     * This is what the section editors stage: the server owns the YAML surgery, the app holds the
+     * result until someone presses save. Nothing here touches the file.
+     */
+    suspend fun applySection(
+        section: String,
+        action: String,
+        name: String,
+        oldName: String,
+        data: JsonObject,
+        currentRaw: String,
+    ): StaticSectionResponse {
+        val response = try {
+            apiProvider.apiFor(null).staticSection(
+                StaticSectionRequest(
+                    section = section,
+                    action = action,
+                    name = name,
+                    oldName = oldName,
+                    data = data,
+                    currentRaw = currentRaw,
+                ),
+            )
+        } catch (exception: HttpException) {
+            error(message(exception) ?: "Could not apply the change (HTTP ${exception.code()})")
+        }
+        if (!response.ok || response.raw.isBlank()) error(response.error ?: "Could not apply the change")
+        return response
+    }
 
     private suspend fun section(action: String, name: String, oldName: String, data: JsonObject) {
         // An agent's file is not on the host, so the document has to travel with the request.

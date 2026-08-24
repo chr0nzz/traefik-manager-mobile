@@ -240,6 +240,7 @@ fun PluginsScreen(
                 AnimatedPane {
                     PluginDetailPane(
                         plugin = state.plugins.firstOrNull { it.name == selectedName },
+                        latest = selectedName?.let { state.updates[it] },
                         users = selectedName?.let { state.usersOf(it) }.orEmpty(),
                         showBack = navigator.canNavigateBack(),
                         contentPadding = insets,
@@ -327,6 +328,7 @@ private fun PluginsListPane(
                     PluginCard(
                         plugin = plugin,
                         usageCount = state.usageFor(plugin.name),
+                        latest = state.updates[plugin.name],
                         selected = plugin.name == selectedName,
                         canManage = state.canManage,
                         onClick = { onSelect(plugin) },
@@ -344,6 +346,7 @@ private fun PluginsListPane(
 private fun PluginCard(
     plugin: PluginEntry,
     usageCount: Int,
+    latest: String?,
     selected: Boolean,
     canManage: Boolean,
     onClick: () -> Unit,
@@ -380,11 +383,20 @@ private fun PluginCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(
-                text = plugin.displayVersion,
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                color = palette.blue,
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = plugin.displayVersion,
+                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                    color = palette.blue,
+                )
+                if (latest != null) {
+                    Text(
+                        text = "$latest available",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.yellow,
+                    )
+                }
+            }
         }
 
         CardDivider(modifier = Modifier.padding(top = TmSpacing.sm))
@@ -426,6 +438,7 @@ private fun PluginCard(
 @Composable
 private fun PluginDetailPane(
     plugin: PluginEntry?,
+    latest: String?,
     users: List<dev.chr0nzz.traefikmanager.data.model.MiddlewareDef>,
     showBack: Boolean,
     contentPadding: PaddingValues,
@@ -509,8 +522,16 @@ private fun PluginDetailPane(
                     label = "Version",
                     value = plugin.displayVersion,
                     mono = true,
-                    last = true,
+                    last = latest == null,
                 )
+                if (latest != null) {
+                    DetailRow(
+                        label = "Update",
+                        value = "$latest available",
+                        mono = true,
+                        last = true,
+                    )
+                }
             }
 
             SectionLabel("Used by middlewares")

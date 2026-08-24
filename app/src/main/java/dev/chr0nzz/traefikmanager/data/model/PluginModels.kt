@@ -88,8 +88,46 @@ data class StaticSectionRequest(
 data class StaticSectionResponse(
     val ok: Boolean = false,
     val raw: String = "",
+    val parsed: kotlinx.serialization.json.JsonObject? = null,
     val error: String? = null,
 )
 
 @Serializable
 data class StaticSaveRequest(val content: String)
+
+@Serializable
+data class PluginCatalog(val plugins: Map<String, String> = emptyMap())
+
+/**
+ * Which installed plugins the catalogue has a newer version of.
+ *
+ * Catalogue keys are module paths, lowercased by the server. A version that is not plain numeric
+ * parts, a pre-release say, is left alone rather than guessed at.
+ */
+object PluginVersions {
+
+    fun updates(plugins: List<PluginEntry>, catalog: Map<String, String>): Map<String, String> =
+        plugins.mapNotNull { plugin ->
+            val latest = catalog[plugin.moduleName.lowercase()] ?: return@mapNotNull null
+            if (isNewer(latest, plugin.version)) plugin.name to latest else null
+        }.toMap()
+
+    fun isNewer(latest: String, installed: String): Boolean {
+        val newer = parts(latest) ?: return false
+        val current = parts(installed) ?: return false
+        val length = maxOf(newer.size, current.size)
+        for (index in 0 until length) {
+            val a = newer.getOrElse(index) { 0 }
+            val b = current.getOrElse(index) { 0 }
+            if (a != b) return a > b
+        }
+        return false
+    }
+
+    private fun parts(version: String): List<Int>? {
+        val trimmed = version.trim().removePrefix("v").removePrefix("V")
+        if (trimmed.isEmpty()) return null
+        val pieces = trimmed.split('.')
+        return pieces.map { it.toIntOrNull() ?: return null }
+    }
+}

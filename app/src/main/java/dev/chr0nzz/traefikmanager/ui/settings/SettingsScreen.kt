@@ -133,10 +133,13 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     // Authentication, connection and notifications configure the host itself, never an agent.
+    // An agent's static config is its own file though, and editing it is the point of selecting it.
     val serverEntries = if (hostSelected) {
         SERVER_ENTRIES
     } else {
-        SERVER_ENTRIES.filter { it.route == SettingsRoutes.AGENTS }
+        SERVER_ENTRIES.filter {
+            it.route == SettingsRoutes.AGENTS || it.route == SettingsRoutes.STATIC_CONFIG
+        }
     }
     val palette = LocalTmPalette.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -178,7 +181,7 @@ fun SettingsScreen(
                 item {
                     Text(
                         text = "Authentication, connection and notification settings belong to the host. " +
-                            "Switch to the host to change them.",
+                            "Switch to the host to change them. Static config is this agent's own file.",
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                     )
