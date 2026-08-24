@@ -2,6 +2,8 @@ package dev.chr0nzz.traefikmanager
 
 import dev.chr0nzz.traefikmanager.data.model.ChannelKinds
 import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
+import dev.chr0nzz.traefikmanager.data.model.PluginEntry
+import dev.chr0nzz.traefikmanager.data.model.PluginVersions
 import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.missingFields
 import dev.chr0nzz.traefikmanager.data.model.summary
@@ -119,5 +121,49 @@ class NotificationStampTest {
     fun `anything older than a week falls back to the date`() {
         val now = java.time.Instant.ofEpochSecond(1786026664L)
         assertNull(TmNotification(at = 1785000000L).since(now))
+    }
+}
+
+class PluginVersionTest {
+
+    @Test
+    fun `a higher patch is an update`() {
+        assertEquals(true, PluginVersions.isNewer("v1.4.6", "v1.4.5"))
+    }
+
+    @Test
+    fun `the same version is not an update`() {
+        assertEquals(false, PluginVersions.isNewer("v1.4.5", "v1.4.5"))
+    }
+
+    @Test
+    fun `an older catalogue entry is not an update`() {
+        assertEquals(false, PluginVersions.isNewer("v1.4.4", "v1.4.5"))
+    }
+
+    @Test
+    fun `a missing v prefix compares the same`() {
+        assertEquals(true, PluginVersions.isNewer("1.5.0", "v1.4.9"))
+    }
+
+    @Test
+    fun `different lengths compare by the parts they have`() {
+        assertEquals(true, PluginVersions.isNewer("v1.5", "v1.4.9"))
+        assertEquals(false, PluginVersions.isNewer("v1.4", "v1.4.0"))
+    }
+
+    @Test
+    fun `a pre-release is left alone rather than guessed at`() {
+        assertEquals(false, PluginVersions.isNewer("v1.5.0-beta", "v1.4.5"))
+        assertEquals(false, PluginVersions.isNewer("v1.5.0", "latest"))
+    }
+
+    @Test
+    fun `matching is by lowercased module path`() {
+        val plugins = listOf(
+            PluginEntry(name = "crowdsec", moduleName = "github.com/Org/Plugin", version = "v1.0.0"),
+        )
+        val updates = PluginVersions.updates(plugins, mapOf("github.com/org/plugin" to "v1.1.0"))
+        assertEquals(mapOf("crowdsec" to "v1.1.0"), updates)
     }
 }

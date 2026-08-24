@@ -11,6 +11,7 @@ import dev.chr0nzz.traefikmanager.data.model.ChannelTestResult
 import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
 import dev.chr0nzz.traefikmanager.data.model.NotificationState
 import dev.chr0nzz.traefikmanager.data.model.AgentStaticStatus
+import dev.chr0nzz.traefikmanager.data.model.PluginCatalog
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
 import dev.chr0nzz.traefikmanager.data.model.StaticAvailable
@@ -236,6 +237,10 @@ interface TmApi {
     /** Agent only, through the proxy: the same question asked of an agent. */
     @GET("api/static/status")
     suspend fun agentStaticStatus(): AgentStaticStatus
+
+    /** Host only: the catalogue is the hub's, cached there for a day. */
+    @GET("api/plugins/catalog")
+    suspend fun pluginCatalog(): PluginCatalog
 
     /** Host only, even for an agent's plugins: the agent id rides in the body. */
     @POST("api/plugins/install")

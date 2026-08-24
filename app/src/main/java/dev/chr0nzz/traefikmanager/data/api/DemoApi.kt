@@ -13,6 +13,7 @@ import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
 import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
 import dev.chr0nzz.traefikmanager.data.model.NotificationState
 import dev.chr0nzz.traefikmanager.data.model.AgentStaticStatus
+import dev.chr0nzz.traefikmanager.data.model.PluginCatalog
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
 import dev.chr0nzz.traefikmanager.data.model.StaticAvailable
@@ -484,6 +485,10 @@ class DemoApi : TmApi {
 
     override suspend fun agentStaticStatus() =
         AgentStaticStatus(configured = true, path = "/etc/traefik/traefik.yml", restartMethod = "proxy")
+
+    override suspend fun pluginCatalog() = PluginCatalog(
+        plugins = mapOf("github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin" to "v1.4.6"),
+    )
 
     override suspend fun installPlugin(body: PluginInstallRequest): PluginInstallResponse {
         settle()

@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.data.model.PluginEntry
 import dev.chr0nzz.traefikmanager.data.model.PluginUsage
+import dev.chr0nzz.traefikmanager.data.model.PluginVersions
 import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.PluginsRepository
 import dev.chr0nzz.traefikmanager.data.repo.StaticConfigRepository
@@ -38,6 +39,8 @@ data class PluginsUiState(
     val restartDetail: String = "",
     val restarting: Boolean = false,
     val message: String? = null,
+    /** Plugin name to the newer version the catalogue lists, for the ones that are behind. */
+    val updates: Map<String, String> = emptyMap(),
 ) {
     val visible: List<PluginEntry>
         get() {
@@ -107,11 +110,15 @@ class PluginsViewModel @Inject constructor(
             val manageable = staticConfig.manageable()
             runCatching { repository.load() }.fold(
                 onSuccess = { snapshot ->
+                    // The catalogue is only worth asking for once something is installed, and a
+                    // failure just means no badges.
+                    val catalog = if (snapshot.plugins.isEmpty()) emptyMap() else staticConfig.catalog()
                     _state.update {
                         it.copy(
                             loading = false,
                             refreshing = false,
                             canManage = manageable,
+                            updates = PluginVersions.updates(snapshot.plugins, catalog),
                             plugins = snapshot.plugins,
                             usage = snapshot.usage,
                             middlewares = snapshot.middlewares,
