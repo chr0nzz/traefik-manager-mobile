@@ -35,7 +35,10 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
 /** The bar holds five, so the sixth tick has to wait for one to be freed. */
-private const val MAX_ITEMS = 5
+private const val BAR_ITEMS = 5
+
+/** A rail runs down the screen, so it holds more than a bottom bar can. */
+private const val RAIL_ITEMS = 8
 
 /**
  * Which destinations sit in the bottom bar, and in what order. Everything else stays reachable
@@ -46,12 +49,14 @@ private const val MAX_ITEMS = 5
 fun NavBarEditorSheet(
     available: List<TmDestination>,
     chosen: List<String>,
+    railLayout: Boolean,
     onSave: (List<String>) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val palette = LocalTmPalette.current
     val sheetState = rememberModalBottomSheetState()
-    val picked = remember { mutableStateListOf<String>().apply { addAll(chosen) } }
+    val picked = remember(chosen) { mutableStateListOf<String>().apply { addAll(chosen) } }
+    val maxItems = if (railLayout) RAIL_ITEMS else BAR_ITEMS
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -67,13 +72,13 @@ fun NavBarEditorSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = "Navigation bar",
+                text = if (railLayout) "Side rail" else "Navigation bar",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Pick up to $MAX_ITEMS and order them with the arrows. Everything else stays " +
-                    "in the drawer.",
+                text = "Pick up to $maxItems and order them with the arrows. Everything else stays " +
+                    "in the drawer. This is remembered for this screen size and this server.",
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
             )
@@ -136,7 +141,7 @@ fun NavBarEditorSheet(
             TmCard {
                 available.forEachIndexed { index, destination ->
                     val on = destination.route in picked
-                    val full = picked.size >= MAX_ITEMS && !on
+                    val full = picked.size >= maxItems && !on
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier

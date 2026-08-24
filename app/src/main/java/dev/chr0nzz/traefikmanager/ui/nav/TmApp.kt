@@ -223,12 +223,17 @@ private fun ConnectedApp(
 
     // A bar keeps five slots. Your own picks win; otherwise primaries first, then whatever else
     // the server exposes.
-    // A chosen set applies to the rail as much as the bar. Left unset, the bar takes the first
-    // five and the rail keeps everything, since it has the room and nothing has been asked for.
-    val chosen = preferences.navItems
+    // What is pinned is remembered per server and per layout: servers do not run the same tabs,
+    // and a rail has room for more than a bottom bar does.
+    val activeAgentId by viewModel.activeAgentId.collectAsStateWithLifecycle()
+    val navScope = navScopeOf(activeAgentId, bar)
+    val savedRoutes = preferences.navScopes[navScope] ?: preferences.navItems
+    val chosen = savedRoutes
         .mapNotNull { route -> destinations.firstOrNull { it.route == route } }
     val suiteDestinations = when {
-        chosen.isNotEmpty() -> chosen
+        // A pick that names nothing this server runs is no pick at all, so the defaults stand
+        // rather than leaving an empty bar behind.
+        chosen.isNotEmpty() -> chosen.take(if (bar) 5 else 8)
         bar -> {
             val primary = destinations.filter { it.primary }
             (primary + destinations.filterNot { it.primary }).take(5)
@@ -247,10 +252,13 @@ private fun ConnectedApp(
     if (navEditorOpen) {
         NavBarEditorSheet(
             available = destinations,
-            chosen = suiteDestinations.map { it.route },
+            // What was actually chosen, not what is on screen: unset on a rail means every
+            // destination, and handing the editor eleven items makes it unusable.
+            chosen = chosen.map { it.route },
+            railLayout = !bar,
             onSave = { routes ->
                 navEditorOpen = false
-                scope.launch { viewModel.setNavItems(routes) }
+                scope.launch { viewModel.setNavItems(navScope, routes) }
             },
             onDismiss = { navEditorOpen = false },
         )
@@ -548,3 +556,7 @@ private fun railBadge(badge: NavBadge, counted: Boolean): (@Composable () -> Uni
 }
 
 private fun alertLabel(alerts: Int): String = if (alerts == 1) "1 alert" else "$alerts alerts"
+
+/** Pinned items belong to one server on one kind of layout, so the key names both. */
+private fun navScopeOf(serverId: String?, bar: Boolean): String =
+    (serverId?.takeIf { it.isNotBlank() } ?: "host") + "|" + if (bar) "bar" else "rail"

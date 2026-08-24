@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -37,8 +38,10 @@ data class TmPreferences(
     val notificationsCacheServer: String = "",
     /** The server's shared read marker as last seen, or -1 on a server without one. */
     val notificationsReadUntil: Int = -1,
-    /** Routes of the destinations pinned to the bar, in order. Empty means the app decides. */
+    /** What was pinned before the choice became per screen size and per server. */
     val navItems: List<String> = emptyList(),
+    /** Pinned routes keyed by "&lt;server&gt;|&lt;layout&gt;": a phone and a tablet want different sets. */
+    val navScopes: Map<String, List<String>> = emptyMap(),
     val hideNavBar: Boolean = false,
 )
 
@@ -58,6 +61,7 @@ class PreferencesStore @Inject constructor(
             migrationNotice = prefs[KEY_MIGRATION_NOTICE],
             notificationsRead = prefs[KEY_NOTIFICATIONS_READ] ?: 0,
             navItems = prefs[KEY_NAV_ITEMS]?.split(',')?.filter { it.isNotBlank() }.orEmpty(),
+            navScopes = decodeScopes(prefs[KEY_NAV_SCOPES]),
             hideNavBar = prefs[KEY_HIDE_NAV_BAR] ?: false,
             pushEnabled = prefs[KEY_PUSH_ENABLED] ?: false,
             pushEndpoint = prefs[KEY_PUSH_ENDPOINT].orEmpty(),
@@ -97,8 +101,16 @@ class PreferencesStore @Inject constructor(
         }
     }
 
-    suspend fun setNavItems(routes: List<String>) {
-        dataStore.edit { it[KEY_NAV_ITEMS] = routes.joinToString(",") }
+    /**
+     * An empty list is stored, not removed: it means "this scope was reset to the defaults", which
+     * has to outrank the pre-scope setting the app still falls back to.
+     */
+    suspend fun setNavItems(scope: String, routes: List<String>) {
+        dataStore.edit { prefs ->
+            val current = decodeScopes(prefs[KEY_NAV_SCOPES]).toMutableMap()
+            current[scope] = routes
+            prefs[KEY_NAV_SCOPES] = encodeScopes(current)
+        }
     }
 
     suspend fun setHideNavBar(hidden: Boolean) {
@@ -153,6 +165,7 @@ class PreferencesStore @Inject constructor(
         val KEY_NOTIFICATIONS_CACHE_SERVER = stringPreferencesKey("notifications_cache_server")
         val KEY_NOTIFICATIONS_READ_UNTIL = intPreferencesKey("notifications_read_until")
         val KEY_NAV_ITEMS = stringPreferencesKey("nav_items")
+        val KEY_NAV_SCOPES = stringPreferencesKey("nav_scopes")
         val KEY_HIDE_NAV_BAR = booleanPreferencesKey("hide_nav_bar")
     }
 }
@@ -170,3 +183,19 @@ private fun decodeChannels(raw: String?): Map<String, String> =
 
 private fun encodeChannels(channels: Map<String, String>): String =
     channels.entries.joinToString("\n") { "${it.key}|${it.value}" }
+
+/**
+ * Scopes are stored as JSON. The key embeds a separator of its own and the value is a list, which
+ * is exactly the case a hand-rolled "key|a,b" format gets wrong.
+ */
+private val scopeJson = Json { ignoreUnknownKeys = true }
+
+internal fun decodeScopes(raw: String?): Map<String, List<String>> {
+    if (raw.isNullOrBlank()) return emptyMap()
+    return runCatching {
+        scopeJson.decodeFromString<Map<String, List<String>>>(raw)
+    }.getOrDefault(emptyMap())
+}
+
+internal fun encodeScopes(scopes: Map<String, List<String>>): String =
+    runCatching { scopeJson.encodeToString(scopes) }.getOrDefault("")

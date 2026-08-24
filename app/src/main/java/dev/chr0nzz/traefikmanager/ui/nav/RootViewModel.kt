@@ -58,6 +58,9 @@ class RootViewModel @Inject constructor(
     private val _switching = MutableStateFlow(false)
     val switching: StateFlow<Boolean> = _switching.asStateFlow()
 
+    /** The selected agent's id, or null for the host. Known immediately, unlike the server list. */
+    val activeAgentId: StateFlow<String?> = serverScope.activeAgentId
+
     val activeServer: StateFlow<ServerEntry?> = combine(serverScope.activeAgentId, _servers) { id, list ->
         list.firstOrNull { it.id == id } ?: list.firstOrNull()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -141,8 +144,8 @@ class RootViewModel @Inject constructor(
 
     fun consumeNavEditor() = navEditorRequests.consume()
 
-    fun setNavItems(routes: List<String>) {
-        viewModelScope.launch { preferencesStore.setNavItems(routes) }
+    fun setNavItems(scope: String, routes: List<String>) {
+        viewModelScope.launch { preferencesStore.setNavItems(scope, routes) }
     }
 
     fun setHideNavBar(hidden: Boolean) {
