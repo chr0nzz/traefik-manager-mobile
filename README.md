@@ -53,9 +53,13 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 - **Services** - health, backends up, provider filter and the routers each one serves
 - **Logs** - live tail with CLF and JSON parsing, tappable facet filters and the v1.10 analytics cards
 - **CrowdSec** - decisions and alerts, add and delete bans, the full stat desk and a world map
-- **Certificates and plugins** - expiry thresholds and the installed plugin list
+- **Certificates** - expiry thresholds and the resolvers in use
+- **Plugins** - install, edit, remove and restart, with the middleware written for you
+- **Static config** - edit `traefik.yml` and restart Traefik, on the host or any agent
 - **Backups** - dynamic and static config backups, restore, and Git backup status, history, diff and push
 - **Multi-server** - switch between the host and any agent from the drawer; tabs follow what each server actually runs
+- **Notifications** - notification channels matching the web: Discord, Slack, ntfy, Gotify, Pushover, Pushbullet, Telegram or generic JSON, each with its own categories, severity, digest and quiet hours
+- **Push** - events delivered to the phone over UnifiedPush
 - **Home screen widgets** - the same desk cards in three sizes, configured per widget
 - **App lock** - optional biometric unlock, with relock when the app goes to the background
 
@@ -65,8 +69,9 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 
 | Requirement              | Version                     |
 | ------------------------- | ---------------------------- |
-| Traefik Manager (server) | **v1.10.1 or higher**       |
+| Traefik Manager (server) | **v1.10.1 or higher**, v1.12.0 for notification channels and push |
 | Android                  | 13+ (API 33)                |
+| Push (optional)          | A UnifiedPush distributor, such as the ntfy app |
 | JDK (to build)           | 17                          |
 
 ---
@@ -119,4 +124,5 @@ keyPassword=...
 - [Retrofit](https://square.github.io/retrofit/) 3 · OkHttp 5 · kotlinx.serialization
 - [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) with an encrypted key store
 - [Glance](https://developer.android.com/jetpack/androidx/releases/glance) and WorkManager for the widgets
+- [UnifiedPush](https://unifiedpush.org) for push
 - Robolectric and JUnit for tests, R8 with resource shrinking for release builds
