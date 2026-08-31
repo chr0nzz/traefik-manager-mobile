@@ -15,6 +15,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.CallSplit
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.LinkOff
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Hub
 import androidx.compose.material.icons.outlined.Info
@@ -59,6 +63,10 @@ fun ServiceDetailPane(
     onBack: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
     modifier: Modifier = Modifier,
+    authorable: Boolean = false,
+    onEdit: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    onOwnership: (Boolean) -> Unit = {},
 ) {
     if (service == null) {
         MessageState(
@@ -119,6 +127,12 @@ fun ServiceDetailPane(
                     title = "Service details",
                 )
                 DetailRow("Type", service.kindLabel, mono = true)
+                if (service.composite.isNotEmpty()) {
+                    DetailRow(
+                        "Managed",
+                        if (service.owned) "by Traefik Manager" else "in the config file",
+                    )
+                }
                 DetailRow("Provider", service.provider, mono = true)
                 DetailRow(
                     label = "Status",
@@ -263,7 +277,10 @@ fun ServiceDetailPane(
             }
         }
 
-        if (service.servers.isNotEmpty()) {
+        val composite = service.composite.isNotEmpty()
+        val fileProvider = service.provider == "file"
+        val canAuthor = authorable && fileProvider
+        if (service.servers.isNotEmpty() || canAuthor) {
             HorizontalFloatingToolbar(
                 expanded = true,
                 modifier = Modifier
@@ -271,13 +288,34 @@ fun ServiceDetailPane(
                     .padding(contentPadding)
                     .padding(bottom = TmSpacing.lg),
             ) {
-                TooltipIconButton(
-                    label = "Copy backend URLs",
-                    icon = Icons.Outlined.ContentCopy,
-                    onClick = {
-                        clipboard.setText(AnnotatedString(service.servers.joinToString("\n") { it.target }))
-                    },
-                )
+                if (service.servers.isNotEmpty()) {
+                    TooltipIconButton(
+                        label = "Copy backend URLs",
+                        icon = Icons.Outlined.ContentCopy,
+                        onClick = {
+                            clipboard.setText(AnnotatedString(service.servers.joinToString("\n") { it.target }))
+                        },
+                    )
+                }
+                if (canAuthor && composite) {
+                    TooltipIconButton(
+                        label = if (service.owned) "Stop managing" else "Manage this service",
+                        icon = if (service.owned) Icons.Outlined.LinkOff else Icons.Outlined.Link,
+                        onClick = { onOwnership(!service.owned) },
+                    )
+                }
+                if (canAuthor && (service.owned || !composite)) {
+                    TooltipIconButton(
+                        label = "Edit service",
+                        icon = Icons.Outlined.Edit,
+                        onClick = onEdit,
+                    )
+                    TooltipIconButton(
+                        label = "Delete service",
+                        icon = Icons.Outlined.Delete,
+                        onClick = onDelete,
+                    )
+                }
             }
         }
     }

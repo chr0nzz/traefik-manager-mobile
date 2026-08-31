@@ -7,7 +7,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.ServiceHealth
 import dev.chr0nzz.traefikmanager.data.model.ServiceProtocol
 import dev.chr0nzz.traefikmanager.data.model.ServiceRow
+import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.ServiceRows
+import dev.chr0nzz.traefikmanager.data.model.TraefikService
 import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.ServicesRepository
 import javax.inject.Inject
@@ -35,6 +37,13 @@ data class ServicesUiState(
     val protocol: ServiceProtocol? = null,
     val provider: String? = null,
     val error: String? = null,
+    val authorable: Boolean = false,
+    val raw: Map<String, TraefikService> = emptyMap(),
+    val editing: ServiceDraft? = null,
+    val editError: String? = null,
+    val busy: Boolean = false,
+    val pendingDelete: ServiceRow? = null,
+    val message: String? = null,
 ) {
     val protocols: List<ServiceProtocol>
         get() = ServiceProtocol.entries.filter { proto -> services.any { it.proto == proto } }
@@ -85,6 +94,8 @@ class ServicesViewModel @Inject constructor(
                 it.copy(
                     loading = false,
                     services = ServiceRows.from(cached),
+                    raw = rawByName(cached),
+                    authorable = repository.authorable,
                     reachable = cached.reachable,
                 )
             }
@@ -93,7 +104,93 @@ class ServicesViewModel @Inject constructor(
         watchServerChanges()
     }
 
+    private fun rawByName(envelope: ServiceEnvelope): Map<String, TraefikService> =
+        (envelope.http + envelope.tcp + envelope.udp)
+            .associateBy { it.name.substringBefore('@') }
+
     fun refresh() = load(initial = false)
+
+    fun startCreate() = _state.update {
+        it.copy(editing = ServiceDraft(), editError = null)
+    }
+
+    fun startEdit(row: ServiceRow) = _state.update {
+        it.copy(editing = ServiceDraft.of(row.name, it.raw[row.shortName]), editError = null)
+    }
+
+    fun onDraftChange(draft: ServiceDraft) = _state.update { it.copy(editing = draft) }
+
+    fun cancelEdit() = _state.update { it.copy(editing = null, editError = null) }
+
+    fun askDelete(row: ServiceRow?) = _state.update { it.copy(pendingDelete = row) }
+
+    fun consumeMessage() = _state.update { it.copy(message = null) }
+
+    fun save() {
+        val draft = _state.value.editing ?: return
+        val problem = draft.problem()
+        if (problem != null) {
+            _state.update { it.copy(editError = problem) }
+            return
+        }
+        _state.update { it.copy(busy = true, editError = null) }
+        viewModelScope.launch {
+            runCatching { repository.save(draft.payload()) }.fold(
+                onSuccess = { name ->
+                    _state.update { it.copy(busy = false, editing = null, message = "Service $name saved") }
+                    load(initial = false)
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(busy = false, editError = throwable.message ?: "Could not save the service")
+                    }
+                },
+            )
+        }
+    }
+
+    fun delete(row: ServiceRow) {
+        _state.update { it.copy(pendingDelete = null, busy = true) }
+        viewModelScope.launch {
+            runCatching { repository.delete(row.shortName) }.fold(
+                onSuccess = {
+                    _state.update { it.copy(busy = false, message = "Service ${row.shortName} deleted") }
+                    load(initial = false)
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(busy = false, message = throwable.message ?: "Could not delete the service")
+                    }
+                },
+            )
+        }
+    }
+
+    fun setOwnership(row: ServiceRow, adopt: Boolean) {
+        _state.update { it.copy(busy = true) }
+        viewModelScope.launch {
+            runCatching { repository.setOwnership(row.shortName, adopt) }.fold(
+                onSuccess = { owned ->
+                    _state.update {
+                        it.copy(
+                            busy = false,
+                            message = if (owned) {
+                                "Traefik Manager now manages ${row.shortName}"
+                            } else {
+                                "${row.shortName} is no longer managed here"
+                            },
+                        )
+                    }
+                    load(initial = false)
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(busy = false, message = throwable.message ?: "Could not change the ownership")
+                    }
+                },
+            )
+        }
+    }
 
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
@@ -134,6 +231,8 @@ class ServicesViewModel @Inject constructor(
                             loading = false,
                             refreshing = false,
                             services = ServiceRows.from(envelope),
+                            raw = rawByName(envelope),
+                            authorable = repository.authorable,
                             reachable = envelope.reachable,
                             error = null,
                         )
@@ -161,7 +260,6 @@ class ServicesViewModel @Inject constructor(
         }
     }
 
-    /** A different server means different data: drop what is on screen and refetch. */
     private fun watchServerChanges() {
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {

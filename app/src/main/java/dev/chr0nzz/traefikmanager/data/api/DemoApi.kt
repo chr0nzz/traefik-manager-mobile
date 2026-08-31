@@ -13,6 +13,10 @@ import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
 import dev.chr0nzz.traefikmanager.data.model.MarkReadRequest
 import dev.chr0nzz.traefikmanager.data.model.NotificationState
 import dev.chr0nzz.traefikmanager.data.model.AgentStaticStatus
+import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipRequest
+import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipResponse
+import dev.chr0nzz.traefikmanager.data.model.ServicePayload
+import dev.chr0nzz.traefikmanager.data.model.ServiceSaveResponse
 import dev.chr0nzz.traefikmanager.data.model.PluginCatalog
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
@@ -485,6 +489,24 @@ class DemoApi : TmApi {
 
     override suspend fun agentStaticStatus() =
         AgentStaticStatus(configured = true, path = "/etc/traefik/traefik.yml", restartMethod = "proxy")
+
+    override suspend fun saveService(body: ServicePayload): ServiceSaveResponse {
+        settle()
+        return ServiceSaveResponse(ok = true, name = body.name)
+    }
+
+    override suspend fun deleteService(name: String): OkResponse {
+        settle()
+        return OkResponse(ok = true)
+    }
+
+    override suspend fun setServiceOwnership(
+        name: String,
+        body: ServiceOwnershipRequest,
+    ): ServiceOwnershipResponse {
+        settle()
+        return ServiceOwnershipResponse(ok = true, owned = body.adopt)
+    }
 
     override suspend fun pluginCatalog() = PluginCatalog(
         plugins = mapOf("github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin" to "v1.4.6"),

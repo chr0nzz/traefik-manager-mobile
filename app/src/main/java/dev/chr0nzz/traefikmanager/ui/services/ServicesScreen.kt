@@ -15,6 +15,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -27,7 +38,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -85,6 +95,37 @@ fun ServicesScreen(
     }
 
     val detailOnly = navigator.canNavigateBack()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.message) {
+        val message = state.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message)
+        viewModel.consumeMessage()
+    }
+
+    state.editing?.let { draft ->
+        ServiceEditorSheet(
+            draft = draft,
+            services = state.services.map { it.shortName }.filterNot { it == draft.originalName },
+            busy = state.busy,
+            error = state.editError,
+            onChange = viewModel::onDraftChange,
+            onSave = viewModel::save,
+            onDismiss = viewModel::cancelEdit,
+        )
+    }
+
+    state.pendingDelete?.let { row ->
+        AlertDialog(
+            onDismissRequest = { viewModel.askDelete(null) },
+            title = { Text("Delete service") },
+            text = { Text("Delete \"${row.shortName}\"? Routes still pointing at it will break.") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.delete(row) }) { Text("Delete") }
+            },
+            dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text("Cancel") } },
+        )
+    }
 
     Scaffold(
         modifier = modifier
@@ -92,6 +133,14 @@ fun ServicesScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (state.authorable && !detailOnly) {
+                FloatingActionButton(onClick = viewModel::startCreate) {
+                    Icon(Icons.Outlined.Add, contentDescription = "Add a service")
+                }
+            }
+        },
         topBar = {
             if (!detailOnly) {
                 ServicesTopBar(
@@ -130,11 +179,16 @@ fun ServicesScreen(
             },
             detailPane = {
                 AnimatedPane {
+                    val selected = state.services.firstOrNull { it.key == selectedKey }
                     ServiceDetailPane(
-                        service = state.services.firstOrNull { it.key == selectedKey },
+                        service = selected,
                         showBack = navigator.canNavigateBack(),
                         contentPadding = insets,
                         onBack = { scope.launch { navigator.navigateBack() } },
+                        authorable = state.authorable,
+                        onEdit = { selected?.let(viewModel::startEdit) },
+                        onDelete = { selected?.let { viewModel.askDelete(it) } },
+                        onOwnership = { adopt -> selected?.let { viewModel.setOwnership(it, adopt) } },
                     )
                 }
             },

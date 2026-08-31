@@ -18,6 +18,10 @@ import dev.chr0nzz.traefikmanager.data.model.StaticAvailable
 import dev.chr0nzz.traefikmanager.data.model.StaticSaveRequest
 import dev.chr0nzz.traefikmanager.data.model.StaticSectionRequest
 import dev.chr0nzz.traefikmanager.data.model.StaticSectionResponse
+import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipRequest
+import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipResponse
+import dev.chr0nzz.traefikmanager.data.model.ServicePayload
+import dev.chr0nzz.traefikmanager.data.model.ServiceSaveResponse
 import dev.chr0nzz.traefikmanager.data.model.CreateAgentRequest
 import dev.chr0nzz.traefikmanager.data.model.ApiKeyStatus
 import dev.chr0nzz.traefikmanager.data.model.AuthActionResponse
@@ -152,6 +156,18 @@ interface TmApi {
     @GET("api/traefik/plugins")
     suspend fun plugins(): PluginsResponse
 
+    @POST("api/services")
+    suspend fun saveService(@Body body: ServicePayload): ServiceSaveResponse
+
+    @DELETE("api/services/{name}")
+    suspend fun deleteService(@Path("name") name: String): OkResponse
+
+    @POST("api/services/{name}/ownership")
+    suspend fun setServiceOwnership(
+        @Path("name") name: String,
+        @Body body: ServiceOwnershipRequest,
+    ): ServiceOwnershipResponse
+
     @GET("api/traefik/services")
     suspend fun services(): ServiceEnvelope
 
@@ -230,54 +246,42 @@ interface TmApi {
     @GET("api/static/config")
     suspend fun staticConfig(@Query("server") server: String? = null): StaticConfigResponse
 
-    /** Host only: whether the host itself has a static config to manage. */
     @GET("api/static/available")
     suspend fun staticAvailable(): StaticAvailable
 
-    /** Agent only, through the proxy: the same question asked of an agent. */
     @GET("api/static/status")
     suspend fun agentStaticStatus(): AgentStaticStatus
 
-    /** Host only: the catalogue is the hub's, cached there for a day. */
     @GET("api/plugins/catalog")
     suspend fun pluginCatalog(): PluginCatalog
 
-    /** Host only, even for an agent's plugins: the agent id rides in the body. */
     @POST("api/plugins/install")
     suspend fun installPlugin(@Body body: PluginInstallRequest): PluginInstallResponse
 
-    /** Host only. Transforms a document and returns it; nothing is written. */
     @POST("api/static/section")
     suspend fun staticSection(@Body body: StaticSectionRequest): StaticSectionResponse
 
     @POST("api/static/config")
     suspend fun saveStaticConfig(@Body body: StaticSaveRequest): OkResponse
 
-    /** The agent's own write path, which has no `/config` on the end. */
     @POST("api/static")
     suspend fun saveAgentStaticConfig(@Body body: StaticSaveRequest): OkResponse
 
     @GET("api/settings/ui")
     suspend fun uiPrefs(): UiPrefsResponse
 
-    /** Merges rather than replaces, so one key at a time is safe here (app.py:3432-3433). */
     @POST("api/settings/ui")
     suspend fun saveUiPrefs(@Body body: UiPrefsRequest): UiPrefsResponse
 
     @GET("api/dashboard/config")
     suspend fun dashboardConfig(@Query("server") server: String? = null): DashboardConfig
 
-    /**
-     * Read-modify-write over the whole document: the hub replaces custom_groups and
-     * route_overrides with exactly what this body carries (app.py:3926-3942).
-     */
     @POST("api/dashboard/config")
     suspend fun saveDashboardConfig(
         @Body body: DashboardConfig,
         @Query("server") server: String? = null,
     ): OkResponse
 
-    /** The hub answers a bare array here; an agent answers an object. Pick by active server. */
     @GET("api/backups")
     suspend fun hubBackups(): List<HubBackup>
 
@@ -287,7 +291,6 @@ interface TmApi {
     @POST("api/backup/create")
     suspend fun createBackup(): CreateBackupResponse
 
-    /** Host only: the hub's plain create never touches the static file, an agent's always does. */
     @POST("api/static/backup/create")
     suspend fun createStaticBackup(): CreateBackupResponse
 
@@ -360,7 +363,6 @@ interface TmApi {
     @GET("api/settings")
     suspend fun settings(): ServerSettings
 
-    /** The same document as [settings], untyped, so a save can round-trip keys this app does not model. */
     @GET("api/settings")
     suspend fun settingsRaw(): JsonObject
 
@@ -379,7 +381,6 @@ interface TmApi {
     @GET("api/agents")
     suspend fun agents(): AgentsResponse
 
-    /** The same call, read whole: every configurable field, with secrets redacted to "***". */
     @GET("api/agents")
     suspend fun agentConfigs(): AgentConfigsResponse
 
