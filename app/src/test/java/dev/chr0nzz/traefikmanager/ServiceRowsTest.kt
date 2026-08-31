@@ -10,6 +10,9 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceKind
 import dev.chr0nzz.traefikmanager.data.model.ServiceLoadBalancer
 import dev.chr0nzz.traefikmanager.data.model.ServiceProtocol
 import dev.chr0nzz.traefikmanager.data.model.ServiceRows
+import dev.chr0nzz.traefikmanager.data.model.ServiceTypes
+import dev.chr0nzz.traefikmanager.ui.services.ServiceChildDraft
+import dev.chr0nzz.traefikmanager.ui.services.ServiceDraft
 import dev.chr0nzz.traefikmanager.data.model.ServiceServer
 import dev.chr0nzz.traefikmanager.data.model.TraefikService
 import dev.chr0nzz.traefikmanager.data.model.WeightedChild
@@ -131,7 +134,7 @@ class ServiceRowsTest {
             failover = FailoverService(service = "primary@file", fallback = "backup@file"),
         )
         assertEquals(
-            listOf("a@file (3)", "b@file (0)", "c@file", "main@file", "shadow@file mirror", "primary@file", "backup@file fallback"),
+            listOf("a@file (3)", "b@file (0)", "c@file", "main@file", "shadow@file mirror (10%)", "primary@file", "backup@file fallback"),
             row(service).composite,
         )
     }
@@ -244,5 +247,215 @@ class ServiceRowsTest {
                "loadBalancer":{"servers":[{"url":"http://a:80"}],"responseForwarding":{"flushInterval":"100ms"}}}""",
         )
         assertEquals("http://a:80", service.loadBalancer?.servers?.single()?.url)
+    }
+}
+
+class HighestRandomWeightTest {
+
+    private fun row(service: TraefikService) = ServiceRows.row(service, ServiceProtocol.Http)
+
+    @Test
+    fun `the declared type is recognised`() {
+        val service = TraefikService(name = "hrw", type = "highestRandomWeight")
+        assertEquals(ServiceKind.HighestRandomWeight, row(service).kind)
+    }
+
+    @Test
+    fun `the structure is recognised when no type is declared`() {
+        val service = TraefikService(
+            name = "hrw",
+            highestRandomWeight = WeightedService(
+                services = listOf(WeightedChild(name = "a", weight = 3)),
+            ),
+        )
+        assertEquals(ServiceKind.HighestRandomWeight, row(service).kind)
+    }
+
+    @Test
+    fun `it no longer renders as the word service`() {
+        val service = TraefikService(name = "hrw", type = "highestRandomWeight")
+        assertEquals("highestrandomweight", row(service).kindLabel)
+    }
+
+    @Test
+    fun `children are listed with their weights`() {
+        val service = TraefikService(
+            name = "hrw",
+            type = "highestRandomWeight",
+            highestRandomWeight = WeightedService(
+                services = listOf(
+                    WeightedChild(name = "blue", weight = 3),
+                    WeightedChild(name = "green"),
+                ),
+            ),
+        )
+        assertEquals(listOf("blue (3)", "green"), row(service).composite)
+    }
+
+    @Test
+    fun `an unknown type still falls back rather than crashing`() {
+        val service = TraefikService(name = "odd", type = "somethingNew")
+        assertEquals(null, row(service).kind)
+        assertEquals("service", row(service).kindLabel)
+    }
+}
+
+class MirrorPercentTest {
+
+    private fun row(service: TraefikService) = ServiceRows.row(service, ServiceProtocol.Http)
+
+    @Test
+    fun `a configured percent is shown`() {
+        val service = TraefikService(
+            name = "m",
+            type = "mirroring",
+            mirroring = MirroringService(service = "main", mirrors = listOf(MirrorChild("shadow", 10))),
+        )
+        assertEquals(listOf("main", "shadow mirror (10%)"), row(service).composite)
+    }
+
+    @Test
+    fun `a missing percent reads as zero rather than vanishing`() {
+        val service = TraefikService(
+            name = "m",
+            type = "mirroring",
+            mirroring = MirroringService(service = "main", mirrors = listOf(MirrorChild("shadow"))),
+        )
+        assertEquals(listOf("main", "shadow mirror (0%)"), row(service).composite)
+    }
+}
+
+class ServiceOwnershipTest {
+
+    private fun envelope(owned: List<String> = emptyList(), children: List<String> = emptyList()) =
+        ServiceEnvelope(
+            http = listOf(
+                TraefikService(name = "pool@file", type = "weighted"),
+                TraefikService(name = "pool-backend-1@file", type = "loadBalancer"),
+                TraefikService(name = "hand@file", type = "weighted"),
+            ),
+            ownedServices = owned,
+            ownedChildren = children,
+        )
+
+    @Test
+    fun `owned parents are flagged and hand written ones are not`() {
+        val rows = ServiceRows.from(envelope(owned = listOf("pool")))
+        assertEquals(true, rows.first { it.shortName == "pool" }.owned)
+        assertEquals(false, rows.first { it.shortName == "hand" }.owned)
+    }
+
+    @Test
+    fun `generated children are hidden from the list`() {
+        val rows = ServiceRows.from(envelope(owned = listOf("pool"), children = listOf("pool-backend-1")))
+        assertEquals(listOf("hand", "pool"), rows.map { it.shortName })
+    }
+
+    @Test
+    fun `an envelope without the ownership keys leaves everything unowned and visible`() {
+        val rows = ServiceRows.from(envelope())
+        assertEquals(3, rows.size)
+        assertTrue(rows.none { it.owned })
+    }
+}
+
+class ServiceDraftTest {
+
+    @Test
+    fun `a weighted draft posts one child per row with its weight`() {
+        val draft = ServiceDraft(
+            name = "pool",
+            type = "weighted",
+            children = listOf(
+                ServiceChildDraft(kind = ServiceChildDraft.MANUAL, address = "10.0.0.10:80", share = "9"),
+                ServiceChildDraft(kind = ServiceChildDraft.SERVICE, name = "canary", share = "1"),
+            ),
+        )
+        val payload = draft.payload()
+        assertEquals("weighted", payload.type)
+        assertEquals(listOf("manual", "service"), payload.children.map { it.kind })
+        assertEquals(listOf(9, 1), payload.children.map { it.weight })
+        assertEquals("canary", payload.children[1].name)
+        assertNull(draft.problem())
+    }
+
+    @Test
+    fun `blank rows are dropped rather than posted`() {
+        val draft = ServiceDraft(
+            name = "pool",
+            type = "weighted",
+            children = listOf(
+                ServiceChildDraft(kind = ServiceChildDraft.MANUAL, address = "10.0.0.10:80"),
+                ServiceChildDraft(kind = ServiceChildDraft.MANUAL, address = "   "),
+                ServiceChildDraft(kind = ServiceChildDraft.SERVICE, name = ""),
+            ),
+        )
+        assertEquals(1, draft.payload().children.size)
+    }
+
+    @Test
+    fun `an empty draft is refused before it reaches the server`() {
+        assertEquals("Give the service a name", ServiceDraft().problem())
+        assertEquals(
+            "Add at least one backend",
+            ServiceDraft(name = "pool", children = listOf(ServiceChildDraft())).problem(),
+        )
+    }
+
+    @Test
+    fun `a name the server would reject is refused here first`() {
+        assertEquals(
+            "Use letters, numbers, dots, dashes or underscores",
+            ServiceDraft(name = "bad name@file").problem(),
+        )
+    }
+
+    @Test
+    fun `a load balancer cannot be built only from service references`() {
+        val draft = ServiceDraft(
+            name = "pool",
+            type = "loadBalancer",
+            children = listOf(ServiceChildDraft(kind = ServiceChildDraft.SERVICE, name = "other")),
+        )
+        assertEquals("A load balancer needs at least one address", draft.problem())
+    }
+
+    @Test
+    fun `an existing weighted service reads back into rows`() {
+        val service = TraefikService(
+            name = "pool@file",
+            type = "weighted",
+            weighted = WeightedService(listOf(WeightedChild("a@file", 3), WeightedChild("b@file", 1))),
+        )
+        val draft = ServiceDraft.of("pool@file", service)
+        assertEquals("pool", draft.name)
+        assertEquals("pool", draft.originalName)
+        assertEquals("weighted", draft.type)
+        assertEquals(listOf("a", "b"), draft.children.map { it.name })
+        assertEquals(listOf("3", "1"), draft.children.map { it.share })
+    }
+
+    @Test
+    fun `an existing mirroring service puts the served row first`() {
+        val service = TraefikService(
+            name = "m@file",
+            type = "mirroring",
+            mirroring = MirroringService(service = "main@file", mirrors = listOf(MirrorChild("shadow@file", 10))),
+        )
+        val draft = ServiceDraft.of("m@file", service)
+        assertEquals(listOf("main", "shadow"), draft.children.map { it.name })
+        assertEquals(listOf("0", "10"), draft.children.map { it.share })
+    }
+
+    @Test
+    fun `highest random weight reads back but is marked unauthorable`() {
+        val service = TraefikService(
+            name = "h@file",
+            type = "highestRandomWeight",
+            highestRandomWeight = WeightedService(listOf(WeightedChild("a@file", 2))),
+        )
+        val draft = ServiceDraft.of("h@file", service)
+        assertEquals("highestRandomWeight", draft.type)
+        assertTrue(ServiceTypes.authorable.none { it.first == draft.type })
     }
 }

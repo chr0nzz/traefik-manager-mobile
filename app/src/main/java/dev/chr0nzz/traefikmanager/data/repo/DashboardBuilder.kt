@@ -221,6 +221,8 @@ object DashboardBuilder {
             obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, "disabled", obj.provider)
             obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, "warning", obj.provider)
             obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, "no status reported", obj.provider)
+            servers.isNullOrEmpty() && obj.type != null && obj.type != "loadBalancer" ->
+                ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
             servers.isNullOrEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, "no health check configured", obj.provider)
             down > 0 -> ObjectSignal(obj.shortName, ObjectState.Warn, "$down of ${servers.size} backends down", obj.provider)
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
@@ -287,9 +289,6 @@ object DashboardBuilder {
         val warn = signals.count { it.state == ObjectState.Warn }
         val idle = signals.count { it.state == ObjectState.Idle }
         val ok = signals.count { it.state == ObjectState.Ok }
-        // Traefik's overview counts every provider and its own internal objects, while the
-        // tabs list only what this app manages. When the list is present the list is the truth,
-        // otherwise the card would contradict the screen it links to.
         val total = when {
             listed -> signals.size
             overviewTotal != null -> overviewTotal

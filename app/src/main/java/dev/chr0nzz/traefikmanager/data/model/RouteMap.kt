@@ -181,9 +181,11 @@ object RouteMapBuilder {
         id = "svc:$name",
         kind = MapNodeKind.Service,
         label = name.substringBefore('@'),
-        detail = owner.target,
+        detail = owner.target.ifEmpty {
+            owner.compositeChildren.joinToString(", ") { it.name.substringBefore('@') }
+        },
         route = owner,
-        health = if (owner.target.isEmpty() && owner.servers.isEmpty()) MapHealth.Down else MapHealth.Quiet,
+        health = if (owner.backendCount == 0) MapHealth.Down else MapHealth.Quiet,
     )
 
     private fun health(route: Route): MapHealth = when {

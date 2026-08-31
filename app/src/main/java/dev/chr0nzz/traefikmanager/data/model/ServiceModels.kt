@@ -64,6 +64,7 @@ data class TraefikService(
     val weighted: WeightedService? = null,
     val mirroring: MirroringService? = null,
     val failover: FailoverService? = null,
+    val highestRandomWeight: WeightedService? = null,
 )
 
 @Serializable
@@ -72,6 +73,8 @@ data class ServiceEnvelope(
     val tcp: List<TraefikService> = emptyList(),
     val udp: List<TraefikService> = emptyList(),
     val reachable: Boolean = true,
+    val ownedServices: List<String> = emptyList(),
+    val ownedChildren: List<String> = emptyList(),
 ) {
     val isEmpty: Boolean get() = http.isEmpty() && tcp.isEmpty() && udp.isEmpty()
 }
@@ -103,6 +106,7 @@ enum class ServiceKind(val label: String) {
     Weighted("weighted"),
     Mirroring("mirroring"),
     Failover("failover"),
+    HighestRandomWeight("highestrandomweight"),
 }
 
 enum class ServiceHealth { Ok, Warning, Error }
@@ -131,6 +135,7 @@ data class ServiceRow(
     val passHostHeader: Boolean?,
     val usedBy: List<String>,
     val errors: List<String>,
+    val owned: Boolean = false,
 ) {
     val kindLabel: String get() = kind?.label ?: "service"
 
@@ -158,12 +163,17 @@ data class ServiceRow(
 
 object ServiceRows {
 
-    fun from(envelope: ServiceEnvelope): List<ServiceRow> =
-        (envelope.http.map { it to ServiceProtocol.Http } +
+    fun from(envelope: ServiceEnvelope): List<ServiceRow> {
+        val owned = envelope.ownedServices.toSet()
+        val generated = envelope.ownedChildren.toSet()
+        return (envelope.http.map { it to ServiceProtocol.Http } +
             envelope.tcp.map { it to ServiceProtocol.Tcp } +
             envelope.udp.map { it to ServiceProtocol.Udp })
             .map { (service, proto) -> row(service, proto) }
+            .filterNot { it.shortName in generated }
+            .map { if (it.shortName in owned) it.copy(owned = true) else it }
             .sortedBy { it.name.lowercase() }
+    }
 
     fun row(service: TraefikService, proto: ServiceProtocol): ServiceRow {
         val statuses = service.serverStatus.orEmpty()
@@ -206,12 +216,14 @@ object ServiceRows {
             "weighted" -> return ServiceKind.Weighted
             "mirroring" -> return ServiceKind.Mirroring
             "failover" -> return ServiceKind.Failover
+            "highestrandomweight" -> return ServiceKind.HighestRandomWeight
         }
         return when {
             service.loadBalancer != null -> ServiceKind.LoadBalancer
             service.mirroring != null -> ServiceKind.Mirroring
             service.failover != null -> ServiceKind.Failover
             service.weighted != null -> ServiceKind.Weighted
+            service.highestRandomWeight != null -> ServiceKind.HighestRandomWeight
             else -> null
         }
     }
@@ -230,9 +242,14 @@ object ServiceRows {
             add(if (child.weight != null) "${child.name} (${child.weight})" else child.name)
         }
         service.mirroring?.service?.let(::add)
-        service.mirroring?.mirrors?.forEach { mirror -> add("${mirror.name} mirror") }
+        service.mirroring?.mirrors?.forEach { mirror ->
+            add("${mirror.name} mirror (${mirror.percent ?: 0}%)")
+        }
         service.failover?.service?.let(::add)
         service.failover?.fallback?.let { add("$it fallback") }
+        service.highestRandomWeight?.services?.forEach { child ->
+            add(if (child.weight != null) "${child.name} (${child.weight})" else child.name)
+        }
     }
 
     fun errorsOf(element: JsonElement?): List<String> = when (element) {
@@ -246,4 +263,72 @@ object ServiceRows {
         is JsonObject -> (element["message"] as? JsonPrimitive)?.content ?: element.toString()
         else -> element.toString()
     }
+}
+
+@Serializable
+data class ServiceChildPayload(
+    val kind: String,
+    val name: String = "",
+    val address: String = "",
+    val scheme: String = "http",
+    val weight: Int = 1,
+    val percent: Int = 0,
+)
+
+@Serializable
+data class ServicePayload(
+    val name: String,
+    val type: String,
+    val originalName: String = "",
+    val configFile: String = "",
+    val children: List<ServiceChildPayload> = emptyList(),
+)
+
+@Serializable
+data class ServiceSaveResponse(
+    val ok: Boolean = false,
+    val name: String = "",
+    val error: String? = null,
+)
+
+@Serializable
+data class ServiceOwnershipRequest(val adopt: Boolean)
+
+@Serializable
+data class ServiceOwnershipResponse(
+    val ok: Boolean = false,
+    val owned: Boolean = false,
+    val error: String? = null,
+)
+
+object ServiceTypes {
+
+    val authorable: List<Pair<String, String>> = listOf(
+        "loadBalancer" to "Load balancer",
+        "weighted" to "Weighted",
+        "mirroring" to "Mirroring",
+        "failover" to "Failover",
+    )
+
+    fun label(type: String): String =
+        authorable.firstOrNull { it.first == type }?.second
+            ?: if (type == "highestRandomWeight") "Highest random weight" else type
+
+    fun shareLabel(type: String): String = when (type) {
+        "mirroring" -> "Percent"
+        "failover" -> ""
+        else -> "Weight"
+    }
+
+    fun rowHint(type: String, index: Int): String? = when {
+        type == "mirroring" && index == 0 -> "serves traffic"
+        type == "mirroring" -> "mirror"
+        type == "failover" && index == 0 -> "primary"
+        type == "failover" && index == 1 -> "fallback"
+        else -> null
+    }
+
+    fun usesShare(type: String): Boolean = type == "weighted" || type == "mirroring"
+
+    fun maxRows(type: String): Int = if (type == "failover") 2 else Int.MAX_VALUE
 }

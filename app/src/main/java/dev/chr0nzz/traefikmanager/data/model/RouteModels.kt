@@ -9,6 +9,14 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 
 @Serializable
+data class CompositeChild(
+    val name: String = "",
+    val url: String = "",
+    val weight: Int = 0,
+    val percent: Int = 0,
+)
+
+@Serializable
 data class Route(
     val id: String = "",
     val name: String = "",
@@ -28,6 +36,8 @@ data class Route(
     val passHostHeader: Boolean? = null,
     val priority: Int? = null,
     val serviceType: String = "loadBalancer",
+    val serviceOwned: Boolean = false,
+    val compositeChildren: List<CompositeChild> = emptyList(),
     val configFile: String = "",
     val provider: String = "file",
     val sticky: StickyCookie? = null,
@@ -49,7 +59,14 @@ data class Route(
 
     val entryPointNames: List<String> get() = entryPoints.asStringList()
 
-    val backendCount: Int get() = if (servers.isNotEmpty()) servers.size else if (target.isNotEmpty() && target != "N/A") 1 else 0
+    val isComposite: Boolean get() = serviceType != "loadBalancer"
+
+    val backendCount: Int get() = when {
+        servers.isNotEmpty() -> servers.size
+        compositeChildren.isNotEmpty() -> compositeChildren.size
+        target.isNotEmpty() && target != "N/A" -> 1
+        else -> 0
+    }
 
     val hosts: List<String> get() = HOST_REGEX.findAll(rule).map { it.groupValues[1] }.toList()
 
