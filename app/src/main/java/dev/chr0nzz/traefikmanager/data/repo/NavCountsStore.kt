@@ -7,11 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * How many of each thing the active server reports, so the drawer and rail can show the same
- * totals the web sidebar does. Repositories report what they fetched; nothing here fetches on
- * its own, and a server change wipes the lot so one instance's totals never show under another.
- */
 @Singleton
 class NavCountsStore @Inject constructor(
     serverScope: ServerScope,

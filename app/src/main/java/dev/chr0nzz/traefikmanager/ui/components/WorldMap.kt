@@ -29,13 +29,11 @@ import kotlinx.coroutines.withContext
 
 private const val MAP_ASSET = "world-map.svg"
 
-// The bundled map's viewBox: "0 10 1000 415".
 private const val VIEW_X = 0f
 private const val VIEW_Y = 10f
 private const val VIEW_W = 1000f
 private const val VIEW_H = 415f
 
-/** One country outline, keyed by its ISO 3166-1 alpha-2 code. */
 private data class CountryShape(val code: String, val path: Path)
 
 private object WorldMapShapes {
@@ -65,10 +63,6 @@ private object WorldMapShapes {
     }
 }
 
-/**
- * A choropleth of the fetched window, shaded the way the web shades it: a log scale against the
- * busiest country, so one loud source does not flatten everything else to invisible.
- */
 @Composable
 fun WorldMap(
     counts: Map<String, Int>,

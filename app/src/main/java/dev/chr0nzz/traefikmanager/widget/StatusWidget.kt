@@ -48,10 +48,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmDarkPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmLightPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmPalette
 
-/**
- * The app's palette, read from the same objects the screens use rather than copied, so the home
- * screen cannot drift from the app.
- */
 internal object P {
     val text = pick { it.text }
     val faint = pick { it.border }
@@ -80,7 +76,6 @@ internal object P {
         else -> muted
     }
 
-    /** Footer and chip text: quiet unless something is wrong, the way the desk prints them. */
     fun chip(wire: String): ColorProvider = when (wire) {
         "warn" -> yellow
         "error" -> red
@@ -95,24 +90,17 @@ private val WIDE = DpSize(250.dp, 100.dp)
 private val TALL = DpSize(110.dp, 220.dp)
 private val LARGE = DpSize(250.dp, 220.dp)
 
-/** Cell geometry: an 8dp square in a 10dp slot, so a line of N needs 10N dp. */
 private const val CELL_SLOT = 10
 private const val ROW_HEIGHT = 19
 private const val CARD_PADDING = 10
 
-/** As many squares as one widget can draw before the launcher gives up on it. */
 private const val MAX_CELLS = 96
 
-/**
- * What this widget's real size can hold. Derived from the actual dp Glance reports, not from a
- * breakpoint, so a card grows continuously as you drag the handles instead of in four jumps.
- */
 private data class Fit(
     val rows: Int,
     val cellLines: Int,
     val perLine: Int,
     val compact: Boolean,
-    /** Type and cells grow with the card, so a big one reads like the mockup, not a stretched 2x2. */
     val heroSp: Int = 30,
     val labelSp: Int = 9,
     val rowSp: Int = 11,
@@ -123,11 +111,9 @@ private data class Fit(
             val width = size.width.value.toInt() - CARD_PADDING * 2
             val height = size.height.value.toInt() - CARD_PADDING * 2
             val compact = width < 200
-            // Head, hero and the lines that always draw come off the top before anything is shared.
             var left = height - 14 - (if (compact) 26 else 30)
             if (hasSub) left -= 14
             if (hasFooter) left -= 13
-            // Everything scales off the card's width, the way the mockups were drawn.
             val heroSp = (width / 7).coerceIn(26, 46)
             val labelSp = (width / 26).coerceIn(9, 14)
             val rowSp = (width / 22).coerceIn(11, 15)
@@ -138,7 +124,6 @@ private data class Fit(
             val rows = if (wantsRows) (left / rowHeight).coerceIn(0, 8) else 0
 
             left -= rows * rowHeight
-            // Whatever survives goes to the mosaic, which is what fills the card out.
             val cellLines = (left / slot).coerceIn(0, 8)
             return Fit(
                 rows = rows,
@@ -156,8 +141,6 @@ private data class Fit(
 
 class StatusWidget : GlanceAppWidget() {
 
-    // Exact, not Responsive: Responsive reports the breakpoint rather than the widget, which is
-    // what left every card padded out with dead space below its content.
     override val sizeMode: SizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -170,7 +153,6 @@ class StatusWidget : GlanceAppWidget() {
             val slot = config.pages[index]
             val payload = payloads.byServer[slot.encode()]
             val stale = prefs[WidgetConfig.ERROR] != null
-            // Each slot draws as though it were the whole widget; the stack only picks which.
             Desk(
                 config.copy(cards = slot.preset.cards, serverId = slot.serverId, layout = slot.preset.layout),
                 payload,
@@ -182,8 +164,6 @@ class StatusWidget : GlanceAppWidget() {
 
     @Composable
     private fun Desk(config: WidgetConfig, payload: WidgetPayload?, stale: Boolean, page: Int) {
-        // Every pick is a page of the same widget. A tap turns to the next, which is what the
-        // dots count: pick four cards and you get four dots, not three.
         val cards = payload?.cards.orEmpty()
         val serverPages = config.pages.size
         val pages = buildList {
@@ -200,7 +180,6 @@ class StatusWidget : GlanceAppWidget() {
             payload = payload,
             config = config,
             stale = stale,
-            // The dots are the servers this widget stacks, never the cards.
             pages = serverPages,
             page = page.coerceIn(0, serverPages - 1),
         )
@@ -228,7 +207,6 @@ class StatusWidget : GlanceAppWidget() {
         )
         val health = when (panel) {
             is Panel.Card -> panel.card.health
-            // A combined card wears the worst state of everything it holds.
             is Panel.Combined -> panel.cards.map { it.health }.let { states ->
                 when {
                     states.contains("error") -> "error"
@@ -240,7 +218,6 @@ class StatusWidget : GlanceAppWidget() {
             Panel.Empty, Panel.Loading -> "unknown"
         }
 
-        // Trouble tints the whole card border, so the state reads at any corner radius.
         val background = when (health) {
             "error" -> R.drawable.widget_bg_error
             "warn" -> R.drawable.widget_bg_warn
@@ -250,8 +227,6 @@ class StatusWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(ImageProvider(background))
-                // A PendingIntent from the launcher, not startActivity from a callback: Android 12
-                // and later refuse a background activity launch, which is why taps did nothing.
                 .clickable(actionRunCallback<CycleLayoutAction>()),
         ) {
             Column(modifier = GlanceModifier.fillMaxSize().padding(CARD_PADDING.dp)) {
@@ -260,8 +235,6 @@ class StatusWidget : GlanceAppWidget() {
                     is Panel.Card -> CardBody(panel.card, config, stale, fit, pages, page)
                     Panel.Overview -> OverviewBody(payload, config, stale, fit, pages, page)
                     Panel.Loading -> {
-                        // Named, so turning to a slot that has not been fetched yet still reads
-                        // as this widget rather than an unconfigured one.
                         val slot = config.pages.getOrNull(page)
                         Head(
                             slot?.preset?.label ?: "Loading",
@@ -424,7 +397,6 @@ class StatusWidget : GlanceAppWidget() {
         Spacer(modifier = GlanceModifier.defaultWeight())
     }
 
-    /** Numbers: the headline figures, large, for a glance from across the room. */
     @Composable
     private fun ColumnScope.NumbersBody(card: WidgetCard, fit: Fit) {
         Hero(card.hero, card.unit.ifEmpty { card.title.lowercase() }, fit.compact, fit)
@@ -459,7 +431,6 @@ class StatusWidget : GlanceAppWidget() {
         }
     }
 
-    /** Rows: what is worst, ranked, which is the view you act on. */
     @Composable
     private fun ColumnScope.RowsBody(card: WidgetCard, fit: Fit) {
         Row(
@@ -487,11 +458,6 @@ class StatusWidget : GlanceAppWidget() {
         }
     }
 
-    /**
-     * The split: what the numbers are down the left, what is worst down the right. The mosaic sits
-     * under the hero with the figures below it, each measured rather than stacked at fixed offsets,
-     * which is what made them collide in the mockup.
-     */
     @Composable
     private fun ColumnScope.CombinedBody(
         cards: List<WidgetCard>,
@@ -503,10 +469,8 @@ class StatusWidget : GlanceAppWidget() {
     ) {
         val lead = cards.first()
         val rest = cards.drop(1)
-        // The dots belong to the stack, so a combination in a stack has to be told about it too.
         Head(config.familyTitle, accentFor(lead.key), glyphFor(lead.key), stale, true, config, pages, page)
 
-        // A narrow card has no room for two columns, so it falls back to the figures alone.
         if (fit.compact) {
             NumbersBody(lead.copy(footer = rest.map { WidgetChip("${it.hero} ${it.unit}", 0, "unknown") }), fit)
             return
@@ -581,7 +545,6 @@ class StatusWidget : GlanceAppWidget() {
                         style = TextStyle(color = P.muted, fontSize = (fit.labelSp - 1).sp, fontFamily = Mono),
                         maxLines = 1,
                     )
-                    // Every list that has something to rank shares the column, worst first.
                     val each = ((fit.rows + 3) / ranked.size).coerceAtLeast(1)
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         ranked.forEach { card ->
@@ -593,15 +556,12 @@ class StatusWidget : GlanceAppWidget() {
         }
     }
 
-    /** Where a tap lands, resolved while composing so the launcher can fire it as a PendingIntent. */
     private fun openIntent(context: Context, config: WidgetConfig): Intent =
         Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra(OpenAppAction.EXTRA_DESTINATION, config.cards.firstOrNull().destinationRoute)
             config.serverId?.let { putExtra(OpenAppAction.EXTRA_SERVER_ID, it) }
-            // Extras alone do not make two PendingIntents distinct, so the data uri keeps a
-            // per-widget intent from being reused for a widget watching something else.
             data = android.net.Uri.parse(
                 "tmwidget://open/${config.cards.firstOrNull()?.key ?: "home"}/${config.serverId ?: "host"}",
             )
@@ -633,7 +593,6 @@ class StatusWidget : GlanceAppWidget() {
                 maxLines = 1,
                 modifier = GlanceModifier.defaultWeight(),
             )
-            // One dot per card you picked, so the count matches what tapping cycles through.
             if (pages > 1) {
                 Row(modifier = GlanceModifier.padding(end = 6.dp)) {
                     repeat(pages.coerceAtMost(6)) { dot ->
@@ -717,14 +676,9 @@ class StatusWidget : GlanceAppWidget() {
         )
     }
 
-    /**
-     * The desk's mosaic: fixed little squares, wrapping, one per object. Glance caps a Row at ten
-     * children, so cells nest as lines of groups rather than one long row.
-     */
     @Composable
     private fun Mosaic(cells: List<String>, fit: Fit, fillHeight: Int = 0) {
         val slot = if (fillHeight > 0 && cells.isNotEmpty()) {
-            // Grow the squares until the set covers the space, rather than hugging the top of it.
             val area = (fit.perLine * (fit.cellDp + 2)) * fillHeight
             val ideal = kotlin.math.sqrt(area.toDouble() / cells.size).toInt()
             ideal.coerceIn(fit.cellDp + 2, 26)
@@ -733,9 +687,6 @@ class StatusWidget : GlanceAppWidget() {
         }
         val perLine = ((fit.perLine * (fit.cellDp + 2)) / slot).coerceAtLeast(4)
         val lines = if (slot > 0) (fillHeight / slot).coerceAtLeast(fit.cellLines) else fit.cellLines
-        // Every square is a pair of nested boxes, and RemoteViews stops rendering a widget that
-        // carries too many views - which is why some sizes drew nothing at all. Aggregate past a
-        // fixed ceiling instead of letting a taller card ask for more squares.
         val cap = (if (fillHeight > 0) lines * perLine else fit.cellLines * fit.perLine)
             .coerceIn(1, MAX_CELLS)
         val per = if (cells.size <= cap) 1 else (cells.size + cap - 1) / cap
@@ -772,7 +723,6 @@ class StatusWidget : GlanceAppWidget() {
         }
     }
 
-    /** When one square stands for several objects, it wears the worst of them. */
     private fun worstOf(bucket: List<String>): String = when {
         bucket.contains("error") -> "error"
         bucket.contains("warn") -> "warn"
@@ -917,7 +867,6 @@ class StatusWidget : GlanceAppWidget() {
         }
     }
 
-    /** Each card's own accent, as the desk assigns them, independent of health. */
     private fun accentFor(key: String): ColorProvider = when (key) {
         WidgetCardType.Http.key -> P.blue
         WidgetCardType.Stream.key -> P.teal
@@ -973,14 +922,11 @@ open class BaseStatusWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
-        // Another size's widgets may still be placed; the worker cancels itself when none are.
         WidgetUpdateWorker.refreshNow(context)
     }
 }
 
-/** The 2x2. Keeps v1's exact class name so widgets placed before the rewrite survive it. */
 class StatusWidgetReceiver : BaseStatusWidgetReceiver()
 
-/** The 4x4, which only earns its size with a combination in it. */
 class StatusWidgetLargeReceiver : BaseStatusWidgetReceiver()
 

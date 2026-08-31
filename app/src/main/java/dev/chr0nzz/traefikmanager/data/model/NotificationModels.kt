@@ -7,14 +7,9 @@ import java.time.format.DateTimeFormatter
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * A manager notification. There is no id and no read state: the only handle is [ts], which is
- * the server's local clock formatted without a timezone, and which can repeat within a second.
- */
 @Serializable
 data class DeleteNotificationRequest(val ts: String, val id: Int? = null)
 
-/** Marks everything up to [id] read for every client, not just this one. */
 @Serializable
 data class MarkReadRequest(val id: Int)
 
@@ -31,9 +26,7 @@ data class TmNotification(
     val type: String = "info",
     val msg: String = "",
     val category: String = "",
-    /** Stable from manager 1.12.0. Zero on older servers, where [ts] is the only handle. */
     val id: Int = 0,
-    /** Unix seconds, or zero when the server could not parse its own stamp. */
     val at: Long = 0,
 ) {
     val severity: NotificationSeverity
@@ -44,10 +37,6 @@ data class TmNotification(
             else -> NotificationSeverity.Info
         }
 
-    /**
-     * The reader's own local time when the server sent an epoch, and the raw server-local string
-     * when it did not: without [at] there is no way to know which zone [ts] was written in.
-     */
     val stamp: String
         get() = if (at > 0) {
             Instant.ofEpochSecond(at).atZone(ZoneId.systemDefault()).format(DISPLAY)
@@ -55,7 +44,6 @@ data class TmNotification(
             runCatching { LocalDateTime.parse(ts, PARSER).format(DISPLAY) }.getOrDefault(ts)
         }
 
-    /** "3 min ago" and the like, for anything recent enough to still be interesting. */
     fun since(now: Instant = Instant.now()): String? {
         if (at <= 0) return null
         val seconds = now.epochSecond - at
@@ -91,10 +79,6 @@ data class WebhookTestResult(
     val error: String? = null,
 )
 
-/**
- * A notification destination. Secrets read back as `***` and the URL of a kind that carries its
- * token in the path reads back masked, so a channel round-tripped unchanged keeps what is stored.
- */
 @Serializable
 data class NotificationChannel(
     val id: String = "",
@@ -113,10 +97,6 @@ data class NotificationChannel(
     @SerialName("break_through") val breakThrough: Boolean = false,
 )
 
-/**
- * What a save sends. No property has a default, so every field is on the wire: the server treats
- * an absent key as "keep what you had", which would silently drop a cleared field.
- */
 @Serializable
 data class ChannelPayload(
     val name: String,

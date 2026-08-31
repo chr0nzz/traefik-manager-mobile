@@ -92,7 +92,6 @@ class RoutesViewModel @Inject constructor(
 
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
-    /** Arriving from an Overview card, already filtered to whatever the card was reporting. */
     fun applyDeepLink(status: String?, proto: String?) {
         if (status == null && proto == null) return
         _state.update { current ->

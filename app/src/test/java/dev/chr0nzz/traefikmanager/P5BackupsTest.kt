@@ -12,10 +12,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * The hub and the agent describe the same backups differently. Every case here is a shape one of
- * them really sends, taken from app.py and agent/handlers.go.
- */
 class P5BackupsTest {
 
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true; explicitNulls = false }
@@ -34,8 +30,6 @@ class P5BackupsTest {
 
     @Test
     fun `an agent with no backups sends null, not an empty array`() {
-        // Go marshals a nil slice as null (agent/handlers.go:770), which would throw on a
-        // non-nullable field and leave the tab looking broken.
         val response = json.decodeFromString<AgentBackupsResponse>("""{"backups":null,"static_configured":true}""")
         assertTrue(response.backups.orEmpty().isEmpty())
         assertTrue(response.staticConfigured)
@@ -64,7 +58,6 @@ class P5BackupsTest {
     @Test
     fun `restore answers success rather than ok`() {
         assertTrue(json.decodeFromString<RestoreResponse>("""{"success":true}""").worked)
-        // The host now refuses a backup that matches no config file instead of guessing a target.
         val refused = json.decodeFromString<RestoreResponse>(
             """{"error":"No config file matches 'stray.bak'"}""",
         )

@@ -36,7 +36,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** The shell every static config form sits in: scrollable, save and cancel, error at the foot. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StaticFormSheet(
@@ -123,7 +122,6 @@ fun FormField(
     )
 }
 
-/** One value per line, which is how the server reads trusted IPs and root CAs. */
 @Composable
 fun FormLines(
     label: String,

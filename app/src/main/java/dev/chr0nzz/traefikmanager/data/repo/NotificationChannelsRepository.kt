@@ -13,14 +13,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import retrofit2.HttpException
 
-/** What a test delivery reported, whichever way the server phrased it. */
 data class ChannelTestOutcome(val ok: Boolean, val message: String)
 
-/**
- * Notification channels, which only exist from manager 1.12.0. Older servers answer the listing
- * with a 404, and [supported] carries that so the settings screen can offer the single webhook
- * it used to instead of an empty list.
- */
 @Singleton
 class NotificationChannelsRepository @Inject constructor(
     private val apiProvider: ApiProvider,
@@ -67,7 +61,6 @@ class NotificationChannelsRepository @Inject constructor(
         }
     }
 
-    /** A refused delivery is an answer, not a failure, so a 400 reads the same as `ok: false`. */
     suspend fun test(id: String): ChannelTestOutcome = try {
         val result = apiProvider.api().testNotificationChannel(id)
         ChannelTestOutcome(

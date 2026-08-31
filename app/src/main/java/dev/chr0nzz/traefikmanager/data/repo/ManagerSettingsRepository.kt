@@ -11,17 +11,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
-/**
- * Writing settings.
- *
- * POST /api/settings looks like a partial update but is a full-document rewrite: every key the
- * handler reads is replaced by a literal default when the client omits it, so a naive
- * {"traefik_api_url": "..."} erases the API user, the acme/log/static paths, the webhook config
- * and the whole CrowdSec block. Every write therefore re-reads the current document, spreads the
- * caller's changes over it, and posts the result. Secrets are stripped from the GET response, and
- * omitting them is what tells the server to keep the stored value - so they are only ever included
- * when the user actually typed a new one.
- */
 @Singleton
 class ManagerSettingsRepository @Inject constructor(
     private val apiProvider: ApiProvider,
@@ -30,7 +19,6 @@ class ManagerSettingsRepository @Inject constructor(
 
     suspend fun raw(): JsonObject = apiProvider.api().settingsRaw()
 
-    /** Reads the live document, applies [changes] on top and writes the whole thing back. */
     suspend fun patch(changes: Map<String, JsonElement>): JsonObject {
         val api = apiProvider.api()
         val current = api.settingsRaw()

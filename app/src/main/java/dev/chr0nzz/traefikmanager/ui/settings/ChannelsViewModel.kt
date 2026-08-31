@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** The channel being edited. [id] is null while it is still being added. */
 data class ChannelDraft(
     val id: String? = null,
     val name: String = "",
@@ -62,7 +61,6 @@ data class ChannelsUiState(
     val saving: Boolean = false,
     val test: TestState = TestState.Idle,
     val pendingDelete: NotificationChannel? = null,
-    /** The channel this device pushes through, so the list can say so. */
     val pushChannelId: String? = null,
 )
 
@@ -197,7 +195,6 @@ class ChannelsViewModel @Inject constructor(
         }
     }
 
-    /** Save and close. The web does the same: a saved channel drops you back on the list. */
     fun save() {
         val draft = _state.value.editing ?: return
         val problem = validate(draft)
@@ -223,7 +220,6 @@ class ChannelsViewModel @Inject constructor(
         }
     }
 
-    /** Testing saves first, so what is tested is what is stored. The editor stays open either way. */
     fun test() {
         val draft = _state.value.editing ?: return
         val problem = validate(draft)
@@ -279,7 +275,6 @@ class ChannelsViewModel @Inject constructor(
         }
     }
 
-    /** The same two checks the web makes before it will send anything. */
     private fun validate(draft: ChannelDraft): String? {
         val missing = draft.toChannel().missingFields()
         if (missing.isNotEmpty()) return "Fill in " + missing.joinToString(" and ") + " first."
@@ -310,7 +305,6 @@ private fun ChannelDraft.toChannel() = NotificationChannel(
 private fun ChannelDraft.quietHours(): String =
     if (quietStart.isNotBlank() && quietEnd.isNotBlank()) "$quietStart-$quietEnd" else ""
 
-/** Slots the chosen kind does not use are cleared, so switching kind does not leave a stale token. */
 private fun ChannelDraft.payload(): ChannelPayload {
     val spec = ChannelKinds.of(kind)
     val uses = spec?.fields?.map { it.key }.orEmpty()

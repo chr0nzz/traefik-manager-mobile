@@ -8,14 +8,12 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
 import dev.chr0nzz.traefikmanager.MainActivity
 
-/** Refreshes just the widget that was tapped, rather than every one on the home screen. */
 class RefreshAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         WidgetUpdateWorker.refreshNow(context, glanceId)
     }
 }
 
-/** Opens the app on whatever the widget is showing. */
 class OpenAppAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         var first: WidgetCardType? = null
@@ -38,7 +36,6 @@ class OpenAppAction : ActionCallback {
     }
 }
 
-/** Where a tap lands, so the widget opens the page whose card it was showing. */
 val WidgetCardType?.destinationRoute: String
     get() = when (this) {
         null, WidgetCardType.Overview -> "home"

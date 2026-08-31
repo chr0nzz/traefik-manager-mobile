@@ -50,7 +50,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** How this app appears on the dashboard. It never touches the route itself. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardSettingsSheet(
@@ -147,7 +146,6 @@ fun CardSettingsSheet(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                // The preview resolves exactly as the card will, so what you see is what lands.
                 RouteIcons.urlFor(app.route, config.copy(routeOverrides = config.routeOverrides + (app.id to draft)), baseUrl)
                     ?.let { preview ->
                         AsyncImage(
@@ -216,7 +214,6 @@ fun CardSettingsSheet(
     }
 }
 
-/** Custom groups and whatever has been hidden. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardSettingsSheet(

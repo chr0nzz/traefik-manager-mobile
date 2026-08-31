@@ -17,10 +17,6 @@ import androidx.compose.ui.Modifier
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * A confirmation that cannot be tapped through by accident: the action stays disabled until the
- * word is typed. For anything that destroys or overwrites what the server is running.
- */
 @Composable
 fun TypedConfirmDialog(
     title: String,
@@ -28,7 +24,6 @@ fun TypedConfirmDialog(
     actionLabel: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    /** Defaults to the action itself, so the word asked for is always the thing about to happen. */
     word: String = actionLabel.uppercase(),
 ) {
     var typed by remember { mutableStateOf("") }

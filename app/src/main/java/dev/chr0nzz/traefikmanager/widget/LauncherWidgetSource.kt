@@ -24,7 +24,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-/** One app on a launcher widget. [icon] is a file we already downloaded, or empty. */
 @Serializable
 data class LauncherEntry(
     val id: String = "",
@@ -52,13 +51,6 @@ data class LauncherWidgetPayload(
     }
 }
 
-/**
- * Builds the app list a launcher widget draws, across however many servers it watches.
- *
- * Glance cannot load a URL, so every icon is fetched here and written to the cache as a PNG the
- * widget can point at. The files are keyed by icon URL and reused, so a refresh costs nothing when
- * nothing changed.
- */
 @Singleton
 class LauncherWidgetSource @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -105,11 +97,8 @@ class LauncherWidgetSource @Inject constructor(
             }
     }
 
-    /** Downloads an icon once and hands back a file path Glance can draw. */
     private suspend fun cache(url: String): String = withContext(Dispatchers.IO) {
         if (url.isEmpty()) return@withContext ""
-        // The earlier release cropped icons at fetch time, and the cache keys by URL with no
-        // expiry - so the bad pixels would be served forever. A new directory retires them all.
         File(context.cacheDir, "widget-icons").takeIf { it.exists() }?.deleteRecursively()
         val dir = File(context.cacheDir, "widget-icons-v2").apply { mkdirs() }
         val file = File(dir, url.hashCode().toString() + ".png")
@@ -122,8 +111,6 @@ class LauncherWidgetSource @Inject constructor(
                     .build(),
             )
         }.getOrNull() as? SuccessResult ?: return@withContext ""
-        // toBitmap(w, h) draws into a canvas of that size rather than scaling to it, which cropped
-        // every icon to its top-left corner. Take the whole bitmap, then scale it ourselves.
         val image = result.image
         val full: Bitmap = runCatching {
             (image as? coil3.BitmapImage)?.bitmap ?: image.toBitmap(image.width, image.height)

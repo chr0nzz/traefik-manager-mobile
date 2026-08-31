@@ -11,9 +11,7 @@ data class Agent(
     @SerialName("cert_resolver") val certResolver: String = "",
     val domains: List<String> = emptyList(),
     @SerialName("created_at") val createdAt: String = "",
-    /** Empty when the agent has never had tabs configured, which means "show everything". */
     @SerialName("visible_tabs") val visibleTabs: Map<String, Boolean> = emptyMap(),
-    /** The only reliable per-agent CrowdSec signal; the host's crowdsec_enabled says nothing about it. */
     @SerialName("crowdsec_lapi_url") val crowdsecLapiUrl: String = "",
 ) {
     fun tabVisible(tab: String): Boolean = visibleTabs[tab] ?: true
@@ -45,7 +43,6 @@ data class ServerTarget(
     }
 }
 
-/** Every field the agent edit sheet and the install snippet need. All defaulted: POST and GET return different key sets. */
 @Serializable
 data class AgentConfig(
     val id: String = "",
@@ -77,7 +74,6 @@ data class AgentConfig(
     @SerialName("crowdsec_client_key") val crowdsecClientKey: String = "",
     @SerialName("crowdsec_ca_cert") val crowdsecCaCert: String = "",
     @SerialName("git_backup_enabled") val gitBackupEnabled: Boolean = false,
-    /** This agent is backed up into the Host's repo, on its own branch, by the hub. */
     @SerialName("git_host_backup") val gitHostBackup: Boolean = false,
     @SerialName("git_host_branch") val gitHostBranch: String = "",
     @SerialName("git_backup_repo") val gitBackupRepo: String = "",
@@ -89,7 +85,6 @@ data class AgentConfig(
     val domains: List<String> = emptyList(),
     @SerialName("visible_tabs") val visibleTabs: Map<String, Boolean> = emptyMap(),
 ) {
-    /** The server redacts a stored secret to "***" and sends "" when there is none. */
     val crowdsecApiKeySet: Boolean get() = crowdsecApiKey.isNotEmpty()
 
     val crowdsecMachinePasswordSet: Boolean get() = crowdsecMachinePassword.isNotEmpty()
@@ -106,7 +101,6 @@ data class AgentMutationResponse(
     val agent: AgentConfig? = null,
     val error: String? = null,
 ) {
-    /** The raw key is nested under `agent`, not top-level - the web reads the wrong place and always fails. */
     val rawKey: String? get() = agent?.apiKeyRaw?.takeIf { it.isNotEmpty() }
 }
 

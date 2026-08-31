@@ -16,7 +16,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import retrofit2.Response
 
-/** The last snapshot seen for one server, kept so switching back is instant. */
 private data class CachedRead(val snapshot: CrowdSecSnapshot, val loadedAt: Long)
 
 @Singleton
@@ -30,7 +29,6 @@ class CrowdSecRepository @Inject constructor(
 
     private fun key(): String = serverScope.activeAgentId.value ?: HOST_KEY
 
-    /** What was last read for the selected server, if anything. */
     fun cached(): CrowdSecSnapshot? = cache[key()]?.snapshot
 
     fun cachedAge(): Long? = cache[key()]?.let { System.currentTimeMillis() - it.loadedAt }
@@ -61,13 +59,9 @@ class CrowdSecRepository @Inject constructor(
             alertLimit = headers?.get("X-CS-Alert-Limit")?.toIntOrNull(),
             alertsCapped = headers?.get("X-CS-Alert-Capped")?.let { it == "1" },
         )
-        // Only keep a read that actually answered; a failed one must not mask the last good data
-        // for this server, and must never leak into another server's entry.
         if (snapshot.decisions.ok || snapshot.alerts.ok) {
             cache[key()] = CachedRead(snapshot, System.currentTimeMillis())
         }
-        // The badge counts the alerts the tab actually lists, not the decisions behind them:
-        // one alert can carry several decisions, and a decision can outlive its alert.
         snapshot.alerts.valueOrNull()?.let { navCounts.report(NavCountsStore.CROWDSEC, it.size) }
         snapshot
     }

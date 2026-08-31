@@ -58,10 +58,6 @@ class RoutesRepository @Inject constructor(
 
     suspend fun load(): RoutesSnapshot = loadFor(apiProvider.ready().agentId, report = true)
 
-    /**
-     * The same list for a named server. Widgets need this: one can watch the host while another
-     * watches an agent, and neither should follow what the app has selected.
-     */
     private fun isFileRoute(route: Route): Boolean = route.provider.isEmpty() || route.provider == "file"
 
     suspend fun loadFor(agentId: String?, report: Boolean = false): RoutesSnapshot {

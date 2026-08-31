@@ -24,7 +24,6 @@ data class ServerEntry(
 ) {
     val isHost: Boolean get() = id == null
 
-    /** Health is only probed for agents; the host is reachable by definition of being connected. */
     val reachable: Boolean get() = isHost || health?.ok == true
 
     val detail: String
@@ -46,7 +45,6 @@ class ServersRepository @Inject constructor(
     private val preferencesStore: PreferencesStore,
 ) {
 
-    /** The host plus every configured agent, each agent probed for health in parallel. */
     suspend fun servers(probeHealth: Boolean = true): List<ServerEntry> = coroutineScope {
         val agents = runCatching { agentsRepository.agents() }.getOrDefault(emptyList())
         val host = ServerEntry(id = null, name = "Host")
@@ -76,11 +74,6 @@ class ServersRepository @Inject constructor(
         return response.rawKey
     }
 
-    /**
-     * Sends only the changed keys. Blank name or url would make the hub drop the record on the
-     * next read, so those two are refused here rather than silently deleting the server.
-     */
-    /** Every configurable field for one agent, as the server holds it. */
     suspend fun config(id: String): AgentConfig? =
         apiProvider.api().agentConfigs().agents.firstOrNull { it.id == id }
 
@@ -93,7 +86,6 @@ class ServersRepository @Inject constructor(
         if (!response.ok) error(response.error ?: "Could not save the server")
     }
 
-    /** Clears the selection first, so nothing keeps proxying to an id the hub no longer knows. */
     suspend fun delete(id: String) {
         if (preferencesStore.preferences.first().activeAgentId == id) preferencesStore.setActiveAgent(null)
         val response = apiProvider.api().deleteAgent(id)
@@ -106,7 +98,6 @@ class ServersRepository @Inject constructor(
         return response.rawKey ?: error("The server did not return a new key")
     }
 
-    /** Drops a stored selection that no longer exists, so the app never proxies to a dead id. */
     suspend fun reconcileActive(agents: List<Agent>): Boolean {
         val active = preferencesStore.preferences.first().activeAgentId ?: return false
         if (agents.any { it.id == active }) return false

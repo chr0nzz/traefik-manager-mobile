@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.booleanOrNull
 
-/** What the server reports about how it lets people in. Read-only: the app never changes it. */
 data class AuthStatus(
     val authEnabled: Boolean = false,
     val noAuth: Boolean = false,
@@ -124,8 +123,6 @@ class AuthSettingsViewModel @Inject constructor(
     }
 }
 
-
-/** The settings payload mixes real booleans with "true"/"1" strings, so read both. */
 private fun kotlinx.serialization.json.JsonObject.flag(key: String): Boolean {
     val element = this[key] ?: return false
     val primitive = element as? kotlinx.serialization.json.JsonPrimitive ?: return false

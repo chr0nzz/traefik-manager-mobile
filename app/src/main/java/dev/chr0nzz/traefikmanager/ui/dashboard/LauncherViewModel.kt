@@ -28,7 +28,6 @@ data class LauncherUiState(
     val density: LauncherDensity
         get() = if (snapshot.density == "icons") LauncherDensity.Icons else LauncherDensity.List
 
-    /** Set after the first successful read, so the launcher does not flash empty on a switch. */
     val ready: Boolean get() = !loading || snapshot.groups.isNotEmpty()
 }
 
@@ -43,7 +42,6 @@ class LauncherViewModel @Inject constructor(
     val state: StateFlow<LauncherUiState> = _state.asStateFlow()
 
     init {
-        // Changing the layout in settings redraws the launcher without a reload.
         viewModelScope.launch {
             repository.density.collect { value ->
                 _state.update { it.copy(snapshot = it.snapshot.copy(density = value)) }
@@ -53,9 +51,7 @@ class LauncherViewModel @Inject constructor(
 
     init {
         load()
-        // A different server means a different estate and a different config.
         viewModelScope.launch { serverScope.generation.drop(1).collect { load() } }
-        // Route edits elsewhere change what the launcher lists.
         viewModelScope.launch { routesRepository.changes.drop(1).collect { load() } }
     }
 
@@ -73,7 +69,6 @@ class LauncherViewModel @Inject constructor(
             runCatching { repository.load() }.fold(
                 onSuccess = { snapshot ->
                     _state.update { current ->
-                        // A slow or failed ui_prefs read must not flip the layout under the user.
                         val density = snapshot.density.takeIf { it.isNotEmpty() }
                             ?: current.snapshot.density
                         current.copy(loading = false, snapshot = snapshot.copy(density = density))
@@ -104,7 +99,6 @@ class LauncherViewModel @Inject constructor(
         repository.removeGroup(_state.value.snapshot.config, name)
     }
 
-    /** Every write reloads: the hub rewrites the whole document, so our copy is stale after one. */
     private fun write(success: String, block: suspend () -> Unit) {
         if (_state.value.saving) return
         _state.update { it.copy(saving = true) }

@@ -41,7 +41,6 @@ class DashboardRepository @Inject constructor(
     private val _raw = MutableStateFlow<RawDashboard?>(null)
     val raw: StateFlow<RawDashboard?> = _raw.asStateFlow()
 
-    // A fetch in flight when the server changes must never land on the new server's screen.
     private val generation = AtomicInteger(0)
 
     private val inFlightLock = Any()
@@ -59,12 +58,7 @@ class DashboardRepository @Inject constructor(
         .map { raw -> raw?.let { DashboardBuilder.build(it, providerFilter = null) } }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    /**
-     * The screen, the pull-to-refresh and the server-change listener all ask for this at once;
-     * they share one fetch instead of firing six requests each.
-     */
     suspend fun refresh(): RawDashboard {
-        // Runs on the application scope so a screen leaving does not cancel a fetch others await.
         val job = synchronized(inFlightLock) {
             inFlight?.takeIf { it.isActive } ?: scope.async { fetch() }.also { inFlight = it }
         }

@@ -11,10 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/**
- * Server capabilities, including which optional tabs the server has switched on.
- * Null means "not known yet" - callers show everything rather than hiding a working tab.
- */
 @Singleton
 class ServerSettingsRepository @Inject constructor(
     private val apiProvider: ApiProvider,

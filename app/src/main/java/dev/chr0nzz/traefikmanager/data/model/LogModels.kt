@@ -286,11 +286,6 @@ object LogParser {
 
     fun providerOf(name: String): String = name.substringAfter('@', "")
 
-    /**
-     * Which side of the internet an address sits on, matching the web's classifyIp
-     * (core.js:843). A log full of private addresses usually means the real client IP is
-     * arriving in a header the proxy is not forwarding.
-     */
     fun ipClass(ip: String): String {
         val raw = ip.trim()
         if (raw.isEmpty()) return "unknown"

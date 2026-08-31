@@ -117,13 +117,11 @@ fun DashboardScreen(
     val launcher by launcherViewModel.state.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
     val unread by bellViewModel.unread.collectAsStateWithLifecycle()
-    // Coming back from the history, the server's count can have changed too, not just what was read.
     LifecycleResumeEffect(Unit) {
         bellViewModel.refresh()
         onPauseOrDispose {}
     }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    // Group cards follow the window: one across on a phone, more as it widens.
     val launcherColumns = when {
         currentWindowAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(1200) -> 3
         currentWindowAdaptiveInfo().windowSizeClass
@@ -288,7 +286,6 @@ fun DashboardScreen(
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         RuntimeFooter(snapshot.runtime)
                     }
-                    // The launcher closes the screen, below the runtime line.
                     if (launcher.snapshot.groups.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             LauncherSection(
@@ -388,7 +385,6 @@ private fun SignalCardView(
                             label = flag.label,
                             status = flag.status,
                             showLabel = !compact,
-                            // The web opens the matching list already filtered to this flag.
                             onClick = { onOpen(flag) },
                         )
                     }
@@ -560,10 +556,6 @@ private fun EntrypointRowView(row: EntrypointRow) {
     }
 }
 
-/**
- * Where a card sends you. The web opens the list the card counts, filtered to whatever the
- * chip you pressed was reporting (dashboard.js:513-516, 772-774) - not always the route list.
- */
 private fun openCard(
     card: SignalCard,
     flag: SignalFlag?,

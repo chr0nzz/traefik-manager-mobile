@@ -28,18 +28,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
-// M3 puts a standard side sheet at 400dp, which leaves a tablet mostly empty when the sheet is
-// holding a form rather than a list of facts.
 private val SHEET_WIDTH = 640.dp
 private val SHEET_MIN_WIDTH = 320.dp
 
-/**
- * A Material 3 modal side sheet. The library has no composable for this yet, so this follows the
- * spec directly: 256-400dp wide, full height, anchored to the trailing edge, 16dp corners on the
- * leading edge only, over a scrim that dismisses on tap.
- *
- * Used where a detail pane would otherwise permanently halve a screen that needs its width.
- */
 @Composable
 fun ModalSideSheet(
     visible: Boolean,

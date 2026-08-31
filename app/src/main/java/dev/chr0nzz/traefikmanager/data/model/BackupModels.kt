@@ -5,11 +5,6 @@ import kotlinx.serialization.Serializable
 
 enum class BackupKind { Routes, Static }
 
-/**
- * One backup, however the server phrased it. The hub answers with a bare array whose stamp is
- * server-local text; an agent answers with an object whose stamp is RFC3339 UTC. Same feature,
- * two wire shapes, so both are folded into this before the UI sees them.
- */
 data class BackupEntry(
     val name: String,
     val size: Long,
@@ -33,14 +28,12 @@ data class AgentBackup(
     val kind: String = "routes",
 )
 
-/** The agent marshals an empty list as null, so the field has to tolerate it. */
 @Serializable
 data class AgentBackupsResponse(
     val backups: List<AgentBackup>? = null,
     @SerialName("static_configured") val staticConfigured: Boolean = false,
 )
 
-/** The hub says success/names, the agent says ok/name. Accept either. */
 @Serializable
 data class CreateBackupResponse(
     val success: Boolean = false,
@@ -69,7 +62,6 @@ data class GitStatus(
     val configured: Boolean = false,
     @SerialName("last_sha") val lastSha: String = "",
     @SerialName("last_push") val lastPush: String = "",
-    /** Only sent back when the call named an agent. */
     val branch: String = "",
 )
 

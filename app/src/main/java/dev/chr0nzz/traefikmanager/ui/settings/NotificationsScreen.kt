@@ -424,7 +424,6 @@ fun NotificationsScreen(
     }
 }
 
-/** One channel in the list: what it is, what it takes, and the four things you can do to it. */
 @Composable
 private fun ChannelRow(
     channel: NotificationChannel,
@@ -443,8 +442,6 @@ private fun ChannelRow(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
                 ) {
-                    // The name yields first: a long one must not squeeze the kind and the tag
-                    // into a column of single letters.
                     Text(
                         text = channel.name,
                         style = MaterialTheme.typography.titleSmall,

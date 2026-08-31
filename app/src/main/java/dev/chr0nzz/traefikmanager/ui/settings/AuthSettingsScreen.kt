@@ -306,7 +306,6 @@ fun AuthSettingsScreen(
     }
 }
 
-/** One read-only line of auth state: what it is, and what that means. */
 @Composable
 private fun AuthFact(
     label: String,

@@ -34,16 +34,10 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** The bar holds five, so the sixth tick has to wait for one to be freed. */
 private const val BAR_ITEMS = 5
 
-/** A rail runs down the screen, so it holds more than a bottom bar can. */
 private const val RAIL_ITEMS = 8
 
-/**
- * Which destinations sit in the bottom bar, and in what order. Everything else stays reachable
- * from the drawer, so unticking something hides it from the bar rather than from the app.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavBarEditorSheet(

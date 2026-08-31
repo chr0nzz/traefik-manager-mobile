@@ -58,13 +58,8 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** Rows or tiles, the web's dashPodDensity. */
 enum class LauncherDensity { List, Icons }
 
-/**
- * Five across only when the card is wide enough for it. On a phone, and in any group card that is
- * sharing a row with another, five tiles leave about 60dp each, which is why it read as cramped.
- */
 private const val TILE_ROWS = 5
 private const val ROW_LIMIT = 5
 
@@ -74,14 +69,6 @@ private fun tileColumns(cardWidth: Dp): Int = when {
     else -> 3
 }
 
-/**
- * The dashboard launcher, drawn the way the web draws it: a group header whose rule runs to the
- * card's edge, then either tiles five across or rows. The status square sits on the icon plate's
- * corner, and a healthy one is quiet grey so a single red square reads as an alarm.
- *
- * [columns] lets a tablet put several groups side by side; each row of groups shares a height so
- * the cards line up.
- */
 @Composable
 fun LauncherSection(
     groups: List<LauncherGroup>,
@@ -160,7 +147,6 @@ private fun GroupCard(
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = palette.muted,
             )
-            // The rule finishes the header, as it does on the web.
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -303,8 +289,6 @@ private fun Tile(
             onLongClick = { onEdit(app) },
         ),
     ) {
-        // No affordances on a tile: a long press opens the editor, which is what the gesture is
-        // for on a phone, and it keeps the grid clean.
         Plate(app, config, baseUrl, size = 52)
         Text(
             text = app.name,
@@ -361,7 +345,6 @@ private fun Plate(
     }
 }
 
-/** Healthy is deliberately quiet: the web keeps green out of it so red carries all the weight. */
 private fun dotColour(app: LauncherApp, red: Color, amber: Color, quiet: Color): Color = when {
     !app.route.enabled -> amber
     app.url == null -> quiet.copy(alpha = 0.3f)
@@ -383,7 +366,6 @@ private fun groupIcon(group: LauncherGroup): ImageVector = when {
     else -> Icons.Outlined.Apps
 }
 
-/** Custom Tabs share the browser's session, so anything already signed in opens signed in. */
 fun openApp(context: android.content.Context, url: String) {
     val uri = android.net.Uri.parse(url)
     runCatching {

@@ -28,7 +28,6 @@ data class PluginsUiState(
     val query: String = "",
     val serverError: String? = null,
     val loadError: String? = null,
-    /** False when this server has no static config, which is where plugins are declared. */
     val canManage: Boolean = false,
     val installing: PluginInstall? = null,
     val editing: PluginEdit? = null,
@@ -39,7 +38,6 @@ data class PluginsUiState(
     val restartDetail: String = "",
     val restarting: Boolean = false,
     val message: String? = null,
-    /** Plugin name to the newer version the catalogue lists, for the ones that are behind. */
     val updates: Map<String, String> = emptyMap(),
 ) {
     val visible: List<PluginEntry>
@@ -56,7 +54,6 @@ data class PluginsUiState(
     fun usersOf(name: String): List<MiddlewareDef> = PluginUsage.usersOf(name, middlewares)
 }
 
-/** The paste-two-snippets install, which is how the web does it. */
 data class PluginInstall(
     val staticYaml: String = DEFAULT_STATIC_SNIPPET,
     val middlewareYaml: String = DEFAULT_MIDDLEWARE_SNIPPET,
@@ -110,8 +107,6 @@ class PluginsViewModel @Inject constructor(
             val manageable = staticConfig.manageable()
             runCatching { repository.load() }.fold(
                 onSuccess = { snapshot ->
-                    // The catalogue is only worth asking for once something is installed, and a
-                    // failure just means no badges.
                     val catalog = if (snapshot.plugins.isEmpty()) emptyMap() else staticConfig.catalog()
                     _state.update {
                         it.copy(
@@ -140,7 +135,6 @@ class PluginsViewModel @Inject constructor(
         }
     }
 
-    /** A different server means different data: drop what is on screen and refetch. */
     private fun watchServerChanges() {
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {

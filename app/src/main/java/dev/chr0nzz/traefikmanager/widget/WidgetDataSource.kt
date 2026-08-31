@@ -19,14 +19,6 @@ import javax.inject.Singleton
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
-/**
- * Builds a widget's cards out of the same code the screens use: DashboardBuilder for the Traefik
- * cards, CrowdSecAnalytics for the security ones. Nothing here re-derives a number the app
- * already knows how to derive.
- *
- * Every call is aimed at one named server rather than whichever the app has selected, so a widget
- * keeps watching what it was pointed at while you read a different server in the app.
- */
 @Singleton
 class WidgetDataSource @Inject constructor(
     private val apiProvider: ApiProvider,
@@ -67,7 +59,6 @@ class WidgetDataSource @Inject constructor(
         )
     }
 
-    /** The overview: every server, with what it runs and what is wrong with it. */
     private suspend fun servers(): List<WidgetServerRow> = coroutineScope {
         val servers = runCatching { serversRepository.servers(probeHealth = false) }.getOrDefault(emptyList())
         servers.map { server ->
@@ -82,7 +73,6 @@ class WidgetDataSource @Inject constructor(
                 val classified = routers.all.map { statusOf(it.status) }
                 val services = runCatching { api.services() }.getOrNull()
                     ?.toProtoEnvelope()?.all.orEmpty()
-                // A server without CrowdSec answers 404, which is not the same as zero bans.
                 val bans = runCatching { api.crowdSecDecisions(null) }.getOrNull()
                     ?.takeIf { it.isSuccessful }
                     ?.body()
@@ -124,7 +114,6 @@ class WidgetDataSource @Inject constructor(
         }
     }
 
-    /** The doors in: what each one is, and how much is bound to it. */
     private fun entrypointsCard(rows: List<dev.chr0nzz.traefikmanager.data.repo.EntrypointRow>): WidgetCard {
         val idle = rows.count { it.idle }
         return WidgetCard(
@@ -154,7 +143,6 @@ class WidgetDataSource @Inject constructor(
     }
 
     private suspend fun certsCard(agentId: String?): WidgetCard {
-        // CertRows works out the days left and the ordering the certificates screen uses.
         val soonest = CertRows.from(
             certs = apiProvider.apiFor(agentId).certs().certs,
             nowMillis = System.currentTimeMillis(),
@@ -219,7 +207,6 @@ class WidgetDataSource @Inject constructor(
         }
     }
 
-    /** The desk's sources card: chips and a mosaic, no ranked rows. */
     private fun sourcesCard(alerts: List<CsAlert>, banned: Set<String>): WidgetCard {
         val sources = CrowdSecAnalytics.sources(alerts, banned)
         val loose = sources.count { it.open > 0 }
@@ -326,7 +313,6 @@ class WidgetDataSource @Inject constructor(
         }.wire(),
     )
 
-    /** The card's tail line, worded the way the desk words it. */
     private fun tail(rest: List<CsRanked>, sum: Int, unit: String, noun: String): List<WidgetChip> =
         if (rest.isEmpty()) {
             emptyList()
@@ -361,7 +347,6 @@ class WidgetDataSource @Inject constructor(
         },
     )
 
-    /** A card the server could not answer for still draws, saying so rather than showing zero. */
     private fun unavailable(type: WidgetCardType): WidgetCard = WidgetCard(
         key = type.key,
         title = type.label,
@@ -371,7 +356,6 @@ class WidgetDataSource @Inject constructor(
         sub = if (type.crowdsec) "CrowdSec did not answer" else "the server did not answer",
     )
 
-    /** Services without a status are internal rather than broken, so they read idle, not red. */
     private fun serviceWire(raw: String?): String = when {
         raw.equals("enabled", ignoreCase = true) -> TmStatus.Ok
         raw.equals("warning", ignoreCase = true) -> TmStatus.Warn
@@ -388,10 +372,8 @@ class WidgetDataSource @Inject constructor(
     }
 
     private companion object {
-        /** The strip stays readable at widget size well before the desk's 240 cap. */
         const val CELLS = 72
 
-        /** Carried in the payload; the renderer slices by how much room the widget has. */
         const val ROWS = 8
     }
 }

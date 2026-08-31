@@ -19,7 +19,6 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.put
 
-/** Everything the agent editor can change, as strings the form can bind to. */
 data class AgentForm(
     val name: String = "",
     val url: String = "",
@@ -95,7 +94,6 @@ class AgentConfigViewModel @Inject constructor(
                             loading = false,
                             agentName = config.name,
                             form = original,
-                            // The server sends "***" for a stored secret and "" for none.
                             crowdsecKeySet = config.crowdsecApiKeySet,
                             crowdsecPasswordSet = config.crowdsecMachinePasswordSet,
                             dirty = false,
@@ -124,7 +122,6 @@ class AgentConfigViewModel @Inject constructor(
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
-    /** Sends only what changed, so a field this screen does not know about is never overwritten. */
     fun save() {
         val form = _state.value.form
         if (form.name.isBlank() || form.url.isBlank()) {
@@ -175,7 +172,6 @@ class AgentConfigViewModel @Inject constructor(
                     buildJsonObject { form.visibleTabs.forEach { (tab, visible) -> put(tab, visible) } },
                 )
             }
-            // Secrets are write-only: an empty box means "keep what is stored".
             if (form.crowdsecApiKey.isNotBlank()) put("crowdsec_api_key", JsonPrimitive(form.crowdsecApiKey))
             if (form.crowdsecMachinePassword.isNotBlank()) {
                 put("crowdsec_machine_password", JsonPrimitive(form.crowdsecMachinePassword))

@@ -70,7 +70,6 @@ data class CrowdSecUiState(
     fun matchesQuery(alert: CsAlert): Boolean {
         val needle = query.trim().lowercase()
         if (needle.isEmpty()) return true
-        // The web searches one haystack per alert (crowdsec.js:449).
         val hay = buildString {
             append(alert.ip).append(' ')
             append(alert.scenarioName).append(' ')
@@ -86,16 +85,11 @@ data class CrowdSecUiState(
         return hay.contains(needle)
     }
 
-    /** Everything the facets allow, for the alert feed. */
     val visibleAlerts: List<CsAlert>
         get() = alerts
             .filter { facets.matches(it, ::countryOf, snapshot::handled) && matchesQuery(it) }
             .sortedByDescending { it.startMillis }
 
-    /**
-     * The alerts the cards rank. Each card leaves its own facet out, so clicking a row narrows
-     * the rest of the desk without the card collapsing to the single row you just picked.
-     */
     fun alertsFor(facet: CsFacet): List<CsAlert> = alerts.filter {
         facets.matches(it, ::countryOf, snapshot::handled, skip = facet) && matchesQuery(it)
     }
@@ -137,7 +131,6 @@ class CrowdSecViewModel @Inject constructor(
     private val serverScope: ServerScope,
 ) : ViewModel() {
 
-    /** True while the view was switched by a facet rather than by the user. */
     private var viewFollowsFacets = false
 
     private val _state = MutableStateFlow(CrowdSecUiState())
@@ -152,15 +145,8 @@ class CrowdSecViewModel @Inject constructor(
         watchServerChanges()
     }
 
-    /** Pull-to-refresh is the one gesture that forces a full LAPI resync. */
     fun refresh() = load(initial = false, full = true)
 
-    /**
-     * Paints the last snapshot for this server straight away, then revalidates in the background.
-     * The revalidation is a delta read: the manager keeps a decisions stream cache and only asks
-     * the LAPI for what changed, so this is cheap even on an instance with tens of thousands of
-     * bans. Alerts have no such feed and always come whole.
-     */
     private fun showCachedThenRevalidate() {
         val cached = repository.cached()
         if (cached == null) {
@@ -183,16 +169,10 @@ class CrowdSecViewModel @Inject constructor(
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
     fun onViewChange(view: CrowdSecView) = _state.update {
-        // An explicit choice sticks; only a facet-driven switch is allowed to bounce back.
         viewFollowsFacets = false
         it.copy(view = view)
     }
 
-    /**
-     * Clicking a value filters the whole desk by it, and clicking the same value again lets it
-     * go. A facet that only decisions carry moves you to the decisions list, and one that only
-     * alerts carry moves you back, the way the web does it (crowdsec.js:370-381).
-     */
     fun toggleFacet(facet: CsFacet, value: String) = _state.update { state ->
         val facets = state.facets.toggle(facet, value)
         val applied = facets[facet] != null
@@ -323,11 +303,9 @@ class CrowdSecViewModel @Inject constructor(
         }
     }
 
-    /** A different server means different data: drop what is on screen and refetch. */
     private fun watchServerChanges() {
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {
-                // Keep only the parts of the screen that are not server data.
                 _state.value = CrowdSecUiState(view = _state.value.view)
                 showCachedThenRevalidate()
             }

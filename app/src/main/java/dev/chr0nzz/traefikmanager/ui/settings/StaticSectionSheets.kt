@@ -14,12 +14,6 @@ import dev.chr0nzz.traefikmanager.data.model.ResolverForm
 import dev.chr0nzz.traefikmanager.data.model.StaticPluginForm
 import dev.chr0nzz.traefikmanager.data.model.SystemForm
 
-/**
- * One sheet per static config section, carrying the same fields as the web's forms.
- *
- * Every field name here is the server's payload key, so what the phone writes and what a browser
- * writes are the same request.
- */
 @Composable
 fun EntrypointSheet(
     initial: EntrypointForm,

@@ -3,7 +3,6 @@ package dev.chr0nzz.traefikmanager.data.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** What the manager sees for this device's request, before and after its reverse proxy. */
 @Serializable
 data class ClientIpDiagnostic(
     @SerialName("effective_ip") val effectiveIp: String = "",
@@ -16,7 +15,6 @@ data class ClientIpDiagnostic(
     val classes: Map<String, String> = emptyMap(),
 ) {
     companion object {
-        /** Rendered in this order rather than trusting map iteration. */
         val HEADER_ORDER = listOf(
             "X-Forwarded-For",
             "X-Real-IP",

@@ -21,17 +21,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-/**
- * One copy of the notification list for the bell and the history screen.
- *
- * They used to fetch it separately, which cost two round trips to show one list. The list is kept
- * so a revisit paints from what was last read while the refresh runs behind it.
- *
- * Unread is counted two ways. From 1.12.0 the server keeps a shared marker and every row has an
- * id, so what is read agrees across the web and every phone. Older servers have neither, and the
- * only handle is the length of the list against a count this device remembers - which quietly
- * stops working once the server's 200 entry cap is reached and the length stops changing.
- */
 @Singleton
 class NotificationsRepository @Inject constructor(
     private val apiProvider: ApiProvider,
@@ -44,7 +33,6 @@ class NotificationsRepository @Inject constructor(
     private val _items = MutableStateFlow<List<TmNotification>?>(null)
     val items: StateFlow<List<TmNotification>?> = _items.asStateFlow()
 
-    /** The server's shared marker, or null while unknown or on a server without one. */
     private val _readUntil = MutableStateFlow<Int?>(null)
 
     private val inFlightLock = Any()
@@ -65,11 +53,6 @@ class NotificationsRepository @Inject constructor(
 
     private fun key(): String = serverScope.activeAgentId.value ?: HOST
 
-    /**
-     * Draw last night's list while today's is on its way. Only for the server it was written on:
-     * every server keeps its own notifications, and showing one server's under another's name
-     * would be worse than a spinner.
-     */
     private suspend fun restore() {
         val prefs = preferencesStore.preferences.first()
         if (prefs.notificationsCache.isBlank() || prefs.notificationsCacheServer != key()) return
@@ -97,7 +80,6 @@ class NotificationsRepository @Inject constructor(
             }
         }.stateIn(scope, SharingStarted.Eagerly, 0)
 
-    /** The bell and the history ask at the same moment, so they share one fetch. */
     suspend fun refresh(): List<TmNotification> {
         val job = synchronized(inFlightLock) {
             inFlight?.takeIf { it.isActive } ?: scope.async { fetch() }.also { inFlight = it }
@@ -114,12 +96,9 @@ class NotificationsRepository @Inject constructor(
         return list
     }
 
-    /** Marks everything currently known read, for every client when the server keeps the marker. */
     suspend fun markRead() {
         val list = _items.value.orEmpty()
         val highest = list.maxOfOrNull { it.id } ?: 0
-        // The highest id we have actually seen, never "everything": a notification that landed
-        // between the last refresh and this tap has not been read by anyone yet.
         if (_readUntil.value != null && highest > 0) {
             runCatching { apiProvider.api().markNotificationsRead(MarkReadRequest(highest)) }
                 .onSuccess {
@@ -154,7 +133,6 @@ class NotificationsRepository @Inject constructor(
         if (_readUntil.value == null) preferencesStore.setNotificationsRead(0)
     }
 
-    /** True when the server keeps the shared read marker, for anything that needs to know. */
     suspend fun sharedMarker(): Boolean {
         if (_readUntil.value != null) return true
         return runCatching { apiProvider.api().notificationState() }

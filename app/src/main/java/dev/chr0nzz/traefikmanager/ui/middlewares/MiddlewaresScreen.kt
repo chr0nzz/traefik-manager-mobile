@@ -139,7 +139,6 @@ fun MiddlewaresScreen(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
-            // The FAB lives in the list pane now, so Scaffold cannot offset this for us.
             SnackbarHost(snackbarHostState, modifier = Modifier.padding(bottom = 72.dp))
         },
         topBar = {

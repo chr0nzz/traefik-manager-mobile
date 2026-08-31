@@ -17,7 +17,6 @@ import org.junit.Test
 
 class NavScopeTest {
 
-    /** The scope key carries its own separator, which is what broke the first encoding. */
     @Test
     fun `a key containing the separator round-trips`() {
         val scopes = mapOf("host|rail" to listOf("home", "routes", "services"))
@@ -44,7 +43,6 @@ class NavScopeTest {
         assertEquals(scopes, decodeScopes(encodeScopes(scopes)))
     }
 
-    /** Reset stores an empty pick, and it has to survive as one rather than vanishing. */
     @Test
     fun `an empty pick is kept, not dropped`() {
         val scopes = mapOf("host|bar" to emptyList<String>())
@@ -59,7 +57,6 @@ class NavScopeTest {
         assertEquals(emptyMap<String, List<String>>(), decodeScopes(""))
     }
 
-    /** A payload from an older build, or a corrupted one, must not take the navigation down. */
     @Test
     fun `junk decodes to nothing rather than throwing`() {
         assertEquals(emptyMap<String, List<String>>(), decodeScopes("host|rail|home,routes"))

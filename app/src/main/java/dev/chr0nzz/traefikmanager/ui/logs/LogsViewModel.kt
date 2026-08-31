@@ -37,7 +37,6 @@ enum class LogFacet(val key: String) {
     Domain("domain"),
     Path("path"),
     Ip("ip"),
-    /** Public, private, CGNAT and the rest: the web's ipclass facet. */
     IpClass("ipclass"),
     Service("service"),
     Router("router"),
@@ -82,14 +81,12 @@ data class LogsUiState(
     private fun matchesCountry(entry: LogEntry?): Boolean =
         country == null || (entry != null && countryByIp[entry.ip] == country)
 
-    /** Search + facets, before the country filter, so the geography panel never collapses. */
     val faceted: List<LogLine> by lazy { lines.filter { matchesQuery(it) && matchesFacets(it.entry) } }
 
     val visible: List<LogLine> by lazy { faceted.filter { matchesCountry(it.entry) } }
 
     val visibleEntries: List<LogEntry> by lazy { visible.mapNotNull { it.entry } }
 
-    /** Recomputed for the current selection, the way the web re-renders the desk on every filter. */
     val window: LogWindow by lazy { LogAnalytics.build(visibleEntries, fetched, unparsed) }
 
     val countries: List<CountryCount> by lazy {
@@ -278,7 +275,6 @@ class LogsViewModel @Inject constructor(
         }
     }
 
-    /** A different server means different data: drop what is on screen and refetch. */
     private fun watchServerChanges() {
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {

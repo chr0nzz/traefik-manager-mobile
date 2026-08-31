@@ -20,7 +20,6 @@ data class ApiKeyStatus(
 @Serializable
 data class ApiKeyEntry(
     val name: String = "",
-    /** The only handle the revoke endpoint accepts; legacy keys have none and cannot be revoked. */
     val preview: String = "",
     @SerialName("created_at") val createdAt: String = "",
 ) {

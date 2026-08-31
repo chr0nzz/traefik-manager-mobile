@@ -132,8 +132,6 @@ fun SettingsScreen(
     hostSelected: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    // Authentication, connection and notifications configure the host itself, never an agent.
-    // An agent's static config is its own file though, and editing it is the point of selecting it.
     val serverEntries = if (hostSelected) {
         SERVER_ENTRIES
     } else {

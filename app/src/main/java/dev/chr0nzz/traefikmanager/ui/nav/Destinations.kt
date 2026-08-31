@@ -27,7 +27,6 @@ enum class TmDestination(
     val icon: ImageVector,
     val section: TmSection,
     val primary: Boolean = false,
-    /** Optional-tab key on the server; null means the destination is always available. */
     val serverTab: String? = null,
 ) {
     Home("home", "Dashboard", Icons.Outlined.Home, TmSection.Traffic, primary = true),

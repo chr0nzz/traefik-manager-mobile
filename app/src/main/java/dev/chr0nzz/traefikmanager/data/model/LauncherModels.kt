@@ -1,16 +1,11 @@
 package dev.chr0nzz.traefikmanager.data.model
 
-/** A section of the launcher. Custom groups win over the worked-out ones. */
 data class LauncherGroup(
     val name: String,
     val apps: List<LauncherApp>,
     val custom: Boolean = false,
 )
 
-/**
- * One card. [url] is where it opens, or null when it cannot be opened - in which case [reason]
- * says why, in the web's own words.
- */
 data class LauncherApp(
     val route: Route,
     val name: String,
@@ -23,11 +18,6 @@ data class LauncherApp(
     val id: String get() = route.id
 }
 
-/**
- * Turns routes plus the saved overrides into the launcher the web draws. The keyword table and the
- * order of it are the web's (static/js/dashboard-tab.js:246-256); a route lands in the first group
- * whose keyword its name or service name contains, once both are stripped of dashes.
- */
 object LauncherBuilder {
 
     private val RULES = listOf(
@@ -79,7 +69,6 @@ object LauncherBuilder {
 
     private const val OTHER = "Other"
 
-    /** The order sections appear in, custom groups first, exactly as the web orders them. */
     fun order(config: DashboardConfig): List<String> =
         config.customGroups.map { it.name } + RULES.map { it.first } + OTHER
 
@@ -128,7 +117,6 @@ object LauncherBuilder {
         return "https://$host"
     }
 
-    /** The web's own wording, so the two read the same. */
     private fun reason(route: Route, override: RouteOverride?): String = when {
         override?.linkDisabled == true -> "link disabled for this route"
         override?.url?.isNotEmpty() == true ->

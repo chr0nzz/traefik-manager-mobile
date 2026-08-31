@@ -47,7 +47,6 @@ object PluginUsage {
 @Serializable
 data class StaticAvailable(val available: Boolean = false)
 
-/** What an agent reports about its own static config, which is how the host's probe is answered. */
 @Serializable
 data class AgentStaticStatus(
     val configured: Boolean = false,
@@ -60,7 +59,6 @@ data class PluginInstallRequest(
     @SerialName("static_yaml") val staticYaml: String,
     @SerialName("middleware_yaml") val middlewareYaml: String = "",
     @SerialName("middleware_file") val middlewareFile: String = "",
-    /** The agent this is for, or empty for the host. The call itself always goes to the host. */
     val server: String = "",
 )
 
@@ -73,7 +71,6 @@ data class PluginInstallResponse(
     val error: String? = null,
 )
 
-/** A pure YAML transform: the server hands back a new document and writes nothing. */
 @Serializable
 data class StaticSectionRequest(
     val section: String,
@@ -98,12 +95,6 @@ data class StaticSaveRequest(val content: String)
 @Serializable
 data class PluginCatalog(val plugins: Map<String, String> = emptyMap())
 
-/**
- * Which installed plugins the catalogue has a newer version of.
- *
- * Catalogue keys are module paths, lowercased by the server. A version that is not plain numeric
- * parts, a pre-release say, is left alone rather than guessed at.
- */
 object PluginVersions {
 
     fun updates(plugins: List<PluginEntry>, catalog: Map<String, String>): Map<String, String> =

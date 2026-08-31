@@ -108,8 +108,6 @@ fun LogsScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val palette = LocalTmPalette.current
 
-    // The signal desk and the log rows both want the full width, so a tablet keeps the list
-    // whole and shows the record in a side sheet instead of halving the screen.
     val wide = currentWindowAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val selected = state.lines.firstOrNull { it.index == selectedIndex }
@@ -333,8 +331,6 @@ private fun LogsListPane(
                             selected = line.index == selectedIndex,
                             onClick = { onSelect(line) },
                         )
-                        // The web rules a line under every access-log entry; without it the rows
-                        // run together once the list is dense.
                         CardDivider()
                     }
                 }

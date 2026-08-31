@@ -5,10 +5,6 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
-/**
- * The cards a widget can hold. These are the desk's own cards, not widget-only inventions: the
- * Traefik ones come straight out of DashboardBuilder, the CrowdSec ones out of CrowdSecAnalytics.
- */
 enum class WidgetCardType(
     val key: String,
     val label: String,
@@ -40,13 +36,6 @@ enum class WidgetCardType(
     }
 }
 
-/**
- * Per-widget settings, held in that widget's own Glance state.
- *
- * A widget placed before v2 has none of these keys, so every default is what an unconfigured
- * widget should show: the overview, on the host, at the ordinary cadence.
- */
-/** The three treatments a card can wear. Tapping the widget cycles them. */
 enum class WidgetLayout(val label: String, val blurb: String) {
     Mosaic("Mosaic", "Hero number over the signal strip."),
     Numbers("Numbers", "The headline figures, large."),
@@ -60,11 +49,6 @@ enum class WidgetLayout(val label: String, val blurb: String) {
     }
 }
 
-/**
- * What a widget is, chosen whole rather than assembled. Building one card at a time meant a
- * combination and a stack were the same two taps apart, and picking a second card silently turned
- * a stack into a combination.
- */
 enum class WidgetPreset(
     val label: String,
     val blurb: String,
@@ -114,10 +98,6 @@ enum class WidgetPreset(
     }
 }
 
-/**
- * One page of a widget: what to show, and which server to show it for. A widget is an ordered
- * stack of these, and a tap turns to the next one.
- */
 data class WidgetSlot(val preset: WidgetPreset, val serverId: String? = null) {
     fun encode(): String = "${preset.name}:${serverId.orEmpty()}"
 
@@ -139,21 +119,17 @@ data class WidgetSlot(val preset: WidgetPreset, val serverId: String? = null) {
 
 data class WidgetConfig(
     val cards: List<WidgetCardType> = listOf(WidgetCardType.Overview),
-    /** null means the host. */
     val serverId: String? = null,
     val serverName: String = "Host",
     val intervalMinutes: Int = DEFAULT_INTERVAL_MINUTES,
     val layout: WidgetLayout = WidgetLayout.Mosaic,
-    /** The stack. Empty falls back to the single card and server named above. */
     val slots: List<WidgetSlot> = emptyList(),
 ) {
-    /** What the dots count, and what a tap moves between. */
     val pages: List<WidgetSlot>
         get() = slots.ifEmpty { listOf(WidgetSlot(WidgetPreset.of(cards), serverId)) }
 
     val needsCrowdSec: Boolean get() = cards.any { it.crowdsec }
 
-    /** Several picks draw as one combined card, so the family names it. */
     val familyTitle: String
         get() = when {
             cards.size <= 1 -> cards.firstOrNull()?.label.orEmpty()
@@ -167,12 +143,10 @@ data class WidgetConfig(
     val needsOverview: Boolean get() = cards.contains(WidgetCardType.Overview)
 
     companion object {
-        /** Four is as much as one card can hold and stay readable. */
         const val MAX_CARDS = 4
 
         const val DEFAULT_INTERVAL_MINUTES = 30
 
-        /** WorkManager will not run periodic work more often than this. */
         const val MIN_INTERVAL_MINUTES = 15
 
         val INTERVAL_CHOICES = listOf(15, 30, 60)
@@ -180,10 +154,8 @@ data class WidgetConfig(
         val CARDS = stringPreferencesKey("widget_cards")
         val LAYOUT = stringPreferencesKey("widget_layout")
 
-        /** Which of the picked cards is showing. Tapping the widget advances it. */
         val PAGE = intPreferencesKey("widget_page")
 
-        /** Comma separated "Preset:serverId"; an empty id is the host. */
         val SLOTS = stringPreferencesKey("widget_slots")
         val SERVER_ID = stringPreferencesKey("widget_server_id")
         val SERVER_NAME = stringPreferencesKey("widget_server_name")

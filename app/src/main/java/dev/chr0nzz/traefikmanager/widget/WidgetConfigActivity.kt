@@ -68,11 +68,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmTheme
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-/**
- * The per-instance setup the launcher shows when a widget is placed, and again when it is
- * reconfigured. Cancelling leaves the widget unplaced, so every path out of here either writes a
- * config or returns RESULT_CANCELED.
- */
 @AndroidEntryPoint
 class WidgetConfigActivity : ComponentActivity() {
 
@@ -105,7 +100,6 @@ class WidgetConfigActivity : ComponentActivity() {
         }
     }
 
-    /** Reconfiguring shows what the widget is set to, not the defaults. */
     private suspend fun readConfig(appWidgetId: Int): WidgetConfig? = runCatching {
         val glanceId = GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId)
         WidgetConfig.read(getAppWidgetState(this, PreferencesGlanceStateDefinition, glanceId))
@@ -123,7 +117,6 @@ class WidgetConfigActivity : ComponentActivity() {
                 prefs[WidgetConfig.SERVER_ID] = config.serverId.orEmpty()
                 prefs[WidgetConfig.SERVER_NAME] = config.serverName
                 prefs[WidgetConfig.INTERVAL] = config.intervalMinutes
-                // Force the next run to fetch rather than trust a previous mode's payload.
                 prefs[WidgetConfig.UPDATED_AT] = 0L
             }
             StatusWidget().update(this@WidgetConfigActivity, glanceId)
@@ -164,7 +157,6 @@ private fun WidgetConfigScreen(
         }
     }
 
-    // Only the overview reads every server; every other card is about one of them.
     val needsServer = slots.any { slot -> slot.preset.cards.any { it != WidgetCardType.Overview } }
 
     Scaffold(

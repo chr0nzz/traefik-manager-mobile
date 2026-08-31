@@ -1,9 +1,5 @@
 package dev.chr0nzz.traefikmanager.data.model
 
-/**
- * The agent install snippet. There is no server endpoint for this - the web builds the same
- * string client-side from the agent's own fields, so the app reproduces that builder.
- */
 object AgentCompose {
 
     private const val KEY_PLACEHOLDER = "<your-api-key>"

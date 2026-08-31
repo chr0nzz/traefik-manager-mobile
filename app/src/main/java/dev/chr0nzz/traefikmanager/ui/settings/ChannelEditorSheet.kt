@@ -53,10 +53,6 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * Add or edit one channel. The fields, their wording and the two checks before a save follow the
- * web's Settings - Notifications, so a channel reads the same wherever it was set up.
- */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ChannelEditorSheet(
@@ -369,7 +365,6 @@ private fun TimeField(value: String, label: String, onClick: () -> Unit, modifie
     )
 }
 
-/** The platform's own time entry, which is what `input type="time"` gives the web. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialog(initial: String, onDismiss: () -> Unit, onPick: (String) -> Unit) {

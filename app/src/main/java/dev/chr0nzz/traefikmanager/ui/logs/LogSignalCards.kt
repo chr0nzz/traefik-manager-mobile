@@ -58,11 +58,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * The signal desk, matching the web card anatomy:
- * head (label + tinted glyph), metric (hero + flags), mono sub, body, footer counters.
- * Every counter and ranked row toggles a facet.
- */
 @Composable
 fun LogSignalCards(
     window: LogWindow,
@@ -820,7 +815,6 @@ private fun RankedRows(
     }
 }
 
-/** The web's wording for each address class (core.js:868). */
 private fun ipClassLabel(kind: String): String = when (kind) {
     "public" -> "Public"
     "private" -> "Private"

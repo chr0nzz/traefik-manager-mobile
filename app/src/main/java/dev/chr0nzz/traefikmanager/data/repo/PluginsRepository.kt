@@ -23,7 +23,6 @@ class PluginsRepository @Inject constructor(
     private val navCounts: NavCountsStore,
 ) {
 
-    /** Just the total, for the nav badge: skips the route fetch that usage counts would need. */
     suspend fun count(): Int = apiProvider.api().plugins().plugins.size
         .also { navCounts.report(NavCountsStore.PLUGINS, it) }
 

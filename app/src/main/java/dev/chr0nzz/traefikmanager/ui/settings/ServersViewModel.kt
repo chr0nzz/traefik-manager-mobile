@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
 
-/** A freshly issued key. The server never shows it again, so it stays on screen until dismissed. */
 data class IssuedKey(
     val agentName: String,
     val key: String,

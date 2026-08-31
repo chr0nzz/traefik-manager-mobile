@@ -33,10 +33,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * Hides the app behind the device's own authentication when the lock is on, and re-locks
- * whenever the app leaves the foreground so the task switcher never shows live config.
- */
 @Composable
 fun AppLockGate(enabled: Boolean, content: @Composable () -> Unit) {
     val context = LocalContext.current

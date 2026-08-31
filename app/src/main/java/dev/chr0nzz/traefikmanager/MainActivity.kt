@@ -22,7 +22,6 @@ import dev.chr0nzz.traefikmanager.widget.OpenAppAction
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    /** Where a widget tap wants to land, as destination route and the server it was watching. */
     private val widgetTarget = mutableStateOf<Pair<String, String?>?>(null)
 
     override fun onNewIntent(intent: android.content.Intent) {

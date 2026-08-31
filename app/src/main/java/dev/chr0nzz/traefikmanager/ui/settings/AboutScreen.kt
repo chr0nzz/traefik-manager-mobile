@@ -46,10 +46,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
 private data class Attribution(val name: String, val licence: String)
 
-/**
- * Every third-party component shipped in the APK. Apache-2.0 is satisfied by attribution here;
- * MIT and OFL require their notice text, which lives in [OSS_NOTICES].
- */
 private val ATTRIBUTIONS = listOf(
     Attribution("AndroidX (core, activity, lifecycle, navigation, datastore, biometric, window, glance, work)", "Apache-2.0"),
     Attribution("Jetpack Compose and Material 3", "Apache-2.0"),

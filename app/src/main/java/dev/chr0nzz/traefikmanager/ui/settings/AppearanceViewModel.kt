@@ -19,7 +19,6 @@ class AppearanceViewModel @Inject constructor(
     private val navEditorRequests: dev.chr0nzz.traefikmanager.ui.nav.NavEditorRequests,
 ) : ViewModel() {
 
-    /** The launcher's row-or-tile setting. It lives on the hub, so the web follows along. */
     val density: StateFlow<String> = launcherRepository.density
 
     fun editNavBar() = navEditorRequests.request()

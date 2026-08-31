@@ -85,7 +85,6 @@ class ConnectionSettingsViewModel @Inject constructor(
 
     fun onPasswordChange(value: String) = _state.update { it.copy(password = value, test = TestState.Idle) }
 
-    /** Tests the values on screen, so nothing has to be saved before it can be verified. */
     fun testConnection() {
         val current = _state.value
         _state.update { it.copy(test = TestState.Running) }
@@ -119,7 +118,6 @@ class ConnectionSettingsViewModel @Inject constructor(
             val changes = buildMap {
                 put("traefik_api_url", JsonPrimitive(current.url.trim()))
                 put("traefik_api_user", JsonPrimitive(current.user.trim()))
-                // An omitted password means "keep the stored one", so only send a typed value.
                 if (current.password.isNotEmpty()) {
                     put("traefik_api_password", JsonPrimitive(current.password))
                 }

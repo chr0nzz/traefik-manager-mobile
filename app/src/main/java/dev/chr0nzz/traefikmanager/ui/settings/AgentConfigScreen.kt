@@ -55,7 +55,6 @@ private val RESTART_METHODS = listOf(
     "socket" to "Direct socket",
 )
 
-/** The four optional tabs this app can show; the web has more that only it renders. */
 private val AGENT_TABS = listOf(
     "logs" to "Logs",
     "crowdsec" to "CrowdSec",

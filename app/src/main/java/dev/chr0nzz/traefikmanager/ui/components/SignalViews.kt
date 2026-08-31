@@ -28,7 +28,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** An icon-and-number chip, the web's sig-flag. Clickable when it stands for a filter. */
 data class SignalChip(
     val icon: ImageVector?,
     val text: String,
@@ -44,15 +43,11 @@ fun SignalCard(
     subtitle: String,
     modifier: Modifier = Modifier,
     heroUnit: String? = null,
-    /** Chips beside the hero, right aligned, as the web puts its sig-flags. */
     flags: List<SignalChip> = emptyList(),
-    /** The card's foot: quiet counts that break the hero down. */
     footer: List<SignalChip> = emptyList(),
     trailing: String? = null,
     trailingColor: Color? = null,
-    /** Tinted glyph in the card head, as the web renders one per card. */
     glyph: ImageVector? = null,
-    /** Overrides the rail when the card is reporting a problem. */
     health: Color? = null,
     content: @Composable (() -> Unit)? = null,
 ) {
@@ -196,7 +191,6 @@ fun RankedRow(
     warnSevere: Boolean = false,
     warnIcon: ImageVector? = null,
     trailing: String? = null,
-    /** A coloured rail on the leading edge, as the web puts on every ranked row. */
     rail: Color? = null,
     leading: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,

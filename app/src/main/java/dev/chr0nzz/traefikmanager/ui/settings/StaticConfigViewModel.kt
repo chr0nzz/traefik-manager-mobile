@@ -28,9 +28,7 @@ data class StaticConfigUiState(
     val loadError: String? = null,
     val saveError: String? = null,
     val message: String? = null,
-    /** True once a save lands: the file is new but Traefik is still running the old one. */
     val restartPending: Boolean = false,
-    /** The staged document, which section edits rewrite and only a save commits. */
     val staged: String = "",
     val parsed: JsonObject? = null,
     val pending: Boolean = false,
@@ -47,12 +45,6 @@ data class StaticConfigUiState(
     val system: SystemForm get() = SystemForm.read(parsed)
 }
 
-/**
- * The raw `traefik.yml`, read and written whole.
- *
- * Nothing is validated here. The server parses the YAML before it writes and refuses anything that
- * will not load, which is the check that matters; anything it accepts is the user's call.
- */
 @HiltViewModel
 class StaticConfigViewModel @Inject constructor(
     private val repository: StaticConfigRepository,
@@ -63,7 +55,6 @@ class StaticConfigViewModel @Inject constructor(
 
     val content = TextFieldState()
 
-    /** What was last read, so the screen knows whether anything is actually unsaved. */
     private var original: String = ""
 
     val dirty: Boolean get() = content.text.toString() != original
@@ -108,12 +99,6 @@ class StaticConfigViewModel @Inject constructor(
         load()
     }
 
-    /**
-     * Run one section change through the server and keep the result staged.
-     *
-     * The raw editor and the section forms work on the same buffer, so a change made in a form is
-     * visible in the YAML and the other way round, and neither is written until save.
-     */
     fun applySection(
         section: String,
         action: String,

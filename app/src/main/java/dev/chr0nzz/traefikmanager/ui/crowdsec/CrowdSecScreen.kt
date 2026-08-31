@@ -304,7 +304,6 @@ private fun CrowdSecBody(
     val palette = LocalTmPalette.current
     val wide = currentWindowAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
-    // The cards rank the filtered window, the way the web feeds them sel.alerts (crowdsec.js:1484).
     val alerts = state.visibleAlerts
     val banned = state.snapshot.bannedIps
     val sources = remember(alerts, banned) { CrowdSecAnalytics.sources(alerts, banned) }
@@ -342,10 +341,6 @@ private fun CrowdSecBody(
         }
 
         item {
-            // The web lays the desk out in columns that grow with the viewport; a phone gets two
-            // across, a tablet three, in the same worst-first order.
-            // The web's desk grid: two columns on a phone, four on a tablet, with the ranked-list
-            // cards spanning two of them (app.css:197, 258, 377).
             val columns = if (wide) 4 else 2
             val loose = sources.filter { it.open > 0 }
             val repeats = sources.filter { it.count > 1 }
@@ -755,10 +750,8 @@ private fun RankCard(
     }
 }
 
-/** The web's compact desk shows four ranked rows and counts the tail off the same cut. */
 private const val ROW_CAP = 4
 
-/** The web draws at most 240 cells and prints what one cell stands for (crowdsec.js:1). */
 private const val CELL_CAP = 240
 
 @Composable
@@ -977,10 +970,6 @@ private fun CrowdSecSearchBar(
     }
 }
 
-/**
- * The web's banner: what the LAPI is seeing right now, boxed and accented by how bad it is, with
- * the window's totals underneath. Same shape as the logs verdict so the two screens read alike.
- */
 @Composable
 private fun CrowdSecVerdictCard(
     state: CrowdSecUiState,
@@ -1113,10 +1102,6 @@ private fun CrowdSecVerdictItem(icon: ImageVector, text: String, color: Color) {
     }
 }
 
-/**
- * The web keeps this outside the banner: what the window holds, and the note that the alert feed
- * is local detections rather than everything the community has seen.
- */
 @Composable
 private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
     val palette = LocalTmPalette.current
@@ -1149,10 +1134,8 @@ private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
     }
 }
 
-/** A desk card and how many grid columns it takes, mirroring the web's lg-wide. */
 private data class DeskCard(val span: Int, val content: @Composable (Modifier) -> Unit)
 
-/** Fills each row up to [columns] in order, starting a new row when the next card will not fit. */
 private fun packRows(cards: List<DeskCard>, columns: Int): List<List<DeskCard>> {
     val rows = mutableListOf<List<DeskCard>>()
     var row = mutableListOf<DeskCard>()
@@ -1171,10 +1154,6 @@ private fun packRows(cards: List<DeskCard>, columns: Int): List<List<DeskCard>> 
     return rows
 }
 
-/**
- * What the desk is filtered by right now: one chip per facet, each removable on its own, the way
- * the web's window row carries them. Every chip applies together.
- */
 @Composable
 private fun FilterBar(
     state: CrowdSecUiState,

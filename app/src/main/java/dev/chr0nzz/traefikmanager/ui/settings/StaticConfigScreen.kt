@@ -68,7 +68,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/** Which form is open, if any. */
 private sealed interface StaticEditing {
     data class Entrypoint(val form: EntrypointForm, val adding: Boolean) : StaticEditing
     data class Resolver(val form: ResolverForm, val adding: Boolean) : StaticEditing
@@ -82,13 +81,6 @@ private sealed interface StaticEditing {
 
 private data class PendingRemoval(val section: String, val name: String)
 
-/**
- * Traefik's static configuration, as the sections it is actually made of.
- *
- * Every form stages its change through the server and leaves the document in hand; nothing is
- * written until save. The raw YAML is the same buffer, one button away, for anything the forms
- * do not cover.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StaticConfigScreen(

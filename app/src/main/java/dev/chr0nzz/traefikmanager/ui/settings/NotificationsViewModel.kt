@@ -125,7 +125,6 @@ class NotificationsViewModel @Inject constructor(
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
-    /** Uses the endpoint's own field names, which differ from the ones the settings document uses. */
     fun test() {
         val current = _state.value
         _state.update { it.copy(test = TestState.Running) }

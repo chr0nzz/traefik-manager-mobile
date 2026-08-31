@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** What a nav entry reports: how many it holds, and how many of those want attention. */
 data class NavBadge(val count: Int = 0, val alerts: Int = 0)
 
 data class NavBadges(private val byRoute: Map<String, NavBadge> = emptyMap()) {
@@ -58,7 +57,6 @@ class RootViewModel @Inject constructor(
     private val _switching = MutableStateFlow(false)
     val switching: StateFlow<Boolean> = _switching.asStateFlow()
 
-    /** The selected agent's id, or null for the host. Known immediately, unlike the server list. */
     val activeAgentId: StateFlow<String?> = serverScope.activeAgentId
 
     val activeServer: StateFlow<ServerEntry?> = combine(serverScope.activeAgentId, _servers) { id, list ->
@@ -76,13 +74,11 @@ class RootViewModel @Inject constructor(
         if (id == serverScope.activeAgentId.value) return
         _switching.value = true
         viewModelScope.launch {
-            // A failed write must not leave the header stuck on "switching…".
             runCatching { serversRepository.select(id) }
             _switching.value = false
         }
     }
 
-    /** Capabilities of whichever server is selected: the host answers for itself, an agent for itself. */
     val capabilities: StateFlow<ServerCapabilities> = combine(
         serverSettingsRepository.settings,
         serverScope.activeAgentId,
@@ -97,7 +93,6 @@ class RootViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ServerCapabilities())
 
-    /** Destinations the selected server has switched on. Unknown means "show everything". */
     val destinations: StateFlow<List<TmDestination>> = capabilities
         .map { capabilities ->
             TmDestination.entries.filter { destination ->
@@ -120,16 +115,12 @@ class RootViewModel @Inject constructor(
         }
     }
 
-    /** Totals the sidebar shows but no screen has fetched yet. Failures just leave the badge off. */
     private fun loadNavCounts() {
         viewModelScope.launch { runCatching { certificatesRepository.load() } }
         viewModelScope.launch { runCatching { pluginsRepository.count() } }
-        // Reading the route list is what makes the Routes and Middleware badges right; without it
-        // they would sit on Traefik's own totals until the user happened to open that screen.
         viewModelScope.launch { runCatching { routesRepository.load() } }
     }
 
-    /** Forget the server, its API key and every cached page on this device. */
     fun disconnect() {
         viewModelScope.launch {
             crowdSecRepository.forget()
@@ -139,7 +130,6 @@ class RootViewModel @Inject constructor(
         }
     }
 
-    /** True when the settings screen has asked for the bar editor. */
     val navEditorOpen: StateFlow<Boolean> = navEditorRequests.open
 
     fun consumeNavEditor() = navEditorRequests.consume()
@@ -171,8 +161,6 @@ class RootViewModel @Inject constructor(
         val middlewares = cardsFor("middlewares")
         NavBadges(
             buildMap {
-                // The route list is the truth for what this server manages; the desk total is
-                // only a stand-in until that list has been read once.
                 put(
                     TmDestination.Routes.route,
                     NavBadge(

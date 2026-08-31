@@ -22,25 +22,15 @@ data class TmPreferences(
     val activeAgentId: String? = null,
     val migratedFromV1: Boolean = false,
     val migrationNotice: String? = null,
-    /** How many notifications had been seen last time the bell was opened, as the web tracks it. */
     val notificationsRead: Int = 0,
-    /** Whether this device asked a UnifiedPush distributor for an endpoint. */
     val pushEnabled: Boolean = false,
-    /** The endpoint the distributor handed out, which is the URL servers post to. */
     val pushEndpoint: String = "",
-    /** Base URL of each server that has a channel for this device, and that channel's id. */
     val pushChannels: Map<String, String> = emptyMap(),
-    /** Why the last registration attempt failed, for the settings screen to explain. */
     val pushError: String = "",
-    /** The last notification list read, as JSON, so a cold start has something to draw. */
     val notificationsCache: String = "",
-    /** Which server that cache belongs to, since each one keeps its own notifications. */
     val notificationsCacheServer: String = "",
-    /** The server's shared read marker as last seen, or -1 on a server without one. */
     val notificationsReadUntil: Int = -1,
-    /** What was pinned before the choice became per screen size and per server. */
     val navItems: List<String> = emptyList(),
-    /** Pinned routes keyed by "&lt;server&gt;|&lt;layout&gt;": a phone and a tablet want different sets. */
     val navScopes: Map<String, List<String>> = emptyMap(),
     val hideNavBar: Boolean = false,
 )
@@ -101,10 +91,6 @@ class PreferencesStore @Inject constructor(
         }
     }
 
-    /**
-     * An empty list is stored, not removed: it means "this scope was reset to the defaults", which
-     * has to outrank the pre-scope setting the app still falls back to.
-     */
     suspend fun setNavItems(scope: String, routes: List<String>) {
         dataStore.edit { prefs ->
             val current = decodeScopes(prefs[KEY_NAV_SCOPES]).toMutableMap()
@@ -170,7 +156,6 @@ class PreferencesStore @Inject constructor(
     }
 }
 
-/** Server to channel id, kept as one string because DataStore has no map type. */
 private fun decodeChannels(raw: String?): Map<String, String> =
     raw.orEmpty()
         .split('\n')
@@ -184,10 +169,6 @@ private fun decodeChannels(raw: String?): Map<String, String> =
 private fun encodeChannels(channels: Map<String, String>): String =
     channels.entries.joinToString("\n") { "${it.key}|${it.value}" }
 
-/**
- * Scopes are stored as JSON. The key embeds a separator of its own and the value is a list, which
- * is exactly the case a hand-rolled "key|a,b" format gets wrong.
- */
 private val scopeJson = Json { ignoreUnknownKeys = true }
 
 internal fun decodeScopes(raw: String?): Map<String, List<String>> {

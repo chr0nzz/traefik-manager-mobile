@@ -87,7 +87,6 @@ class CertificatesViewModel @Inject constructor(
         }
     }
 
-    /** A different server means different data: drop what is on screen and refetch. */
     private fun watchServerChanges() {
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {

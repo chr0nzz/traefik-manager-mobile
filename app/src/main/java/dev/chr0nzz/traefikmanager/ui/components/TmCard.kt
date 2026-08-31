@@ -189,7 +189,6 @@ fun CountChip(
     status: TmStatus,
     modifier: Modifier = Modifier,
     showLabel: Boolean = true,
-    /** Set when the chip stands for a filter you can open. */
     onClick: (() -> Unit)? = null,
 ) {
     val color = statusColor(status)

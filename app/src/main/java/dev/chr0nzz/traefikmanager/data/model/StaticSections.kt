@@ -11,13 +11,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/**
- * The static config's structured editors.
- *
- * Every form maps to one `section` on `POST /api/static/section`, which transforms the document
- * and hands it back without writing. The keys below are the server's, not ours, so they are spelt
- * exactly as `app.py` reads them.
- */
 object StaticSections {
 
     const val ENTRYPOINTS = "entrypoints"
@@ -51,8 +44,6 @@ private fun JsonObject?.csv(key: String): String =
         .orEmpty()
 
 private fun JsonObject?.has(key: String): Boolean = this?.containsKey(key) == true
-
-// ---------------------------------------------------------------- entry points
 
 data class EntrypointForm(
     val name: String = "",
@@ -128,8 +119,6 @@ data class EntrypointForm(
     }
 }
 
-// ------------------------------------------------------------------ resolvers
-
 data class ResolverForm(
     val name: String = "",
     val email: String = "",
@@ -204,8 +193,6 @@ data class ResolverForm(
     }
 }
 
-// -------------------------------------------------------------------- plugins
-
 data class StaticPluginForm(
     val name: String = "",
     val moduleName: String = "",
@@ -218,8 +205,6 @@ data class StaticPluginForm(
         put("local", JsonPrimitive(local))
     }
 }
-
-// ------------------------------------------------------------------ providers
 
 data class ProvidersForm(
     val docker: Boolean = false,
@@ -258,15 +243,12 @@ data class ProvidersForm(
             )
         }
 
-        /** Everything that is not the docker or file card, which the app lists but cannot edit. */
         fun others(providers: JsonObject?): List<String> =
             providers?.keys.orEmpty()
                 .filterNot { it == "docker" || it == "file" || it == "providersThrottleDuration" }
                 .sorted()
     }
 }
-
-// ------------------------------------------------------------------------ api
 
 data class ApiForm(
     val enabled: Boolean = false,
@@ -293,8 +275,6 @@ data class ApiForm(
         }
     }
 }
-
-// ------------------------------------------------------------------------ log
 
 data class LogForm(
     val level: String = "ERROR",
@@ -366,8 +346,6 @@ data class LogForm(
     }
 }
 
-// -------------------------------------------------------------- observability
-
 data class ObservabilityForm(
     val ping: Boolean = false,
     val prometheus: Boolean = false,
@@ -409,8 +387,6 @@ data class ObservabilityForm(
         }
     }
 }
-
-// --------------------------------------------------------------------- system
 
 data class SystemForm(
     val checkNewVersion: Boolean = true,
@@ -457,7 +433,6 @@ data class SystemForm(
     }
 }
 
-/** Named entries of a list section, in the order the document holds them. */
 object StaticEntries {
 
     fun entrypoints(root: JsonObject?): List<Pair<String, JsonObject>> = named(root.obj("entryPoints"))

@@ -37,7 +37,6 @@ data class BackupsUiState(
     val diffFor: GitCommit? = null,
     val diff: GitDiff? = null,
     val diffLoading: Boolean = false,
-    /** Set after restoring a static backup: it only takes effect once Traefik restarts. */
     val restartPending: Boolean = false,
     val message: String? = null,
 ) {
@@ -94,8 +93,6 @@ class BackupsViewModel @Inject constructor(
                             refreshing = false,
                             onHost = repository.onHost,
                             entries = snapshot.entries,
-                            // The host answers for its own static config through its settings, so
-                            // only an agent's explicit answer can hide the tab.
                             staticConfigured = snapshot.staticConfigured ?: true,
                             kindKnown = snapshot.kindKnown,
                         )
@@ -174,7 +171,6 @@ class BackupsViewModel @Inject constructor(
 
     fun push(message: String) = run("Pushed to Git") {
         repository.gitPush(message)
-        // A push with nothing to commit still answers ok, so the log is the only honest report.
         "Pushed to Git"
     }
 
@@ -216,7 +212,6 @@ class BackupsViewModel @Inject constructor(
     }
 }
 
-/** Server failures can arrive as HTML, so never show a raw body as if it were a message. */
 private fun Throwable.readable(fallback: String): String {
     val message = message?.trim().orEmpty()
     return when {

@@ -14,7 +14,6 @@ data class ServerSettings(
     val certResolvers: List<String>
         get() = certResolver.split(',').map(String::trim).filter(String::isNotEmpty)
 
-    /** Optional server tabs the user has switched on. An unreported tab stays visible. */
     fun tabVisible(tab: String): Boolean = visibleTabs[tab] ?: true
 }
 
@@ -27,7 +26,6 @@ data class CertResolversResponse(
 data class StaticConfigResponse(
     val parsed: kotlinx.serialization.json.JsonObject? = null,
     val path: String = "",
-    /** The file as text, which is what the editor works on. */
     val raw: String = "",
     val error: String? = null,
 )
@@ -42,7 +40,6 @@ data class SaveSettingsResponse(
 data class TestConnectionRequest(
     val url: String,
     val user: String = "",
-    /** Empty means "test against the password already stored on the server". */
     val password: String = "",
 )
 

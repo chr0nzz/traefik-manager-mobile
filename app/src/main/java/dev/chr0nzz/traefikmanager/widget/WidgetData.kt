@@ -4,7 +4,6 @@ import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-/** A card the app already draws, flattened so it survives a trip through widget state. */
 @Serializable
 data class WidgetCard(
     val key: String = "",
@@ -14,15 +13,10 @@ data class WidgetCard(
     val health: String = "ok",
     val healthLabel: String = "",
     val sub: String = "",
-    /** The signal strip, one entry per object, exactly as the desk shades it. */
     val cells: List<String> = emptyList(),
-    /** Chips beside the hero, as the desk places its sig-flags: "101 loose", "6 idle". */
     val chips: List<WidgetChip> = emptyList(),
-    /** Ranked rows for the cards that list rather than count. */
     val rows: List<WidgetRow> = emptyList(),
-    /** The card's foot: providers on a Traefik card, origins on a CrowdSec one. */
     val footer: List<WidgetChip> = emptyList(),
-    /** What the ranked list is called when this card supplies one. */
     val listTitle: String = "WORST OFFENDERS",
 )
 
@@ -41,7 +35,6 @@ data class WidgetChip(
     val health: String = "ok",
 )
 
-/** One server on the overview: what it is running and what is wrong with it. */
 @Serializable
 data class WidgetServerRow(
     val id: String = "",
@@ -50,7 +43,6 @@ data class WidgetServerRow(
     val warn: Int = 0,
     val err: Int = 0,
     val services: Int = 0,
-    /** One entry per service on this server, shaded the way the services card shades them. */
     val cells: List<String> = emptyList(),
     val bans: Int = -1,
     val reachable: Boolean = true,
@@ -58,7 +50,6 @@ data class WidgetServerRow(
     val hasBans: Boolean get() = bans >= 0
 }
 
-/** Payloads keyed by server: "" is the host. Pages read their own entry. */
 @Serializable
 data class WidgetPayloads(val byServer: Map<String, WidgetPayload> = emptyMap()) {
     companion object {
@@ -69,7 +60,6 @@ data class WidgetPayloads(val byServer: Map<String, WidgetPayload> = emptyMap())
         fun decode(raw: String?): WidgetPayloads {
             if (raw.isNullOrEmpty()) return WidgetPayloads()
             return runCatching { json.decodeFromString<WidgetPayloads>(raw) }.getOrNull()
-                // A payload written before stacking existed is the host's.
                 ?: WidgetPayload.decode(raw)?.let { WidgetPayloads(mapOf("" to it)) }
                 ?: WidgetPayloads()
         }

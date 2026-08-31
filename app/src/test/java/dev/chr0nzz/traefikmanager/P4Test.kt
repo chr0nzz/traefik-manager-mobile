@@ -52,8 +52,6 @@ class P4Test {
 
     @Test
     fun `an agent keeps crowdsec offered even with an empty lapi url on the hub record`() {
-        // The hub field only feeds the compose snippet; the agent reads CROWDSEC_LAPI_URL from its
-        // own environment, so hiding the tab on an empty field would hide a working screen.
         val capabilities = ServerCapabilities(
             isHost = false,
             agent = Agent(id = "a1", name = "edge", visibleTabs = mapOf("crowdsec" to true)),

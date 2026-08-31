@@ -15,13 +15,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import retrofit2.HttpException
 
-/**
- * Traefik's static configuration, and the plugin entries that live inside it.
- *
- * Reads always go to the host, naming the agent when there is one, because the host knows how to
- * fetch an agent's file and hands back the same shape either way. Writes are the asymmetric part:
- * the host takes `/api/static/config`, an agent takes its own `/api/static` through the proxy.
- */
 @Singleton
 class StaticConfigRepository @Inject constructor(
     private val apiProvider: ApiProvider,
@@ -30,7 +23,6 @@ class StaticConfigRepository @Inject constructor(
 
     private fun agent(): String? = serverScope.activeAgentId.value
 
-    /** Whether this server has a static config at all, which is what gates every write. */
     suspend fun manageable(): Boolean = runCatching {
         val agent = agent()
         if (agent == null) {
@@ -63,14 +55,12 @@ class StaticConfigRepository @Inject constructor(
         try {
             apiProvider.api().restartTraefik()
         } catch (exception: HttpException) {
-            // Traefik usually carries this very request, so it dying mid-flight means it worked.
             if (exception.code() !in setOf(502, 504)) {
                 error(message(exception) ?: "The restart failed (HTTP ${exception.code()})")
             }
         }
     }
 
-    /** Best effort: no catalogue means no update badges, never an error on the screen. */
     suspend fun catalog(): Map<String, String> = runCatching {
         apiProvider.apiFor(null).pluginCatalog().plugins
     }.getOrDefault(emptyMap())
@@ -96,7 +86,6 @@ class StaticConfigRepository @Inject constructor(
         }
     }
 
-    /** Rewrites one plugin entry. The transform is the host's; the write is wherever it belongs. */
     suspend fun savePlugin(name: String, oldName: String, moduleName: String, version: String) =
         section(
             action = "edit",
@@ -111,12 +100,6 @@ class StaticConfigRepository @Inject constructor(
     suspend fun removePlugin(name: String) =
         section(action = "remove", name = name, oldName = name, data = JsonObject(emptyMap()))
 
-    /**
-     * Transform the document and hand it back without writing it.
-     *
-     * This is what the section editors stage: the server owns the YAML surgery, the app holds the
-     * result until someone presses save. Nothing here touches the file.
-     */
     suspend fun applySection(
         section: String,
         action: String,
@@ -144,7 +127,6 @@ class StaticConfigRepository @Inject constructor(
     }
 
     private suspend fun section(action: String, name: String, oldName: String, data: JsonObject) {
-        // An agent's file is not on the host, so the document has to travel with the request.
         val currentRaw = if (agent() != null) read().raw.takeIf { it.isNotBlank() } else null
         val response = try {
             apiProvider.apiFor(null).staticSection(

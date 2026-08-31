@@ -110,10 +110,6 @@ fun EmptyState(
     modifier = modifier,
 )
 
-/**
- * A failure the user can report. The details go to the clipboard with the app and device stamped
- * on them, because a minified build's own message rarely says enough on its own.
- */
 @Composable
 fun ErrorState(
     headline: String,

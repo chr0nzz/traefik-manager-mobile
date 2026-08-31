@@ -29,10 +29,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * What a node is, as facts rather than a picture. The map itself is the picture, and a second one
- * shrunk into a sheet was unreadable on a phone.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeSheet(

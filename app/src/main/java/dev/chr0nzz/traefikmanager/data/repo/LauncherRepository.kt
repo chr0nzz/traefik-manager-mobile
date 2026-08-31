@@ -21,13 +21,6 @@ data class LauncherSnapshot(
     val density: String = "list",
 )
 
-/**
- * The dashboard launcher: the routes of the selected server, dressed with the overrides the hub
- * holds for it.
- *
- * The config is a hub document scoped by a query parameter rather than by the agent proxy, so
- * every call here names the server instead of relying on the interceptor.
- */
 @Singleton
 class LauncherRepository @Inject constructor(
     private val apiProvider: ApiProvider,
@@ -36,7 +29,6 @@ class LauncherRepository @Inject constructor(
 
     private val _density = kotlinx.coroutines.flow.MutableStateFlow("list")
 
-    /** Watched by both the launcher and the appearance screen, so a change lands on both. */
     val density: kotlinx.coroutines.flow.StateFlow<String> = _density
 
     suspend fun load(): LauncherSnapshot = coroutineScope {
@@ -57,10 +49,6 @@ class LauncherRepository @Inject constructor(
         )
     }
 
-    /**
-     * Saving one card still posts the whole document: the hub replaces custom_groups and
-     * route_overrides with whatever arrives, so anything left out is deleted.
-     */
     private suspend fun save(config: DashboardConfig) {
         val ready = apiProvider.ready()
         val response = ready.api.saveDashboardConfig(
@@ -86,7 +74,6 @@ class LauncherRepository @Inject constructor(
     }
 
     suspend fun removeGroup(config: DashboardConfig, name: String) {
-        // Cards pointing at a group that no longer exists fall back to auto-detection.
         val overrides = config.routeOverrides.mapValues { (_, override) ->
             if (override.group == name) override.copy(group = "") else override
         }
@@ -98,7 +85,6 @@ class LauncherRepository @Inject constructor(
         )
     }
 
-    /** The density lives in the hub's ui_prefs, which merges, so this one key is safe to send. */
     suspend fun setDensity(density: String) {
         _density.value = density
         val ready = apiProvider.ready()

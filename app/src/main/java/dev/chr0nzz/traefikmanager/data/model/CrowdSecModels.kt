@@ -186,15 +186,10 @@ object CrowdSecAnalytics {
     fun sources(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
         rank(alerts, banned) { listOf(it.ip) }
 
-    /**
-     * Keyed by AS number and labelled with the name, as the web does (crowdsec.js:772): two
-     * networks can share a name, and the number is what a filter has to carry.
-     */
     fun networks(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
         rank(
             alerts = alerts,
             banned = banned,
-            // The web flags each network with the country of its first alert (crowdsec.js:766).
             extraOf = { rows -> rows.firstOrNull()?.countryCode.orEmpty() },
             labelOf = { key, rows -> rows.firstOrNull()?.source?.asName?.ifEmpty { "AS$key" } ?: "AS$key" },
         ) { alert ->

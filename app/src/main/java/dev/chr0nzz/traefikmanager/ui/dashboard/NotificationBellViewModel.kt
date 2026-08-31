@@ -8,10 +8,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-/**
- * The bell's badge. The count is the repository's, so marking the history read clears it here
- * without a refresh, and the list itself is fetched once for both screens.
- */
 @HiltViewModel
 class NotificationBellViewModel @Inject constructor(
     private val repository: NotificationsRepository,

@@ -13,12 +13,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.chr0nzz.traefikmanager.data.store.PreferencesStore
 
-/**
- * Talks to the server about this device's channel.
- *
- * A push service is only bound for a few seconds around an event, which is not long enough to be
- * sure of a round trip to someone's homelab, so anything that leaves the phone runs here instead.
- */
 class PushSyncWorker(
     context: Context,
     params: WorkerParameters,
@@ -56,7 +50,6 @@ class PushSyncWorker(
                     )
                     Result.success()
                 },
-                // The server may simply be asleep or off the network; the endpoint is still good.
                 onFailure = { if (runAttemptCount < 5) Result.retry() else Result.failure() },
             )
         }

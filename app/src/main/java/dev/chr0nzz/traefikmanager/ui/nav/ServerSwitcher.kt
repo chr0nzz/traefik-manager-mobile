@@ -39,10 +39,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * The drawer header doubles as the server switcher: it names the server every screen is
- * currently reading from, and expands into the host plus each agent with its health.
- */
 @Composable
 fun ServerSwitcherHeader(
     servers: List<ServerEntry>,

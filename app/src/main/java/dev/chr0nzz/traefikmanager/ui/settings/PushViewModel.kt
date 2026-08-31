@@ -24,11 +24,9 @@ data class PushUiState(
     val current: String? = null,
     val picking: Boolean = false,
 ) {
-    /** The distributor actually registered with, which need not be the only one installed. */
     val currentLabel: String?
         get() = distributors.firstOrNull { it.packageName == current }?.label
 
-    /** Nothing on the phone can carry a push, so the toggle has nothing to switch on. */
     val noDistributor: Boolean get() = distributors.isEmpty()
 
     val registered: Boolean get() = enabled && endpoint.isNotBlank()
@@ -59,7 +57,6 @@ class PushViewModel @Inject constructor(
         refresh()
     }
 
-    /** Distributors come and go with the apps that provide them, so this runs on every visit. */
     fun refresh() {
         _state.update { it.copy(distributors = registrar.distributors(), current = registrar.current()) }
         registrar.refresh()
@@ -95,7 +92,6 @@ class PushViewModel @Inject constructor(
         }
     }
 
-    /** The user turned the system permission down, so say why nothing will arrive. */
     fun onPermissionDenied() {
         viewModelScope.launch {
             preferencesStore.setPushError(

@@ -16,13 +16,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-/**
- * Turns a pushed payload into a notification in the tray.
- *
- * The body is whatever the server's generic channel posts, which is
- * `{"event": severity, "message": text, "timestamp": when}`. Anything that does not parse is
- * still shown, as its own text, because a message that arrived is worth more than a clean model.
- */
 object PushNotifier {
 
     private const val CHANNEL_ID = "tm_events"
@@ -36,8 +29,6 @@ object PushNotifier {
         val parsed = runCatching { json.parseToJsonElement(raw) as? JsonObject }.getOrNull()
         val message = parsed?.text("message")?.takeIf { it.isNotBlank() } ?: raw.take(400)
         val event = parsed?.text("event").orEmpty()
-        // The server names the category it came from, which is more use as a title than the
-        // product name repeated on every line of the tray.
         val source = parsed?.text("source")?.takeIf { it.isNotBlank() } ?: "Traefik Manager"
         show(context, message, event, source)
     }
@@ -65,22 +56,15 @@ object PushNotifier {
             .setContentIntent(open)
             .build()
 
-        // The id is the clock, so a burst stacks rather than each one replacing the last.
         runCatching {
             NotificationManagerCompat.from(context).notify(System.currentTimeMillis().toInt(), notification)
         }
     }
 
-    /**
-     * Drop everything this app has in the tray, which is also what clears the launcher's badge:
-     * the dot is derived from active notifications, so reading the history in the app has to take
-     * them away or it stays lit.
-     */
     fun clear(context: Context) {
         runCatching { NotificationManagerCompat.from(context).cancelAll() }
     }
 
-    /** Android 13 and up will not show anything until the user has granted this. */
     fun allowed(context: Context): Boolean = ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.POST_NOTIFICATIONS,

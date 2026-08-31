@@ -31,12 +31,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-/**
- * Install a plugin the way the web does: paste what the plugin's own page gives you.
- *
- * The two snippets are Traefik's, not ours - the static block declares the plugin and the
- * middleware block is an example of using it - so they are pasted rather than composed.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginInstallSheet(
@@ -138,7 +132,6 @@ fun PluginInstallSheet(
     }
 }
 
-/** Rename a plugin, move it to another module, or change the version it pins. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginEditSheet(
@@ -208,7 +201,6 @@ fun PluginEditSheet(
     }
 }
 
-/** Nothing a plugin change does reaches Traefik until it restarts, so the app says so and offers. */
 @Composable
 fun PluginRestartNotice(detail: String, busy: Boolean, onRestart: () -> Unit, onDismiss: () -> Unit) {
     val palette = LocalTmPalette.current

@@ -51,10 +51,6 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmTheme
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-/**
- * Sets up a launcher widget. The 1x1 asks for one server and one app; the scrollable one takes as
- * many servers as you like and merges them.
- */
 @AndroidEntryPoint
 class LauncherConfigActivity : ComponentActivity() {
 

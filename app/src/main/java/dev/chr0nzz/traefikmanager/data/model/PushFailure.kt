@@ -1,6 +1,5 @@
 package dev.chr0nzz.traefikmanager.data.model
 
-/** Turns a distributor's refusal into something worth reading. */
 object PushFailure {
 
     fun describe(reason: String): String = when (reason.uppercase()) {

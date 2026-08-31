@@ -155,7 +155,6 @@ private fun ConnectedApp(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Health goes stale fast, so re-probe whenever the drawer is opened.
     LaunchedEffect(drawerState.isOpen) {
         if (drawerState.isOpen) viewModel.loadServers()
     }
@@ -168,8 +167,6 @@ private fun ConnectedApp(
         }
     }
 
-    // Ask for the layout the suite will actually use: a short window puts the items in a bar even
-    // when it is wide, and a bar has room for neither nine destinations nor a count on each.
     val suiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     val bar = suiteType == NavigationSuiteType.ShortNavigationBarCompact ||
         suiteType == NavigationSuiteType.ShortNavigationBarMedium ||
@@ -191,8 +188,6 @@ private fun ConnectedApp(
                         scope.launch { drawerState.close() }
                     },
                 )
-                // A server with every tab on overflows the sheet, so the list scrolls under the
-                // switcher rather than running off the bottom.
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
                     Text(
@@ -221,18 +216,12 @@ private fun ConnectedApp(
         },
     ) {
 
-    // A bar keeps five slots. Your own picks win; otherwise primaries first, then whatever else
-    // the server exposes.
-    // What is pinned is remembered per server and per layout: servers do not run the same tabs,
-    // and a rail has room for more than a bottom bar does.
     val activeAgentId by viewModel.activeAgentId.collectAsStateWithLifecycle()
     val navScope = navScopeOf(activeAgentId, bar)
     val savedRoutes = preferences.navScopes[navScope] ?: preferences.navItems
     val chosen = savedRoutes
         .mapNotNull { route -> destinations.firstOrNull { it.route == route } }
     val suiteDestinations = when {
-        // A pick that names nothing this server runs is no pick at all, so the defaults stand
-        // rather than leaving an empty bar behind.
         chosen.isNotEmpty() -> chosen.take(if (bar) 5 else 8)
         bar -> {
             val primary = destinations.filter { it.primary }
@@ -252,8 +241,6 @@ private fun ConnectedApp(
     if (navEditorOpen) {
         NavBarEditorSheet(
             available = destinations,
-            // What was actually chosen, not what is on screen: unset on a rail means every
-            // destination, and handing the editor eleven items makes it unusable.
             chosen = chosen.map { it.route },
             railLayout = !bar,
             onSave = { routes ->
@@ -264,8 +251,6 @@ private fun ConnectedApp(
         )
     }
 
-    // A widget tap names both a page and the server it was watching, so the app lands on what the
-    // widget was actually showing rather than on whatever was last selected.
     LaunchedEffect(widgetDestination, widgetServerId) {
         val route = widgetDestination ?: return@LaunchedEffect
         if (widgetServerId != null) viewModel.switchServer(widgetServerId.takeIf { it.isNotEmpty() })
@@ -281,14 +266,9 @@ private fun ConnectedApp(
 
     NavigationSuiteScaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        // Hiding the bar leaves the drawer as the way around, which is why it stays reachable
-        // from every top bar.
         navigationSuiteType = if (preferences.hideNavBar && bar) NavigationSuiteType.None else suiteType,
-        // The rail's own drawer button belongs at the top where a top bar's would be; a bottom
-        // bar has no such item and stays centred.
         navigationItemVerticalArrangement = if (bar) Arrangement.Center else Arrangement.Top,
         navigationItems = {
-            // The rail carries the drawer itself, so the top bars do not need a second one.
             if (!bar) {
                 NavigationSuiteItem(
                     selected = false,
@@ -504,10 +484,6 @@ private fun ConnectedApp(
 
 private fun badgeLabel(value: Int): String = if (value > 999) "999+" else value.toString()
 
-/**
- * The drawer prints the total the way the web sidebar does, as a quiet trailing number, and
- * swaps in a filled badge when that entry has something wrong with it.
- */
 private fun drawerBadge(badge: NavBadge): (@Composable () -> Unit)? = when {
     badge.alerts > 0 -> {
         {
@@ -529,10 +505,6 @@ private fun drawerBadge(badge: NavBadge): (@Composable () -> Unit)? = when {
     else -> null
 }
 
-/**
- * The rail has room for a number, the bottom bar does not: only alerts survive the compact
- * layout, and totals ride a neutral badge so a big count never reads as a big problem.
- */
 private fun railBadge(badge: NavBadge, counted: Boolean): (@Composable () -> Unit)? = when {
     badge.alerts > 0 -> {
         {
@@ -557,6 +529,5 @@ private fun railBadge(badge: NavBadge, counted: Boolean): (@Composable () -> Uni
 
 private fun alertLabel(alerts: Int): String = if (alerts == 1) "1 alert" else "$alerts alerts"
 
-/** Pinned items belong to one server on one kind of layout, so the key names both. */
 private fun navScopeOf(serverId: String?, bar: Boolean): String =
     (serverId?.takeIf { it.isNotBlank() } ?: "host") + "|" + if (bar) "bar" else "rail"

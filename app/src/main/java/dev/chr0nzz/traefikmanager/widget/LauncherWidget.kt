@@ -39,9 +39,7 @@ import androidx.glance.text.TextStyle
 import dev.chr0nzz.traefikmanager.R
 import java.io.File
 
-/** What a launcher widget was set to: which servers, and whether names are drawn. */
 object LauncherWidgetConfig {
-    /** Comma separated server ids; an empty entry is the host. */
     val SERVERS = stringPreferencesKey("launcher_servers")
     val HIDE_NAMES = booleanPreferencesKey("launcher_hide_names")
     val PAYLOAD = stringPreferencesKey("launcher_payload")
@@ -52,18 +50,11 @@ object LauncherWidgetConfig {
         ?: listOf(null)
 }
 
-/** Glance provides grid layouts for one to five columns and no more. */
 private const val MAX_GRID_COLUMNS = 5
 
-/** Opens an app through the browser's own session, so anything signed in stays signed in. */
 private fun openIntent(url: String): Intent =
     Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-/**
- * A grid of apps that grows with the widget: wider gets more columns, taller gets more rows, and
- * anything past the bottom scrolls. Sized off the cell the launcher actually gave us rather than
- * fixed numbers, which is what made earlier versions crop.
- */
 class LauncherWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode = SizeMode.Exact
@@ -80,9 +71,6 @@ class LauncherWidget : GlanceAppWidget() {
     private fun Body(payload: LauncherWidgetPayload?, hideNames: Boolean) {
         val apps = payload?.apps.orEmpty()
         val width = LocalSize.current.width.value.toInt()
-        // One cell per icon plus its label; the count follows the width so a resize re-flows.
-        // Glance only ships grid layouts for one to five columns, so six has nothing to render
-        // into and the widget fails with "can't show content".
         val cell = if (hideNames) 56 else 68
         val columns = ((width - 12) / cell).coerceIn(1, MAX_GRID_COLUMNS)
 
@@ -132,7 +120,6 @@ class LauncherWidget : GlanceAppWidget() {
     }
 }
 
-/** The cached PNG, drawn whole, or the app's initial when we have no icon for it. */
 @Composable
 private fun Icon(icon: String, name: String, size: Int) {
     val bitmap = icon.takeIf { it.isNotEmpty() }

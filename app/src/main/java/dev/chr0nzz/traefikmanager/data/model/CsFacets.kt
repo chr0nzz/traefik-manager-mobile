@@ -1,10 +1,5 @@
 package dev.chr0nzz.traefikmanager.data.model
 
-/**
- * The eleven things the desk can be filtered by, exactly as the web names them
- * (crowdsec.js:26). Two of them read decisions, the rest read alerts, and scenario and ip read
- * both - which is what decides the view a click lands you in.
- */
 enum class CsFacet(val key: String, val label: String, val reads: CsReads) {
     Scenario("scenario", "scenario", CsReads.Both),
     Ip("ip", "IP", CsReads.Both),
@@ -21,10 +16,6 @@ enum class CsFacet(val key: String, val label: String, val reads: CsReads) {
 
 enum class CsReads { Alerts, Decisions, Both }
 
-/**
- * Every filter on the window row applies together, and clicking a value that is already set
- * clears it (crowdsec.js:372-373).
- */
 data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
 
     operator fun get(facet: CsFacet): String? = values[facet]?.takeIf { it.isNotEmpty() }
@@ -44,7 +35,6 @@ data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
 
     fun clear(): CsFacets = CsFacets()
 
-    /** Mirrors `_atkMatchAlert` (crowdsec.js:431). [skip] leaves one facet out, as the map does. */
     fun matches(
         alert: CsAlert,
         countryOf: (CsAlert) -> String,
@@ -70,7 +60,6 @@ data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
         return true
     }
 
-    /** Mirrors `_atkMatchDec` (crowdsec.js:455), including the two synthetic origins. */
     fun matches(decision: CsDecision): Boolean {
         get(CsFacet.Type)?.let { if (decision.type != it) return false }
         get(CsFacet.Origin)?.let { origin ->
@@ -85,9 +74,5 @@ data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
         return true
     }
 
-    /**
-     * Which view a click should land in: a decision-only facet has nothing to say about alerts,
-     * and the other way round (crowdsec.js:374-379).
-     */
     fun viewFor(facet: CsFacet): CsReads = facet.reads
 }

@@ -1,6 +1,5 @@
 package dev.chr0nzz.traefikmanager.data.model
 
-/** One credential slot on a channel, and how it is asked for. */
 data class ChannelField(
     val key: String,
     val label: String,
@@ -9,10 +8,6 @@ data class ChannelField(
     val secret: Boolean = false,
 )
 
-/**
- * What each kind of channel needs. The labels follow the web's Settings - Notifications, so a
- * channel set up on a phone reads the same as one set up in a browser.
- */
 data class ChannelKind(
     val key: String,
     val label: String,
@@ -192,7 +187,6 @@ object ChannelKinds {
     fun severityLabel(key: String): String = severities.firstOrNull { it.first == key }?.second ?: key
 }
 
-/** The labels of the credential slots this channel leaves blank. */
 fun NotificationChannel.missingFields(): List<String> {
     val kind = ChannelKinds.of(kind) ?: return emptyList()
     return kind.required.filter { field -> valueOf(field.key).isBlank() }.map { it.label }
@@ -207,10 +201,6 @@ fun NotificationChannel.valueOf(key: String): String = when (key) {
     else -> ""
 }
 
-/**
- * The one line under a channel's name: what it takes, how loudly, and when. Mirrors the web's
- * summary so the two read alike.
- */
 fun NotificationChannel.summary(): String {
     val parts = mutableListOf<String>()
     val known = categories.filter { key -> ChannelKinds.categories.any { it.first == key } }

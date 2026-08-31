@@ -6,10 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Lets the settings screen open the bar editor, which lives up in the scaffold beside the bar it
- * edits. The two sit in different view models, so the request passes through here.
- */
 @Singleton
 class NavEditorRequests @Inject constructor() {
 
