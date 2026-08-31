@@ -53,8 +53,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.chr0nzz.traefikmanager.data.model.BackendMode
 import dev.chr0nzz.traefikmanager.data.model.HeadersPresetDefaults
+import dev.chr0nzz.traefikmanager.data.model.BackendKind
+import dev.chr0nzz.traefikmanager.data.model.BackendMode
 import dev.chr0nzz.traefikmanager.data.model.RouteForm
 import dev.chr0nzz.traefikmanager.data.model.RouteProtocol
 import dev.chr0nzz.traefikmanager.data.model.TcpTlsMode
@@ -186,7 +187,6 @@ fun RouteFormBody(
                         onClick = { viewModel.setProtocol(protocol) },
                         shape = SegmentedButtonDefaults.itemShape(index, RouteProtocol.entries.size),
                         enabled = !form.isEdit,
-                        // protocol still cannot change on an existing route
                     ) {
                         Text(protocol.wire.uppercase())
                     }
@@ -380,19 +380,9 @@ private fun BackendSection(
                     onClick = { viewModel.setBackendMode(mode) },
                     shape = SegmentedButtonDefaults.itemShape(index, BackendMode.entries.size),
                 ) {
-                    Text(if (mode == BackendMode.Manual) "Manual" else "Existing service")
+                    Text(if (mode == BackendMode.Manual) "Build backends" else "Use a service")
                 }
             }
-        }
-
-        if (!form.isManagedService) {
-            Text(
-                text = "This route uses a ${form.serviceType} service. Backends are managed in the config file.",
-                style = MaterialTheme.typography.bodySmall,
-                color = palette.yellow,
-                modifier = Modifier.padding(top = TmSpacing.sm),
-            )
-            return@TmCard
         }
 
         if (form.backendMode == BackendMode.ExistingService) {
@@ -407,43 +397,128 @@ private fun BackendSection(
             return@TmCard
         }
 
+        if (!form.isManagedService) {
+            Text(
+                text = if (form.serviceOwned) {
+                    "This route uses a ${form.serviceType} service that Traefik Manager manages. " +
+                        "Edit its backends from the Services tab."
+                } else {
+                    "This route uses a ${form.serviceType} service. Backends are managed in the config file."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = palette.yellow,
+                modifier = Modifier.padding(top = TmSpacing.sm),
+            )
+            return@TmCard
+        }
+
         SectionLabel("Backends", modifier = Modifier.padding(top = TmSpacing.sm))
+        val composite = form.protocol == RouteProtocol.Http
         form.backends.forEachIndexed { index, backend ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+            Column(
+                verticalArrangement = Arrangement.spacedBy(TmSpacing.xs),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = TmSpacing.xs),
+                    .padding(top = TmSpacing.sm),
             ) {
-                if (form.protocol == RouteProtocol.Http) {
-                    DropdownField(
-                        label = "Scheme",
-                        value = backend.scheme,
-                        options = listOf("http", "https"),
-                        onSelect = { value -> viewModel.updateBackend(index) { it.copy(scheme = value) } },
-                        modifier = Modifier.width(112.dp),
-                    )
+                if (composite) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        DropdownField(
+                            label = "Kind",
+                            value = if (backend.isService) "Service" else "IP:Port",
+                            options = listOf("IP:Port", "Service"),
+                            onSelect = { value ->
+                                viewModel.updateBackend(index) {
+                                    it.copy(
+                                        kind = if (value == "Service") {
+                                            BackendKind.SERVICE
+                                        } else {
+                                            BackendKind.ADDRESS
+                                        },
+                                    )
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (form.compositeType != RouteForm.LOAD_BALANCER) {
+                            OutlinedTextField(
+                                value = backend.share,
+                                onValueChange = { value ->
+                                    viewModel.updateBackend(index) { it.copy(share = value) }
+                                },
+                                label = {
+                                    Text(if (form.compositeType == "mirroring") "Percent" else "Weight")
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.width(104.dp),
+                            )
+                        }
+                        if (form.backends.size > 1) {
+                            IconButton(onClick = { viewModel.removeBackend(index) }) {
+                                Icon(Icons.Outlined.Close, contentDescription = "Remove backend")
+                            }
+                        }
+                    }
                 }
-                OutlinedTextField(
-                    value = backend.host,
-                    onValueChange = { value -> viewModel.updateBackend(index) { it.copy(host = value) } },
-                    label = { Text("Host") },
-                    placeholder = { Text("10.0.0.10") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                )
-                OutlinedTextField(
-                    value = backend.port,
-                    onValueChange = { value -> viewModel.updateBackend(index) { it.copy(port = value) } },
-                    label = { Text("Port") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(96.dp),
-                )
-                if (form.backends.size > 1) {
-                    IconButton(onClick = { viewModel.removeBackend(index) }) {
-                        Icon(Icons.Outlined.Close, contentDescription = "Remove backend")
+
+                if (backend.isService) {
+                    DropdownField(
+                        label = "Service",
+                        value = backend.serviceName,
+                        options = state.serviceOptions,
+                        placeholder = "Select a service",
+                        onSelect = { value ->
+                            viewModel.updateBackend(index) { it.copy(serviceName = value) }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (form.protocol == RouteProtocol.Http) {
+                            DropdownField(
+                                label = "Scheme",
+                                value = backend.scheme,
+                                options = listOf("http", "https"),
+                                onSelect = { value ->
+                                    viewModel.updateBackend(index) { it.copy(scheme = value) }
+                                },
+                                modifier = Modifier.width(112.dp),
+                            )
+                        }
+                        OutlinedTextField(
+                            value = backend.host,
+                            onValueChange = { value ->
+                                viewModel.updateBackend(index) { it.copy(host = value) }
+                            },
+                            label = { Text("Host") },
+                            placeholder = { Text("10.0.0.10") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                        )
+                        OutlinedTextField(
+                            value = backend.port,
+                            onValueChange = { value ->
+                                viewModel.updateBackend(index) { it.copy(port = value) }
+                            },
+                            label = { Text("Port") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.width(96.dp),
+                        )
+                        if (!composite && form.backends.size > 1) {
+                            IconButton(onClick = { viewModel.removeBackend(index) }) {
+                                Icon(Icons.Outlined.Close, contentDescription = "Remove backend")
+                            }
+                        }
                     }
                 }
             }
@@ -454,6 +529,40 @@ private fun BackendSection(
         ) {
             Icon(Icons.Outlined.Add, contentDescription = null)
             Text("Add backend", modifier = Modifier.padding(start = TmSpacing.xs))
+        }
+
+        if (composite && form.backends.size > 1) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = TmSpacing.sm),
+            ) {
+                DropdownField(
+                    label = "Combine backends as",
+                    value = RouteForm.compositeTypes.firstOrNull { it.first == form.compositeType }?.second
+                        ?: form.compositeType,
+                    options = RouteForm.compositeTypes.map { it.second },
+                    onSelect = { label ->
+                        val picked = RouteForm.compositeTypes.firstOrNull { it.second == label }?.first
+                        if (picked != null) viewModel.setCompositeType(picked)
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Text(
+                text = RouteForm.combineHint(form.compositeType),
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.muted,
+            )
+            if (form.wasComposite && form.compositeType == RouteForm.LOAD_BALANCER) {
+                Text(
+                    text = "Saving replaces the composite service with a plain load balancer.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.yellow,
+                )
+            }
         }
 
         Row(

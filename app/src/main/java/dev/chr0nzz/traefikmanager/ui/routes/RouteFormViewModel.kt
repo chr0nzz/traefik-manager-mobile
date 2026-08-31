@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager.ui.routes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.chr0nzz.traefikmanager.data.model.BackendKind
 import dev.chr0nzz.traefikmanager.data.model.BackendMode
 import dev.chr0nzz.traefikmanager.data.model.BackendServer
 import dev.chr0nzz.traefikmanager.data.model.ConfigFile
@@ -160,6 +161,7 @@ class RouteFormViewModel @Inject constructor(
                 protocol = RouteProtocol.from(route.protocol),
                 backendMode = if (sharedService) BackendMode.ExistingService else BackendMode.Manual,
                 serviceRef = if (sharedService) route.serviceName else "",
+
                 advancedRule = route.protocol == "http" && !plainRule,
                 httpRule = if (route.protocol == "http" && !plainRule) route.rule else "",
                 subdomain = split?.subdomain.orEmpty(),
@@ -181,9 +183,10 @@ class RouteFormViewModel @Inject constructor(
                 tlsMainDomain = route.tlsDomains.firstOrNull()?.main.orEmpty(),
                 tlsSans = route.tlsDomains.firstOrNull()?.sans.orEmpty(),
                 tlsOptionsProfile = route.tlsOptionsProfile,
-                backends = route.servers.ifEmpty { listOf(route.target) }
-                    .mapNotNull(::parseBackend)
-                    .ifEmpty { listOf(BackendServer()) },
+                backends = compositeRows(route)
+                    ?: route.servers.ifEmpty { listOf(route.target) }
+                        .mapNotNull(::parseBackend)
+                        .ifEmpty { listOf(BackendServer()) },
                 sticky = StickyConfig(
                     enabled = route.stickyEnabled,
                     cookieName = route.sticky?.name.orEmpty(),
@@ -212,6 +215,9 @@ class RouteFormViewModel @Inject constructor(
                     )
                 } ?: HeadersPresetForm(),
                 serviceType = route.serviceType,
+            serviceOwned = route.serviceOwned,
+            compositeType = if (route.isComposite) route.serviceType else RouteForm.LOAD_BALANCER,
+            wasComposite = route.isComposite,
                 configFile = route.configFile,
                 isEdit = true,
                 originalId = route.id,
@@ -270,8 +276,6 @@ class RouteFormViewModel @Inject constructor(
         return hosts.joinToString(" || ") { "Host(`$it`)" }
     }
 
-    fun setBackendMode(mode: BackendMode) = update { it.copy(backendMode = mode) }
-
     fun update(transform: (RouteForm) -> RouteForm) {
         _state.update { it.copy(form = transform(it.form), error = null) }
     }
@@ -290,6 +294,33 @@ class RouteFormViewModel @Inject constructor(
             },
         )
     }
+
+    private fun compositeRows(route: Route): List<BackendServer>? {
+        if (!route.isComposite || route.compositeChildren.isEmpty()) return null
+        return route.compositeChildren.map { child ->
+            val share = if (route.serviceType == "mirroring") child.percent else child.weight
+            if (child.url.isBlank()) {
+                BackendServer(
+                    kind = BackendKind.SERVICE,
+                    serviceName = child.name.substringBefore('@'),
+                    share = share.toString(),
+                )
+            } else {
+                val bare = child.url.substringAfter("://", child.url)
+                BackendServer(
+                    kind = BackendKind.ADDRESS,
+                    scheme = if (child.url.startsWith("https")) "https" else "http",
+                    host = bare.substringBeforeLast(':', bare),
+                    port = bare.substringAfterLast(':', ""),
+                    share = share.toString(),
+                )
+            }
+        }
+    }
+
+    fun setBackendMode(mode: BackendMode) = update { it.copy(backendMode = mode) }
+
+    fun setCompositeType(type: String) = update { it.copy(compositeType = type) }
 
     fun addBackend() = update { it.copy(backends = it.backends + BackendServer()) }
 

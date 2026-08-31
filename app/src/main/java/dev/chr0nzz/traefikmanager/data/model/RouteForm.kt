@@ -9,7 +9,38 @@ data class BackendServer(
     val scheme: String = "http",
     val host: String = "",
     val port: String = "",
+    val kind: String = BackendKind.ADDRESS,
+    val serviceName: String = "",
+    val share: String = "1",
+) {
+    val isService: Boolean get() = kind == BackendKind.SERVICE
+
+    val filled: Boolean get() = if (isService) serviceName.isNotBlank() else host.isNotBlank()
+}
+
+@Serializable
+data class BackendWire(
+    val scheme: String = "http",
+    val host: String = "",
+    val port: String = "",
 )
+
+object BackendKind {
+    const val ADDRESS = "address"
+    const val SERVICE = "service"
+}
+
+@Serializable
+data class BackendChildPayload(
+    val kind: String,
+    val name: String = "",
+    val address: String = "",
+    val scheme: String = "http",
+    val weight: Int = 1,
+    val percent: Int = 0,
+)
+
+enum class BackendMode { Manual, ExistingService }
 
 @Serializable
 data class StickyConfig(
@@ -29,7 +60,9 @@ data class HealthCheckConfig(
 
 @Serializable
 data class BackendsPayload(
-    val servers: List<BackendServer> = emptyList(),
+    val servers: List<BackendWire> = emptyList(),
+    val children: List<BackendChildPayload>? = null,
+    val compositeType: String? = null,
     val sticky: StickyConfig? = null,
     val healthCheck: HealthCheckConfig? = null,
     val priority: Int? = null,
@@ -48,8 +81,6 @@ enum class RouteProtocol(val wire: String) {
 }
 
 enum class TcpTlsMode { None, Terminate, Passthrough }
-
-enum class BackendMode { Manual, ExistingService }
 
 data class HeadersPresetForm(
     val present: Boolean = false,
@@ -84,8 +115,6 @@ object HeadersPresetDefaults {
 data class RouteForm(
     val name: String = "",
     val protocol: RouteProtocol = RouteProtocol.Http,
-    val backendMode: BackendMode = BackendMode.Manual,
-    val serviceRef: String = "",
     val subdomain: String = "",
     val domains: List<String> = emptyList(),
     val advancedRule: Boolean = false,
@@ -109,7 +138,12 @@ data class RouteForm(
     val streamingPresent: Boolean = false,
     val streamingEnabled: Boolean = false,
     val headersPreset: HeadersPresetForm = HeadersPresetForm(),
+    val backendMode: BackendMode = BackendMode.Manual,
+    val serviceRef: String = "",
     val serviceType: String = "loadBalancer",
+    val serviceOwned: Boolean = false,
+    val compositeType: String = LOAD_BALANCER,
+    val wasComposite: Boolean = false,
     val configFile: String = "",
     val isEdit: Boolean = false,
     val originalId: String = "",
@@ -117,7 +151,7 @@ data class RouteForm(
 ) {
     val usesSharedService: Boolean get() = backendMode == BackendMode.ExistingService
 
-    val isManagedService: Boolean get() = serviceType == "loadBalancer"
+    val isManagedService: Boolean get() = serviceType == LOAD_BALANCER || serviceOwned
 
     val effectivePassHostHeader: Boolean get() = if (streamingEnabled) true else passHostHeader
 
@@ -125,10 +159,12 @@ data class RouteForm(
         get() = when {
             name.isBlank() -> "A route name is required."
             usesSharedService && serviceRef.isBlank() ->
-                "Select a service to reference, or switch the backend to Manual."
+                "Pick the service this route points at."
             usesSharedService -> null
             !isManagedService -> null
-            backends.none { it.host.isNotBlank() } ->
+            backends.any { it.isService && it.serviceName.isBlank() } ->
+                "Pick a service for every service backend."
+            backends.none { it.filled } ->
                 "A backend host is required."
             protocol != RouteProtocol.Http && backends.any { it.host.isNotBlank() && it.port.isBlank() } ->
                 "${protocol.wire.uppercase()} routes need a backend port."
@@ -140,6 +176,21 @@ data class RouteForm(
     companion object {
         const val CERT_RESOLVER_DISABLED = "__disabled__"
         const val CERT_RESOLVER_NONE = "__none__"
+        const val LOAD_BALANCER = "loadBalancer"
+
+        val compositeTypes: List<Pair<String, String>> = listOf(
+            LOAD_BALANCER to "Load balanced",
+            "weighted" to "Weighted",
+            "mirroring" to "Mirroring",
+            "failover" to "Failover",
+        )
+
+        fun combineHint(type: String): String = when (type) {
+            "weighted" -> "Traffic is split by weight."
+            "mirroring" -> "The first backend serves. The rest get a copy."
+            "failover" -> "The first backend serves. The second takes over if it fails."
+            else -> "Traffic is load balanced across every backend."
+        }
     }
 }
 
@@ -247,11 +298,48 @@ object RouteFormEncoder {
     }
 
     private fun backendsPayload(form: RouteForm) = BackendsPayload(
-        servers = form.backends.filter { it.host.isNotBlank() },
+        servers = form.backends
+            .filter { !it.isService && it.host.isNotBlank() }
+            .map { BackendWire(scheme = it.scheme, host = it.host, port = it.port) },
+        children = compositeChildren(form),
+        compositeType = compositeChildren(form)
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { form.compositeType.takeIf { type -> type != RouteForm.LOAD_BALANCER } ?: "weighted" },
         sticky = form.sticky.takeIf { it.enabled && form.protocol == RouteProtocol.Http },
         healthCheck = form.healthCheck.takeIf { it.enabled && form.protocol == RouteProtocol.Http },
         priority = form.priority?.takeIf { it != 0 && form.protocol != RouteProtocol.Udp },
     )
+
+    private fun compositeChildren(form: RouteForm): List<BackendChildPayload>? {
+        if (form.protocol != RouteProtocol.Http) return null
+        val rows = form.backends.filter { it.filled }
+        if (form.compositeType == RouteForm.LOAD_BALANCER && !rows.any { it.isService }) {
+            return if (form.wasComposite) emptyList() else null
+        }
+        if (rows.isEmpty()) return null
+        return rows.map { row ->
+            val share = row.share.trim().toIntOrNull()
+                ?: if (form.compositeType == "mirroring") 0 else 1
+            if (row.isService) {
+                BackendChildPayload(
+                    kind = "service",
+                    name = row.serviceName.trim(),
+                    weight = share,
+                    percent = share,
+                )
+            } else {
+                BackendChildPayload(
+                    kind = "manual",
+                    address = listOf(row.host.trim(), row.port.trim())
+                        .filter { it.isNotBlank() }
+                        .joinToString(":"),
+                    scheme = row.scheme,
+                    weight = share,
+                    percent = share,
+                )
+            }
+        }
+    }
 
     private fun indexed(
         field: String,

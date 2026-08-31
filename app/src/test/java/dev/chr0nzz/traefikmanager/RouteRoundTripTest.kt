@@ -1,11 +1,20 @@
 package dev.chr0nzz.traefikmanager
 
+import dev.chr0nzz.traefikmanager.data.model.BackendKind
+import dev.chr0nzz.traefikmanager.data.model.BackendMode
+import dev.chr0nzz.traefikmanager.data.model.BackendServer
 import dev.chr0nzz.traefikmanager.data.model.RouteForm
 import dev.chr0nzz.traefikmanager.data.model.RouteFormEncoder
 import dev.chr0nzz.traefikmanager.data.model.RouteProtocol
 import dev.chr0nzz.traefikmanager.data.model.TcpTlsMode
 import dev.chr0nzz.traefikmanager.ui.routes.RouteFormViewModel
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -196,7 +205,7 @@ class RouteRoundTripTest {
         val fields = encode(
             RouteForm(
                 name = "app",
-                backendMode = dev.chr0nzz.traefikmanager.data.model.BackendMode.ExistingService,
+                backendMode = BackendMode.ExistingService,
                 serviceRef = "shared-service",
             ),
         )
@@ -295,10 +304,14 @@ class RouteRoundTripTest {
             ).validationError,
         )
         assertEquals(
-            "Select a service to reference, or switch the backend to Manual.",
+            "Pick the service this route points at.",
+            RouteForm(name = "app", backendMode = BackendMode.ExistingService).validationError,
+        )
+        assertEquals(
+            "Pick a service for every service backend.",
             RouteForm(
                 name = "app",
-                backendMode = dev.chr0nzz.traefikmanager.data.model.BackendMode.ExistingService,
+                backends = listOf(BackendServer(kind = BackendKind.SERVICE)),
             ).validationError,
         )
         assertNull(
@@ -315,4 +328,159 @@ class RouteRoundTripTest {
 
     private fun backend(host: String = "10.0.0.5", port: String = "8080") =
         dev.chr0nzz.traefikmanager.data.model.BackendServer(host = host, port = port)
+}
+
+class CompositeRoutePayloadTest {
+
+    private fun encode(form: RouteForm) = RouteFormEncoder.fields(form, null)
+
+    private fun valueOf(form: RouteForm, key: String) =
+        encode(form).firstOrNull { it.first == key }?.second
+
+    private fun backendsJson(form: RouteForm) =
+        valueOf(form, "backendsJsonHttp")?.let { Json.parseToJsonElement(it).jsonObject }
+
+    @Test
+    fun `a plain load balancer sends no children key at all`() {
+        val form = RouteForm(
+            name = "app",
+            backends = listOf(BackendServer(host = "10.0.0.10", port = "80")),
+        )
+        val payload = backendsJson(form)
+        assertNotNull(payload)
+        assertNull(payload!!["children"])
+        assertNull(payload["compositeType"])
+    }
+
+    @Test
+    fun `a weighted mix posts children and keeps servers to the address rows`() {
+        val form = RouteForm(
+            name = "app",
+            compositeType = "weighted",
+            backends = listOf(
+                BackendServer(host = "10.0.0.10", port = "80", share = "9"),
+                BackendServer(kind = BackendKind.SERVICE, serviceName = "canary", share = "1"),
+            ),
+        )
+        val payload = backendsJson(form)!!
+        assertEquals("weighted", payload["compositeType"]!!.jsonPrimitive.content)
+        val children = payload["children"]!!.jsonArray
+        assertEquals(2, children.size)
+        assertEquals("manual", children[0].jsonObject["kind"]!!.jsonPrimitive.content)
+        assertEquals("10.0.0.10:80", children[0].jsonObject["address"]!!.jsonPrimitive.content)
+        assertEquals(9, children[0].jsonObject["weight"]!!.jsonPrimitive.content.toInt())
+        assertEquals("service", children[1].jsonObject["kind"]!!.jsonPrimitive.content)
+        assertEquals("canary", children[1].jsonObject["name"]!!.jsonPrimitive.content)
+        assertEquals(1, payload["servers"]!!.jsonArray.size)
+    }
+
+    @Test
+    fun `mirroring carries the share as a percent`() {
+        val form = RouteForm(
+            name = "app",
+            compositeType = "mirroring",
+            backends = listOf(
+                BackendServer(host = "10.0.0.10", port = "80", share = "0"),
+                BackendServer(kind = BackendKind.SERVICE, serviceName = "shadow", share = "10"),
+            ),
+        )
+        val children = backendsJson(form)!!["children"]!!.jsonArray
+        assertEquals(10, children[1].jsonObject["percent"]!!.jsonPrimitive.content.toInt())
+    }
+
+    @Test
+    fun `an unchanged composite is preserved rather than flattened`() {
+        val form = RouteForm(
+            name = "app",
+            serviceType = "weighted",
+            serviceOwned = true,
+            wasComposite = true,
+            compositeType = "weighted",
+            backends = listOf(BackendServer(kind = BackendKind.SERVICE, serviceName = "a", share = "1")),
+        )
+        val children = backendsJson(form)!!["children"]!!.jsonArray
+        assertEquals(1, children.size)
+    }
+
+    @Test
+    fun `choosing load balanced on a composite sends the empty list that flattens it`() {
+        val form = RouteForm(
+            name = "app",
+            serviceType = "weighted",
+            serviceOwned = true,
+            wasComposite = true,
+            compositeType = RouteForm.LOAD_BALANCER,
+            backends = listOf(BackendServer(host = "10.0.0.10", port = "80")),
+        )
+        val payload = backendsJson(form)!!
+        assertEquals(0, payload["children"]!!.jsonArray.size)
+        assertNull(payload["compositeType"])
+    }
+
+    @Test
+    fun `a route that was never composite never sends an empty children list`() {
+        val form = RouteForm(
+            name = "app",
+            wasComposite = false,
+            compositeType = RouteForm.LOAD_BALANCER,
+            backends = listOf(BackendServer(host = "10.0.0.10", port = "80")),
+        )
+        assertNull(backendsJson(form)!!["children"])
+    }
+
+    @Test
+    fun `an owned composite is editable rather than read only`() {
+        val form = RouteForm(name = "app", serviceType = "weighted", serviceOwned = true)
+        assertTrue(form.isManagedService)
+    }
+
+    @Test
+    fun `a composite nobody manages stays read only`() {
+        val form = RouteForm(name = "app", serviceType = "weighted", serviceOwned = false)
+        assertFalse(form.isManagedService)
+    }
+}
+
+class BackendModeTest {
+
+    private fun encode(form: RouteForm) = RouteFormEncoder.fields(form, null)
+
+    private fun valueOf(form: RouteForm, key: String) =
+        encode(form).firstOrNull { it.first == key }?.second
+
+    @Test
+    fun `a tcp route can still point at an existing service`() {
+        val form = RouteForm(
+            name = "db",
+            protocol = RouteProtocol.Tcp,
+            backendMode = BackendMode.ExistingService,
+            serviceRef = "db-service",
+        )
+        assertEquals("db-service", valueOf(form, "serviceRef"))
+        assertNull(valueOf(form, "backendsJsonTcp"))
+        assertNull(form.validationError)
+    }
+
+    @Test
+    fun `a udp route can still point at an existing service`() {
+        val form = RouteForm(
+            name = "dns",
+            protocol = RouteProtocol.Udp,
+            backendMode = BackendMode.ExistingService,
+            serviceRef = "dns-service",
+        )
+        assertEquals("dns-service", valueOf(form, "serviceRef"))
+        assertNull(valueOf(form, "backendsJsonUdp"))
+    }
+
+    @Test
+    fun `a service row on its own still authors a weighted service`() {
+        val form = RouteForm(
+            name = "app",
+            backends = listOf(BackendServer(kind = BackendKind.SERVICE, serviceName = "canary")),
+        )
+        val payload = Json.parseToJsonElement(valueOf(form, "backendsJsonHttp")!!).jsonObject
+        assertEquals("weighted", payload["compositeType"]!!.jsonPrimitive.content)
+        assertEquals(1, payload["children"]!!.jsonArray.size)
+    }
 }
