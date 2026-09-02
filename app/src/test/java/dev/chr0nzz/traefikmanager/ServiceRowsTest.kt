@@ -20,6 +20,7 @@ import dev.chr0nzz.traefikmanager.data.model.WeightedService
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -457,5 +458,25 @@ class ServiceDraftTest {
         val draft = ServiceDraft.of("h@file", service)
         assertEquals("highestRandomWeight", draft.type)
         assertTrue(ServiceTypes.authorable.none { it.first == draft.type })
+    }
+}
+
+class ServiceAuthorableTest {
+
+    private fun row(service: TraefikService, proto: ServiceProtocol) = ServiceRows.row(service, proto)
+
+    @Test
+    fun `an http service can be authored`() {
+        assertTrue(row(TraefikService(name = "web@file"), ServiceProtocol.Http).authorable)
+    }
+
+    @Test
+    fun `a tcp service cannot, because a save would write it as http`() {
+        assertFalse(row(TraefikService(name = "db@file"), ServiceProtocol.Tcp).authorable)
+    }
+
+    @Test
+    fun `a udp service cannot either`() {
+        assertFalse(row(TraefikService(name = "dns@file"), ServiceProtocol.Udp).authorable)
     }
 }

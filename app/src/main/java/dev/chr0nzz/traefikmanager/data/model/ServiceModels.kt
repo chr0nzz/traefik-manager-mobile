@@ -139,6 +139,8 @@ data class ServiceRow(
 ) {
     val kindLabel: String get() = kind?.label ?: "service"
 
+    val authorable: Boolean get() = proto == ServiceProtocol.Http
+
     val usedByLabel: String?
         get() = when (usedBy.size) {
             0 -> null

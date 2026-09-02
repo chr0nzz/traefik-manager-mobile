@@ -297,14 +297,14 @@ fun ServiceDetailPane(
                         },
                     )
                 }
-                if (canAuthor && composite) {
+                if (canAuthor && service.authorable && composite) {
                     TooltipIconButton(
                         label = if (service.owned) "Stop managing" else "Manage this service",
                         icon = if (service.owned) Icons.Outlined.LinkOff else Icons.Outlined.Link,
                         onClick = { onOwnership(!service.owned) },
                     )
                 }
-                if (canAuthor && (service.owned || !composite)) {
+                if (canAuthor && service.authorable && (service.owned || !composite)) {
                     TooltipIconButton(
                         label = "Edit service",
                         icon = Icons.Outlined.Edit,
