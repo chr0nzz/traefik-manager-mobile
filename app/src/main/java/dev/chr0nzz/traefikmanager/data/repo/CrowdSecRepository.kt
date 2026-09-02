@@ -52,11 +52,13 @@ class CrowdSecRepository @Inject constructor(
             onFailure = { CsRead.Failed(it.message ?: "Could not reach the CrowdSec LAPI", null) },
         )
         val headers = alertsResponse.getOrNull()?.headers()
+        val staleNote = decisionsCall.await().getOrNull()?.headers()?.get("X-CS-Stale")
 
         val snapshot = CrowdSecSnapshot(
             decisions = decisions.withHint(),
             alerts = alerts,
             alertLimit = headers?.get("X-CS-Alert-Limit")?.toIntOrNull(),
+            decisionsStale = staleNote?.takeIf { it.isNotBlank() },
             alertsCapped = headers?.get("X-CS-Alert-Capped")?.let { it == "1" },
         )
         if (snapshot.decisions.ok || snapshot.alerts.ok) {

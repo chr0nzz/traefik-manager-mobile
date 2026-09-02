@@ -522,16 +522,21 @@ private fun CrowdSecBody(
                 },
                 DeskCard(1) { cardModifier ->
                     val perCell = ((state.decisions.size + CELL_CAP - 1) / CELL_CAP).coerceAtLeast(1)
+                    val stale = state.snapshot.decisionsStale
                     SignalCard(
-                        label = "Bans in force",
+                        label = if (stale != null) "Bans in force (stale)" else "Bans in force",
                         hero = if (state.decisionsOk) LogParser.formatCount(state.decisions.size) else "-",
-                        accent = palette.green,
+                        accent = if (stale != null) palette.yellow else palette.green,
                         glyph = Icons.Outlined.Shield,
-                        health = if (!state.decisionsOk) palette.red else null,
-                        subtitle = if (!state.decisionsOk) {
-                            "nothing was read from /v1/decisions"
-                        } else {
-                            "${LogParser.formatCount(state.ownBans)} from this host · " +
+                        health = when {
+                            !state.decisionsOk -> palette.red
+                            stale != null -> palette.yellow
+                            else -> null
+                        },
+                        subtitle = when {
+                            !state.decisionsOk -> "nothing was read from /v1/decisions"
+                            stale != null -> stale
+                            else -> "${LogParser.formatCount(state.ownBans)} from this host · " +
                                 "${LogParser.formatCount(state.subscribedBans)} subscribed"
                         },
                         flags = if (state.decisionsOk) {

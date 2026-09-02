@@ -164,6 +164,7 @@ data class CrowdSecSnapshot(
     val alerts: CsRead<List<CsAlert>> = CsRead.Loaded(emptyList()),
     val alertLimit: Int? = null,
     val alertsCapped: Boolean? = null,
+    val decisionsStale: String? = null,
 ) {
     val decisionList: List<CsDecision> get() = decisions.valueOrNull().orEmpty()
 
