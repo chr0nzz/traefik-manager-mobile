@@ -49,7 +49,7 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 
 - **Overview** - the signal desk: routers, services and middlewares as cards with health, provider breakdown and entry points
 - **Routes** - view, enable/disable, add, edit and delete HTTP/TCP/UDP routes, multiple domains per route, raw YAML editing
-- **Middlewares** - 24 templates with guided wizards, plus edit, delete and htpasswd generation
+- **Middlewares** - 30 templates with guided wizards, plus edit, delete and htpasswd generation
 - **Services** - health, backends up, provider filter and the routers each one serves
 - **Logs** - live tail with CLF and JSON parsing, tappable facet filters and the v1.10 analytics cards
 - **CrowdSec** - decisions and alerts, add and delete bans, the full stat desk and a world map

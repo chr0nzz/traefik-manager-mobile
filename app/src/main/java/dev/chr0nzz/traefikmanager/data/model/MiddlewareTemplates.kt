@@ -148,6 +148,74 @@ object MiddlewareTemplates {
         ),
     )
 
+    private val stripPrefixRegexFields = listOf(
+        WizardField.Lines(
+            key = "regex",
+            label = "Regexes",
+            placeholder = "^/api/v[0-9]+",
+            help = "One per line. The matched prefix is removed before the request is forwarded. " +
+                "Anchor with ^ or it can match mid-path.",
+        ),
+    )
+
+    private val replacePathRegexFields = listOf(
+        WizardField.Text(key = "regex", label = "Regex", placeholder = "^/foo/(.*)"),
+        WizardField.Text(
+            key = "replacement",
+            label = "Replacement",
+            placeholder = "/bar/$1",
+            help = "Capture groups are $1, $2 and so on. In a compose file $ must be written $$.",
+        ),
+    )
+
+    private val errorsFields = listOf(
+        WizardField.Lines(
+            key = "status",
+            label = "Status codes",
+            placeholder = "500-599",
+            help = "One per line. Single codes or ranges. Only these responses are replaced.",
+        ),
+        WizardField.Text(
+            key = "service",
+            label = "Service",
+            placeholder = "error-pages",
+            help = "The service that serves the error page. It must already exist in this config.",
+        ),
+        WizardField.Text(
+            key = "query",
+            label = "Query",
+            placeholder = "/{status}.html",
+            help = "Optional. {status} is replaced with the response code.",
+        ),
+    )
+
+    private val contentTypeFields = listOf(
+        WizardField.Toggle(
+            key = "autoDetect",
+            label = "Auto-detect the content type",
+            default = false,
+        ),
+    )
+
+    private val grpcWebFields = listOf(
+        WizardField.Lines(
+            key = "allowOrigins",
+            label = "Allowed origins",
+            placeholder = "https://app.example.com",
+            help = "One per line. Converts gRPC-Web requests to gRPC before forwarding. " +
+                "* allows any origin.",
+        ),
+    )
+
+    private val passTlsClientCertFields = listOf(
+        WizardField.Toggle(key = "pem", label = "Pass the whole certificate", default = true),
+        WizardField.Toggle(key = "info", label = "Also pass selected certificate fields"),
+        WizardField.Toggle(key = "subjectCN", label = "Subject Common Name", default = true),
+        WizardField.Toggle(key = "issuerCN", label = "Issuer Common Name"),
+        WizardField.Toggle(key = "serial", label = "Serial Number"),
+        WizardField.Toggle(key = "notAfter", label = "Expiry Date"),
+    )
+
     val all: List<MiddlewareWizard> = listOf(
         MiddlewareWizard("basicAuth", "Basic Auth", CATEGORY_AUTH, basicAuthFields) { values ->
             buildString {
@@ -547,6 +615,60 @@ object MiddlewareTemplates {
             listOf(WizardField.Text(key = "amount", label = "Max in-flight requests", default = "10", numeric = true)),
         ) { values ->
             "inFlightReq:\n  amount: ${values.value("amount", "10")}"
+        },
+        MiddlewareWizard(
+            "stripPrefixRegex",
+            "Strip Prefix Regex",
+            CATEGORY_ROUTING,
+            stripPrefixRegexFields,
+        ) { values ->
+            "stripPrefixRegex:\n  regex:\n" + listBlock("    ", values.lines("regex"))
+        },
+        MiddlewareWizard(
+            "replacePathRegex",
+            "Replace Path Regex",
+            CATEGORY_ROUTING,
+            replacePathRegexFields,
+        ) { values ->
+            "replacePathRegex:\n  regex: " + yamlString(values.value("regex")) +
+                "\n  replacement: " + yamlString(values.value("replacement"))
+        },
+        MiddlewareWizard("errors", "Custom Error Pages", CATEGORY_ADVANCED, errorsFields) { values ->
+            buildString {
+                append("errors:\n  status:\n")
+                append(listBlock("    ", values.lines("status")))
+                append("\n  service: ")
+                append(yamlString(values.value("service")))
+                val query = values.value("query")
+                if (query.isNotBlank()) {
+                    append("\n  query: ")
+                    append(yamlString(query))
+                }
+            }
+        },
+        MiddlewareWizard("contentType", "Content Type", CATEGORY_ADVANCED, contentTypeFields) { values ->
+            "contentType:\n  autoDetect: " + values.flag("autoDetect")
+        },
+        MiddlewareWizard("grpcWeb", "gRPC-Web", CATEGORY_ADVANCED, grpcWebFields) { values ->
+            "grpcWeb:\n  allowOrigins:\n" + listBlock("    ", values.lines("allowOrigins"))
+        },
+        MiddlewareWizard(
+            "passTLSClientCert",
+            "Pass TLS Client Cert",
+            CATEGORY_ADVANCED,
+            passTlsClientCertFields,
+        ) { values ->
+            buildString {
+                append("passTLSClientCert:\n  pem: ")
+                append(values.flag("pem"))
+                if (values.flag("info")) {
+                    append("\n  info:")
+                    if (values.flag("serial")) append("\n    serialNumber: true")
+                    if (values.flag("notAfter")) append("\n    notAfter: true")
+                    if (values.flag("subjectCN")) append("\n    subject:\n      commonName: true")
+                    if (values.flag("issuerCN")) append("\n    issuer:\n      commonName: true")
+                }
+            }
         },
     )
 

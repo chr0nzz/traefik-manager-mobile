@@ -24,8 +24,8 @@ class MiddlewareWizardTest {
     }
 
     @Test
-    fun `all 24 built-in templates exist and are grouped`() {
-        assertEquals(24, MiddlewareTemplates.all.size)
+    fun `all built-in templates exist and are grouped`() {
+        assertEquals(30, MiddlewareTemplates.all.size)
         assertEquals(
             listOf("Auth", "Security", "Routing", "Advanced"),
             MiddlewareTemplates.categories,
@@ -240,5 +240,94 @@ class MiddlewareWizardTest {
         assertEquals(1, counts["inner"])
         assertEquals(0, counts["orphan"])
         assertNotNull(counts["orphan"])
+    }
+}
+
+class NewWizardYamlTest {
+
+    private fun build(id: String, text: Map<String, String> = emptyMap(), toggles: Map<String, Boolean> = emptyMap()): String {
+        val wizard = MiddlewareTemplates.all.first { it.id == id }
+        return wizard.build(WizardValues(text, toggles, wizard.fields))
+    }
+
+    @Test
+    fun `strip prefix regex lists every line`() {
+        assertEquals(
+            "stripPrefixRegex:\n  regex:\n    - \"^/api/v[0-9]+\"\n    - \"^/legacy\"",
+            build("stripPrefixRegex", mapOf("regex" to "^/api/v[0-9]+\n^/legacy")),
+        )
+    }
+
+    @Test
+    fun `replace path regex always emits both keys`() {
+        assertEquals(
+            "replacePathRegex:\n  regex: \"^/foo/(.*)\"\n  replacement: \"/bar/\$1\"",
+            build("replacePathRegex", mapOf("regex" to "^/foo/(.*)", "replacement" to "/bar/\$1")),
+        )
+    }
+
+    @Test
+    fun `errors omits the query when it is blank`() {
+        assertEquals(
+            "errors:\n  status:\n    - \"500-599\"\n  service: \"error-pages\"",
+            build("errors", mapOf("status" to "500-599", "service" to "error-pages")),
+        )
+    }
+
+    @Test
+    fun `errors keeps the query when it is set`() {
+        assertEquals(
+            "errors:\n  status:\n    - \"404\"\n  service: \"pages\"\n  query: \"/{status}.html\"",
+            build("errors", mapOf("status" to "404", "service" to "pages", "query" to "/{status}.html")),
+        )
+    }
+
+    @Test
+    fun `content type writes the flag either way`() {
+        assertEquals("contentType:\n  autoDetect: false", build("contentType"))
+        assertEquals(
+            "contentType:\n  autoDetect: true",
+            build("contentType", toggles = mapOf("autoDetect" to true)),
+        )
+    }
+
+    @Test
+    fun `grpc web lists the origins`() {
+        assertEquals(
+            "grpcWeb:\n  allowOrigins:\n    - \"https://app.example.com\"\n    - \"*\"",
+            build("grpcWeb", mapOf("allowOrigins" to "https://app.example.com\n*")),
+        )
+    }
+
+    @Test
+    fun `pass tls client cert omits the info block until it is asked for`() {
+        assertEquals("passTLSClientCert:\n  pem: true", build("passTLSClientCert"))
+    }
+
+    @Test
+    fun `pass tls client cert nests the info fields in the server's order`() {
+        val yaml = build(
+            "passTLSClientCert",
+            toggles = mapOf(
+                "info" to true,
+                "serial" to true,
+                "notAfter" to true,
+                "subjectCN" to true,
+                "issuerCN" to true,
+            ),
+        )
+        assertEquals(
+            "passTLSClientCert:\n  pem: true\n  info:\n    serialNumber: true\n    notAfter: true" +
+                "\n    subject:\n      commonName: true\n    issuer:\n      commonName: true",
+            yaml,
+        )
+    }
+
+    @Test
+    fun `pass tls client cert defaults to the subject common name`() {
+        assertEquals(
+            "passTLSClientCert:\n  pem: true\n  info:\n    subject:\n      commonName: true",
+            build("passTLSClientCert", toggles = mapOf("info" to true)),
+        )
     }
 }
