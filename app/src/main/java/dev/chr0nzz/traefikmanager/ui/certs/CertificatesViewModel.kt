@@ -51,7 +51,13 @@ class CertificatesViewModel @Inject constructor(
     val queryState = TextFieldState()
 
     init {
-        load(initial = true)
+        viewModelScope.launch {
+            val stored = runCatching { repository.cached() }.getOrNull()
+            if (stored != null && _state.value.certs.isEmpty()) {
+                _state.update { it.copy(loading = false, refreshing = true, certs = CertRows.from(stored.certs, System.currentTimeMillis())) }
+            }
+            load(initial = stored == null)
+        }
         watchServerChanges()
     }
 

@@ -82,7 +82,20 @@ class RoutesViewModel @Inject constructor(
             val icons = runCatching { repository.iconContext() }.getOrNull() ?: return@launch
             _state.update { it.copy(icons = icons) }
         }
-        load(initial = true)
+        viewModelScope.launch {
+            val stored = runCatching { repository.cached() }.getOrNull()
+            if (stored != null && _state.value.routes.isEmpty()) {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        refreshing = true,
+                        routes = stored.routes,
+                        configErrors = stored.configErrors,
+                    )
+                }
+            }
+            load(initial = stored == null)
+        }
         viewModelScope.launch {
             repository.changes.drop(1).collect { load(initial = false) }
         }

@@ -1,6 +1,8 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
+import dev.chr0nzz.traefikmanager.data.store.SnapshotStore
+import kotlinx.serialization.Serializable
 import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
 import dev.chr0nzz.traefikmanager.data.model.PingResult
@@ -29,6 +31,7 @@ data class IconContext(
     val baseUrl: String = "",
 )
 
+@Serializable
 data class RoutesSnapshot(
     val routes: List<Route>,
     val middlewares: List<MiddlewareDef>,
@@ -39,9 +42,20 @@ data class RoutesSnapshot(
 @Singleton
 class RoutesRepository @Inject constructor(
     private val apiProvider: ApiProvider,
+    private val snapshots: SnapshotStore,
     serverScope: ServerScope,
     private val navCounts: NavCountsStore,
 ) {
+
+    suspend fun cached(): RoutesSnapshot? {
+        val ready = runCatching { apiProvider.ready() }.getOrNull() ?: return null
+        if (ready.demo) return null
+        return snapshots.read(
+            SNAPSHOT,
+            snapshots.keyFor(ready.baseUrl, ready.agentId),
+            RoutesSnapshot.serializer(),
+        )
+    }
 
     private val _changes = MutableStateFlow(0)
     val changes: StateFlow<Int> = _changes.asStateFlow()
@@ -72,7 +86,16 @@ class RoutesRepository @Inject constructor(
             navCounts.report(NavCountsStore.ROUTES, apps.count { isFileRoute(it) && it.enabled })
             navCounts.report(NavCountsStore.MIDDLEWARES, response.middlewares.size)
         }
-        return RoutesSnapshot(apps, response.middlewares, response.configErrors, response.services)
+        val snapshot = RoutesSnapshot(apps, response.middlewares, response.configErrors, response.services)
+        if (!ready.demo) {
+            snapshots.write(
+                SNAPSHOT,
+                snapshots.keyFor(ready.baseUrl, agentId),
+                snapshot,
+                RoutesSnapshot.serializer(),
+            )
+        }
+        return snapshot
     }
 
     suspend fun toggle(routeId: String, enable: Boolean) {
@@ -153,5 +176,9 @@ class RoutesRepository @Inject constructor(
     suspend fun tlsOptions(): List<TlsOptionProfile> {
         val ready = apiProvider.ready()
         return runCatching { ready.api.tlsOptions(ready.agentId) }.getOrDefault(emptyList())
+    }
+
+    private companion object {
+        const val SNAPSHOT = "routes"
     }
 }

@@ -6,7 +6,9 @@ import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
+import dev.chr0nzz.traefikmanager.data.store.SnapshotStore
 import dev.chr0nzz.traefikmanager.di.ApplicationScope
+import kotlinx.serialization.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@Serializable
 data class RawDashboard(
     val overview: Overview? = null,
     val entrypoints: List<Entrypoint>? = null,
@@ -34,6 +37,7 @@ data class RawDashboard(
 @Singleton
 class DashboardRepository @Inject constructor(
     private val apiProvider: ApiProvider,
+    private val snapshots: SnapshotStore,
     serverScope: ServerScope,
     @param:ApplicationScope private val scope: CoroutineScope,
 ) {
@@ -47,10 +51,24 @@ class DashboardRepository @Inject constructor(
     private var inFlight: Deferred<RawDashboard>? = null
 
     init {
+        scope.launch { restore() }
         serverScope.onServerChanged {
             generation.incrementAndGet()
             _raw.value = null
-            scope.launch { runCatching { refresh() } }
+            scope.launch {
+                restore()
+                runCatching { refresh() }
+            }
+        }
+    }
+
+    private suspend fun restore() {
+        val ready = runCatching { apiProvider.ready() }.getOrNull() ?: return
+        if (ready.demo) return
+        val started = generation.get()
+        val stored = snapshots.read(SNAPSHOT, snapshots.keyFor(ready.baseUrl, ready.agentId), RawDashboard.serializer())
+        if (stored != null && _raw.value == null && generation.get() == started) {
+            _raw.value = stored
         }
     }
 
@@ -82,7 +100,22 @@ class DashboardRepository @Inject constructor(
             middlewares = middlewares.await(),
             version = version.await(),
         )
-        if (generation.get() == startedAt) _raw.value = fetched
+        if (generation.get() == startedAt) {
+            _raw.value = fetched
+            val ready = apiProvider.ready()
+            if (!ready.demo) {
+                snapshots.write(
+                    SNAPSHOT,
+                    snapshots.keyFor(ready.baseUrl, ready.agentId),
+                    fetched,
+                    RawDashboard.serializer(),
+                )
+            }
+        }
         fetched
+    }
+
+    private companion object {
+        const val SNAPSHOT = "dashboard"
     }
 }
