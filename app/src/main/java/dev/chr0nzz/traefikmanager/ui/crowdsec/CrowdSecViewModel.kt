@@ -85,39 +85,38 @@ data class CrowdSecUiState(
         return hay.contains(needle)
     }
 
-    val visibleAlerts: List<CsAlert>
-        get() = alerts
+    val visibleAlerts: List<CsAlert> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        alerts
             .filter { facets.matches(it, ::countryOf, snapshot::handled) && matchesQuery(it) }
             .sortedByDescending { it.startMillis }
+    }
 
     fun alertsFor(facet: CsFacet): List<CsAlert> = alerts.filter {
         facets.matches(it, ::countryOf, snapshot::handled, skip = facet) && matchesQuery(it)
     }
 
-    val visibleDecisions: List<CsDecision>
-        get() {
-            val needle = query.trim().lowercase()
-            return decisions.filter { decision ->
-                val matchesQuery = needle.isEmpty() ||
-                    decision.value.lowercase().contains(needle) ||
-                    decision.scenario.lowercase().contains(needle) ||
-                    decision.originKey.contains(needle) ||
-                    decision.scope.lowercase().contains(needle) ||
-                    decision.type.lowercase().contains(needle)
-                facets.matches(decision) && matchesQuery
-            }.sortedWith(compareByDescending<CsDecision> { it.own }.thenByDescending { it.id })
-        }
+    val visibleDecisions: List<CsDecision> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        val needle = query.trim().lowercase()
+        decisions.filter { decision ->
+            val matchesQuery = needle.isEmpty() ||
+                decision.value.lowercase().contains(needle) ||
+                decision.scenario.lowercase().contains(needle) ||
+                decision.originKey.contains(needle) ||
+                decision.scope.lowercase().contains(needle) ||
+                decision.type.lowercase().contains(needle)
+            facets.matches(decision) && matchesQuery
+        }.sortedWith(compareByDescending<CsDecision> { it.own }.thenByDescending { it.id })
+    }
 
-    val countries: List<CountryCount>
-        get() {
-            val tally = mutableMapOf<String, Int>()
-            alertsFor(CsFacet.Country).forEach { alert ->
-                val code = countryOf(alert)
-                if (code.isNotEmpty()) tally[code] = (tally[code] ?: 0) + 1
-            }
-            return tally.map { CountryCount(it.key, Countries.name(it.key), it.value) }
-                .sortedWith(compareByDescending<CountryCount> { it.count }.thenBy { it.name })
+    val countries: List<CountryCount> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        val tally = mutableMapOf<String, Int>()
+        alertsFor(CsFacet.Country).forEach { alert ->
+            val code = countryOf(alert)
+            if (code.isNotEmpty()) tally[code] = (tally[code] ?: 0) + 1
         }
+        tally.map { CountryCount(it.key, Countries.name(it.key), it.value) }
+            .sortedWith(compareByDescending<CountryCount> { it.count }.thenBy { it.name })
+    }
 
     val ownBans: Int get() = decisions.count { it.own }
 
@@ -150,7 +149,13 @@ class CrowdSecViewModel @Inject constructor(
     private fun showCachedThenRevalidate() {
         val cached = repository.cached()
         if (cached == null) {
-            load(initial = true, full = false)
+            viewModelScope.launch {
+                val stored = runCatching { repository.restore() }.getOrNull()
+                if (stored != null && _state.value.snapshot.alertList.isEmpty()) {
+                    _state.update { it.copy(loading = false, refreshing = true, snapshot = stored) }
+                }
+                load(initial = stored == null, full = false)
+            }
             return
         }
         _state.update {
