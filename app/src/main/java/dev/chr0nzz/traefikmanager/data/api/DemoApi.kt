@@ -221,7 +221,7 @@ class DemoApi : TmApi {
         )
     }
 
-    override suspend fun services(): ServiceEnvelope {
+    override suspend fun services(agentId: String?): ServiceEnvelope {
         settle()
         return ServiceEnvelope(
             http = DEMO_ROUTES.filter { it.protocol == "http" }.map { route ->
@@ -495,7 +495,7 @@ class DemoApi : TmApi {
         return ServiceSaveResponse(ok = true, name = body.name)
     }
 
-    override suspend fun deleteService(name: String): OkResponse {
+    override suspend fun deleteService(name: String, agentId: String?): OkResponse {
         settle()
         return OkResponse(ok = true)
     }
@@ -503,6 +503,7 @@ class DemoApi : TmApi {
     override suspend fun setServiceOwnership(
         name: String,
         body: ServiceOwnershipRequest,
+        agentId: String?,
     ): ServiceOwnershipResponse {
         settle()
         return ServiceOwnershipResponse(ok = true, owned = body.adopt)

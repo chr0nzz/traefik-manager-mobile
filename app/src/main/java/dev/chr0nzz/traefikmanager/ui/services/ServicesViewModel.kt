@@ -95,7 +95,7 @@ class ServicesViewModel @Inject constructor(
                     loading = false,
                     services = ServiceRows.from(cached),
                     raw = rawByName(cached),
-                    authorable = repository.authorable,
+                    authorable = true,
                     reachable = cached.reachable,
                 )
             }
@@ -232,7 +232,7 @@ class ServicesViewModel @Inject constructor(
                             refreshing = false,
                             services = ServiceRows.from(envelope),
                             raw = rawByName(envelope),
-                            authorable = repository.authorable,
+                            authorable = true,
                             reachable = envelope.reachable,
                             error = null,
                         )

@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -284,6 +285,7 @@ data class ServicePayload(
     val originalName: String = "",
     val configFile: String = "",
     val children: List<ServiceChildPayload> = emptyList(),
+    @SerialName("agent_id") val agentId: String = "",
 )
 
 @Serializable

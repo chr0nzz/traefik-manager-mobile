@@ -160,16 +160,20 @@ interface TmApi {
     suspend fun saveService(@Body body: ServicePayload): ServiceSaveResponse
 
     @DELETE("api/services/{name}")
-    suspend fun deleteService(@Path("name") name: String): OkResponse
+    suspend fun deleteService(
+        @Path("name") name: String,
+        @Query("agent_id") agentId: String? = null,
+    ): OkResponse
 
     @POST("api/services/{name}/ownership")
     suspend fun setServiceOwnership(
         @Path("name") name: String,
         @Body body: ServiceOwnershipRequest,
+        @Query("agent_id") agentId: String? = null,
     ): ServiceOwnershipResponse
 
     @GET("api/traefik/services")
-    suspend fun services(): ServiceEnvelope
+    suspend fun services(@Query("agent_id") agentId: String? = null): ServiceEnvelope
 
     @GET("api/traefik/middlewares")
     suspend fun middlewares(): ProtoEnvelope

@@ -18,18 +18,18 @@ class ServicesRepository @Inject constructor(
     private val serverScope: ServerScope,
 ) {
 
-    val authorable: Boolean get() = serverScope.activeAgentId.value == null
+    private fun agent(): String? = serverScope.activeAgentId.value
 
     fun cached(): ServiceEnvelope? = dashboardRepository.raw.value?.services
 
     suspend fun load(): ServiceEnvelope = try {
-        apiProvider.api().services()
+        apiProvider.api().services(agentId = agent())
     } catch (exception: HttpException) {
         error(upstreamMessage(exception) ?: "Traefik API not reachable (HTTP ${exception.code()})")
     }
 
     suspend fun save(payload: ServicePayload): String = try {
-        val response = apiProvider.api().saveService(payload)
+        val response = apiProvider.api().saveService(payload.copy(agentId = agent().orEmpty()))
         if (!response.ok) error(response.error ?: "Could not save the service")
         response.name.ifBlank { payload.name }
     } catch (exception: HttpException) {
@@ -38,14 +38,15 @@ class ServicesRepository @Inject constructor(
 
     suspend fun delete(name: String) {
         try {
-            apiProvider.api().deleteService(name)
+            apiProvider.api().deleteService(name, agentId = agent())
         } catch (exception: HttpException) {
             error(upstreamMessage(exception) ?: "Could not delete the service (HTTP ${exception.code()})")
         }
     }
 
     suspend fun setOwnership(name: String, adopt: Boolean): Boolean = try {
-        val response = apiProvider.api().setServiceOwnership(name, ServiceOwnershipRequest(adopt))
+        val response = apiProvider.api()
+            .setServiceOwnership(name, ServiceOwnershipRequest(adopt), agentId = agent())
         if (!response.ok) error(response.error ?: "Could not change the ownership")
         response.owned
     } catch (exception: HttpException) {
