@@ -484,3 +484,47 @@ class BackendModeTest {
         assertEquals(1, payload["children"]!!.jsonArray.size)
     }
 }
+
+class FailoverCapTest {
+
+    @Test
+    fun `failover stops at two backends`() {
+        val two = RouteForm(
+            name = "app",
+            compositeType = "failover",
+            backends = listOf(BackendServer(host = "10.0.0.1"), BackendServer(host = "10.0.0.2")),
+        )
+        assertTrue(two.backendsAtCap)
+    }
+
+    @Test
+    fun `one backend is not yet at the cap`() {
+        val one = RouteForm(
+            name = "app",
+            compositeType = "failover",
+            backends = listOf(BackendServer(host = "10.0.0.1")),
+        )
+        assertFalse(one.backendsAtCap)
+    }
+
+    @Test
+    fun `weighted has no cap`() {
+        val many = RouteForm(
+            name = "app",
+            compositeType = "weighted",
+            backends = List(5) { BackendServer(host = "10.0.0.$it") },
+        )
+        assertFalse(many.backendsAtCap)
+    }
+
+    @Test
+    fun `tcp is never capped, it has no composite types`() {
+        val tcp = RouteForm(
+            name = "db",
+            protocol = RouteProtocol.Tcp,
+            compositeType = "failover",
+            backends = listOf(BackendServer(host = "10.0.0.1"), BackendServer(host = "10.0.0.2")),
+        )
+        assertFalse(tcp.backendsAtCap)
+    }
+}

@@ -322,7 +322,9 @@ class RouteFormViewModel @Inject constructor(
 
     fun setCompositeType(type: String) = update { it.copy(compositeType = type) }
 
-    fun addBackend() = update { it.copy(backends = it.backends + BackendServer()) }
+    fun addBackend() = update {
+        if (it.backendsAtCap) it else it.copy(backends = it.backends + BackendServer())
+    }
 
     fun removeBackend(index: Int) = update {
         it.copy(

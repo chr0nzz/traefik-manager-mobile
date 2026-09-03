@@ -523,7 +523,16 @@ private fun BackendSection(
                 }
             }
         }
+        if (form.backendsAtCap) {
+            Text(
+                text = "Failover takes two backends: the one that serves and the one that takes over.",
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.muted,
+                modifier = Modifier.padding(top = TmSpacing.xs),
+            )
+        }
         OutlinedButton(
+            enabled = !form.backendsAtCap,
             onClick = viewModel::addBackend,
             modifier = Modifier.padding(top = TmSpacing.xs),
         ) {

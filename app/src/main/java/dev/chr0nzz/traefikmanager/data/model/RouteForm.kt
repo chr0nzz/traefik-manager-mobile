@@ -153,6 +153,9 @@ data class RouteForm(
 
     val isManagedService: Boolean get() = serviceType == LOAD_BALANCER || serviceOwned
 
+    val backendsAtCap: Boolean
+        get() = protocol == RouteProtocol.Http && compositeType == "failover" && backends.size >= 2
+
     val effectivePassHostHeader: Boolean get() = if (streamingEnabled) true else passHostHeader
 
     val validationError: String?

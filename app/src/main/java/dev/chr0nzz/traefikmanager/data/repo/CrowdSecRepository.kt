@@ -71,11 +71,13 @@ class CrowdSecRepository @Inject constructor(
     suspend fun addDecision(request: AddDecisionRequest) {
         val response = apiProvider.api().crowdSecAddDecision(request)
         if (!response.isSuccessful) error(errorMessage(response) ?: "Could not add the decision")
+        cache.remove(key())
     }
 
     suspend fun deleteDecision(id: Long) {
         val response = apiProvider.api().crowdSecDeleteDecision(id)
         if (!response.isSuccessful) error(errorMessage(response) ?: "Could not delete the decision")
+        cache.remove(key())
     }
 
     private fun <T, R> read(response: Response<T>, transform: (T?) -> R): CsRead<R> = when {
