@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -283,7 +284,7 @@ private fun RoutesListPane(
                             )
                         }
                     } else {
-                        items(state.visible, key = { it.id }) { route ->
+                        itemsIndexed(state.visible, key = { index, route -> route.id.ifEmpty { "route-$index" } }) { _, route ->
                             RouteCard(
                                 route = route,
                                 selected = route.id == selectedId,

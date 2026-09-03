@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -284,7 +285,7 @@ fun NotificationsScreen(
                         )
                     }
                 }
-                items(channels.channels, key = { it.id }) { channel ->
+                itemsIndexed(channels.channels, key = { index, channel -> channel.id.ifEmpty { "ch-$index" } }) { _, channel ->
                     ChannelRow(
                         channel = channel,
                         thisDevice = channel.id == channels.pushChannelId,

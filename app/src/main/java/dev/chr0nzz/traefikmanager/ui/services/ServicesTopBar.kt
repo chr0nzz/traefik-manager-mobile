@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -153,7 +154,7 @@ fun ServicesTopBar(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(results, key = { it.key }) { service ->
+                    itemsIndexed(results, key = { index, service -> service.key.ifEmpty { "svc-$index" } }) { _, service ->
                         ListItem(
                             headlineContent = { Text(service.shortName) },
                             supportingContent = {

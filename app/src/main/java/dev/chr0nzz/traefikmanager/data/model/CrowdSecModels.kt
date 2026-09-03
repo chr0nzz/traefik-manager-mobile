@@ -170,8 +170,9 @@ data class CrowdSecSnapshot(
 
     val alertList: List<CsAlert> get() = alerts.valueOrNull().orEmpty()
 
-    val bannedIps: Set<String>
-        get() = decisionList.filter { it.scope == "Ip" || it.scope == "Range" }.map { it.value }.toSet()
+    val bannedIps: Set<String> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        decisionList.filter { it.scope == "Ip" || it.scope == "Range" }.map { it.value }.toSet()
+    }
 
     fun handled(alert: CsAlert): Boolean =
         decisions.ok && !alert.simulated && alert.ip in bannedIps

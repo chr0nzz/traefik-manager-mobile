@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -209,7 +210,7 @@ private fun TemplateList(
                 )
             }
         } else {
-            items(state.templates, key = { it.id }) { template ->
+            itemsIndexed(state.templates, key = { index, template -> template.id.ifEmpty { "tpl-$index" } }) { _, template ->
                 TmCard(onClick = { onEdit(template) }) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

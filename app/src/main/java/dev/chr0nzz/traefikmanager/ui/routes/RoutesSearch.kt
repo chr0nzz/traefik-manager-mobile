@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -154,7 +155,7 @@ fun RoutesTopBar(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(results, key = { it.id }) { route ->
+                    itemsIndexed(results, key = { index, route -> route.id.ifEmpty { "route-$index" } }) { _, route ->
                         ListItem(
                             headlineContent = { Text(route.name) },
                             supportingContent = {

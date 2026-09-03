@@ -10,6 +10,7 @@ import dev.chr0nzz.traefikmanager.data.model.CsRead
 import dev.chr0nzz.traefikmanager.data.model.CsSource
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -180,5 +181,45 @@ class CrowdSecTest {
         assertEquals("abc", CsAlert(uuid = "abc").key(3))
         assertEquals("7", CsAlert(id = 7).key(3))
         assertEquals("cs3", CsAlert().key(3))
+    }
+}
+
+class BannedIpsCostTest {
+
+    private fun snapshot(decisions: Int): CrowdSecSnapshot = CrowdSecSnapshot(
+        decisions = CsRead.Loaded(
+            List(decisions) { CsDecision(id = it.toLong(), scope = "Ip", value = "10.0.0.$it") },
+        ),
+    )
+
+    @Test
+    fun `the banned set is built once, not once per alert`() {
+        val snap = snapshot(500)
+        val first = snap.bannedIps
+        val second = snap.bannedIps
+        assertSame(first, second)
+    }
+
+    @Test
+    fun `it still contains what it should`() {
+        val snap = CrowdSecSnapshot(
+            decisions = CsRead.Loaded(
+                listOf(
+                    CsDecision(id = 1, scope = "Ip", value = "1.2.3.4"),
+                    CsDecision(id = 2, scope = "Range", value = "10.0.0.0/8"),
+                    CsDecision(id = 3, scope = "Country", value = "RU"),
+                ),
+            ),
+        )
+        assertEquals(setOf("1.2.3.4", "10.0.0.0/8"), snap.bannedIps)
+    }
+
+    @Test
+    fun `an alert is handled when its ip is banned`() {
+        val snap = CrowdSecSnapshot(
+            decisions = CsRead.Loaded(listOf(CsDecision(id = 1, scope = "Ip", value = "1.2.3.4"))),
+        )
+        assertTrue(snap.handled(CsAlert(source = CsSource(ip = "1.2.3.4"))))
+        assertFalse(snap.handled(CsAlert(source = CsSource(ip = "5.6.7.8"))))
     }
 }
