@@ -50,7 +50,7 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 - **Overview** - the signal desk: routers, services and middlewares as cards with health, provider breakdown and entry points
 - **Routes** - view, enable/disable, add, edit and delete HTTP/TCP/UDP routes, multiple domains per route, raw YAML editing
 - **Middlewares** - 30 templates with guided wizards, plus edit, delete and htpasswd generation
-- **Services** - health, backends up, provider filter and the routers each one serves
+- **Services** - health, backends up, provider filter and the routers each one serves, plus create, edit, rename and delete: load balancer, weighted, mirroring and failover, on the host or any agent
 - **Logs** - live tail with CLF and JSON parsing, tappable facet filters and the v1.10 analytics cards
 - **CrowdSec** - decisions and alerts, add and delete bans, the full stat desk and a world map
 - **Certificates** - expiry thresholds and the resolvers in use
@@ -62,6 +62,7 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 - **Push** - events delivered to the phone over UnifiedPush
 - **Home screen widgets** - the same desk cards in three sizes, configured per widget
 - **App lock** - optional biometric unlock, with relock when the app goes to the background
+- **Opens on your last data** - every screen keeps its own snapshot per server and draws it immediately, then refreshes behind it
 
 ---
 
@@ -69,7 +70,7 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 
 | Requirement              | Version                     |
 | ------------------------- | ---------------------------- |
-| Traefik Manager (server) | **v1.10.1 or higher**, v1.12.0 for notification channels and push |
+| Traefik Manager (server) | **v1.10.1 or higher**, v1.12.0 for notification channels and push, v1.13.0 for service authoring |
 | Android                  | 13+ (API 33)                |
 | Push (optional)          | A UnifiedPush distributor, such as the ntfy app |
 | JDK (to build)           | 17                          |
