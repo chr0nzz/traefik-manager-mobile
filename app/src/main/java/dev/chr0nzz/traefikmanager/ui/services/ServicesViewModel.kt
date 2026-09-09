@@ -11,6 +11,7 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.ServiceRows
 import dev.chr0nzz.traefikmanager.data.model.TraefikService
 import dev.chr0nzz.traefikmanager.data.repo.ServerScope
+import dev.chr0nzz.traefikmanager.data.repo.InUseException
 import dev.chr0nzz.traefikmanager.data.repo.ServicesRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,14 @@ enum class ServiceStatusFilter(val label: String) {
     Warnings("Warnings"),
     Errors("Errors"),
 }
+
+data class BlockedDelete(
+    val name: String,
+    val reason: String,
+    val routers: List<String>,
+    val parents: List<String>,
+    val row: ServiceRow,
+)
 
 data class ServicesUiState(
     val loading: Boolean = true,
@@ -43,6 +52,7 @@ data class ServicesUiState(
     val editError: String? = null,
     val busy: Boolean = false,
     val pendingDelete: ServiceRow? = null,
+    val blockedDelete: BlockedDelete? = null,
     val message: String? = null,
 ) {
     val protocols: List<ServiceProtocol>
@@ -149,22 +159,39 @@ class ServicesViewModel @Inject constructor(
         }
     }
 
-    fun delete(row: ServiceRow) {
-        _state.update { it.copy(pendingDelete = null, busy = true) }
+    fun delete(row: ServiceRow, force: Boolean = false) {
+        _state.update { it.copy(pendingDelete = null, blockedDelete = null, busy = true) }
         viewModelScope.launch {
-            runCatching { repository.delete(row.shortName) }.fold(
+            runCatching { repository.delete(row.shortName, force) }.fold(
                 onSuccess = {
                     _state.update { it.copy(busy = false, message = "Service ${row.shortName} deleted") }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
-                    _state.update {
-                        it.copy(busy = false, message = throwable.message ?: "Could not delete the service")
+                    if (throwable is InUseException) {
+                        _state.update {
+                            it.copy(
+                                busy = false,
+                                blockedDelete = BlockedDelete(
+                                    name = row.shortName,
+                                    reason = throwable.message,
+                                    routers = throwable.routers,
+                                    parents = throwable.parents,
+                                    row = row,
+                                ),
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(busy = false, message = throwable.message ?: "Could not delete the service")
+                        }
                     }
                 },
             )
         }
     }
+
+    fun dismissBlockedDelete() = _state.update { it.copy(blockedDelete = null) }
 
     fun setOwnership(row: ServiceRow, adopt: Boolean) {
         _state.update { it.copy(busy = true) }

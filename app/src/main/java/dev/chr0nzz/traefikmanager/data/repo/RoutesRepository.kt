@@ -2,6 +2,10 @@ package dev.chr0nzz.traefikmanager.data.repo
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.store.SnapshotStore
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import retrofit2.HttpException
 import kotlinx.serialization.Serializable
 import dev.chr0nzz.traefikmanager.data.model.ConfigsResponse
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
@@ -98,9 +102,25 @@ class RoutesRepository @Inject constructor(
         return snapshot
     }
 
+    private suspend fun <T> reporting(what: String, call: suspend () -> T): T = try {
+        call()
+    } catch (exception: HttpException) {
+        error(upstreamMessage(exception) ?: "$what (HTTP ${exception.code()})")
+    }
+
+    private fun upstreamMessage(exception: HttpException): String? {
+        val body = runCatching { exception.response()?.errorBody()?.string() }.getOrNull()
+        if (body.isNullOrBlank()) return null
+        val parsed = runCatching { Json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
+        return listOf("message", "error")
+            .firstNotNullOfOrNull { (parsed[it] as? JsonPrimitive)?.content?.takeIf { m -> m.isNotBlank() } }
+    }
+
     suspend fun toggle(routeId: String, enable: Boolean) {
         val ready = apiProvider.ready()
-        val result = ready.api.toggleRoute(routeId, ToggleRequest(enable, ready.agentId.orEmpty()))
+        val result = reporting("Could not change the route") {
+            ready.api.toggleRoute(routeId, ToggleRequest(enable, ready.agentId.orEmpty()))
+        }
         if (!result.ok) error(result.message ?: result.error ?: "Could not toggle the route")
     }
 
@@ -111,7 +131,7 @@ class RoutesRepository @Inject constructor(
                 add(name, value)
             }
         }.build()
-        val result = ready.api.saveRoute(body)
+        val result = reporting("Could not save the route") { ready.api.saveRoute(body) }
         if (!result.ok) error(result.message ?: result.error ?: "Could not save the route")
         notifyChanged()
     }
@@ -122,7 +142,7 @@ class RoutesRepository @Inject constructor(
             .add("configFile", route.configFile)
             .add("agent_id", ready.agentId.orEmpty())
             .build()
-        val result = ready.api.deleteRoute(route.id, body)
+        val result = reporting("Could not delete the route") { ready.api.deleteRoute(route.id, body) }
         if (!result.ok) error(result.message ?: result.error ?: "Could not delete the route")
         notifyChanged()
     }
@@ -130,7 +150,9 @@ class RoutesRepository @Inject constructor(
     suspend fun rawYaml(routeId: String): RawRoute = apiProvider.api().routeRaw(routeId)
 
     suspend fun saveRawYaml(routeId: String, content: String) {
-        val result = apiProvider.api().saveRouteRaw(routeId, RawRouteSave(content))
+        val result = reporting("Could not save the YAML") {
+            apiProvider.api().saveRouteRaw(routeId, RawRouteSave(content))
+        }
         if (!result.ok) error(result.error ?: result.message ?: "Could not save the YAML")
         notifyChanged()
     }

@@ -36,11 +36,15 @@ class ServicesRepository @Inject constructor(
         error(upstreamMessage(exception) ?: "Could not save the service (HTTP ${exception.code()})")
     }
 
-    suspend fun delete(name: String) {
+    suspend fun delete(name: String, force: Boolean = false) {
         try {
-            apiProvider.api().deleteService(name, agentId = agent())
+            apiProvider.api().deleteService(
+                name = name,
+                agentId = agent(),
+                force = if (force) "1" else null,
+            )
         } catch (exception: HttpException) {
-            error(upstreamMessage(exception) ?: "Could not delete the service (HTTP ${exception.code()})")
+            throw InUse.from(exception, "Could not delete the service")
         }
     }
 

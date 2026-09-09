@@ -10,6 +10,7 @@ import dev.chr0nzz.traefikmanager.data.model.TemplateBody
 import javax.inject.Inject
 import javax.inject.Singleton
 import okhttp3.FormBody
+import retrofit2.HttpException
 
 @Singleton
 class MiddlewaresRepository @Inject constructor(
@@ -28,13 +29,18 @@ class MiddlewaresRepository @Inject constructor(
         routesRepository.notifyChangedExternally()
     }
 
-    suspend fun delete(name: String, configFile: String) {
+    suspend fun delete(name: String, configFile: String, force: Boolean = false) {
         val ready = apiProvider.ready()
         val body = FormBody.Builder()
             .add("configFile", configFile)
             .add("agent_id", ready.agentId.orEmpty())
+            .apply { if (force) add("force", "true") }
             .build()
-        val result = ready.api.deleteMiddleware(name, body)
+        val result = try {
+            ready.api.deleteMiddleware(name, body)
+        } catch (exception: HttpException) {
+            throw InUse.from(exception, "Could not delete the middleware")
+        }
         if (!result.ok) error(result.message ?: result.error ?: "Could not delete the middleware")
         routesRepository.notifyChangedExternally()
     }

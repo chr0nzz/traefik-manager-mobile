@@ -41,6 +41,12 @@ class WizardValues(
     private val toggles: Map<String, Boolean>,
     private val fields: List<WizardField>,
 ) {
+    fun prefilled(key: String): String {
+        val raw = text[key]
+        if (raw != null) return raw.trim()
+        return fields.filterIsInstance<WizardField.Text>().firstOrNull { it.key == key }?.default.orEmpty()
+    }
+
     fun value(key: String, fallback: String = ""): String {
         val raw = text[key]?.trim()
         if (!raw.isNullOrEmpty()) return raw
@@ -115,9 +121,10 @@ object MiddlewareTemplates {
         ),
         WizardField.Text(
             key = "maxBody",
-            label = "Max response body size (optional)",
+            label = "Max response body size",
             placeholder = "4096",
-            help = "Bytes, Traefik 3.7+",
+            default = "4096",
+            help = "Bytes. Traefik 3.7 warns on every forward auth without one. Clear it to omit.",
             numeric = true,
         ),
     )
@@ -273,8 +280,10 @@ object MiddlewareTemplates {
                 WizardField.Lines(key = "headers", label = "Auth response headers", help = "One per line"),
                 WizardField.Text(
                     key = "maxBody",
-                    label = "Max response body size (optional)",
+                    label = "Max response body size",
                     placeholder = "4096",
+                    default = "4096",
+                    help = "Bytes. Traefik 3.7 warns on every forward auth without one. Clear it to omit.",
                     numeric = true,
                 ),
             ),
@@ -296,7 +305,7 @@ object MiddlewareTemplates {
                 append("forwardAuth:\n  address: ${yamlString(address)}\n")
                 append("  trustForwardHeader: ${values.flag("trust")}")
                 if (all.isNotEmpty()) append("\n  authResponseHeaders:\n" + listBlock("    ", all))
-                val maxBody = values.value("maxBody")
+                val maxBody = values.prefilled("maxBody")
                 if (maxBody.toIntOrNull() != null) append("\n  maxResponseBodySize: $maxBody")
             }
         },
@@ -693,7 +702,7 @@ private fun buildForwardAuth(values: WizardValues): String = buildString {
         append("\n  authResponseHeaders:\n")
         append(headers.joinToString("\n") { "    - " + yamlStringOf(it) })
     }
-    val maxBody = values.value("maxBody")
+    val maxBody = values.prefilled("maxBody")
     if (maxBody.toIntOrNull() != null) append("\n  maxResponseBodySize: $maxBody")
 }
 

@@ -120,11 +120,40 @@ fun ServicesScreen(
         AlertDialog(
             onDismissRequest = { viewModel.askDelete(null) },
             title = { Text("Delete service") },
-            text = { Text("Delete \"${row.shortName}\"? Routes still pointing at it will break.") },
+            text = { Text("Delete \"${row.shortName}\"?") },
             confirmButton = {
                 TextButton(onClick = { viewModel.delete(row) }) { Text("Delete") }
             },
             dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text("Cancel") } },
+        )
+    }
+
+    state.blockedDelete?.let { blocked ->
+        AlertDialog(
+            onDismissRequest = viewModel::dismissBlockedDelete,
+            title = { Text("Still in use") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
+                    Text(blocked.reason)
+                    if (blocked.routers.isNotEmpty()) {
+                        Text("Deleting it also deletes ${blocked.routers.size} route" +
+                            (if (blocked.routers.size == 1) "" else "s") +
+                            ": ${blocked.routers.joinToString(", ")}.")
+                    }
+                    if (blocked.parents.isNotEmpty()) {
+                        Text("It is removed from ${blocked.parents.joinToString(", ")}, " +
+                            "and any left with no backends goes too.")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.delete(blocked.row, force = true) }) {
+                    Text("Delete anyway")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissBlockedDelete) { Text("Keep it") }
+            },
         )
     }
 

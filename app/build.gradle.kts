@@ -25,8 +25,8 @@ android {
         applicationId = "dev.chr0nzz.traefikmanager"
         minSdk = 33
         targetSdk = 37
-        versionCode = 27
-        versionName = "2.2.0"
+        versionCode = 29
+        versionName = "2.3.0"
     }
 
     signingConfigs {

@@ -58,7 +58,8 @@ class MiddlewareWizardTest {
     @Test
     fun `forward auth defaults trust to true and omits an invalid max body`() {
         assertEquals(
-            "forwardAuth:\n  address: \"http://auth:4181\"\n  trustForwardHeader: true",
+            "forwardAuth:\n  address: \"http://auth:4181\"\n  trustForwardHeader: true" +
+                "\n  maxResponseBodySize: 4096",
             build("forwardAuth", mapOf("address" to "http://auth:4181")),
         )
         val withBody = build(
@@ -329,5 +330,50 @@ class NewWizardYamlTest {
             "passTLSClientCert:\n  pem: true\n  info:\n    subject:\n      commonName: true",
             build("passTLSClientCert", toggles = mapOf("info" to true)),
         )
+    }
+}
+
+class ForwardAuthBodyLimitTest {
+
+    private fun build(
+        id: String,
+        text: Map<String, String> = emptyMap(),
+        toggles: Map<String, Boolean> = emptyMap(),
+    ): String {
+        val wizard = MiddlewareTemplates.byId(id) ?: error("no wizard $id")
+        return wizard.build(WizardValues(text, toggles, wizard.fields))
+    }
+
+    private val variants = listOf(
+        "forwardAuth" to mapOf("address" to "http://auth:4181"),
+        "forwardAuthAuthentik" to emptyMap(),
+        "forwardAuthAuthelia" to emptyMap(),
+        "forwardAuthGatekeeper" to mapOf("url" to "https://auth.example.com"),
+    )
+
+    @Test
+    fun `every forward auth wizard sets the limit by default`() {
+        variants.forEach { (id, text) ->
+            val yaml = build(id, text)
+            assertTrue("$id: $yaml", yaml.contains("maxResponseBodySize: 4096"))
+        }
+    }
+
+    @Test
+    fun `a typed value wins over the default`() {
+        val yaml = build("forwardAuth", mapOf("address" to "http://a", "maxBody" to "8192"))
+        assertTrue(yaml, yaml.contains("maxResponseBodySize: 8192"))
+    }
+
+    @Test
+    fun `clearing the field omits the key`() {
+        val yaml = build("forwardAuth", mapOf("address" to "http://a", "maxBody" to ""))
+        assertTrue(yaml, !yaml.contains("maxResponseBodySize"))
+    }
+
+    @Test
+    fun `a non-numeric value is still refused`() {
+        val yaml = build("forwardAuth", mapOf("address" to "http://a", "maxBody" to "lots"))
+        assertTrue(yaml, !yaml.contains("maxResponseBodySize"))
     }
 }

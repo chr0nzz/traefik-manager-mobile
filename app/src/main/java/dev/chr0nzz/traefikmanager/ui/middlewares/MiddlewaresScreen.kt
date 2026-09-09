@@ -76,6 +76,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -128,6 +130,32 @@ fun MiddlewaresScreen(
                 viewModel.delete(middleware)
                 pendingDelete = null
                 scope.launch { navigator.navigateBack() }
+            },
+        )
+    }
+
+    state.blockedDelete?.let { blocked ->
+        AlertDialog(
+            onDismissRequest = viewModel::dismissBlockedDelete,
+            title = { Text("Still in use") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
+                    Text(blocked.reason)
+                    if (blocked.routers.isNotEmpty()) {
+                        Text(
+                            "Deleting it removes it from " +
+                                blocked.routers.joinToString(", ") + ".",
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.delete(blocked.middleware, force = true) }) {
+                    Text("Delete anyway")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissBlockedDelete) { Text("Keep it") }
             },
         )
     }
