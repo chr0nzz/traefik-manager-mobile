@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -266,8 +267,55 @@ fun NotificationsScreen(
                 }
             }
 
+            if (state.routeCheckSupported == true) {
+                item { SectionLabel("Route checks") }
+                item {
+                    TmCard {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Check route reachability",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = "Colours the status dot on Routes, and alerts under the " +
+                                        "Traefik category when a backend stops answering.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = palette.muted,
+                                )
+                            }
+                            Switch(
+                                checked = state.routeCheckEnabled,
+                                enabled = !state.savingRouteCheck,
+                                onCheckedChange = { viewModel.setRouteChecks(enabled = it) },
+                            )
+                        }
+                        if (state.routeCheckEnabled) {
+                            CardDivider(modifier = Modifier.padding(vertical = TmSpacing.xs))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    text = "Every",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                RouteCheckIntervalPicker(
+                                    value = state.routeCheckInterval,
+                                    enabled = !state.savingRouteCheck,
+                                    onSelect = { viewModel.setRouteChecks(interval = it) },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             if (channels.supported != false) {
-                item { SectionLabel("Channels ${channels.channels.size}") }
+                item { SectionLabel("Channels ${channels.channels.size}", modifier = Modifier.padding(top = TmSpacing.sm)) }
                 item {
                     Text(
                         text = "Every enabled channel gets its own copy of an event, filtered by the " +
@@ -497,6 +545,28 @@ private fun ChannelRow(
                     contentDescription = "Remove ${channel.name}",
                     tint = palette.red,
                     modifier = Modifier.size(18.dp),
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RouteCheckIntervalPicker(value: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        TextButton(onClick = { open = true }, enabled = enabled) {
+            Text(RouteCheckIntervals.label(value))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            RouteCheckIntervals.options.forEach { (seconds, label) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    onClick = {
+                        open = false
+                        onSelect(seconds)
+                    },
                 )
             }
         }

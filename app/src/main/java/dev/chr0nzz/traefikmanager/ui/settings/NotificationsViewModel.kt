@@ -11,6 +11,7 @@ import dev.chr0nzz.traefikmanager.data.model.TmNotification
 import dev.chr0nzz.traefikmanager.data.model.WebhookTestRequest
 import dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository
 import dev.chr0nzz.traefikmanager.data.repo.NotificationsRepository
+import dev.chr0nzz.traefikmanager.data.repo.RouteHealthRepository
 import dev.chr0nzz.traefikmanager.data.repo.ManagerSettingsRepository.Companion.text
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,13 +36,30 @@ data class NotificationsUiState(
     val message: String? = null,
     val error: String? = null,
     val unread: Int = 0,
+    val routeCheckSupported: Boolean? = null,
+    val routeCheckEnabled: Boolean = true,
+    val routeCheckInterval: Int = 300,
+    val savingRouteCheck: Boolean = false,
 )
+
+object RouteCheckIntervals {
+    val options: List<Pair<Int, String>> = listOf(
+        60 to "1 minute",
+        300 to "5 minutes",
+        900 to "15 minutes",
+        1800 to "30 minutes",
+    )
+
+    fun label(seconds: Int): String =
+        options.firstOrNull { it.first == seconds }?.second ?: "$seconds seconds"
+}
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
     @param:ApplicationContext private val context: android.content.Context,
     private val apiProvider: ApiProvider,
     private val notifications: NotificationsRepository,
+    private val routeHealth: RouteHealthRepository,
     private val settingsRepository: ManagerSettingsRepository,
     private val preferencesStore: dev.chr0nzz.traefikmanager.data.store.PreferencesStore,
 ) : ViewModel() {
@@ -64,6 +82,7 @@ class NotificationsViewModel @Inject constructor(
     fun load() {
         _state.update { it.copy(loading = it.notifications.isEmpty(), error = null) }
         viewModelScope.launch {
+            loadRouteChecks()
             val history = runCatching { notifications.refresh() }
             val settings = runCatching { settingsRepository.raw() }
             _state.update { current ->
@@ -76,6 +95,44 @@ class NotificationsViewModel @Inject constructor(
                     error = history.exceptionOrNull()?.message,
                 )
             }
+        }
+    }
+
+    private fun loadRouteChecks() {
+        viewModelScope.launch {
+            val snapshot = routeHealth.refresh()
+            _state.update {
+                it.copy(
+                    routeCheckSupported = routeHealth.supported.value,
+                    routeCheckEnabled = snapshot?.enabled ?: it.routeCheckEnabled,
+                    routeCheckInterval = snapshot?.interval ?: it.routeCheckInterval,
+                )
+            }
+        }
+    }
+
+    fun setRouteChecks(enabled: Boolean = _state.value.routeCheckEnabled, interval: Int = _state.value.routeCheckInterval) {
+        _state.update { it.copy(savingRouteCheck = true) }
+        viewModelScope.launch {
+            runCatching { routeHealth.save(enabled, interval) }.fold(
+                onSuccess = { saved ->
+                    _state.update {
+                        it.copy(
+                            savingRouteCheck = false,
+                            routeCheckEnabled = saved.enabled,
+                            routeCheckInterval = saved.interval,
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(
+                            savingRouteCheck = false,
+                            message = throwable.message ?: "Could not save the route checks",
+                        )
+                    }
+                },
+            )
         }
     }
 

@@ -5,6 +5,7 @@ import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
 import dev.chr0nzz.traefikmanager.data.model.RouteServerTally
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
+import dev.chr0nzz.traefikmanager.ui.settings.RouteCheckIntervals
 import dev.chr0nzz.traefikmanager.ui.routes.status
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -81,5 +82,28 @@ class RouteHealthTest {
         assertEquals("Reachable in 42ms", RouteHealth(state = "up", latencyMs = 42).summary)
         assertEquals("Reachable, this app", RouteHealth(state = "up", self = true).summary)
         assertEquals("Not checked yet", RouteHealth().summary)
+    }
+}
+
+class RouteCheckIntervalTest {
+
+    @Test
+    fun `the intervals are the ones the server accepts`() {
+        assertEquals(
+            listOf(60, 300, 900, 1800),
+            RouteCheckIntervals.options.map { it.first },
+        )
+    }
+
+    @Test
+    fun `each one reads as a duration`() {
+        assertEquals("1 minute", RouteCheckIntervals.label(60))
+        assertEquals("5 minutes", RouteCheckIntervals.label(300))
+        assertEquals("30 minutes", RouteCheckIntervals.label(1800))
+    }
+
+    @Test
+    fun `an interval the server invents still renders`() {
+        assertEquals("45 seconds", RouteCheckIntervals.label(45))
     }
 }
