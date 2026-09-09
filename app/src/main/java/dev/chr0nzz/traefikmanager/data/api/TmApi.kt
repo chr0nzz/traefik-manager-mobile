@@ -39,6 +39,9 @@ import dev.chr0nzz.traefikmanager.data.model.MiddlewareTemplatesResponse
 import dev.chr0nzz.traefikmanager.data.model.OkResponse
 import dev.chr0nzz.traefikmanager.data.model.TemplateBody
 import dev.chr0nzz.traefikmanager.data.model.PingResult
+import dev.chr0nzz.traefikmanager.data.model.RouteHealthSaveResponse
+import dev.chr0nzz.traefikmanager.data.model.RouteHealthSettings
+import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
 import dev.chr0nzz.traefikmanager.data.model.RawRoute
 import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
 import dev.chr0nzz.traefikmanager.data.model.Overview
@@ -163,6 +166,7 @@ interface TmApi {
     suspend fun deleteService(
         @Path("name") name: String,
         @Query("agent_id") agentId: String? = null,
+        @Query("force") force: String? = null,
     ): OkResponse
 
     @POST("api/services/{name}/ownership")
@@ -237,6 +241,12 @@ interface TmApi {
         @Path("routeId", encoded = false) routeId: String,
         @Body body: RawRouteSave,
     ): OkResponse
+
+    @GET("api/routes/health")
+    suspend fun routeHealth(@Query("agent_id") agentId: String? = null): RouteHealthSnapshot
+
+    @POST("api/settings/route-health")
+    suspend fun saveRouteHealth(@Body body: RouteHealthSettings): RouteHealthSaveResponse
 
     @GET("api/ping")
     suspend fun ping(

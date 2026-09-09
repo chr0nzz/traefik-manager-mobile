@@ -188,3 +188,74 @@ data class PingResult(
     val self: Boolean = false,
     val error: String? = null,
 )
+
+@Serializable
+data class RouteServerTally(
+    val up: Int = 0,
+    val total: Int = 0,
+)
+
+@Serializable
+data class RouteHealth(
+    val state: String = STATE_PENDING,
+    val pending: Boolean = false,
+    val source: String = "",
+    @SerialName("latency_ms") val latencyMs: Int? = null,
+    @SerialName("status_code") val statusCode: Int? = null,
+    val error: String? = null,
+    val servers: RouteServerTally? = null,
+    @SerialName("down_servers") val downServers: List<String> = emptyList(),
+    @SerialName("via_target") val viaTarget: Boolean = false,
+    val unverified: Boolean = false,
+    val note: String? = null,
+    val self: Boolean = false,
+    val at: Double? = null,
+) {
+    val known: Boolean get() = state == STATE_UP || state == STATE_DEGRADED || state == STATE_DOWN
+
+    val summary: String
+        get() {
+            val tally = servers
+            return when {
+                state == STATE_UP && self -> "Reachable, this app"
+                state == STATE_UP && tally != null -> "Reachable, ${tally.up} of ${tally.total} servers up"
+                state == STATE_UP && latencyMs != null -> "Reachable in ${latencyMs}ms"
+                state == STATE_UP -> "Reachable"
+                state == STATE_DEGRADED && tally != null ->
+                    "Degraded, ${tally.up} of ${tally.total} servers up"
+                state == STATE_DEGRADED -> "Degraded"
+                state == STATE_DOWN && tally != null -> "Down, 0 of ${tally.total} servers up"
+                state == STATE_DOWN -> error?.takeIf { it.isNotBlank() }?.let { "Down: $it" } ?: "Down"
+                else -> note?.takeIf { it.isNotBlank() } ?: "Not checked yet"
+            }
+        }
+
+    companion object {
+        const val STATE_UP = "up"
+        const val STATE_DEGRADED = "degraded"
+        const val STATE_DOWN = "down"
+        const val STATE_PENDING = "pending"
+    }
+}
+
+@Serializable
+data class RouteHealthSnapshot(
+    val enabled: Boolean = true,
+    val interval: Int = 300,
+    @SerialName("checked_at") val checkedAt: Double? = null,
+    val routes: Map<String, RouteHealth> = emptyMap(),
+)
+
+@Serializable
+data class RouteHealthSettings(
+    val enabled: Boolean,
+    val interval: Int,
+)
+
+@Serializable
+data class RouteHealthSaveResponse(
+    val ok: Boolean = false,
+    val enabled: Boolean = true,
+    val interval: Int = 300,
+    val error: String? = null,
+)

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.ConfigError
 import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
+import dev.chr0nzz.traefikmanager.data.repo.RouteHealthRepository
 import dev.chr0nzz.traefikmanager.data.repo.RoutesRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +38,8 @@ data class RoutesUiState(
     val loading: Boolean = true,
     val refreshing: Boolean = false,
     val routes: List<Route> = emptyList(),
+    val health: Map<String, RouteHealth> = emptyMap(),
+    val healthCheckedAt: Double? = null,
     val configErrors: List<ConfigError> = emptyList(),
     val query: String = "",
     val protocol: ProtocolFilter = ProtocolFilter.All,
@@ -70,6 +74,7 @@ data class RoutesUiState(
 @HiltViewModel
 class RoutesViewModel @Inject constructor(
     private val repository: RoutesRepository,
+    private val routeHealth: RouteHealthRepository,
 ) : ViewModel() {
 
     val queryState = TextFieldState()
@@ -214,11 +219,21 @@ class RoutesViewModel @Inject constructor(
         }
     }
 
+    private fun loadHealth() {
+        viewModelScope.launch {
+            val snapshot = routeHealth.refresh() ?: return@launch
+            _state.update {
+                it.copy(health = snapshot.routes, healthCheckedAt = snapshot.checkedAt)
+            }
+        }
+    }
+
     private fun load(initial: Boolean) {
         _state.update { it.copy(loading = initial && it.routes.isEmpty(), refreshing = !initial, error = null) }
         viewModelScope.launch {
             runCatching { repository.load() }.fold(
                 onSuccess = { snapshot ->
+                    loadHealth()
                     _state.update {
                         it.copy(
                             loading = false,

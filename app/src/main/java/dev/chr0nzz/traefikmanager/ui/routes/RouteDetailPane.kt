@@ -62,6 +62,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.data.model.Route
+import androidx.compose.material.icons.outlined.MonitorHeart
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.HealthLabel
 import dev.chr0nzz.traefikmanager.ui.components.MessageState
@@ -87,6 +89,7 @@ fun RouteDetailPane(
     onEditYaml: (Route) -> Unit = {},
     onPing: (Route) -> Unit = {},
     ping: PingState? = null,
+    health: RouteHealth? = null,
     modifier: Modifier = Modifier,
 ) {
     if (route == null) {
@@ -194,6 +197,40 @@ fun RouteDetailPane(
                         }
                     }
                 }
+            }
+        }
+
+        if (health != null && (health.known || health.note != null)) {
+            DetailSection("Reachability", Icons.Outlined.MonitorHeart, palette.teal) {
+                DetailRow(
+                    label = "Checked",
+                    value = health.summary,
+                    status = when (health.state) {
+                        RouteHealth.STATE_UP -> TmStatus.Ok
+                        RouteHealth.STATE_DEGRADED -> TmStatus.Warn
+                        RouteHealth.STATE_DOWN -> TmStatus.Error
+                        else -> TmStatus.Unknown
+                    },
+                )
+                if (health.downServers.isNotEmpty()) {
+                    DetailRow("Not answering", health.downServers.joinToString(", "), mono = true)
+                }
+                health.error?.takeIf { it.isNotBlank() && health.state == RouteHealth.STATE_DOWN }
+                    ?.let { DetailRow("Error", it) }
+                if (health.unverified) {
+                    DetailRow("Note", "Behind forward auth, so the check could not confirm the app itself")
+                }
+                DetailRow(
+                    label = "Source",
+                    value = when (health.source) {
+                        "traefik" -> "Traefik health check"
+                        "servers" -> "Each backend server"
+                        "ping" -> "Request to the route"
+                        "self" -> "This app"
+                        else -> health.source.ifEmpty { "unknown" }
+                    },
+                    last = true,
+                )
             }
         }
 

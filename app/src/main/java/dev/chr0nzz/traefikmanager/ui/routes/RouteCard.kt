@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.components.ValueRow
@@ -37,9 +38,12 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
-fun Route.status(): TmStatus = when {
+fun Route.status(health: RouteHealth? = null): TmStatus = when {
     !enabled -> TmStatus.Disabled
     target == "N/A" || backendCount == 0 -> TmStatus.Error
+    health?.state == RouteHealth.STATE_DOWN -> TmStatus.Error
+    health?.state == RouteHealth.STATE_DEGRADED -> TmStatus.Warn
+    health?.state == RouteHealth.STATE_UP -> TmStatus.Ok
     else -> TmStatus.Ok
 }
 
@@ -50,9 +54,10 @@ fun RouteCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     iconUrl: String? = null,
+    health: RouteHealth? = null,
 ) {
     val palette = LocalTmPalette.current
-    val status = route.status()
+    val status = route.status(health)
     TmCard(
         modifier = modifier,
         accent = if (selected || status != TmStatus.Ok) status else null,

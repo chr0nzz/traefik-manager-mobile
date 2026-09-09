@@ -17,6 +17,11 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipRequest
 import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipResponse
 import dev.chr0nzz.traefikmanager.data.model.ServicePayload
 import dev.chr0nzz.traefikmanager.data.model.ServiceSaveResponse
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
+import dev.chr0nzz.traefikmanager.data.model.RouteHealthSaveResponse
+import dev.chr0nzz.traefikmanager.data.model.RouteHealthSettings
+import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
+import dev.chr0nzz.traefikmanager.data.model.RouteServerTally
 import dev.chr0nzz.traefikmanager.data.model.PluginCatalog
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
@@ -495,7 +500,11 @@ class DemoApi : TmApi {
         return ServiceSaveResponse(ok = true, name = body.name)
     }
 
-    override suspend fun deleteService(name: String, agentId: String?): OkResponse {
+    override suspend fun deleteService(
+        name: String,
+        agentId: String?,
+        force: String?,
+    ): OkResponse {
         settle()
         return OkResponse(ok = true)
     }
@@ -507,6 +516,30 @@ class DemoApi : TmApi {
     ): ServiceOwnershipResponse {
         settle()
         return ServiceOwnershipResponse(ok = true, owned = body.adopt)
+    }
+
+    override suspend fun routeHealth(agentId: String?): RouteHealthSnapshot {
+        settle()
+        return RouteHealthSnapshot(
+            enabled = true,
+            interval = 300,
+            checkedAt = System.currentTimeMillis() / 1000.0,
+            routes = mapOf(
+                "media" to RouteHealth(state = "up", source = "ping", latencyMs = 42),
+                "backup" to RouteHealth(
+                    state = "degraded",
+                    source = "servers",
+                    servers = RouteServerTally(up = 1, total = 2),
+                    downServers = listOf("http://10.0.0.12:8080"),
+                ),
+                "bin" to RouteHealth(state = "down", source = "ping", error = "Connection refused"),
+            ),
+        )
+    }
+
+    override suspend fun saveRouteHealth(body: RouteHealthSettings): RouteHealthSaveResponse {
+        settle()
+        return RouteHealthSaveResponse(ok = true, enabled = body.enabled, interval = body.interval)
     }
 
     override suspend fun pluginCatalog() = PluginCatalog(

@@ -208,6 +208,7 @@ fun RoutesScreen(
                         onEditYaml = { route -> onEditYaml(route.id) },
                         onPing = viewModel::ping,
                         ping = state.pingResults[selectedId],
+                        health = selectedId?.let { state.health[it] },
                     )
                 }
             },
@@ -298,6 +299,7 @@ private fun RoutesListPane(
                                 } else {
                                     null
                                 },
+                                health = state.health[route.id],
                                 modifier = Modifier.animateItem(),
                             )
                         }
