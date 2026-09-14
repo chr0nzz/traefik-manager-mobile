@@ -130,6 +130,24 @@ fun DiagnosticsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
+                            diagnostic.proxyTrusted?.let { trusted ->
+                                Text(
+                                    text = if (trusted) {
+                                        "Socket peer is a trusted proxy"
+                                    } else {
+                                        "Socket peer is not a trusted proxy, so forwarding headers are ignored"
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (trusted) palette.green else palette.yellow,
+                                )
+                            }
+                            if (diagnostic.trustedProxies.isNotEmpty()) {
+                                Text(
+                                    text = "Trusted: ${diagnostic.trustedProxies.joinToString(", ")}",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                                    color = palette.muted,
+                                )
+                            }
                             if (diagnostic.forwardedForChain.isEmpty()) {
                                 Text(
                                     text = "No X-Forwarded-For chain",

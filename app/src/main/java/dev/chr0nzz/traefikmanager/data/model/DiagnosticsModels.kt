@@ -12,6 +12,8 @@ data class ClientIpDiagnostic(
     val headers: Map<String, String> = emptyMap(),
     @SerialName("forwarded_for_chain") val forwardedForChain: List<String> = emptyList(),
     @SerialName("proxy_hops") val proxyHops: Int = 0,
+    @SerialName("proxy_trusted") val proxyTrusted: Boolean? = null,
+    @SerialName("trusted_proxies") val trustedProxies: List<String> = emptyList(),
     val classes: Map<String, String> = emptyMap(),
 ) {
     companion object {
