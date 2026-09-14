@@ -28,6 +28,7 @@ enum class StatusFilter(val label: String) {
 data class PingState(
     val running: Boolean = false,
     val ok: Boolean? = null,
+    val degraded: Boolean = false,
     val latencyMs: Int? = null,
     val detail: String = "",
 )
@@ -142,9 +143,13 @@ class RoutesViewModel @Inject constructor(
                     PingState(
                         running = false,
                         ok = ping.ok,
+                        degraded = ping.degraded,
                         latencyMs = ping.latencyMs,
                         detail = when {
                             ping.self -> "this server"
+                            ping.degraded -> ping.servers
+                                ?.let { tally -> "${tally.up} of ${tally.total} servers up" }
+                                ?: "some servers down"
                             ping.ok -> listOfNotNull(
                                 ping.statusCode?.let { code -> "HTTP $code" },
                                 ping.latencyMs?.let { ms -> "${ms}ms" },

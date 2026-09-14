@@ -252,6 +252,7 @@ interface TmApi {
     suspend fun ping(
         @Query("url") url: String,
         @Query("fallback") fallback: String? = null,
+        @Query("servers") servers: List<String>? = null,
     ): PingResult
 
     @GET("api/agents/{agentId}/cert-resolvers")

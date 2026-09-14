@@ -161,7 +161,7 @@ class RoutesRepository @Inject constructor(
         val host = route.hosts.firstOrNull()
             ?: return PingResult(ok = false, error = "This route has no host to ping")
         val fallback = route.target.takeIf { it.isNotEmpty() && it != "N/A" }
-        return apiProvider.api().ping("https://$host", fallback)
+        return apiProvider.api().ping("https://$host", fallback, route.servers.takeIf { it.isNotEmpty() })
     }
 
     suspend fun iconContext(): IconContext {

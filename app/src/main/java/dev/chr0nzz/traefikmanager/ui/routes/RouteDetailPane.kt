@@ -187,6 +187,7 @@ fun RouteDetailPane(
                             style = MaterialTheme.typography.labelMedium,
                             color = palette.muted,
                         )
+                        ping?.degraded == true -> HealthLabel(TmStatus.Warn,ping.detail.ifEmpty { "degraded" })
                         ping?.ok == true -> HealthLabel(TmStatus.Ok, ping.detail.ifEmpty { "reachable" })
                         ping?.ok == false -> HealthLabel(TmStatus.Error, ping.detail.ifEmpty { "unreachable" })
                         else -> TextButton(onClick = { onPing(route) }) { Text("Ping") }

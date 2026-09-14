@@ -188,7 +188,13 @@ data class PingResult(
     @SerialName("status_code") val statusCode: Int? = null,
     val self: Boolean = false,
     val error: String? = null,
-)
+    val state: String = "",
+    val source: String = "",
+    val servers: RouteServerTally? = null,
+    @SerialName("down_servers") val downServers: List<String> = emptyList(),
+) {
+    val degraded: Boolean get() = state == RouteHealth.STATE_DEGRADED
+}
 
 @Serializable
 data class RouteServerTally(

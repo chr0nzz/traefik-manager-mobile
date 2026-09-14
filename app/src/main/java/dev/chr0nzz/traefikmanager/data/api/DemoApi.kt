@@ -600,7 +600,7 @@ class DemoApi : TmApi {
 
     override suspend fun saveRouteRaw(routeId: String, body: RawRouteSave) = OkResponse(ok = true)
 
-    override suspend fun ping(url: String, fallback: String?) =
+    override suspend fun ping(url: String, fallback: String?, servers: List<String>?) =
         PingResult(ok = true, latencyMs = 24, statusCode = 200)
 
     override suspend fun uiPrefs() = UiPrefsResponse(uiPrefs = UiPrefs(showRouteIcons = true))
