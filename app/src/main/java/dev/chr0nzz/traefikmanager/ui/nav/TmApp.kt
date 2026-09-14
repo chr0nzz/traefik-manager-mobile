@@ -84,6 +84,7 @@ import dev.chr0nzz.traefikmanager.ui.settings.NotificationHistoryScreen
 import dev.chr0nzz.traefikmanager.ui.settings.NotificationsScreen
 import dev.chr0nzz.traefikmanager.ui.settings.ServersScreen
 import dev.chr0nzz.traefikmanager.ui.settings.SettingsScreen
+import dev.chr0nzz.traefikmanager.ui.providers.ProviderScreen
 import dev.chr0nzz.traefikmanager.ui.routemap.RouteMapScreen
 import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
@@ -475,6 +476,15 @@ private fun ConnectedApp(
                 CrowdSecScreen(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                 )
+            }
+            TmDestination.entries.forEach { destination ->
+                val page = destination.provider ?: return@forEach
+                composable(destination.route) {
+                    ProviderScreen(
+                        page = page,
+                        onOpenDrawer = { scope.launch { drawerState.open() } },
+                    )
+                }
             }
         }
         }

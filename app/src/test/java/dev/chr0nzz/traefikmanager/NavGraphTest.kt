@@ -10,7 +10,10 @@ class NavGraphTest {
     @Test
     fun `every destination the drawer can offer is registered in the nav graph`() {
         val source = File("src/main/java/dev/chr0nzz/traefikmanager/ui/nav/TmApp.kt").readText()
+        val providersRegistered = source.contains("val page = destination.provider ?: return@forEach") &&
+            source.contains("composable(destination.route)")
         val missing = TmDestination.entries.filter { destination ->
+            if (destination.provider != null) return@filter !providersRegistered
             val byConstant = "TmDestination.${destination.name}.route"
             !source.contains(byConstant) && !source.contains("\"${destination.route}\"")
         }

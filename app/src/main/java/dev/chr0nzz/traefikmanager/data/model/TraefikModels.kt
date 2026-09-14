@@ -46,6 +46,8 @@ data class TraefikObject(
     val usedBy: List<String>? = null,
     val serverStatus: Map<String, String>? = null,
     val type: String? = null,
+    val middlewares: List<String>? = null,
+    val tls: kotlinx.serialization.json.JsonElement? = null,
 ) {
     val shortName: String get() = name.substringBefore('@')
 }

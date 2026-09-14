@@ -97,7 +97,7 @@ class RootViewModel @Inject constructor(
         .map { capabilities ->
             TmDestination.entries.filter { destination ->
                 val tab = destination.serverTab ?: return@filter true
-                val visible = capabilities.tabVisible(tab)
+                val visible = if (destination.provider != null) capabilities.tabEnabled(tab) else capabilities.tabVisible(tab)
                 if (destination == TmDestination.CrowdSec) visible && capabilities.crowdsecConfigured else visible
             }
         }

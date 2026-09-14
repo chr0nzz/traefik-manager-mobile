@@ -15,6 +15,11 @@ data class ServerCapabilities(
         else -> settings.tabVisible(tab)
     }
 
+    fun tabEnabled(tab: String): Boolean = when {
+        !isHost -> agent?.visibleTabs?.get(tab) == true
+        else -> settings?.visibleTabs?.get(tab) == true
+    }
+
     val crowdsecConfigured: Boolean
         get() = when {
             !isHost -> true
