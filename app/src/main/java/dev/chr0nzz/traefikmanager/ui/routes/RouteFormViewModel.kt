@@ -13,6 +13,8 @@ import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.data.model.RouteForm
 import dev.chr0nzz.traefikmanager.data.model.RouteProtocol
+import dev.chr0nzz.traefikmanager.data.model.ServicePicker
+import dev.chr0nzz.traefikmanager.data.model.ServicesByProtocol
 import dev.chr0nzz.traefikmanager.data.model.StickyConfig
 import dev.chr0nzz.traefikmanager.data.model.TcpTlsMode
 import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
@@ -59,6 +61,7 @@ class RouteFormViewModel @Inject constructor(
     private var editRouteId: String? = null
     private var optionsLoaded = false
     private var pendingRoute: Route? = null
+    private var providerServices = ServicesByProtocol()
 
     init {
         viewModelScope.launch { loadOptions() }
@@ -86,6 +89,7 @@ class RouteFormViewModel @Inject constructor(
         val snapshotAsync = async { runCatching { routesRepository.load() }.getOrNull() }
         val resolversAsync = async { routesRepository.certResolvers() }
         val entryPointsAsync = async { routesRepository.entryPointNames() }
+        val providerAsync = async { runCatching { routesRepository.providerServices() }.getOrNull() }
 
         val settings = settingsAsync.await()
         val configs = configsAsync.await()
@@ -93,6 +97,7 @@ class RouteFormViewModel @Inject constructor(
         val snapshot = snapshotAsync.await()
         val resolvers = resolversAsync.await()
         val entryPoints = entryPointsAsync.await()
+        providerServices = providerAsync.await() ?: providerServices
 
         if (pendingRoute == null) {
             pendingRoute = editRouteId?.let { id -> snapshot?.routes?.firstOrNull { it.id == id } }
@@ -109,7 +114,7 @@ class RouteFormViewModel @Inject constructor(
                 entryPointsUnavailable = entryPoints.isEmpty(),
                 domainOptions = mergedDomains(settings.domains, snapshot?.routes.orEmpty()),
                 certResolverOptions = resolvers,
-                serviceOptions = snapshot?.services?.forProtocol(current.form.protocol.wire).orEmpty(),
+                serviceOptions = serviceOptionsFor(snapshot?.services, current.form.protocol.wire),
                 middlewareOptions = snapshot?.middlewares.orEmpty(),
                 form = if (isEdit) {
                     current.form
@@ -237,8 +242,11 @@ class RouteFormViewModel @Inject constructor(
 
     private suspend fun refreshServiceOptions(protocol: RouteProtocol) {
         val snapshot = runCatching { routesRepository.load() }.getOrNull() ?: return
-        _state.update { it.copy(serviceOptions = snapshot.services.forProtocol(protocol.wire)) }
+        _state.update { it.copy(serviceOptions = serviceOptionsFor(snapshot.services, protocol.wire)) }
     }
+
+    private fun serviceOptionsFor(own: ServicesByProtocol?, protocol: String): List<String> =
+        ServicePicker.options(own?.forProtocol(protocol).orEmpty(), providerServices.forProtocol(protocol))
 
     fun setAdvancedRule(enabled: Boolean) {
         if (enabled) {

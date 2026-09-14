@@ -20,6 +20,7 @@ import dev.chr0nzz.traefikmanager.data.model.RouteFormEncoder
 import dev.chr0nzz.traefikmanager.data.model.ServerSettings
 import dev.chr0nzz.traefikmanager.data.model.ServicesByProtocol
 import dev.chr0nzz.traefikmanager.data.model.TlsOptionProfile
+import dev.chr0nzz.traefikmanager.data.model.ServicePicker
 import dev.chr0nzz.traefikmanager.data.model.ToggleRequest
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -160,8 +161,13 @@ class RoutesRepository @Inject constructor(
     suspend fun ping(route: Route): PingResult {
         val host = route.hosts.firstOrNull()
             ?: return PingResult(ok = false, error = "This route has no host to ping")
-        val fallback = route.target.takeIf { it.isNotEmpty() && it != "N/A" }
+        val fallback = route.target.takeIf { it.isNotEmpty() && it != "N/A" && !it.endsWith("@internal") }
         return apiProvider.api().ping("https://$host", fallback, route.servers.takeIf { it.isNotEmpty() })
+    }
+
+    suspend fun providerServices(): ServicesByProtocol {
+        val ready = apiProvider.ready()
+        return ServicePicker.providerServices(ready.api.services(agentId = ready.agentId))
     }
 
     suspend fun iconContext(): IconContext {
