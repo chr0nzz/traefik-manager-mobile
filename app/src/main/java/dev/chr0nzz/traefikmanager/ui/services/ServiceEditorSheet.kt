@@ -28,10 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.chr0nzz.traefikmanager.data.model.ServiceHealthDraft
 import dev.chr0nzz.traefikmanager.data.model.ServiceTypes
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.settings.FormField
 import dev.chr0nzz.traefikmanager.ui.settings.FormSelect
+import dev.chr0nzz.traefikmanager.ui.settings.FormToggle
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
@@ -145,6 +147,13 @@ fun ServiceEditorSheet(
                 ) { Text("Add backend") }
             }
 
+            if (draft.type == "loadBalancer") {
+                HealthCheckSection(
+                    health = draft.healthCheck,
+                    onChange = { onChange(draft.copy(healthCheck = it)) },
+                )
+            }
+
             if (error != null) {
                 Text(text = error, style = MaterialTheme.typography.bodySmall, color = palette.red)
             }
@@ -161,6 +170,155 @@ fun ServiceEditorSheet(
                 TextButton(onClick = onDismiss) { Text("Cancel") }
             }
         }
+    }
+}
+
+@Composable
+private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHealthDraft) -> Unit) {
+    val palette = LocalTmPalette.current
+    Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
+        SectionLabel("Health check", modifier = Modifier.padding(top = TmSpacing.sm))
+        FormToggle(
+            title = "Poll the servers",
+            subtitle = "Traefik stops sending traffic to servers that fail",
+            checked = health.enabled,
+            onChange = { onChange(health.copy(enabled = it)) },
+        )
+        if (!health.enabled) return@Column
+
+        FormField(
+            label = "Path",
+            value = health.path,
+            onChange = { onChange(health.copy(path = it)) },
+            placeholder = "/ (server root)",
+            mono = true,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
+            Column(modifier = Modifier.weight(1f)) {
+                FormField(
+                    label = "Interval",
+                    value = health.interval,
+                    onChange = { onChange(health.copy(interval = it)) },
+                    placeholder = "30s",
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                FormField(
+                    label = "Timeout",
+                    value = health.timeout,
+                    onChange = { onChange(health.copy(timeout = it)) },
+                    placeholder = "5s",
+                )
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
+            Column(modifier = Modifier.weight(1f)) {
+                FormField(
+                    label = "Method",
+                    value = health.method,
+                    onChange = { onChange(health.copy(method = it)) },
+                    placeholder = "GET",
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                FormField(
+                    label = "Expected status",
+                    value = health.status,
+                    onChange = { onChange(health.copy(status = it)) },
+                    placeholder = "any 2xx or 3xx",
+                    numeric = true,
+                )
+            }
+        }
+        FormField(
+            label = "Interval when down",
+            value = health.unhealthyInterval,
+            onChange = { onChange(health.copy(unhealthyInterval = it)) },
+            placeholder = "same as interval",
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
+            Column(modifier = Modifier.weight(1f)) {
+                FormSelect(
+                    label = "Scheme",
+                    value = health.scheme,
+                    options = listOf("" to "same as server", "http" to "http", "https" to "https"),
+                    onChange = { onChange(health.copy(scheme = it)) },
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                FormField(
+                    label = "Port",
+                    value = health.port,
+                    onChange = { onChange(health.copy(port = it)) },
+                    placeholder = "same as server",
+                    numeric = true,
+                )
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
+            Column(modifier = Modifier.weight(1f)) {
+                FormField(
+                    label = "Host header",
+                    value = health.hostname,
+                    onChange = { onChange(health.copy(hostname = it)) },
+                    placeholder = "optional",
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                FormSelect(
+                    label = "Mode",
+                    value = health.mode,
+                    options = listOf("" to "http", "grpc" to "grpc"),
+                    onChange = { onChange(health.copy(mode = it)) },
+                )
+            }
+        }
+        FormToggle(
+            title = "Follow redirects",
+            checked = health.followRedirects,
+            onChange = { onChange(health.copy(followRedirects = it)) },
+        )
+
+        health.headers.forEachIndexed { index, (key, value) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    FormField(
+                        label = "Header",
+                        value = key,
+                        onChange = { typed ->
+                            onChange(health.copy(headers = health.headers.toMutableList().apply { this[index] = typed to value }))
+                        },
+                        mono = true,
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    FormField(
+                        label = "Value",
+                        value = value,
+                        onChange = { typed ->
+                            onChange(health.copy(headers = health.headers.toMutableList().apply { this[index] = key to typed }))
+                        },
+                    )
+                }
+                IconButton(
+                    onClick = { onChange(health.copy(headers = health.headers.filterIndexed { at, _ -> at != index })) },
+                ) {
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = "Remove this header",
+                        tint = palette.red,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+        }
+        OutlinedButton(
+            onClick = { onChange(health.copy(headers = health.headers + ("" to ""))) },
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Add header") }
     }
 }
 

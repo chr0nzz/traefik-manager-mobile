@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager.ui.services
 
 import dev.chr0nzz.traefikmanager.data.model.EntityNames
 import dev.chr0nzz.traefikmanager.data.model.ServiceChildPayload
+import dev.chr0nzz.traefikmanager.data.model.ServiceHealthDraft
 import dev.chr0nzz.traefikmanager.data.model.ServicePayload
 import dev.chr0nzz.traefikmanager.data.model.TraefikService
 
@@ -24,6 +25,7 @@ data class ServiceDraft(
     val type: String = "loadBalancer",
     val configFile: String = "",
     val children: List<ServiceChildDraft> = listOf(ServiceChildDraft()),
+    val healthCheck: ServiceHealthDraft = ServiceHealthDraft(),
 ) {
     val adding: Boolean get() = originalName.isEmpty()
 
@@ -32,6 +34,7 @@ data class ServiceDraft(
         type = type,
         originalName = originalName,
         configFile = configFile.trim(),
+        healthCheck = healthCheck.payload().takeIf { type == "loadBalancer" },
         children = children.mapNotNull { child ->
             val share = child.share.trim().toIntOrNull() ?: if (type == "mirroring") 0 else 1
             when {
@@ -95,6 +98,7 @@ data class ServiceDraft(
                 name = bare,
                 type = type,
                 children = children.ifEmpty { listOf(ServiceChildDraft()) },
+                healthCheck = ServiceHealthDraft.of(service?.loadBalancer?.healthCheck),
             )
         }
 

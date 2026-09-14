@@ -285,6 +285,7 @@ data class ServicePayload(
     val originalName: String = "",
     val configFile: String = "",
     val children: List<ServiceChildPayload> = emptyList(),
+    val healthCheck: HealthCheckPayload? = null,
     @SerialName("agent_id") val agentId: String = "",
 )
 
