@@ -9,10 +9,14 @@ import dev.chr0nzz.traefikmanager.data.model.CertEntry
 import dev.chr0nzz.traefikmanager.data.model.CertRef
 import dev.chr0nzz.traefikmanager.data.model.ConfigError
 import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.data.model.BackendHealth
 import dev.chr0nzz.traefikmanager.data.model.RouteHealth
+import dev.chr0nzz.traefikmanager.data.model.ServiceRow
+import dev.chr0nzz.traefikmanager.data.model.ServiceRows
 import dev.chr0nzz.traefikmanager.data.repo.CertificatesRepository
 import dev.chr0nzz.traefikmanager.data.repo.RouteHealthRepository
 import dev.chr0nzz.traefikmanager.data.repo.RoutesRepository
+import dev.chr0nzz.traefikmanager.data.repo.ServicesRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +54,7 @@ data class RoutesUiState(
     val refreshing: Boolean = false,
     val routes: List<Route> = emptyList(),
     val health: Map<String, RouteHealth> = emptyMap(),
+    val services: Map<String, ServiceRow> = emptyMap(),
     val healthCheckedAt: Double? = null,
     val configErrors: List<ConfigError> = emptyList(),
     val query: String = "",
@@ -87,6 +92,7 @@ class RoutesViewModel @Inject constructor(
     private val repository: RoutesRepository,
     private val routeHealth: RouteHealthRepository,
     private val certificates: CertificatesRepository,
+    private val servicesRepository: ServicesRepository,
 ) : ViewModel() {
 
     val queryState = TextFieldState()
@@ -265,6 +271,17 @@ class RoutesViewModel @Inject constructor(
         }
     }
 
+    private fun loadServices() {
+        viewModelScope.launch {
+            val envelope = runCatching { servicesRepository.load() }.getOrNull() ?: return@launch
+            _state.update { state ->
+                state.copy(
+                    services = ServiceRows.from(envelope).associateBy { BackendHealth.key(it.proto.name, it.shortName) },
+                )
+            }
+        }
+    }
+
     private fun loadHealth() {
         viewModelScope.launch {
             val snapshot = routeHealth.refresh() ?: return@launch
@@ -280,6 +297,7 @@ class RoutesViewModel @Inject constructor(
             runCatching { repository.load() }.fold(
                 onSuccess = { snapshot ->
                     loadHealth()
+                    loadServices()
                     _state.update {
                         it.copy(
                             loading = false,

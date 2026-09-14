@@ -90,6 +90,7 @@ fun RouteDetailPane(
     onPing: (Route) -> Unit = {},
     ping: PingState? = null,
     health: RouteHealth? = null,
+    service: dev.chr0nzz.traefikmanager.data.model.ServiceRow? = null,
     modifier: Modifier = Modifier,
 ) {
     if (route == null) {
@@ -277,6 +278,17 @@ fun RouteDetailPane(
 
         DetailSection("Service", Icons.Outlined.Bolt, palette.yellow) {
             DetailRow("Type", if (route.serviceType == "loadBalancer") "Load Balancer" else route.serviceType)
+            dev.chr0nzz.traefikmanager.data.model.BackendHealth.summary(service)?.let { summary ->
+                DetailRow(
+                    label = "Health",
+                    value = summary,
+                    status = when {
+                        service?.backendsUp == service?.backendsTotal -> TmStatus.Ok
+                        service?.backendsUp == 0 -> TmStatus.Error
+                        else -> TmStatus.Warn
+                    },
+                )
+            }
             route.passHostHeader?.let { DetailRow("Pass host header", it.toString()) }
             val servers = route.servers.ifEmpty { listOf(route.target) }
             servers.forEachIndexed { index, server ->
@@ -284,6 +296,11 @@ fun RouteDetailPane(
                     label = if (servers.size == 1) "Server" else "Server ${index + 1}",
                     value = server,
                     mono = true,
+                    status = when (service?.servers?.firstOrNull { it.target == server }?.health) {
+                        dev.chr0nzz.traefikmanager.data.model.ServerHealth.Up -> TmStatus.Ok
+                        dev.chr0nzz.traefikmanager.data.model.ServerHealth.Down -> TmStatus.Error
+                        else -> null
+                    },
                     last = index == servers.lastIndex,
                 )
             }

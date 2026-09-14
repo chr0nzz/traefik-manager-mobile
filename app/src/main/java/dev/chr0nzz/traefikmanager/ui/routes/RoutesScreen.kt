@@ -221,6 +221,11 @@ fun RoutesScreen(
                         onPing = viewModel::ping,
                         ping = state.pingResults[selectedId],
                         health = selectedId?.let { state.health[it] },
+                        service = state.routes.firstOrNull { it.id == selectedId }?.let { route ->
+                            state.services[
+                                dev.chr0nzz.traefikmanager.data.model.BackendHealth.key(route.protocol, route.serviceName)
+                            ]
+                        },
                     )
                 }
             },
