@@ -25,6 +25,7 @@ data class ConnectionSettingsUiState(
     val loading: Boolean = true,
     val saving: Boolean = false,
     val url: String = "",
+    val savedUrl: String = "",
     val user: String = "",
     val password: String = "",
     val passwordStored: Boolean = false,
@@ -37,7 +38,45 @@ data class ConnectionSettingsUiState(
     val urlValid: Boolean
         get() = url.startsWith("http://") || url.startsWith("https://")
 
-    val canSave: Boolean get() = !saving && urlValid && domains.isNotEmpty()
+    val passwordRequired: Boolean
+        get() = passwordStored && user.isNotBlank() && !ApiOrigin.same(url, savedUrl)
+
+    val canSave: Boolean
+        get() = !saving && urlValid && domains.isNotEmpty() && !(passwordRequired && password.isEmpty())
+}
+
+object ApiOrigin {
+    private val DEFAULT_PORTS = mapOf("http" to 80, "https" to 443)
+
+    private data class Parts(val scheme: String, val host: String, val port: Int?, val path: String)
+
+    fun same(a: String, b: String): Boolean {
+        val left = parse(a) ?: return false
+        val right = parse(b) ?: return false
+        return left == right
+    }
+
+    private fun parse(raw: String): Parts? {
+        val text = raw.trim()
+        if (!text.contains("://")) return null
+        val scheme = text.substringBefore("://").lowercase().ifEmpty { return null }
+        val rest = text.substringAfter("://")
+        val end = rest.indexOfAny(charArrayOf('/', '?', '#')).let { if (it == -1) rest.length else it }
+        val authority = rest.substring(0, end).substringAfterLast('@')
+        val path = rest.substring(end).substringBefore('?').substringBefore('#').trimEnd('/')
+        val host: String
+        val portText: String
+        if (authority.startsWith("[")) {
+            host = authority.substringBefore(']').removePrefix("[")
+            portText = authority.substringAfter("]", "").removePrefix(":")
+        } else {
+            host = authority.substringBefore(':')
+            portText = authority.substringAfter(':', "")
+        }
+        if (host.isEmpty()) return null
+        val port = if (portText.isEmpty()) DEFAULT_PORTS[scheme] else portText.toIntOrNull() ?: return null
+        return Parts(scheme, host.lowercase(), port, path)
+    }
 }
 
 @HiltViewModel
@@ -61,6 +100,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             url = document.text("traefik_api_url"),
+                            savedUrl = document.text("traefik_api_url"),
                             user = document.text("traefik_api_user"),
                             passwordStored = document.bool("traefik_api_password_set"),
                             certResolver = document.text("cert_resolver"),
@@ -128,6 +168,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                         it.copy(
                             saving = false,
                             saved = true,
+                            savedUrl = current.url.trim(),
                             password = "",
                             passwordStored = it.passwordStored || current.password.isNotEmpty(),
                         )

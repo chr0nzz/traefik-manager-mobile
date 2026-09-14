@@ -157,9 +157,12 @@ fun ConnectionSettingsScreen(
                         value = state.password,
                         onValueChange = viewModel::onPasswordChange,
                         label = { Text(if (state.passwordStored) "New password" else "Password (optional)") },
+                        isError = state.passwordRequired && state.password.isEmpty(),
                         supportingText = {
                             Text(
-                                if (state.passwordStored) {
+                                if (state.passwordRequired) {
+                                    "Re-enter the password. The saved one is only sent to the saved API URL."
+                                } else if (state.passwordStored) {
                                     "A password is already saved. Leave this empty to keep it."
                                 } else {
                                     "Only needed if the Traefik API is behind basic auth."
