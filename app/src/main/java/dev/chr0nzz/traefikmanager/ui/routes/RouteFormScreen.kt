@@ -487,7 +487,7 @@ private fun BackendSection(
                             DropdownField(
                                 label = "Scheme",
                                 value = backend.scheme,
-                                options = listOf("http", "https"),
+                                options = listOf("http", "https", "h2c"),
                                 onSelect = { value ->
                                     viewModel.updateBackend(index) { it.copy(scheme = value) }
                                 },

@@ -309,7 +309,7 @@ class RouteFormViewModel @Inject constructor(
                 val bare = child.url.substringAfter("://", child.url)
                 BackendServer(
                     kind = BackendKind.ADDRESS,
-                    scheme = if (child.url.startsWith("https")) "https" else "http",
+                    scheme = child.url.substringBefore("://", "http").lowercase(),
                     host = bare.substringBeforeLast(':', bare),
                     port = bare.substringAfterLast(':', ""),
                     share = share.toString(),

@@ -87,7 +87,7 @@ data class ServiceDraft(
                     ServiceChildDraft(
                         kind = ServiceChildDraft.MANUAL,
                         address = url.substringAfter("://", url),
-                        scheme = if (url.startsWith("https")) "https" else "http",
+                        scheme = url.substringBefore("://", "http").lowercase(),
                     )
                 }
             }

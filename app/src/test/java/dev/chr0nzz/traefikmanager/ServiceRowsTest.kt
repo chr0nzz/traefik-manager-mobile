@@ -449,6 +449,23 @@ class ServiceDraftTest {
     }
 
     @Test
+    fun `a backend scheme reads back as written, h2c included`() {
+        val service = TraefikService(
+            name = "grpc@file",
+            loadBalancer = ServiceLoadBalancer(
+                servers = listOf(
+                    ServiceServer(url = "h2c://10.0.0.5:50051"),
+                    ServiceServer(url = "https://10.0.0.6:443"),
+                    ServiceServer(url = "10.0.0.7:80"),
+                ),
+            ),
+        )
+        val draft = ServiceDraft.of("grpc@file", service)
+        assertEquals(listOf("h2c", "https", "http"), draft.children.map { it.scheme })
+        assertEquals("10.0.0.5:50051", draft.children[0].address)
+    }
+
+    @Test
     fun `highest random weight reads back but is marked unauthorable`() {
         val service = TraefikService(
             name = "h@file",

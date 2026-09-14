@@ -217,7 +217,7 @@ private fun ChildRow(
             FormSelect(
                 label = "Scheme",
                 value = child.scheme,
-                options = listOf("http" to "http", "https" to "https"),
+                options = listOf("http" to "http", "https" to "https", "h2c" to "h2c"),
                 onChange = { onChange(child.copy(scheme = it)) },
             )
             FormField(
