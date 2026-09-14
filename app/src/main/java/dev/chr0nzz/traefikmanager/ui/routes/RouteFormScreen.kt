@@ -869,7 +869,8 @@ private fun TlsSection(
                 OutlinedTextField(
                     value = form.tlsMainDomain,
                     onValueChange = { value -> viewModel.update { it.copy(tlsMainDomain = value) } },
-                    label = { Text("Main domain") },
+                    label = { Text("Certificate domain") },
+                    supportingText = { Text("Traefik asks your resolver for a certificate covering this name") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -880,8 +881,8 @@ private fun TlsSection(
                             it.copy(tlsSans = value.split('\n').map(String::trim).filter(String::isNotEmpty))
                         }
                     },
-                    label = { Text("SANs") },
-                    supportingText = { Text("One per line, e.g. *.example.com") },
+                    label = { Text("Extra domains") },
+                    supportingText = { Text("One per line. A wildcard needs a DNS challenge resolver") },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
