@@ -8,6 +8,7 @@ import dev.chr0nzz.traefikmanager.data.model.GitCommit
 import dev.chr0nzz.traefikmanager.data.model.GitDiff
 import dev.chr0nzz.traefikmanager.data.model.GitPushRequest
 import dev.chr0nzz.traefikmanager.data.model.GitStatus
+import dev.chr0nzz.traefikmanager.data.model.RestoreResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,13 +56,14 @@ class BackupsRepository @Inject constructor(
 
     suspend fun delete(name: String) {
         val response = apiProvider.api().deleteBackup(name)
-        if (!response.ok) error(response.error ?: response.message ?: "Could not delete the backup")
+        if (!response.worked) error(response.error ?: response.message ?: "Could not delete the backup")
     }
 
-    suspend fun restore(name: String) {
+    suspend fun restore(name: String): RestoreResponse {
         val response = apiProvider.api().restoreBackup(name)
         if (!response.worked) error(response.error ?: "Could not restore the backup")
         routesRepository.notifyChangedExternally()
+        return response
     }
 
     suspend fun restartTraefik() {
@@ -92,9 +94,9 @@ class BackupsRepository @Inject constructor(
         routesRepository.notifyChangedExternally()
     }
 
-    private fun kindOf(raw: String) = if (raw.equals("static", ignoreCase = true)) {
-        BackupKind.Static
-    } else {
-        BackupKind.Routes
+    private fun kindOf(raw: String) = when (raw.lowercase()) {
+        "static" -> BackupKind.Static
+        "certs" -> BackupKind.Certs
+        else -> BackupKind.Routes
     }
 }

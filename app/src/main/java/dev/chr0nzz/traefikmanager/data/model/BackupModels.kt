@@ -3,7 +3,7 @@ package dev.chr0nzz.traefikmanager.data.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-enum class BackupKind { Routes, Static }
+enum class BackupKind { Routes, Static, Certs }
 
 data class BackupEntry(
     val name: String,
@@ -52,6 +52,8 @@ data class RestoreResponse(
     val success: Boolean = false,
     val ok: Boolean = false,
     val error: String? = null,
+    val restarted: Boolean? = null,
+    @SerialName("restart_error") val restartError: String = "",
 ) {
     val worked: Boolean get() = success || ok
 }

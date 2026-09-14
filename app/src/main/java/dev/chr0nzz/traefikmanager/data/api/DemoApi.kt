@@ -674,6 +674,7 @@ class DemoApi : TmApi {
         return listOf(
             HubBackup("dynamic.yml.20260812_143001.bak", 2048, "2026-08-12 14:30:01", "routes"),
             HubBackup("traefik.yml.20260812_090012.bak", 1104, "2026-08-12 09:00:12", "static"),
+            HubBackup("acme.json.20260812_080000.bak", 5120, "2026-08-12 08:00:00", "certs"),
             HubBackup("dynamic.yml.20260811_221500.bak", 1990, "2026-08-11 22:15:00", "routes"),
         )
     }
@@ -703,7 +704,7 @@ class DemoApi : TmApi {
 
     override suspend fun restoreBackup(filename: String): RestoreResponse {
         settle()
-        return RestoreResponse(success = true)
+        return RestoreResponse(success = true, restarted = true)
     }
 
     override suspend fun restartTraefik(): OkResponse {

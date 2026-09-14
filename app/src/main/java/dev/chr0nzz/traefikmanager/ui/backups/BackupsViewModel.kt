@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class BackupsTab { Dynamic, Static, Git }
+enum class BackupsTab { Dynamic, Static, Certs, Git }
 
 data class BackupsUiState(
     val tab: BackupsTab = BackupsTab.Dynamic,
@@ -37,12 +37,14 @@ data class BackupsUiState(
     val diffFor: GitCommit? = null,
     val diff: GitDiff? = null,
     val diffLoading: Boolean = false,
-    val restartPending: Boolean = false,
+    val restartPending: BackupKind? = null,
     val message: String? = null,
 ) {
     val dynamic: List<BackupEntry> get() = entries.filter { it.kind == BackupKind.Routes }
 
     val static: List<BackupEntry> get() = entries.filter { it.kind == BackupKind.Static }
+
+    val certs: List<BackupEntry> get() = entries.filter { it.kind == BackupKind.Certs }
 
     val totalSize: Long get() = entries.sumOf { it.size }
 }
@@ -80,7 +82,7 @@ class BackupsViewModel @Inject constructor(
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
-    fun dismissRestartNotice() = _state.update { it.copy(restartPending = false) }
+    fun dismissRestartNotice() = _state.update { it.copy(restartPending = null) }
 
     private fun load(initial: Boolean) {
         _state.update { it.copy(loading = initial && it.entries.isEmpty(), refreshing = !initial, error = null) }
@@ -154,18 +156,26 @@ class BackupsViewModel @Inject constructor(
     }
 
     fun restore(entry: BackupEntry) = run("Backup restored") {
-        repository.restore(entry.name)
-        if (entry.kind == BackupKind.Static) {
-            _state.update { it.copy(restartPending = true) }
-            "Static config restored - Traefik needs a restart"
-        } else {
-            "Restored ${entry.name}"
+        val response = repository.restore(entry.name)
+        when {
+            entry.kind == BackupKind.Static -> {
+                _state.update { it.copy(restartPending = BackupKind.Static) }
+                "Static config restored - Traefik needs a restart"
+            }
+            entry.kind != BackupKind.Certs -> "Restored ${entry.name}"
+            response.restarted == true -> "Certificates restored and Traefik restarted"
+            else -> {
+                _state.update { it.copy(restartPending = BackupKind.Certs) }
+                response.restartError.ifBlank { null }
+                    ?.let { "Certificates restored, but Traefik did not restart: $it" }
+                    ?: "Certificates restored, but Traefik did not restart"
+            }
         }
     }
 
     fun restartTraefik() = run("Traefik restarted") {
         repository.restartTraefik()
-        _state.update { it.copy(restartPending = false) }
+        _state.update { it.copy(restartPending = null) }
         "Traefik restarted"
     }
 

@@ -98,12 +98,16 @@ fun BackupsScreen(
     restoreTarget?.let { entry ->
         TypedConfirmDialog(
             title = "Restore ${entry.name}?",
-            consequence = if (entry.kind == BackupKind.Static) {
-                "This overwrites the live static config. The server backs up what is there now " +
-                    "first, and Traefik has to restart before it takes effect."
-            } else {
-                "This overwrites the live config, replacing every route it holds. The server " +
-                    "backs up what is there now first."
+            consequence = when (entry.kind) {
+                BackupKind.Static ->
+                    "This overwrites the live static config. The server backs up what is there now " +
+                        "first, and Traefik has to restart before it takes effect."
+                BackupKind.Certs ->
+                    "This replaces every certificate in acme.json. The server backs up what is there " +
+                        "now first, then restarts Traefik because it only reads acme.json at startup."
+                BackupKind.Routes ->
+                    "This overwrites the live config, replacing every route it holds. The server " +
+                        "backs up what is there now first."
             },
             actionLabel = "Restore",
             onDismiss = { restoreTarget = null },
@@ -203,8 +207,9 @@ fun BackupsScreen(
                 }
             }
 
-            if (state.restartPending) {
+            state.restartPending?.let { kind ->
                 RestartNotice(
+                    certs = kind == BackupKind.Certs,
                     busy = state.busy,
                     onRestart = viewModel::restartTraefik,
                     onDismiss = viewModel::dismissRestartNotice,
@@ -255,23 +260,28 @@ private val BackupsTab.label: String
     get() = when (this) {
         BackupsTab.Dynamic -> "Dynamic"
         BackupsTab.Static -> "Static"
+        BackupsTab.Certs -> "Certificates"
         BackupsTab.Git -> "Git"
     }
 
 @Composable
-private fun RestartNotice(busy: Boolean, onRestart: () -> Unit, onDismiss: () -> Unit) {
+private fun RestartNotice(certs: Boolean, busy: Boolean, onRestart: () -> Unit, onDismiss: () -> Unit) {
     val palette = LocalTmPalette.current
     TmCard(
         accentColor = palette.yellow,
         modifier = Modifier.padding(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
     ) {
         Text(
-            text = "Traefik is still running the old static config",
+            text = if (certs) "Traefik is still serving the old certificates" else "Traefik is still running the old static config",
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = "A restored static config only takes effect after a restart.",
+            text = if (certs) {
+                "A restored acme.json only takes effect after a restart."
+            } else {
+                "A restored static config only takes effect after a restart."
+            },
             style = MaterialTheme.typography.labelSmall,
             color = palette.muted,
         )
@@ -298,7 +308,12 @@ private fun LocalPane(
 ) {
     val palette = LocalTmPalette.current
     val static = state.tab == BackupsTab.Static
-    val rows = if (static) state.static else state.dynamic
+    val certs = state.tab == BackupsTab.Certs
+    val rows = when {
+        static -> state.static
+        certs -> state.certs
+        else -> state.dynamic
+    }
 
     if (state.loading) {
         LoadingState(label = "Loading backups")
@@ -337,12 +352,20 @@ private fun LocalPane(
                             color = palette.muted,
                         )
                     }
-                    if (!static || state.onHost) {
+                    if (!certs && (!static || state.onHost)) {
                         Button(onClick = onCreate, enabled = !state.busy) {
                             Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                             Text("Back up", modifier = Modifier.padding(start = TmSpacing.xs))
                         }
                     }
+                }
+                if (certs) {
+                    Text(
+                        text = "Taken automatically before a certificate is removed from acme.json.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted,
+                        modifier = Modifier.padding(top = TmSpacing.xs),
+                    )
                 }
                 if (static && !state.onHost) {
                     Text(
@@ -368,18 +391,30 @@ private fun LocalPane(
         if (rows.isEmpty()) {
             item {
                 EmptyState(
-                    headline = if (static) "No static backups" else "No backups yet",
-                    body = if (static) {
-                        "Backing up the static config keeps a copy of entrypoints and resolvers."
-                    } else {
-                        "A backup copies every dynamic config file the server holds."
+                    headline = when {
+                        static -> "No static backups"
+                        certs -> "No certificate backups"
+                        else -> "No backups yet"
+                    },
+                    body = when {
+                        static -> "Backing up the static config keeps a copy of entrypoints and resolvers."
+                        certs -> "A copy of acme.json is kept each time a certificate is removed."
+                        else -> "A backup copies every dynamic config file the server holds."
                     },
                 )
             }
             return@LazyColumn
         }
 
-        item { SectionLabel(if (static) "Static config" else "Dynamic config") }
+        item {
+            SectionLabel(
+                when {
+                    static -> "Static config"
+                    certs -> "Certificate stores"
+                    else -> "Dynamic config"
+                },
+            )
+        }
 
         items(rows.size, key = { rows[it].name }) { index ->
             val entry = rows[index]
