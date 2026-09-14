@@ -4,9 +4,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.chr0nzz.traefikmanager.data.model.CertCleanup
+import dev.chr0nzz.traefikmanager.data.model.CertEntry
+import dev.chr0nzz.traefikmanager.data.model.CertRef
 import dev.chr0nzz.traefikmanager.data.model.ConfigError
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.data.model.RouteHealth
+import dev.chr0nzz.traefikmanager.data.repo.CertificatesRepository
 import dev.chr0nzz.traefikmanager.data.repo.RouteHealthRepository
 import dev.chr0nzz.traefikmanager.data.repo.RoutesRepository
 import javax.inject.Inject
@@ -33,7 +37,13 @@ data class PingState(
     val detail: String = "",
 )
 
+data class CertOffer(
+    val routeName: String,
+    val certs: List<CertEntry>,
+)
+
 data class RoutesUiState(
+    val certOffer: CertOffer? = null,
     val pingResults: Map<String, PingState> = emptyMap(),
     val icons: dev.chr0nzz.traefikmanager.data.repo.IconContext = dev.chr0nzz.traefikmanager.data.repo.IconContext(),
     val loading: Boolean = true,
@@ -76,6 +86,7 @@ data class RoutesUiState(
 class RoutesViewModel @Inject constructor(
     private val repository: RoutesRepository,
     private val routeHealth: RouteHealthRepository,
+    private val certificates: CertificatesRepository,
 ) : ViewModel() {
 
     val queryState = TextFieldState()
@@ -201,9 +212,16 @@ class RoutesViewModel @Inject constructor(
     fun delete(route: Route) {
         _state.update { it.copy(togglingId = route.id) }
         viewModelScope.launch {
+            val freed = runCatching { certsFreedBy(route) }.getOrNull().orEmpty()
             runCatching { repository.delete(route) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(togglingId = null, message = "${route.name} deleted") }
+                    _state.update {
+                        it.copy(
+                            togglingId = null,
+                            message = "${route.name} deleted",
+                            certOffer = freed.takeIf { certs -> certs.isNotEmpty() }?.let { certs -> CertOffer(route.name, certs) },
+                        )
+                    }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
@@ -212,6 +230,29 @@ class RoutesViewModel @Inject constructor(
                     }
                 },
             )
+        }
+    }
+
+    private suspend fun certsFreedBy(route: Route): List<CertEntry> {
+        val hosts = CertCleanup.hostsOf(route)
+        if (hosts.isEmpty() || !certificates.manage().available) return emptyList()
+        val usage = certificates.usage(listOf(route.id)) ?: return emptyList()
+        return CertCleanup.freedBy(hosts, certificates.load().certs, usage)
+    }
+
+    fun dismissCertOffer() = _state.update { it.copy(certOffer = null) }
+
+    fun removeOfferedCerts() {
+        val offer = _state.value.certOffer ?: return
+        _state.update { it.copy(certOffer = null) }
+        viewModelScope.launch {
+            val message = runCatching {
+                certificates.remove(offer.certs.map { CertRef(it.resolver, it.main) })
+            }.fold(
+                onSuccess = { response -> CertCleanup.outcome(response, offer.certs.size) },
+                onFailure = { throwable -> throwable.message ?: "Could not remove the certificate" },
+            )
+            _state.update { it.copy(message = message) }
         }
     }
 

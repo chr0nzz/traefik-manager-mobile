@@ -120,6 +120,18 @@ fun RoutesScreen(
 
     val detailOnly = navigator.canNavigateBack()
 
+    state.certOffer?.let { offer ->
+        dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog(
+            title = if (offer.certs.size == 1) "Remove its certificate too?" else "Remove its ${offer.certs.size} certificates too?",
+            consequence = "Nothing else uses ${offer.certs.joinToString(", ") { it.main }} now that " +
+                "${offer.routeName} is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.",
+            actionLabel = "Remove",
+            word = "DELETE",
+            onDismiss = viewModel::dismissCertOffer,
+            onConfirm = viewModel::removeOfferedCerts,
+        )
+    }
+
     pendingDelete?.let { route ->
         ConfirmDeleteDialog(
             routeName = route.name,

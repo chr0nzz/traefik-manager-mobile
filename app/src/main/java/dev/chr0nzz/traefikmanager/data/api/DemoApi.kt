@@ -62,7 +62,11 @@ import dev.chr0nzz.traefikmanager.data.model.RawRouteSave
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.OverviewCounts
 import dev.chr0nzz.traefikmanager.data.model.OverviewSection
+import dev.chr0nzz.traefikmanager.data.model.CertDeleteRequest
+import dev.chr0nzz.traefikmanager.data.model.CertDeleteResponse
 import dev.chr0nzz.traefikmanager.data.model.CertEntry
+import dev.chr0nzz.traefikmanager.data.model.CertManageState
+import dev.chr0nzz.traefikmanager.data.model.CertUsage
 import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
 import dev.chr0nzz.traefikmanager.data.model.CertsResponse
 import dev.chr0nzz.traefikmanager.data.model.ClientIpDiagnostic
@@ -142,6 +146,17 @@ class DemoApi : TmApi {
         GenerateKeyResponse(ok = true, key = "demo-key-not-a-real-secret-000000000000000")
 
     override suspend fun revokeApiKey(body: RevokeKeyRequest) = AuthActionResponse(ok = true)
+
+    override suspend fun revokeSessions() = AuthActionResponse(ok = true)
+
+    override suspend fun certUsage(server: String?, exclude: List<String>?) =
+        retrofit2.Response.success(CertUsage(unusedKnown = true, resolversKnown = true))
+
+    override suspend fun certManage(server: String?) =
+        retrofit2.Response.success(CertManageState(reason = "Demo mode does not change certificates"))
+
+    override suspend fun deleteCerts(body: CertDeleteRequest) =
+        retrofit2.Response.success(CertDeleteResponse(ok = true, removed = body.certs.size, restarted = true))
 
     override suspend fun clientIpDiagnostic() = ClientIpDiagnostic(
         effectiveIp = "203.0.113.7",

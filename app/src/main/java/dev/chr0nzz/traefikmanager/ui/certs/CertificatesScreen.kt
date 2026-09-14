@@ -2,6 +2,8 @@ package dev.chr0nzz.traefikmanager.ui.certs
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Refresh
@@ -28,6 +31,7 @@ import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +40,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -62,7 +67,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.CertHealth
 import dev.chr0nzz.traefikmanager.data.model.CertRow
+import dev.chr0nzz.traefikmanager.data.model.CertVerdict
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
+import dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -98,8 +105,36 @@ fun CertificatesScreen(
     val scope = rememberCoroutineScope()
     val palette = LocalTmPalette.current
 
+    var pendingRemoval by remember { mutableStateOf<List<CertRow>?>(null) }
+
     LaunchedEffect(viewModel.queryState) {
         snapshotFlow { viewModel.queryState.text.toString() }.collect(viewModel::onQueryChange)
+    }
+
+    LaunchedEffect(state.message) {
+        val message = state.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message)
+        viewModel.consumeMessage()
+    }
+
+    pendingRemoval?.let { rows ->
+        val inUse = rows.count { state.verdict(it)?.unused != true }
+        TypedConfirmDialog(
+            title = if (rows.size == 1) "Remove ${rows.first().main}?" else "Remove ${rows.size} certificates?",
+            consequence = buildString {
+                append("Traefik is restarted afterwards, because it only reads acme.json at startup.")
+                if (inUse == 1) append(" One still serves a route, so Traefik requests a new certificate for it.")
+                if (inUse > 1) append(" $inUse still serve routes, so Traefik requests new certificates for them.")
+                append(" A copy of acme.json is saved to Backups first.")
+            },
+            actionLabel = "Remove",
+            word = "DELETE",
+            onDismiss = { pendingRemoval = null },
+            onConfirm = {
+                viewModel.remove(rows)
+                pendingRemoval = null
+            },
+        )
     }
 
     Scaffold(
@@ -172,7 +207,7 @@ fun CertificatesScreen(
                     body = "acme.json may be empty - certs are issued on first request.",
                 )
 
-                state.visible.isEmpty() -> EmptyState(
+                state.visible.isEmpty() && state.filter == CertFilter.All -> EmptyState(
                     headline = "No certificates match your search",
                 )
 
@@ -188,15 +223,61 @@ fun CertificatesScreen(
                 ) {
                     item {
                         Text(
-                            text = "Traefik issues and renews these through its ACME resolver. " +
-                                "Renew or revoke them in your Traefik config.",
+                            text = when {
+                                state.manage.available ->
+                                    "Traefik issues and renews these through its ACME resolver. Removing one " +
+                                        "restarts Traefik so it lets go of it."
+                                state.manage.reason.isNotBlank() ->
+                                    "Traefik issues and renews these through its ACME resolver. Removal is off: " +
+                                        state.manage.reason
+                                else -> "Traefik issues and renews these through its ACME resolver."
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = palette.muted,
                             modifier = Modifier.padding(bottom = TmSpacing.xs),
                         )
                     }
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                        ) {
+                            CertFilter.entries.forEach { filter ->
+                                FilterChip(
+                                    selected = state.filter == filter,
+                                    onClick = { viewModel.onFilterChange(filter) },
+                                    label = { Text(filter.label) },
+                                )
+                            }
+                            val unused = state.unusedRemovable
+                            if (unused.isNotEmpty()) {
+                                TextButton(onClick = { pendingRemoval = unused }, enabled = !state.removing) {
+                                    Text("Remove ${unused.size} unused")
+                                }
+                            }
+                        }
+                    }
+                    if (state.visible.isEmpty()) {
+                        item {
+                            Text(
+                                text = "No certificates match these filters",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = palette.muted,
+                                modifier = Modifier.padding(vertical = TmSpacing.lg),
+                            )
+                        }
+                    }
                     items(state.visible, key = { it.key }) { cert ->
-                        CertificateCard(cert = cert, modifier = Modifier.animateItem())
+                        CertificateCard(
+                            cert = cert,
+                            verdict = state.verdict(cert),
+                            removable = state.removable(cert) && !state.removing,
+                            onRemove = { pendingRemoval = listOf(cert) },
+                            modifier = Modifier.animateItem(),
+                        )
                     }
                 }
             }
@@ -205,7 +286,13 @@ fun CertificatesScreen(
 }
 
 @Composable
-private fun CertificateCard(cert: CertRow, modifier: Modifier = Modifier) {
+private fun CertificateCard(
+    cert: CertRow,
+    verdict: CertVerdict?,
+    removable: Boolean,
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val palette = LocalTmPalette.current
     val clipboard = LocalClipboardManager.current
     var expanded by remember { mutableStateOf(false) }
@@ -236,11 +323,37 @@ private fun CertificateCard(cert: CertRow, modifier: Modifier = Modifier) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    text = cert.resolverLabel,
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                    color = palette.muted,
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
+                    Text(
+                        text = cert.resolverLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                        color = palette.muted,
+                    )
+                    if (verdict?.unused == true) {
+                        Text(
+                            text = "unused",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.yellow,
+                        )
+                    }
+                    if (verdict?.orphaned == true) {
+                        Text(
+                            text = "no resolver",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.red,
+                        )
+                    }
+                }
+            }
+            if (removable) {
+                IconButton(onClick = onRemove) {
+                    Icon(
+                        Icons.Outlined.Delete,
+                        contentDescription = "Remove certificate",
+                        tint = palette.red,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
             }
             IconButton(
                 onClick = {

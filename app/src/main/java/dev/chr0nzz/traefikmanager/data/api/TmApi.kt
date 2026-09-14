@@ -51,6 +51,10 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.CertResolversResponse
 import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
 import dev.chr0nzz.traefikmanager.data.model.CertsResponse
+import dev.chr0nzz.traefikmanager.data.model.CertDeleteRequest
+import dev.chr0nzz.traefikmanager.data.model.CertDeleteResponse
+import dev.chr0nzz.traefikmanager.data.model.CertManageState
+import dev.chr0nzz.traefikmanager.data.model.CertUsage
 import dev.chr0nzz.traefikmanager.data.model.ClientIpDiagnostic
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
@@ -114,6 +118,9 @@ interface TmApi {
     @POST("api/auth/apikey/revoke")
     suspend fun revokeApiKey(@Body body: RevokeKeyRequest): AuthActionResponse
 
+    @POST("api/auth/sessions/revoke")
+    suspend fun revokeSessions(): AuthActionResponse
+
     @GET("api/diagnostics/client-ip")
     suspend fun clientIpDiagnostic(): ClientIpDiagnostic
 
@@ -155,6 +162,18 @@ interface TmApi {
 
     @GET("api/traefik/certs")
     suspend fun certs(): CertsResponse
+
+    @GET("api/certs/usage")
+    suspend fun certUsage(
+        @Query("server") server: String? = null,
+        @Query("exclude") exclude: List<String>? = null,
+    ): Response<CertUsage>
+
+    @GET("api/certs/manage")
+    suspend fun certManage(@Query("server") server: String? = null): Response<CertManageState>
+
+    @POST("api/certs/delete")
+    suspend fun deleteCerts(@Body body: CertDeleteRequest): Response<CertDeleteResponse>
 
     @GET("api/traefik/plugins")
     suspend fun plugins(): PluginsResponse
