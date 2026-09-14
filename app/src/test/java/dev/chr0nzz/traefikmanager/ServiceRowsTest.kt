@@ -406,8 +406,8 @@ class ServiceDraftTest {
     @Test
     fun `a name the server would reject is refused here first`() {
         assertEquals(
-            "Use letters, numbers, dots, dashes or underscores",
-            ServiceDraft(name = "bad name@file").problem(),
+            "A name cannot contain @ / , : { or }",
+            ServiceDraft(name = "bad@file").problem(),
         )
     }
 

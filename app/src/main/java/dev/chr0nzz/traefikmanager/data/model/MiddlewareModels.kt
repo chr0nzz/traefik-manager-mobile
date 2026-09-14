@@ -63,6 +63,7 @@ data class MiddlewareForm(
     val validationError: String?
         get() = when {
             name.isBlank() -> "A middleware name is required."
+            EntityNames.problem(name) != null -> EntityNames.problem(name)
             yaml.isBlank() -> "Middleware content cannot be empty."
             else -> null
         }

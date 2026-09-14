@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.services
 
+import dev.chr0nzz.traefikmanager.data.model.EntityNames
 import dev.chr0nzz.traefikmanager.data.model.ServiceChildPayload
 import dev.chr0nzz.traefikmanager.data.model.ServicePayload
 import dev.chr0nzz.traefikmanager.data.model.TraefikService
@@ -50,7 +51,7 @@ data class ServiceDraft(
 
     fun problem(): String? = when {
         name.isBlank() -> "Give the service a name"
-        !NAME.matches(name.trim()) -> "Use letters, numbers, dots, dashes or underscores"
+        EntityNames.problem(name) != null -> EntityNames.problem(name)
         payload().children.isEmpty() -> "Add at least one backend"
         type == "loadBalancer" && payload().children.none { it.kind == ServiceChildDraft.MANUAL } ->
             "A load balancer needs at least one address"
@@ -58,8 +59,6 @@ data class ServiceDraft(
     }
 
     companion object {
-        private val NAME = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$")
-
         fun of(name: String, service: TraefikService?): ServiceDraft {
             val bare = name.substringBefore('@')
             val weighted = service?.weighted?.services

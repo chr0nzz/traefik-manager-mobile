@@ -161,6 +161,7 @@ data class RouteForm(
     val validationError: String?
         get() = when {
             name.isBlank() -> "A route name is required."
+            EntityNames.problem(name) != null -> EntityNames.problem(name)
             usesSharedService && serviceRef.isBlank() ->
                 "Pick the service this route points at."
             usesSharedService -> null
