@@ -9,6 +9,8 @@ enum class CsFacet(val key: String, val label: String, val reads: CsReads) {
     User("user", "account", CsReads.Alerts),
     Agent("agent", "tool", CsReads.Alerts),
     Verb("verb", "method", CsReads.Alerts),
+    Router("router", "route", CsReads.Alerts),
+    Host("host", "host", CsReads.Alerts),
     Outcome("outcome", "outcome", CsReads.Alerts),
     Origin("origin", "origin", CsReads.Decisions),
     Type("type", "type", CsReads.Decisions),
@@ -50,6 +52,8 @@ data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
         on(CsFacet.User)?.let { if (it !in alert.users) return false }
         on(CsFacet.Verb)?.let { if (it !in alert.verbs) return false }
         on(CsFacet.Agent)?.let { if (it !in alert.userAgents) return false }
+        on(CsFacet.Router)?.let { if (it !in alert.routers) return false }
+        on(CsFacet.Host)?.let { if (it !in alert.hosts) return false }
         on(CsFacet.Outcome)?.let { outcome ->
             when (outcome) {
                 "sim" -> if (!alert.simulated) return false
@@ -75,4 +79,12 @@ data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
     }
 
     fun viewFor(facet: CsFacet): CsReads = facet.reads
+
+    fun decisionQuery(query: String): CsDecisionQuery = CsDecisionQuery(
+        q = query.trim().lowercase().ifEmpty { null },
+        origin = get(CsFacet.Origin),
+        type = get(CsFacet.Type),
+        ip = get(CsFacet.Ip),
+        scenario = get(CsFacet.Scenario),
+    )
 }

@@ -7,10 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
 import dev.chr0nzz.traefikmanager.data.model.Countries
 import dev.chr0nzz.traefikmanager.data.model.CountryCount
-import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import dev.chr0nzz.traefikmanager.data.model.CsDecisionFeed
+import dev.chr0nzz.traefikmanager.data.model.CsDecisionQuery
 import dev.chr0nzz.traefikmanager.data.model.CsReads
 import dev.chr0nzz.traefikmanager.data.model.CsFacets
 import dev.chr0nzz.traefikmanager.data.model.CsFacet
@@ -19,6 +20,8 @@ import dev.chr0nzz.traefikmanager.data.repo.ServerScope
 import dev.chr0nzz.traefikmanager.data.repo.CrowdSecRepository
 import dev.chr0nzz.traefikmanager.data.repo.GeoRepository
 import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +49,7 @@ data class CrowdSecUiState(
     val loadError: String? = null,
     val notConfigured: Boolean = false,
     val readAt: Long? = null,
+    val decisionFeed: CsDecisionFeed? = null,
 ) {
     val alerts: List<CsAlert> get() = snapshot.alertList
 
@@ -80,7 +84,9 @@ data class CrowdSecUiState(
             append(alert.uris.joinToString(" ")).append(' ')
             append(alert.userAgents.joinToString(" ")).append(' ')
             append(alert.users.joinToString(" ")).append(' ')
-            append(alert.source.range)
+            append(alert.source.range).append(' ')
+            append(alert.routers.joinToString(" ")).append(' ')
+            append(alert.hosts.joinToString(" "))
         }.lowercase()
         return hay.contains(needle)
     }
@@ -108,6 +114,25 @@ data class CrowdSecUiState(
         }.sortedWith(compareByDescending<CsDecision> { it.own }.thenByDescending { it.id })
     }
 
+    val decisionQuery: CsDecisionQuery
+        get() = facets.decisionQuery(if (view == CrowdSecView.Bans) query else "")
+
+    val decisionsNeeded: Boolean get() = view == CrowdSecView.Bans || decisionQuery.filtered
+
+    val feed: CsDecisionFeed?
+        get() = decisionFeed?.takeIf {
+            snapshot.serverSearch && it.query == decisionQuery && it.version == snapshot.version
+        }
+
+    val bansCount: Int?
+        get() {
+            if (!decisionsOk) return null
+            if (!snapshot.serverSearch) return visibleDecisions.size
+            val wanted = decisionQuery
+            if (!wanted.filtered && wanted.q == null) return snapshot.decisionTotal
+            return feed?.takeIf { it.loaded }?.total
+        }
+
     val countries: List<CountryCount> by lazy(LazyThreadSafetyMode.PUBLICATION) {
         val tally = mutableMapOf<String, Int>()
         alertsFor(CsFacet.Country).forEach { alert ->
@@ -117,10 +142,6 @@ data class CrowdSecUiState(
         tally.map { CountryCount(it.key, Countries.name(it.key), it.value) }
             .sortedWith(compareByDescending<CountryCount> { it.count }.thenBy { it.name })
     }
-
-    val ownBans: Int get() = decisions.count { it.own }
-
-    val subscribedBans: Int get() = decisions.size - ownBans
 }
 
 @HiltViewModel
@@ -139,12 +160,17 @@ class CrowdSecViewModel @Inject constructor(
 
     private val loadLock = Mutex()
 
+    private var feedJob: Job? = null
+
     init {
         showCachedThenRevalidate()
         watchServerChanges()
     }
 
-    fun refresh() = load(initial = false, full = true)
+    fun refresh() {
+        _state.update { it.copy(decisionFeed = null) }
+        load(initial = false, full = true)
+    }
 
     private fun showCachedThenRevalidate() {
         val cached = repository.cached()
@@ -168,52 +194,76 @@ class CrowdSecViewModel @Inject constructor(
                 readAt = repository.cachedAge()?.let { age -> System.currentTimeMillis() - age },
             )
         }
+        syncDecisions()
         load(initial = false, full = false)
     }
 
-    fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
-
-    fun onViewChange(view: CrowdSecView) = _state.update {
-        viewFollowsFacets = false
-        it.copy(view = view)
+    fun onQueryChange(value: String) {
+        if (value == _state.value.query) return
+        _state.update { it.copy(query = value) }
+        syncDecisions(delayMs = QUERY_DEBOUNCE_MS)
     }
 
-    fun toggleFacet(facet: CsFacet, value: String) = _state.update { state ->
-        val facets = state.facets.toggle(facet, value)
-        val applied = facets[facet] != null
-        val view = when {
-            !applied -> if (viewFollowsFacets && facets.isEmpty) {
-                viewFollowsFacets = false
-                CrowdSecView.Evidence
-            } else {
-                state.view
-            }
-            facet.reads == CsReads.Decisions && state.view != CrowdSecView.Bans -> {
-                viewFollowsFacets = true
-                CrowdSecView.Bans
-            }
-            facet.reads == CsReads.Alerts && state.view != CrowdSecView.Evidence -> {
-                viewFollowsFacets = true
-                CrowdSecView.Evidence
-            }
-            else -> state.view
+    fun onViewChange(view: CrowdSecView) {
+        _state.update {
+            viewFollowsFacets = false
+            it.copy(view = view)
         }
-        state.copy(facets = facets, view = view)
+        syncDecisions()
+    }
+
+    fun toggleFacet(facet: CsFacet, value: String) {
+        _state.update { state ->
+            val facets = state.facets.toggle(facet, value)
+            val applied = facets[facet] != null
+            val view = when {
+                !applied -> if (viewFollowsFacets && facets.isEmpty) {
+                    viewFollowsFacets = false
+                    CrowdSecView.Evidence
+                } else {
+                    state.view
+                }
+                facet.reads == CsReads.Decisions && state.view != CrowdSecView.Bans -> {
+                    viewFollowsFacets = true
+                    CrowdSecView.Bans
+                }
+                facet.reads == CsReads.Alerts && state.view != CrowdSecView.Evidence -> {
+                    viewFollowsFacets = true
+                    CrowdSecView.Evidence
+                }
+                else -> state.view
+            }
+            state.copy(facets = facets, view = view)
+        }
+        syncDecisions()
     }
 
     fun onCountryChange(code: String?) = toggleFacet(CsFacet.Country, code.orEmpty())
 
     fun onScenarioChange(name: String?) = toggleFacet(CsFacet.Scenario, name.orEmpty())
 
-    fun removeFacet(facet: CsFacet) = _state.update { it.copy(facets = it.facets.without(facet)) }
+    fun removeFacet(facet: CsFacet) {
+        _state.update { it.copy(facets = it.facets.without(facet)) }
+        syncDecisions()
+    }
 
-    fun clearFilters() = _state.update {
-        viewFollowsFacets = false
-        queryState.edit { replace(0, length, "") }
-        it.copy(facets = it.facets.clear())
+    fun clearFilters() {
+        _state.update {
+            viewFollowsFacets = false
+            queryState.edit { replace(0, length, "") }
+            it.copy(facets = it.facets.clear())
+        }
+        syncDecisions()
     }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
+
+    fun loadMoreDecisions() {
+        val feed = _state.value.feed ?: return
+        if (!feed.more || feed.loading) return
+        _state.update { it.copy(decisionFeed = feed.copy(loading = true, error = null)) }
+        feedJob = viewModelScope.launch { fetchDecisions(feed.query, feed.version, feed.page + 1) }
+    }
 
     fun addDecision(value: String, type: String, duration: String, reason: String) {
         _state.update { it.copy(saving = true) }
@@ -229,7 +279,9 @@ class CrowdSecViewModel @Inject constructor(
                 )
             }.fold(
                 onSuccess = {
-                    _state.update { it.copy(saving = false, message = "Decision added for ${value.trim()}") }
+                    _state.update {
+                        it.copy(saving = false, message = "Decision added for ${value.trim()}", decisionFeed = null)
+                    }
                     load(initial = false, full = true)
                 },
                 onFailure = { throwable ->
@@ -245,7 +297,7 @@ class CrowdSecViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.deleteDecision(decision.id) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(message = "${decision.value} unbanned") }
+                    _state.update { it.copy(message = "${decision.value} unbanned", decisionFeed = null) }
                     load(initial = false, full = true)
                 },
                 onFailure = { throwable ->
@@ -254,6 +306,36 @@ class CrowdSecViewModel @Inject constructor(
                     }
                 },
             )
+        }
+    }
+
+    private fun syncDecisions(delayMs: Long = 0) {
+        val state = _state.value
+        val snapshot = state.snapshot
+        if (!snapshot.serverSearch || !snapshot.decisions.ok || !state.decisionsNeeded) return
+        val query = state.decisionQuery
+        val current = state.decisionFeed
+        if (current != null && current.query == query && current.version == snapshot.version) return
+        feedJob?.cancel()
+        _state.update { it.copy(decisionFeed = CsDecisionFeed(query, snapshot.version, loading = true)) }
+        feedJob = viewModelScope.launch {
+            if (delayMs > 0) delay(delayMs)
+            fetchDecisions(query, snapshot.version, 1)
+        }
+    }
+
+    private suspend fun fetchDecisions(query: CsDecisionQuery, version: String?, page: Int) {
+        val result = repository.searchDecisions(query, page)
+        _state.update { state ->
+            val feed = state.decisionFeed
+            if (feed == null || feed.query != query || feed.version != version) return@update state
+            when (result) {
+                is CsRead.Loaded -> state.copy(decisionFeed = feed.accept(result.value))
+                is CsRead.Failed -> state.copy(decisionFeed = feed.copy(loading = false, error = result.message))
+                CsRead.NotConfigured -> state.copy(
+                    decisionFeed = feed.copy(loading = false, error = "Decisions unavailable"),
+                )
+            }
         }
     }
 
@@ -288,6 +370,7 @@ class CrowdSecViewModel @Inject constructor(
                         }
                     },
                 )
+                syncDecisions()
             } finally {
                 loadLock.unlock()
             }
@@ -311,9 +394,14 @@ class CrowdSecViewModel @Inject constructor(
     private fun watchServerChanges() {
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {
+                feedJob?.cancel()
                 _state.value = CrowdSecUiState(view = _state.value.view)
                 showCachedThenRevalidate()
             }
         }
+    }
+
+    private companion object {
+        const val QUERY_DEBOUNCE_MS = 300L
     }
 }

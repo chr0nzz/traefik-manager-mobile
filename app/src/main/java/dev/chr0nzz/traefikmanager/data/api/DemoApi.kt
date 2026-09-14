@@ -71,7 +71,11 @@ import dev.chr0nzz.traefikmanager.data.model.AddDecisionRequest
 import dev.chr0nzz.traefikmanager.data.model.CertsResponse
 import dev.chr0nzz.traefikmanager.data.model.ClientIpDiagnostic
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
+import dev.chr0nzz.traefikmanager.data.model.CsAlertsSummary
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import dev.chr0nzz.traefikmanager.data.model.CsDecisionPage
+import dev.chr0nzz.traefikmanager.data.model.CsDecisionsSummary
+import dev.chr0nzz.traefikmanager.data.model.CsSummary
 import dev.chr0nzz.traefikmanager.data.model.CsMetaEntry
 import dev.chr0nzz.traefikmanager.data.model.CsSource
 import retrofit2.Response
@@ -308,27 +312,104 @@ class DemoApi : TmApi {
         )
     }
 
+    private val demoDecisions = listOf(
+        CsDecision(1, "213.209.159.154", "ban", "Ip", "cscli", "manual ban from Traefik Manager", "590h47m11s"),
+        CsDecision(2, "45.148.10.238", "ban", "Ip", "crowdsec", "crowdsecurity/http-probing", "3h57m11s"),
+        CsDecision(3, "62.210.142.174", "ban", "Ip", "CAPI", "community blocklist", "167h2m4s"),
+        CsDecision(4, "185.220.101.0/24", "ban", "Range", "lists", "firehol_level1", "23h11m9s"),
+    )
+
     override suspend fun crowdSecDecisions(full: String?): Response<List<CsDecision>> {
         settle()
-        val demo = listOf(
-            CsDecision(1, "213.209.159.154", "ban", "Ip", "cscli", "manual ban from Traefik Manager", "590h47m11s"),
-            CsDecision(2, "45.148.10.238", "ban", "Ip", "crowdsec", "crowdsecurity/http-probing", "3h57m11s"),
-            CsDecision(3, "62.210.142.174", "ban", "Ip", "CAPI", "community blocklist", "167h2m4s"),
-            CsDecision(4, "185.220.101.0/24", "ban", "Range", "lists", "firehol_level1", "23h11m9s"),
-        )
-        return Response.success(demo)
+        return Response.success(demoDecisions)
     }
 
-    override suspend fun crowdSecAlerts(): Response<List<CsAlert>> {
+    override suspend fun crowdSecAlerts(full: String?): Response<List<CsAlert>> {
         settle()
-        val now = java.time.Instant.now()
-        val demo = listOf(
-            demoAlert(1, "45.148.10.125", "crowdsecurity/http-sensitive-files", "NL", "Techoff Srv Limited", 5, now.minusSeconds(120), listOf("/.env")),
-            demoAlert(2, "62.210.142.174", "crowdsecurity/http-technology-probing", "FR", "Scaleway S.a.s.", 1, now.minusSeconds(1440), listOf("/remote/login")),
-            demoAlert(3, "212.87.212.246", "crowdsecurity/http-probing", "DE", "ITP-Solutions GmbH", 11, now.minusSeconds(3600), listOf("/")),
-            demoAlert(4, "45.142.193.221", "crowdsecurity/http-cve-probing", "RO", "Skynet Network", 1, now.minusSeconds(25200), listOf("/global-protect/login.esp")),
+        return Response.success(demoAlerts())
+    }
+
+    override suspend fun crowdSecSummary(version: String?, full: String?): Response<CsSummary> {
+        settle()
+        val current = "demo-crowdsec-1"
+        if (version == current) return Response.success(CsSummary(version = current, unchanged = true))
+        val banned = demoDecisions.filter { it.scope == "Ip" || it.scope == "Range" }.map { it.value }.toSet()
+        val own = demoDecisions.filter { it.own }
+        return Response.success(
+            CsSummary(
+                version = current,
+                decisions = CsDecisionsSummary(
+                    ok = true,
+                    total = demoDecisions.size,
+                    own = own.size,
+                    subscribed = demoDecisions.size - own.size,
+                    wide = demoDecisions.count { it.scope != "Ip" },
+                    origins = demoDecisions.groupingBy { it.originKey }.eachCount(),
+                    types = demoDecisions.groupingBy { it.type.lowercase() }.eachCount(),
+                    rows = own.filter { it.originKey != "crowdsec" }.sortedByDescending { it.id },
+                ),
+                alerts = CsAlertsSummary(
+                    ok = true,
+                    status = 200,
+                    limit = 500,
+                    rows = demoAlerts().map { it.copy(handled = it.ip in banned) },
+                ),
+            ),
         )
-        return Response.success(demo)
+    }
+
+    override suspend fun crowdSecDecisionsSearch(
+        q: String?,
+        origin: String?,
+        type: String?,
+        ip: String?,
+        scenario: String?,
+        page: Int,
+        per: Int,
+    ): Response<CsDecisionPage> {
+        settle()
+        val needle = q?.trim()?.lowercase().orEmpty()
+        val originKey = origin?.trim()?.lowercase().orEmpty()
+        val rows = demoDecisions.filter { decision ->
+            val originOk = when (originKey) {
+                "" -> true
+                "subscribed" -> !decision.own
+                "own" -> decision.own
+                "byhand" -> decision.originKey == "cscli" || decision.originKey == "manual"
+                else -> decision.originKey == originKey
+            }
+            val hay = listOf(decision.value, decision.scenario, decision.originKey, decision.scope, decision.type)
+                .joinToString(" ")
+                .lowercase()
+            originOk &&
+                (type.isNullOrEmpty() || decision.type.lowercase() == type.lowercase()) &&
+                (ip.isNullOrEmpty() || decision.value == ip) &&
+                (scenario.isNullOrEmpty() || decision.scenario == scenario) &&
+                (needle.isEmpty() || hay.contains(needle))
+        }.sortedWith(compareByDescending<CsDecision> { it.own }.thenByDescending { it.id })
+        val size = per.coerceIn(1, 200)
+        val pages = maxOf(1, (rows.size + size - 1) / size)
+        val current = page.coerceIn(1, pages)
+        return Response.success(
+            CsDecisionPage(
+                rows = rows.drop((current - 1) * size).take(size),
+                total = rows.size,
+                page = current,
+                pages = pages,
+                per = size,
+                facetTotals = mapOf("origin" to rows.size, "type" to rows.size),
+            ),
+        )
+    }
+
+    private fun demoAlerts(): List<CsAlert> {
+        val now = java.time.Instant.now()
+        return listOf(
+            demoAlert(1, "45.148.10.125", "crowdsecurity/http-sensitive-files", "NL", "Techoff Srv Limited", 5, now.minusSeconds(120), listOf("/.env"), router = "dashboard@file", host = "dash.example.com"),
+            demoAlert(2, "62.210.142.174", "crowdsecurity/http-technology-probing", "FR", "Scaleway S.a.s.", 1, now.minusSeconds(1440), listOf("/remote/login")),
+            demoAlert(3, "212.87.212.246", "crowdsecurity/http-probing", "DE", "ITP-Solutions GmbH", 11, now.minusSeconds(3600), listOf("/"), router = "dashboard@file", host = "dash.example.com", leaf = true),
+            demoAlert(4, "45.142.193.221", "crowdsecurity/http-cve-probing", "RO", "Skynet Network", 1, now.minusSeconds(25200), listOf("/global-protect/login.esp"), router = "api@file", host = "api.example.com"),
+        )
     }
 
     private fun demoAlert(
@@ -340,6 +421,9 @@ class DemoApi : TmApi {
         events: Int,
         at: java.time.Instant,
         uris: List<String>,
+        router: String? = null,
+        host: String? = null,
+        leaf: Boolean = false,
     ) = CsAlert(
         uuid = "demo-$id",
         id = id,
@@ -354,6 +438,9 @@ class DemoApi : TmApi {
             CsMetaEntry("target_uri", uris.joinToString(prefix = "[\"", postfix = "\"]", separator = "\",\"")),
             CsMetaEntry("method", "GET"),
             CsMetaEntry("user_agent", "Mozilla/5.0 (compatible; scanner)"),
+        ) + listOfNotNull(
+            router?.let { CsMetaEntry(if (leaf) "traefik_router_name_leaf" else "traefik_router_name", it) },
+            host?.let { CsMetaEntry("target_fqdn", it) },
         ),
     )
 

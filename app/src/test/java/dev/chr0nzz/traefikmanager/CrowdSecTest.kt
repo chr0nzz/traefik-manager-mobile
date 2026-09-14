@@ -124,7 +124,7 @@ class CrowdSecTest {
             CsAlert(scenario = "s", eventsCount = 50, source = CsSource(ip = "banned.host")),
             CsAlert(scenario = "s", eventsCount = 1, source = CsSource(ip = "open.host")),
         )
-        val ranked = CrowdSecAnalytics.sources(alerts, banned = setOf("banned.host"))
+        val ranked = CrowdSecAnalytics.sources(alerts) { it.ip == "banned.host" }
         assertEquals("open.host", ranked.first().key)
         assertEquals(1, ranked.first().open)
         assertEquals(0, ranked.last().open)
@@ -138,7 +138,7 @@ class CrowdSecTest {
             source = CsSource(ip = "1.1.1.1"),
             meta = listOf(CsMetaEntry("target_uri", """["/a","/b","/a"]""")),
         )
-        val ranked = CrowdSecAnalytics.paths(listOf(alert), emptySet())
+        val ranked = CrowdSecAnalytics.paths(listOf(alert)) { false }
         assertEquals(setOf("/a", "/b"), ranked.map { it.key }.toSet())
         assertEquals(1, ranked.first { it.key == "/a" }.count)
     }

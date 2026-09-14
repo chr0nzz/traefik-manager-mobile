@@ -58,6 +58,8 @@ import dev.chr0nzz.traefikmanager.data.model.CertUsage
 import dev.chr0nzz.traefikmanager.data.model.ClientIpDiagnostic
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
 import dev.chr0nzz.traefikmanager.data.model.CsDecision
+import dev.chr0nzz.traefikmanager.data.model.CsDecisionPage
+import dev.chr0nzz.traefikmanager.data.model.CsSummary
 import dev.chr0nzz.traefikmanager.data.model.GeoLookupRequest
 import dev.chr0nzz.traefikmanager.data.model.GeoLookupResponse
 import dev.chr0nzz.traefikmanager.data.model.GeoStatus
@@ -143,7 +145,24 @@ interface TmApi {
     suspend fun crowdSecDecisions(@Query("full") full: String? = null): Response<List<CsDecision>>
 
     @GET("api/crowdsec/alerts")
-    suspend fun crowdSecAlerts(): Response<List<CsAlert>>
+    suspend fun crowdSecAlerts(@Query("full") full: String? = null): Response<List<CsAlert>>
+
+    @GET("api/crowdsec/summary")
+    suspend fun crowdSecSummary(
+        @Query("version") version: String? = null,
+        @Query("full") full: String? = null,
+    ): Response<CsSummary>
+
+    @GET("api/crowdsec/decisions/search")
+    suspend fun crowdSecDecisionsSearch(
+        @Query("q") q: String? = null,
+        @Query("origin") origin: String? = null,
+        @Query("type") type: String? = null,
+        @Query("ip") ip: String? = null,
+        @Query("scenario") scenario: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("per") per: Int = 20,
+    ): Response<CsDecisionPage>
 
     @POST("api/crowdsec/decisions")
     suspend fun crowdSecAddDecision(@Body body: AddDecisionRequest): Response<OkResponse>

@@ -27,6 +27,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AltRoute
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.GpsFixed
@@ -152,7 +154,7 @@ fun CrowdSecScreen(
     if (addSheetOpen) {
         AddDecisionSheet(
             initialValue = addSheetFor.orEmpty(),
-            decisions = state.decisions.filter { it.own },
+            decisions = state.snapshot.ownRows,
             saving = state.saving,
             onAdd = { value, type, duration, reason ->
                 viewModel.addDecision(value, type, duration, reason)
@@ -230,7 +232,7 @@ fun CrowdSecScreen(
             matches = if (state.view == CrowdSecView.Evidence) {
                 state.visibleAlerts.size
             } else {
-                state.visibleDecisions.size
+                state.bansCount ?: 0
             },
         )
 
@@ -283,6 +285,7 @@ fun CrowdSecScreen(
                         addSheetOpen = true
                     },
                     onDelete = { pendingDelete = it },
+                    onLoadMore = viewModel::loadMoreDecisions,
                 )
             }
         }
@@ -300,19 +303,23 @@ private fun CrowdSecBody(
     onClearFilters: () -> Unit,
     onBan: (String) -> Unit,
     onDelete: (CsDecision) -> Unit,
+    onLoadMore: () -> Unit,
 ) {
     val palette = LocalTmPalette.current
     val wide = currentWindowAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val alerts = state.visibleAlerts
-    val banned = state.snapshot.bannedIps
-    val sources = remember(alerts, banned) { CrowdSecAnalytics.sources(alerts, banned) }
-    val networks = remember(alerts, banned) { CrowdSecAnalytics.networks(alerts, banned) }
-    val scenarios = remember(alerts, banned) { CrowdSecAnalytics.scenarios(alerts, banned) }
-    val paths = remember(alerts, banned) { CrowdSecAnalytics.paths(alerts, banned) }
-    val accounts = remember(alerts, banned) { CrowdSecAnalytics.accounts(alerts, banned) }
-    val tooling = remember(alerts, banned) { CrowdSecAnalytics.tooling(alerts, banned) }
-    val origins = remember(state.decisions) { CrowdSecAnalytics.origins(state.decisions) }
+    val snapshot = state.snapshot
+    val sources = remember(alerts, snapshot) { CrowdSecAnalytics.sources(alerts, snapshot::handled) }
+    val networks = remember(alerts, snapshot) { CrowdSecAnalytics.networks(alerts, snapshot::handled) }
+    val scenarios = remember(alerts, snapshot) { CrowdSecAnalytics.scenarios(alerts, snapshot::handled) }
+    val paths = remember(alerts, snapshot) { CrowdSecAnalytics.paths(alerts, snapshot::handled) }
+    val accounts = remember(alerts, snapshot) { CrowdSecAnalytics.accounts(alerts, snapshot::handled) }
+    val tooling = remember(alerts, snapshot) { CrowdSecAnalytics.tooling(alerts, snapshot::handled) }
+    val routes = remember(alerts, snapshot) { CrowdSecAnalytics.routes(alerts, snapshot::handled) }
+    val hosts = remember(alerts, snapshot) { CrowdSecAnalytics.hosts(alerts, snapshot::handled) }
+    val origins = snapshot.origins
+    val decisionTotal = snapshot.decisionTotal
     val span = remember(alerts) { CrowdSecAnalytics.spanMillis(alerts) }
 
     LazyColumn(
@@ -493,6 +500,44 @@ private fun CrowdSecBody(
                         modifier = cardModifier,
                     )
                 },
+                DeskCard(2) { cardModifier ->
+                    val named = state.alerts.any { it.routers.isNotEmpty() }
+                    RankCard(
+                        label = "Targeted routes",
+                        accent = palette.purple,
+                        glyph = Icons.Outlined.AltRoute,
+                        rows = routes,
+                        onRowClick = { onFacet(CsFacet.Router, it) },
+                        blind = !state.alertsOk,
+                        blindReason = "routers live in alert.meta[]",
+                        emptyReason = when {
+                            state.alerts.isEmpty() -> "nothing was aimed at"
+                            named -> "no router matches"
+                            else -> "no router in the evidence"
+                        },
+                        hero = LogParser.formatCount(routes.size),
+                        heroUnit = "routers",
+                        noun = "hits",
+                        thing = "routers",
+                        subtitle = routes.firstOrNull()?.let { "most wanted ${it.label}" },
+                        flags = hosts.take(3).map { host ->
+                            SignalChip(
+                                Icons.Outlined.Language,
+                                "${LogParser.formatCount(host.count)} ${host.key}",
+                                onClick = { onFacet(CsFacet.Host, host.key) },
+                            )
+                        },
+                        rowGlyph = {
+                            Icon(
+                                imageVector = Icons.Outlined.AltRoute,
+                                contentDescription = null,
+                                tint = palette.muted,
+                                modifier = Modifier.size(11.dp),
+                            )
+                        },
+                        modifier = cardModifier,
+                    )
+                },
                 DeskCard(1) { cardModifier ->
                     RankCard(
                         label = "Tooling",
@@ -521,11 +566,11 @@ private fun CrowdSecBody(
                     )
                 },
                 DeskCard(1) { cardModifier ->
-                    val perCell = ((state.decisions.size + CELL_CAP - 1) / CELL_CAP).coerceAtLeast(1)
-                    val stale = state.snapshot.decisionsStale
+                    val perCell = ((decisionTotal + CELL_CAP - 1) / CELL_CAP).coerceAtLeast(1)
+                    val stale = snapshot.decisionsStale
                     SignalCard(
                         label = if (stale != null) "Bans in force (stale)" else "Bans in force",
-                        hero = if (state.decisionsOk) LogParser.formatCount(state.decisions.size) else "-",
+                        hero = if (state.decisionsOk) LogParser.formatCount(decisionTotal) else "-",
                         accent = if (stale != null) palette.yellow else palette.green,
                         glyph = Icons.Outlined.Shield,
                         health = when {
@@ -536,14 +581,14 @@ private fun CrowdSecBody(
                         subtitle = when {
                             !state.decisionsOk -> "nothing was read from /v1/decisions"
                             stale != null -> stale
-                            else -> "${LogParser.formatCount(state.ownBans)} from this host · " +
-                                "${LogParser.formatCount(state.subscribedBans)} subscribed"
+                            else -> "${LogParser.formatCount(snapshot.ownBans)} from this host · " +
+                                "${LogParser.formatCount(snapshot.subscribedBans)} subscribed"
                         },
                         flags = if (state.decisionsOk) {
                             listOf(
                                 SignalChip(
                                     Icons.Outlined.Block,
-                                    "${LogParser.formatCount(state.decisions.size)} ban",
+                                    "${LogParser.formatCount(snapshot.typeCount("ban"))} ban",
                                     onClick = { onFacet(CsFacet.Type, "ban") },
                                 ),
                             )
@@ -567,8 +612,8 @@ private fun CrowdSecBody(
                         modifier = cardModifier,
                     ) {
                         SignalCells(
-                            cells = List((state.decisions.size + perCell - 1) / perCell) { index ->
-                                val ownCells = (state.ownBans + perCell - 1) / perCell
+                            cells = List((decisionTotal + perCell - 1) / perCell) { index ->
+                                val ownCells = (snapshot.ownBans + perCell - 1) / perCell
                                 if (index < ownCells) {
                                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.42f)
                                 } else {
@@ -632,7 +677,7 @@ private fun CrowdSecBody(
                                 CrowdSecView.Evidence ->
                                     "Evidence ${if (state.alertsOk) state.visibleAlerts.size else UNKNOWN}"
                                 CrowdSecView.Bans ->
-                                    "Bans ${if (state.decisionsOk) state.visibleDecisions.size else UNKNOWN}"
+                                    "Bans ${state.bansCount ?: UNKNOWN}"
                             },
                         )
                     }
@@ -653,6 +698,8 @@ private fun CrowdSecBody(
                     onBan = { onBan(alert.ip) },
                     onFilterIp = { onFacet(CsFacet.Ip, alert.ip) },
                     onFilterScenario = { onFacet(CsFacet.Scenario, alert.scenarioName) },
+                    onFilterRouter = { onFacet(CsFacet.Router, it) },
+                    onFilterHost = { onFacet(CsFacet.Host, it) },
                 )
             }
             if (state.visibleAlerts.isEmpty()) {
@@ -665,6 +712,14 @@ private fun CrowdSecBody(
                     )
                 }
             }
+        } else if (snapshot.serverSearch) {
+            itemsIndexed(
+                items = state.feed?.rows.orEmpty(),
+                key = { index, decision -> "${decision.id}:$index" },
+            ) { _, decision ->
+                DecisionRow(decision = decision, onDelete = { onDelete(decision) })
+            }
+            item { DecisionFeedFooter(state = state, onLoadMore = onLoadMore) }
         } else {
             itemsIndexed(
                 items = state.visibleDecisions.take(200),
@@ -755,6 +810,42 @@ private fun RankCard(
     }
 }
 
+@Composable
+private fun DecisionFeedFooter(state: CrowdSecUiState, onLoadMore: () -> Unit) {
+    val palette = LocalTmPalette.current
+    val feed = state.feed
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        val empty = feed == null || feed.rows.isEmpty()
+        Text(
+            text = when {
+                !state.decisionsOk -> "Decisions unavailable"
+                feed == null || (feed.loading && !feed.loaded) -> "Loading decisions"
+                feed.error != null && feed.rows.isEmpty() -> feed.error
+                feed.rows.isEmpty() -> "No active decisions"
+                else -> "Showing ${LogParser.formatCount(feed.rows.size)} of ${LogParser.formatCount(feed.total)}"
+            },
+            style = if (empty) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.labelSmall,
+            color = palette.muted,
+            modifier = Modifier.padding(if (empty) TmSpacing.lg else TmSpacing.sm),
+        )
+        if (feed?.error != null && feed.rows.isNotEmpty()) {
+            Text(
+                text = feed.error,
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.red,
+            )
+        }
+        if (feed?.more == true) {
+            TextButton(onClick = onLoadMore, enabled = !feed.loading) {
+                Text(if (feed.loading) "Loading" else "Load more")
+            }
+        }
+    }
+}
+
 private const val ROW_CAP = 4
 
 private const val CELL_CAP = 240
@@ -768,6 +859,8 @@ private fun AlertRow(
     onBan: () -> Unit,
     onFilterIp: () -> Unit = {},
     onFilterScenario: () -> Unit = {},
+    onFilterRouter: (String) -> Unit = {},
+    onFilterHost: (String) -> Unit = {},
 ) {
     val palette = LocalTmPalette.current
 
@@ -817,6 +910,33 @@ private fun AlertRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                val router = alert.routers.firstOrNull()
+                val host = alert.hosts.firstOrNull()
+                if (router != null || host != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        router?.let {
+                            EvidenceValue(
+                                icon = Icons.Outlined.AltRoute,
+                                text = it.substringBefore('@').ifEmpty { it },
+                                description = "Filter by route",
+                                onClick = { onFilterRouter(it) },
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                        }
+                        host?.let {
+                            EvidenceValue(
+                                icon = Icons.Outlined.Language,
+                                text = it,
+                                description = "Filter by host",
+                                onClick = { onFilterHost(it) },
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                        }
+                    }
+                }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (country.isNotEmpty()) {
                         Text(text = Countries.flag(country), style = MaterialTheme.typography.labelSmall)
@@ -871,6 +991,34 @@ private fun AlertRow(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun EvidenceValue(
+    icon: ImageVector,
+    text: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val palette = LocalTmPalette.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(onClickLabel = description) { onClick() }
+            .padding(horizontal = 2.dp),
+    ) {
+        Icon(imageVector = icon, contentDescription = null, tint = palette.muted, modifier = Modifier.size(11.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+            color = palette.muted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -1123,7 +1271,7 @@ private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
                 span?.let { append(" · span ${LogParser.spanText(it)}") }
                 append(
                     if (state.decisionsOk) {
-                        " · ${LogParser.formatCount(state.decisions.size)} bans"
+                        " · ${LogParser.formatCount(state.snapshot.decisionTotal)} bans"
                     } else {
                         " · $UNKNOWN bans"
                     },

@@ -72,6 +72,7 @@ data class CsAlert(
     val createdAt: String = "",
     val source: CsSource = CsSource(),
     val meta: List<CsMetaEntry> = emptyList(),
+    val handled: Boolean? = null,
 ) {
     val ip: String get() = source.ip.ifEmpty { source.value }
 
@@ -92,6 +93,13 @@ data class CsAlert(
     val codes: List<String> get() = metaMap["status"].orEmpty()
 
     val userAgents: List<String> get() = metaMap["user_agent"].orEmpty()
+
+    val routers: List<String>
+        get() = metaMap.let { map ->
+            map["traefik_router_name_leaf"]?.takeIf { it.isNotEmpty() } ?: map["traefik_router_name"].orEmpty()
+        }
+
+    val hosts: List<String> get() = metaMap["target_fqdn"].orEmpty()
 
     fun key(index: Int): String = uuid.ifEmpty { id.takeIf { it != 0L }?.toString() ?: "cs$index" }
 
@@ -165,8 +173,27 @@ data class CrowdSecSnapshot(
     val alertLimit: Int? = null,
     val alertsCapped: Boolean? = null,
     val decisionsStale: String? = null,
+    val counts: CsDecisionsSummary? = null,
+    val version: String? = null,
 ) {
     val decisionList: List<CsDecision> get() = decisions.valueOrNull().orEmpty()
+
+    val serverSearch: Boolean get() = version != null
+
+    val decisionTotal: Int get() = counts?.total ?: decisionList.size
+
+    val ownBans: Int get() = counts?.own ?: decisionList.count { it.own }
+
+    val subscribedBans: Int get() = counts?.subscribed ?: (decisionList.size - decisionList.count { it.own })
+
+    val ownRows: List<CsDecision> get() = if (counts != null) decisionList else decisionList.filter { it.own }
+
+    val origins: List<CsOriginBreakdown> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        counts?.let { CrowdSecAnalytics.origins(it.origins) } ?: CrowdSecAnalytics.origins(decisionList)
+    }
+
+    fun typeCount(type: String): Int =
+        counts?.types?.get(type) ?: decisionList.count { it.type.lowercase() == type }
 
     val alertList: List<CsAlert> get() = alerts.valueOrNull().orEmpty()
 
@@ -175,7 +202,7 @@ data class CrowdSecSnapshot(
     }
 
     fun handled(alert: CsAlert): Boolean =
-        decisions.ok && !alert.simulated && alert.ip in bannedIps
+        decisions.ok && !alert.simulated && (alert.handled ?: (alert.ip in bannedIps))
 }
 
 object CrowdSecAnalytics {
@@ -185,13 +212,13 @@ object CrowdSecAnalytics {
     fun filterAlerts(alerts: List<CsAlert>): List<CsAlert> =
         alerts.filterNot { it.source.scope.lowercase() in setOf("capi", "lists") }
 
-    fun sources(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        rank(alerts, banned) { listOf(it.ip) }
+    fun sources(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(alerts, handled) { listOf(it.ip) }
 
-    fun networks(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
+    fun networks(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
         rank(
             alerts = alerts,
-            banned = banned,
+            handled = handled,
             extraOf = { rows -> rows.firstOrNull()?.countryCode.orEmpty() },
             labelOf = { key, rows -> rows.firstOrNull()?.source?.asName?.ifEmpty { "AS$key" } ?: "AS$key" },
         ) { alert ->
@@ -199,27 +226,44 @@ object CrowdSecAnalytics {
             if (number.isEmpty()) emptyList() else listOf(number)
         }
 
-    fun scenarios(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        rank(alerts, banned) { listOf(it.scenarioName) }
+    fun scenarios(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(alerts, handled) { listOf(it.scenarioName) }
 
-    fun paths(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        rank(alerts, banned) { it.uris }
+    fun paths(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(alerts, handled) { it.uris }
 
-    fun accounts(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        rank(alerts, banned) { it.users }
+    fun accounts(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(alerts, handled) { it.users }
 
-    fun tooling(alerts: List<CsAlert>, banned: Set<String>): List<CsRanked> =
-        rank(alerts, banned) { it.userAgents }
+    fun tooling(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(alerts, handled) { it.userAgents }
+
+    fun routes(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(
+            alerts = alerts,
+            handled = handled,
+            extraOf = { rows -> rows.firstNotNullOfOrNull { it.hosts.firstOrNull() }.orEmpty() },
+            labelOf = { key, _ -> key.substringBefore('@').ifEmpty { key } },
+        ) { it.routers }
+
+    fun hosts(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): List<CsRanked> =
+        rank(alerts, handled) { it.hosts }
 
     fun origins(decisions: List<CsDecision>): List<CsOriginBreakdown> =
-        decisions.groupingBy { it.originKey.ifEmpty { "other" } }
-            .eachCount()
-            .map { CsOriginBreakdown(it.key, it.value) }
-            .sortedByDescending { it.count }
+        origins(decisions.groupingBy { it.originKey }.eachCount())
+
+    fun origins(counts: Map<String, Int>): List<CsOriginBreakdown> {
+        val merged = mutableMapOf<String, Int>()
+        counts.forEach { (origin, count) ->
+            val key = origin.trim().lowercase().ifEmpty { "other" }
+            merged[key] = (merged[key] ?: 0) + count
+        }
+        return merged.map { CsOriginBreakdown(it.key, it.value) }.sortedByDescending { it.count }
+    }
 
     fun rank(
         alerts: List<CsAlert>,
-        banned: Set<String>,
+        handled: (CsAlert) -> Boolean,
         extraOf: (List<CsAlert>) -> String = { "" },
         labelOf: (String, List<CsAlert>) -> String = { key, _ -> key },
         keysOf: (CsAlert) -> List<String>,
@@ -236,7 +280,7 @@ object CrowdSecAnalytics {
                 label = labelOf(key, rows),
                 count = rows.size,
                 weight = rows.sumOf { it.eventsCount },
-                open = rows.count { it.ip !in banned },
+                open = rows.count { !handled(it) },
                 extra = extraOf(rows),
             )
         }.sortedWith(

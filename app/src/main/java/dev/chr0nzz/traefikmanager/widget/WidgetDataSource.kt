@@ -4,11 +4,12 @@ import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.api.TmApi
 import dev.chr0nzz.traefikmanager.data.model.CertRows
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
+import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot
 import dev.chr0nzz.traefikmanager.data.model.CsAlert
-import dev.chr0nzz.traefikmanager.data.model.CsDecision
 import dev.chr0nzz.traefikmanager.data.model.CsRanked
 import dev.chr0nzz.traefikmanager.data.model.LogParser
 import dev.chr0nzz.traefikmanager.data.model.toProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.repo.CrowdSecReader
 import dev.chr0nzz.traefikmanager.data.repo.DashboardBuilder
 import dev.chr0nzz.traefikmanager.data.repo.RawDashboard
 import dev.chr0nzz.traefikmanager.data.repo.ServersRepository
@@ -73,11 +74,7 @@ class WidgetDataSource @Inject constructor(
                 val classified = routers.all.map { statusOf(it.status) }
                 val services = runCatching { api.services() }.getOrNull()
                     ?.toProtoEnvelope()?.all.orEmpty()
-                val bans = runCatching { api.crowdSecDecisions(null) }.getOrNull()
-                    ?.takeIf { it.isSuccessful }
-                    ?.body()
-                    ?.size
-                    ?: -1
+                val bans = runCatching { CrowdSecReader.bans(api) }.getOrDefault(-1)
                 WidgetServerRow(
                     id = server.id.orEmpty(),
                     name = server.name,
@@ -189,26 +186,22 @@ class WidgetDataSource @Inject constructor(
         )
     }
 
-    private suspend fun crowdSecCards(agentId: String?): Map<String, WidgetCard> = coroutineScope {
-        val api = apiProvider.apiFor(agentId)
-        val decisionsCall = async { runCatching { api.crowdSecDecisions(null) }.getOrNull() }
-        val alertsCall = async { runCatching { api.crowdSecAlerts() }.getOrNull() }
-        val decisions = decisionsCall.await()?.takeIf { it.isSuccessful }?.body().orEmpty()
-        val alerts = alertsCall.await()?.takeIf { it.isSuccessful }?.body()
-            ?.let { CrowdSecAnalytics.filterAlerts(it) }
-            .orEmpty()
-        val banned = decisions.filter { it.scope == "Ip" || it.scope == "Range" }.map { it.value }.toSet()
+    private suspend fun crowdSecCards(agentId: String?): Map<String, WidgetCard> {
+        val snapshot = CrowdSecReader.read(apiProvider.apiFor(agentId), full = false, previous = null)
+        if (!snapshot.decisions.ok && !snapshot.alerts.ok) return emptyMap()
+        val alerts = snapshot.alertList
+        val handled = snapshot::handled
 
-        buildMap {
-            put(WidgetCardType.Sources.key, sourcesCard(alerts, banned))
-            put(WidgetCardType.Scenarios.key, scenariosCard(alerts, banned))
-            put(WidgetCardType.Paths.key, pathsCard(alerts, banned))
-            put(WidgetCardType.Bans.key, bansCard(decisions))
+        return buildMap {
+            put(WidgetCardType.Sources.key, sourcesCard(alerts, handled))
+            put(WidgetCardType.Scenarios.key, scenariosCard(alerts, handled))
+            put(WidgetCardType.Paths.key, pathsCard(alerts, handled))
+            put(WidgetCardType.Bans.key, bansCard(snapshot))
         }
     }
 
-    private fun sourcesCard(alerts: List<CsAlert>, banned: Set<String>): WidgetCard {
-        val sources = CrowdSecAnalytics.sources(alerts, banned)
+    private fun sourcesCard(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): WidgetCard {
+        val sources = CrowdSecAnalytics.sources(alerts, handled)
         val loose = sources.count { it.open > 0 }
         val severe = sources.any { it.open > 0 && it.count > 1 }
         val repeats = sources.count { it.count > 1 }
@@ -247,8 +240,8 @@ class WidgetDataSource @Inject constructor(
         )
     }
 
-    private fun scenariosCard(alerts: List<CsAlert>, banned: Set<String>): WidgetCard {
-        val rows = CrowdSecAnalytics.scenarios(alerts, banned)
+    private fun scenariosCard(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): WidgetCard {
+        val rows = CrowdSecAnalytics.scenarios(alerts, handled)
         val events = alerts.sumOf { it.eventsCount }
         val rest = rows.drop(ROWS)
         return WidgetCard(
@@ -265,8 +258,8 @@ class WidgetDataSource @Inject constructor(
         )
     }
 
-    private fun pathsCard(alerts: List<CsAlert>, banned: Set<String>): WidgetCard {
-        val rows = CrowdSecAnalytics.paths(alerts, banned)
+    private fun pathsCard(alerts: List<CsAlert>, handled: (CsAlert) -> Boolean): WidgetCard {
+        val rows = CrowdSecAnalytics.paths(alerts, handled)
         val rest = rows.drop(ROWS)
         return WidgetCard(
             key = WidgetCardType.Paths.key,
@@ -280,23 +273,26 @@ class WidgetDataSource @Inject constructor(
         )
     }
 
-    private fun bansCard(decisions: List<CsDecision>): WidgetCard {
-        val own = decisions.count { it.own }
+    private fun bansCard(snapshot: CrowdSecSnapshot): WidgetCard {
+        val total = snapshot.decisionTotal
+        val own = snapshot.ownBans
+        val cells = total.coerceAtMost(CELLS)
+        val ownCells = if (total == 0) 0 else ((own.toLong() * cells + total - 1) / total).toInt()
         return WidgetCard(
             key = WidgetCardType.Bans.key,
             title = "Bans in force",
-            hero = LogParser.formatCount(decisions.size),
-            unit = if (decisions.size == 1) "ban" else "bans",
-            health = if (decisions.isEmpty()) TmStatus.Disabled.wire() else TmStatus.Ok.wire(),
-            chips = decisions.count { it.type == "ban" }.takeIf { it > 0 }
+            hero = LogParser.formatCount(total),
+            unit = if (total == 1) "ban" else "bans",
+            health = if (total == 0) TmStatus.Disabled.wire() else TmStatus.Ok.wire(),
+            chips = snapshot.typeCount("ban").takeIf { it > 0 }
                 ?.let { listOf(chip("${LogParser.formatCount(it)} ban", TmStatus.Unknown)) }
                 .orEmpty(),
             sub = "${LogParser.formatCount(own)} from this host · " +
-                "${LogParser.formatCount(decisions.size - own)} subscribed",
-            cells = decisions.take(CELLS).map {
-                if (it.own) TmStatus.Ok.wire() else TmStatus.Disabled.wire()
+                "${LogParser.formatCount(snapshot.subscribedBans)} subscribed",
+            cells = List(cells) { index ->
+                if (index < ownCells) TmStatus.Ok.wire() else TmStatus.Disabled.wire()
             },
-            footer = CrowdSecAnalytics.origins(decisions).take(3).map { origin ->
+            footer = snapshot.origins.take(3).map { origin ->
                 chip("${origin.origin} ${LogParser.formatCount(origin.count)}", TmStatus.Unknown)
             },
         )
