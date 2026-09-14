@@ -67,6 +67,9 @@ data class TraefikVersion(
 @Serializable
 data class OkResponse(
     val ok: Boolean = false,
+    val success: Boolean = false,
     val message: String? = null,
     val error: String? = null,
-)
+) {
+    val worked: Boolean get() = success || ok
+}
