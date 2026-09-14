@@ -73,6 +73,24 @@ fun AuthSettingsScreen(
 
     var newKeyName by remember { mutableStateOf("") }
     var revokeTarget by remember { mutableStateOf<ApiKeyEntry?>(null) }
+    var confirmSignOut by remember { mutableStateOf(false) }
+
+    if (confirmSignOut) {
+        AlertDialog(
+            onDismissRequest = { confirmSignOut = false },
+            title = { Text("Sign out other sessions?") },
+            text = { Text("Every browser signed in to the web UI is signed out. API keys, including this app's, keep working.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.revokeSessions()
+                        confirmSignOut = false
+                    },
+                ) { Text("Sign out") }
+            },
+            dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text("Cancel") } },
+        )
+    }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
@@ -222,6 +240,28 @@ fun AuthSettingsScreen(
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.sm),
                     )
+                }
+            }
+
+            item {
+                TmCard {
+                    Text(
+                        text = "Browser sessions",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = "Signs out every browser signed in to the web UI. API keys keep working.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted,
+                    )
+                    Button(
+                        onClick = { confirmSignOut = true },
+                        enabled = !state.busy,
+                        modifier = Modifier.padding(top = TmSpacing.sm),
+                    ) {
+                        Text("Sign out other sessions")
+                    }
                 }
             }
 

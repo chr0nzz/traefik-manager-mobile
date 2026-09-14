@@ -103,6 +103,11 @@ class AuthSettingsViewModel @Inject constructor(
         if (!response.worked) error(response.error ?: "Could not revoke the key")
     }
 
+    fun revokeSessions() = run("Other browser sessions signed out") {
+        val response = apiProvider.api().revokeSessions()
+        if (!response.worked) error(response.error ?: "Could not sign out other sessions")
+    }
+
     fun dismissKey() = _state.update { it.copy(issuedKey = null) }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
