@@ -251,7 +251,10 @@ class RouteFormViewModel @Inject constructor(
             return
         }
         _state.update { current ->
-            val hosts = HOST_RULE.findAll(current.form.httpRule).map { it.groupValues[1] }.toList()
+            val hosts = HOST_RULE.findAll(current.form.httpRule)
+                .filter { it.groupValues[1] != "!" }
+                .map { it.groupValues[2] }
+                .toList()
             val split = splitHosts(hosts, current.domainOptions)
             current.copy(
                 form = current.form.copy(
@@ -369,7 +372,7 @@ class RouteFormViewModel @Inject constructor(
 
     companion object {
 
-        private val HOST_RULE = Regex("Host\\(`([^`]+)`\\)")
+        private val HOST_RULE = Regex("(!?)\\s*Host\\(`([^`]+)`\\)")
 
         fun splitHosts(hosts: List<String>, knownDomains: List<String>): HostSplit? {
             if (hosts.isEmpty()) return null

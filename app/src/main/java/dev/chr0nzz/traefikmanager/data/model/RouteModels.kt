@@ -68,7 +68,8 @@ data class Route(
         else -> 0
     }
 
-    val hosts: List<String> get() = HOST_REGEX.findAll(rule).map { it.groupValues[1] }.toList()
+    val hosts: List<String>
+        get() = HOST_REGEX.findAll(rule).filter { it.groupValues[1] != "!" }.map { it.groupValues[2] }.toList()
 
     val isPlainHostRule: Boolean
         get() = hosts.isNotEmpty() && rule == hosts.joinToString(" || ") { "Host(`$it`)" }
@@ -117,7 +118,7 @@ data class HeadersPreset(
     val toggles: HeadersPresetToggles = HeadersPresetToggles(),
 )
 
-private val HOST_REGEX = Regex("""Host\(`([^`]+)`\)""")
+private val HOST_REGEX = Regex("""(!?)\s*Host\(`([^`]+)`\)""")
 
 private fun JsonElement?.asStringList(): List<String> = when (this) {
     null, JsonNull -> emptyList()
