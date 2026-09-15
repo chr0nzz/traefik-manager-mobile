@@ -1,9 +1,11 @@
 package dev.chr0nzz.traefikmanager.ui.certs
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +22,9 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Language
@@ -30,8 +34,10 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +46,6 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -57,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -70,6 +76,7 @@ import dev.chr0nzz.traefikmanager.data.model.CertRow
 import dev.chr0nzz.traefikmanager.data.model.CertVerdict
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog
+import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -106,6 +113,7 @@ fun CertificatesScreen(
     val palette = LocalTmPalette.current
 
     var pendingRemoval by remember { mutableStateOf<List<CertRow>?>(null) }
+    var filterMenuOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel.queryState) {
         snapshotFlow { viewModel.queryState.text.toString() }.collect(viewModel::onQueryChange)
@@ -157,6 +165,29 @@ fun CertificatesScreen(
                 actions = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
                         Icon(Icons.Outlined.Search, contentDescription = "Search certificates")
+                    }
+                    Box {
+                        IconButton(onClick = { filterMenuOpen = true }) {
+                            Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                        }
+                        if (state.filter != CertFilter.All) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(top = 10.dp, end = 10.dp)
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(palette.blue),
+                            )
+                        }
+                        CertFilterMenu(
+                            expanded = filterMenuOpen,
+                            filter = state.filter,
+                            unusedCount = if (state.removing) 0 else state.unusedRemovable.size,
+                            onDismiss = { filterMenuOpen = false },
+                            onFilterChange = viewModel::onFilterChange,
+                            onRemoveUnused = { pendingRemoval = state.unusedRemovable },
+                        )
                     }
                     IconButton(onClick = viewModel::refresh) {
                         Icon(Icons.Outlined.Refresh, contentDescription = "Refresh certificates")
@@ -221,52 +252,14 @@ fun CertificatesScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 ) {
-                    item {
-                        Text(
-                            text = when {
-                                state.manage.available ->
-                                    "Traefik issues and renews these through its ACME resolver. Removing one " +
-                                        "restarts Traefik so it lets go of it."
-                                state.manage.reason.isNotBlank() ->
-                                    "Traefik issues and renews these through its ACME resolver. Removal is off: " +
-                                        state.manage.reason
-                                else -> "Traefik issues and renews these through its ACME resolver."
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = palette.muted,
-                            modifier = Modifier.padding(bottom = TmSpacing.xs),
-                        )
-                    }
-                    item {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                        ) {
-                            CertFilter.entries.forEach { filter ->
-                                FilterChip(
-                                    selected = state.filter == filter,
-                                    onClick = { viewModel.onFilterChange(filter) },
-                                    label = { Text(filter.label) },
-                                )
-                            }
-                            val unused = state.unusedRemovable
-                            if (unused.isNotEmpty()) {
-                                TextButton(onClick = { pendingRemoval = unused }, enabled = !state.removing) {
-                                    Text("Remove ${unused.size} unused")
-                                }
-                            }
-                        }
+                    item(key = "verdict") {
+                        VerdictLine(verdict = state.statusVerdict, info = state.statusNote)
                     }
                     if (state.visible.isEmpty()) {
-                        item {
-                            Text(
-                                text = "No certificates match these filters",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = palette.muted,
-                                modifier = Modifier.padding(vertical = TmSpacing.lg),
+                        item(key = "empty") {
+                            EmptyState(
+                                headline = "No certificates match",
+                                body = "Try a different search or filter.",
                             )
                         }
                     }
@@ -281,6 +274,69 @@ fun CertificatesScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CertFilterMenu(
+    expanded: Boolean,
+    filter: CertFilter,
+    unusedCount: Int,
+    onDismiss: () -> Unit,
+    onFilterChange: (CertFilter) -> Unit,
+    onRemoveUnused: () -> Unit,
+) {
+    val palette = LocalTmPalette.current
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        modifier = Modifier.widthIn(min = 240.dp),
+    ) {
+        Text(
+            text = "SHOW",
+            style = MaterialTheme.typography.labelSmall,
+            color = palette.muted,
+            modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
+        )
+        CertFilter.entries.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(option.label) },
+                onClick = {
+                    onFilterChange(option)
+                    onDismiss()
+                },
+                trailingIcon = if (option == filter) {
+                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                } else {
+                    null
+                },
+                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
+            )
+        }
+        if (unusedCount > 0) {
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text("Remove $unusedCount unused") },
+                leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = palette.red) },
+                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
+                onClick = {
+                    onRemoveUnused()
+                    onDismiss()
+                },
+            )
+        }
+        if (filter != CertFilter.All) {
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text("Clear filters") },
+                leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
+                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
+                onClick = {
+                    onFilterChange(CertFilter.All)
+                    onDismiss()
+                },
+            )
         }
     }
 }

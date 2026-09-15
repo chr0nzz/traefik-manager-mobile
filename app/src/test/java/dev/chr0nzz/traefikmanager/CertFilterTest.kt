@@ -49,6 +49,20 @@ class CertFilterTest {
     }
 
     @Test
+    fun `the status line words the certificates the way the web Certs tab does`() {
+        val verdict = state.statusVerdict
+        assertEquals("1 expiring within 7 days", verdict.headline)
+        assertEquals(dev.chr0nzz.traefikmanager.ui.components.TmStatus.Error, verdict.status)
+        assertEquals(
+            "4 certificates · 1 under 7d · 3 resolvers · 2 unused · 1 no resolver · next expiry in 3d",
+            verdict.detail,
+        )
+        val healthy = state.copy(certs = state.certs.filter { it.main == "old.example.com" }, usage = null)
+        assertEquals("All certificates healthy", healthy.statusVerdict.headline)
+        assertTrue(state.statusNote.contains("Removing one restarts Traefik"))
+    }
+
+    @Test
     fun `only resolver certificates are removable, and only when removal is available`() {
         assertEquals(listOf("old.example.com"), state.unusedRemovable.map { it.main })
         assertFalse(state.removable(state.certs.first { it.main == "static.example.com" }))

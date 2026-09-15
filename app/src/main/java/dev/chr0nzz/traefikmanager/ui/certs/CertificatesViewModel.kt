@@ -13,6 +13,8 @@ import dev.chr0nzz.traefikmanager.data.model.CertRows
 import dev.chr0nzz.traefikmanager.data.model.CertUsage
 import dev.chr0nzz.traefikmanager.data.model.CertVerdict
 import dev.chr0nzz.traefikmanager.data.repo.ServerScope
+import dev.chr0nzz.traefikmanager.data.repo.Verdict
+import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.data.repo.CertificatesRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,6 +70,52 @@ data class CertificatesUiState(
 
     val expiringSoon: Int
         get() = certs.count { it.health == CertHealth.Critical || it.health == CertHealth.Expiring }
+
+    val statusVerdict: Verdict
+        get() {
+            val days = certs.mapNotNull { it.daysLeft }
+            val expired = days.count { it <= 0 }
+            val critical = days.count { it in 1..6 }
+            val expiring = days.count { it in 7..29 }
+            val next = days.filter { it > 0 }.minOrNull()
+            val resolvers = certs.map { it.resolver }.filter { it.isNotEmpty() }.distinct().size
+            val unused = usage?.certs?.count { it.unused } ?: 0
+            val orphaned = usage?.certs?.count { it.orphaned } ?: 0
+            val headline = when {
+                expired > 0 -> "$expired ${if (expired == 1) "certificate has" else "certificates have"} expired"
+                critical > 0 -> "$critical expiring within 7 days"
+                expiring > 0 -> "$expiring expiring within 30 days"
+                else -> "All certificates healthy"
+            }
+            val detail = buildList {
+                add("${certs.size} ${if (certs.size == 1) "certificate" else "certificates"}")
+                if (expired > 0) add("$expired expired")
+                if (critical > 0) add("$critical under 7d")
+                if (expiring > 0) add("$expiring under 30d")
+                if (expired == 0 && critical == 0 && expiring == 0) add("none expiring soon")
+                if (resolvers > 1) add("$resolvers resolvers")
+                if (unused > 0) add("$unused unused")
+                if (orphaned > 0) add("$orphaned no resolver")
+                next?.let { add("next expiry in ${it}d") }
+            }.joinToString(" · ")
+            val status = when {
+                expired > 0 || critical > 0 -> TmStatus.Error
+                expiring > 0 -> TmStatus.Warn
+                else -> TmStatus.Ok
+            }
+            return Verdict(headline = headline, detail = detail, status = status)
+        }
+
+    val statusNote: String
+        get() = buildString {
+            append("TLS certificates are managed automatically by Traefik's ACME resolver.")
+            when {
+                manage.available -> append(" Removing one restarts Traefik so it lets go of it.")
+                manage.reason.isNotBlank() -> append(" Removal is off: ${manage.reason}")
+                else -> append(" Renew or revoke them via your Traefik config.")
+            }
+            usage?.why?.takeIf { it.isNotBlank() }?.let { append(" $it") }
+        }
 }
 
 @HiltViewModel
