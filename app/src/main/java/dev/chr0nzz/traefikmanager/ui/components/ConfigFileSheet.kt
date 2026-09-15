@@ -56,7 +56,8 @@ fun ConfigFileSheet(
 
     val matches = remember(files, query) {
         val needle = query.trim().lowercase()
-        if (needle.isEmpty()) files else files.filter { it.label.lowercase().contains(needle) }
+        val unique = files.filter { it.label.isNotEmpty() }.distinctBy { it.path.ifEmpty { it.label } }
+        if (needle.isEmpty()) unique else unique.filter { it.label.lowercase().contains(needle) }
     }
 
     ModalBottomSheet(

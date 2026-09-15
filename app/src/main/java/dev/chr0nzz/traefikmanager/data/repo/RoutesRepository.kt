@@ -198,8 +198,11 @@ class RoutesRepository @Inject constructor(
         runCatching { apiProvider.api().entrypoints().map { it.name }.filter { it.isNotEmpty() } }
             .getOrDefault(emptyList())
 
-    suspend fun configs(): ConfigsResponse =
-        runCatching { apiProvider.api().configs() }.getOrDefault(ConfigsResponse())
+    suspend fun configs(): ConfigsResponse {
+        val ready = runCatching { apiProvider.ready() }.getOrNull() ?: return ConfigsResponse()
+        val response = runCatching { ready.api.configs() }.getOrDefault(ConfigsResponse())
+        return response.normalized(onAgent = ready.agentId != null)
+    }
 
     suspend fun tlsOptions(): List<TlsOptionProfile> {
         val ready = apiProvider.ready()
