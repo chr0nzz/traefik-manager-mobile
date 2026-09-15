@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.providers
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,8 @@ import dev.chr0nzz.traefikmanager.data.model.ProviderRows
 import dev.chr0nzz.traefikmanager.data.model.ProviderVerdict
 import dev.chr0nzz.traefikmanager.data.repo.RoutesRepository
 import dev.chr0nzz.traefikmanager.data.repo.ServerScope
+import dev.chr0nzz.traefikmanager.ui.routes.ProtocolFilter
+import dev.chr0nzz.traefikmanager.ui.routes.StatusFilter
 import javax.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -30,7 +33,8 @@ data class ProviderUiState(
     val routes: List<ProviderRoute> = emptyList(),
     val middlewares: List<ProviderMiddleware> = emptyList(),
     val query: String = "",
-    val protocol: ProviderProtocol? = null,
+    val protocol: ProtocolFilter = ProtocolFilter.All,
+    val status: StatusFilter = StatusFilter.All,
     val selected: ProviderRoute? = null,
     val error: String? = null,
 ) {
@@ -40,8 +44,21 @@ data class ProviderUiState(
         get() {
             val needle = query.trim().lowercase()
             return routes.filter { route ->
-                (protocol == null || route.protocol == protocol) &&
-                    (needle.isEmpty() || route.name.lowercase().contains(needle) || route.rule.lowercase().contains(needle))
+                val matchesProtocol = when (protocol) {
+                    ProtocolFilter.All -> true
+                    ProtocolFilter.Http -> route.protocol == ProviderProtocol.Http
+                    ProtocolFilter.Tcp -> route.protocol == ProviderProtocol.Tcp
+                    ProtocolFilter.Udp -> route.protocol == ProviderProtocol.Udp
+                }
+                val matchesStatus = when (status) {
+                    StatusFilter.All -> true
+                    StatusFilter.Active -> route.serving
+                    StatusFilter.Inactive -> !route.serving
+                }
+                val matchesQuery = needle.isEmpty() ||
+                    route.name.lowercase().contains(needle) ||
+                    route.rule.lowercase().contains(needle)
+                matchesProtocol && matchesStatus && matchesQuery
             }
         }
 }
@@ -53,6 +70,8 @@ class ProviderViewModel @Inject constructor(
     private val serverScope: ServerScope,
 ) : ViewModel() {
 
+    val queryState = TextFieldState()
+
     private val _state = MutableStateFlow(ProviderUiState())
     val state: StateFlow<ProviderUiState> = _state.asStateFlow()
 
@@ -62,7 +81,7 @@ class ProviderViewModel @Inject constructor(
         viewModelScope.launch {
             serverScope.generation.drop(1).collect {
                 val page = bound ?: return@collect
-                _state.value = ProviderUiState(page = page)
+                _state.update { ProviderUiState(page = page, query = it.query, protocol = it.protocol, status = it.status) }
                 load(initial = true)
             }
         }
@@ -79,7 +98,9 @@ class ProviderViewModel @Inject constructor(
 
     fun onQueryChange(value: String) = _state.update { it.copy(query = value) }
 
-    fun onProtocolChange(value: ProviderProtocol?) = _state.update { it.copy(protocol = value) }
+    fun onProtocolChange(value: ProtocolFilter) = _state.update { it.copy(protocol = value) }
+
+    fun onStatusChange(value: StatusFilter) = _state.update { it.copy(status = value) }
 
     fun select(route: ProviderRoute?) = _state.update { it.copy(selected = route) }
 

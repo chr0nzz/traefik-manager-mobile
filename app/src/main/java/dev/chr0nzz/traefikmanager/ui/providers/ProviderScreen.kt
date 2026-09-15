@@ -1,6 +1,5 @@
 package dev.chr0nzz.traefikmanager.ui.providers
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,39 +12,33 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -55,7 +48,6 @@ import dev.chr0nzz.traefikmanager.data.model.ProviderPage
 import dev.chr0nzz.traefikmanager.data.model.ProviderProtocol
 import dev.chr0nzz.traefikmanager.data.model.ProviderRoute
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
-import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
@@ -85,30 +77,40 @@ fun ProviderScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val refreshState = rememberPullToRefreshState()
+    val searchBarState = rememberSearchBarState()
+    val searchScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val queryState = viewModel.queryState
 
     LaunchedEffect(page) { viewModel.bind(page) }
+
+    LaunchedEffect(queryState) {
+        snapshotFlow { queryState.text.toString() }.collect(viewModel::onQueryChange)
+    }
 
     state.selected?.let { route ->
         ProviderRouteSheet(route = route, onDismiss = { viewModel.select(null) })
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(searchScrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background,
-                ),
-                title = { Text(page.label) },
-                navigationIcon = { DrawerButton(onOpenDrawer) },
-                actions = {
-                    IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh ${page.label} routes")
-                    }
-                },
+            ProviderTopBar(
+                page = page,
+                onOpenDrawer = onOpenDrawer,
+                searchBarState = searchBarState,
+                queryState = queryState,
+                results = state.visible,
+                protocol = state.protocol,
+                status = state.status,
+                scrollBehavior = searchScrollBehavior,
+                onProtocolChange = viewModel::onProtocolChange,
+                onStatusChange = viewModel::onStatusChange,
+                onResultClick = viewModel::select,
+                onRefresh = viewModel::refresh,
             )
         },
     ) { insets ->
@@ -154,43 +156,11 @@ fun ProviderScreen(
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 ) {
                     item { VerdictCard(state = state) }
-                    item {
-                        OutlinedTextField(
-                            value = state.query,
-                            onValueChange = viewModel::onQueryChange,
-                            leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-                            placeholder = { Text("Search ${page.label} routes") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    item {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
-                            modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        ) {
-                            FilterChip(
-                                selected = state.protocol == null,
-                                onClick = { viewModel.onProtocolChange(null) },
-                                label = { Text("All") },
-                            )
-                            ProviderProtocol.entries.forEach { protocol ->
-                                FilterChip(
-                                    selected = state.protocol == protocol,
-                                    onClick = { viewModel.onProtocolChange(protocol) },
-                                    label = { Text(protocol.label) },
-                                )
-                            }
-                        }
-                    }
                     if (state.visible.isEmpty() && state.routes.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "No routes match these filters",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = palette.muted,
-                                modifier = Modifier.padding(vertical = TmSpacing.lg),
+                        item(key = "empty") {
+                            EmptyState(
+                                headline = "No routes match",
+                                body = "Try a different search or filter.",
                             )
                         }
                     }

@@ -87,6 +87,23 @@ class ProviderPagesTest {
     }
 
     @Test
+    fun `the top bar protocol, status and search filters narrow the list like Routes`() {
+        val state = dev.chr0nzz.traefikmanager.ui.providers.ProviderUiState(
+            routes = ProviderRows.routes(ProviderPage.Docker, routers, null),
+        )
+        assertEquals(3, state.visible.size)
+        assertEquals(
+            listOf("db@docker"),
+            state.copy(protocol = dev.chr0nzz.traefikmanager.ui.routes.ProtocolFilter.Tcp).visible.map { it.name },
+        )
+        assertEquals(
+            listOf("broken@docker"),
+            state.copy(status = dev.chr0nzz.traefikmanager.ui.routes.StatusFilter.Inactive).visible.map { it.name },
+        )
+        assertEquals(listOf("whoami@docker"), state.copy(query = "who.example").visible.map { it.name })
+    }
+
+    @Test
     fun `router tls and middlewares decode from the Traefik API`() {
         val json = Json { ignoreUnknownKeys = true }
         val router = json.decodeFromString<TraefikObject>(

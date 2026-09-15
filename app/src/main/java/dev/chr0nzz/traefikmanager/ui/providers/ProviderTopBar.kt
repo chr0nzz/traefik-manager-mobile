@@ -1,33 +1,25 @@
-package dev.chr0nzz.traefikmanager.ui.routes
+package dev.chr0nzz.traefikmanager.ui.providers
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FilterList
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -39,8 +31,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -48,9 +40,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import dev.chr0nzz.traefikmanager.data.model.Route
+import dev.chr0nzz.traefikmanager.data.model.ProviderPage
+import dev.chr0nzz.traefikmanager.data.model.ProviderProtocol
+import dev.chr0nzz.traefikmanager.data.model.ProviderRoute
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.StatusDot
+import dev.chr0nzz.traefikmanager.ui.routes.FilterMenu
+import dev.chr0nzz.traefikmanager.ui.routes.ProtocolFilter
+import dev.chr0nzz.traefikmanager.ui.routes.StatusFilter
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
@@ -58,17 +55,18 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutesTopBar(
+fun ProviderTopBar(
+    page: ProviderPage,
     onOpenDrawer: () -> Unit,
     searchBarState: SearchBarState,
     queryState: TextFieldState,
-    results: List<Route>,
+    results: List<ProviderRoute>,
     protocol: ProtocolFilter,
     status: StatusFilter,
     scrollBehavior: TopAppBarScrollBehavior,
     onProtocolChange: (ProtocolFilter) -> Unit,
     onStatusChange: (StatusFilter) -> Unit,
-    onResultClick: (Route) -> Unit,
+    onResultClick: (ProviderRoute) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -83,13 +81,13 @@ fun RoutesTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text("Routes") },
+        title = { Text(page.label) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search routes")
+                Icon(Icons.Outlined.Search, contentDescription = "Search ${page.label} routes")
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
@@ -116,7 +114,7 @@ fun RoutesTopBar(
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh routes")
+                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh ${page.label} routes")
             }
         },
         scrollBehavior = scrollBehavior,
@@ -129,7 +127,7 @@ fun RoutesTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search routes") },
+                placeholder = { Text("Search ${page.label} routes") },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
@@ -155,18 +153,18 @@ fun RoutesTopBar(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    itemsIndexed(results, key = { index, route -> route.id.ifEmpty { "route-$index" } }) { _, route ->
+                    items(results, key = { "${it.protocol}:${it.name}" }) { route ->
                         ListItem(
-                            headlineContent = { Text(route.name) },
+                            headlineContent = { Text(route.shortName) },
                             supportingContent = {
                                 Text(
-                                    text = route.hosts.firstOrNull() ?: route.target,
+                                    text = route.plainHost ?: route.target ?: route.rule,
                                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                                 )
                             },
-                            leadingContent = { StatusDot(route.status()) },
-                            trailingContent = if (route.protocol != "http") {
-                                { Text(route.protocol.uppercase(), style = MaterialTheme.typography.labelSmall) }
+                            leadingContent = { StatusDot(route.tmStatus()) },
+                            trailingContent = if (route.protocol != ProviderProtocol.Http) {
+                                { Text(route.protocol.label, style = MaterialTheme.typography.labelSmall) }
                             } else {
                                 null
                             },
@@ -178,81 +176,6 @@ fun RoutesTopBar(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun FilterMenu(
-    expanded: Boolean,
-    protocol: ProtocolFilter,
-    status: StatusFilter,
-    filtersActive: Boolean,
-    onDismiss: () -> Unit,
-    onProtocolChange: (ProtocolFilter) -> Unit,
-    onStatusChange: (StatusFilter) -> Unit,
-) {
-    val palette = LocalTmPalette.current
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        modifier = Modifier.widthIn(min = 240.dp),
-    ) {
-        Text(
-            text = "PROTOCOL",
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-            modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
-        )
-        ProtocolFilter.entries.forEach { option ->
-            DropdownMenuItem(
-                text = { Text(option.label) },
-                onClick = {
-                    onProtocolChange(option)
-                    onDismiss()
-                },
-                trailingIcon = if (option == protocol) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
-                } else {
-                    null
-                },
-                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
-            )
-        }
-        HorizontalDivider()
-        Text(
-            text = "STATUS",
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-            modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
-        )
-        StatusFilter.entries.forEach { option ->
-            DropdownMenuItem(
-                text = { Text(option.label) },
-                onClick = {
-                    onStatusChange(option)
-                    onDismiss()
-                },
-                trailingIcon = if (option == status) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
-                } else {
-                    null
-                },
-                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
-            )
-        }
-        if (filtersActive) {
-            HorizontalDivider()
-            DropdownMenuItem(
-                text = { Text("Clear filters") },
-                leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
-                contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
-                onClick = {
-                    onProtocolChange(ProtocolFilter.All)
-                    onStatusChange(StatusFilter.All)
-                    onDismiss()
-                },
-            )
         }
     }
 }
