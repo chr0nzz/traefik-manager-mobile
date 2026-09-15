@@ -151,6 +151,14 @@ data class ProviderVerdict(
             notServing > 0 -> "$notServing ${if (notServing == 1) "route" else "routes"} not serving"
             else -> "$routes ${if (routes == 1) "route" else "routes"} live"
         }
+
+    val detail: String
+        get() = buildList {
+            if (http > 0) add("$http HTTP")
+            if (tcp > 0) add("$tcp TCP")
+            if (udp > 0) add("$udp UDP")
+            if (middlewares > 0) add("$middlewares ${if (middlewares == 1) "middleware" else "middlewares"}")
+        }.joinToString(" · ").ifEmpty { "No routes" }
 }
 
 object ProviderRows {

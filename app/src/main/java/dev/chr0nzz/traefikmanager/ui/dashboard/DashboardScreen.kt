@@ -81,6 +81,7 @@ import dev.chr0nzz.traefikmanager.data.repo.RuntimeInfo
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
 import dev.chr0nzz.traefikmanager.data.repo.SignalFlag
 import dev.chr0nzz.traefikmanager.data.repo.Verdict
+import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.CountChip
@@ -304,30 +305,6 @@ fun DashboardScreen(
             }
         }
         }
-    }
-}
-
-@Composable
-private fun VerdictLine(verdict: Verdict) {
-    val palette = LocalTmPalette.current
-    TmCard(accent = verdict.status) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-        ) {
-            StatusDot(verdict.status)
-            Text(
-                text = verdict.headline,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        Text(
-            text = verdict.detail,
-            style = MaterialTheme.typography.bodySmall,
-            color = palette.muted,
-            modifier = Modifier.padding(top = 2.dp),
-        )
     }
 }
 

@@ -47,6 +47,8 @@ import dev.chr0nzz.traefikmanager.data.model.ProviderMiddleware
 import dev.chr0nzz.traefikmanager.data.model.ProviderPage
 import dev.chr0nzz.traefikmanager.data.model.ProviderProtocol
 import dev.chr0nzz.traefikmanager.data.model.ProviderRoute
+import dev.chr0nzz.traefikmanager.data.repo.Verdict
+import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -190,34 +192,15 @@ fun ProviderScreen(
 
 @Composable
 private fun VerdictCard(state: ProviderUiState) {
-    val palette = LocalTmPalette.current
     val verdict = state.verdict
-    TmCard(accentColor = if (verdict.notServing > 0) palette.red else palette.green) {
-        Text(
-            text = verdict.headline,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = buildList {
-                if (verdict.http > 0) add("${verdict.http} HTTP")
-                if (verdict.tcp > 0) add("${verdict.tcp} TCP")
-                if (verdict.udp > 0) add("${verdict.udp} UDP")
-                if (verdict.middlewares > 0) {
-                    add("${verdict.middlewares} ${if (verdict.middlewares == 1) "middleware" else "middlewares"}")
-                }
-                add("read-only")
-            }.joinToString(" · "),
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-        )
-        Text(
-            text = state.page.note,
-            style = MaterialTheme.typography.labelSmall,
-            color = palette.muted,
-            modifier = Modifier.padding(top = TmSpacing.xs),
-        )
-    }
+    VerdictLine(
+        verdict = Verdict(
+            headline = verdict.headline,
+            detail = verdict.detail,
+            status = if (verdict.notServing > 0) TmStatus.Error else TmStatus.Ok,
+        ),
+        info = state.page.note,
+    )
 }
 
 @Composable

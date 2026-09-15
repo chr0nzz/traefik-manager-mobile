@@ -80,6 +80,7 @@ class ProviderPagesTest {
         )
         val verdict = ProviderRows.verdict(routes, middlewares)
         assertEquals("1 route not serving", verdict.headline)
+        assertEquals("2 HTTP · 1 TCP · 1 middleware", verdict.detail)
         assertEquals(2, verdict.http)
         assertEquals(1, verdict.tcp)
         assertEquals(1, verdict.middlewares)
