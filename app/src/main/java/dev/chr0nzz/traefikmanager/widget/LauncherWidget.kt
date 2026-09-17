@@ -36,7 +36,9 @@ import androidx.glance.layout.size
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import androidx.glance.LocalContext
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.BitmapSampling
 import java.io.File
 
 object LauncherWidgetConfig {
@@ -120,12 +122,22 @@ class LauncherWidget : GlanceAppWidget() {
     }
 }
 
+private fun decodeIcon(file: File, targetPx: Int): android.graphics.Bitmap? {
+    val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    android.graphics.BitmapFactory.decodeFile(file.absolutePath, bounds)
+    val options = android.graphics.BitmapFactory.Options().apply {
+        inSampleSize = BitmapSampling.sampleSize(bounds.outWidth, bounds.outHeight, targetPx)
+    }
+    return android.graphics.BitmapFactory.decodeFile(file.absolutePath, options)
+}
+
 @Composable
 private fun Icon(icon: String, name: String, size: Int) {
+    val density = LocalContext.current.resources.displayMetrics.density
     val bitmap = icon.takeIf { it.isNotEmpty() }
         ?.let { File(it) }
         ?.takeIf { it.exists() }
-        ?.let { runCatching { android.graphics.BitmapFactory.decodeFile(it.absolutePath) }.getOrNull() }
+        ?.let { file -> runCatching { decodeIcon(file, (size * density).toInt()) }.getOrNull() }
     Box(modifier = GlanceModifier.size(size.dp), contentAlignment = Alignment.Center) {
         if (bitmap != null) {
             Image(
