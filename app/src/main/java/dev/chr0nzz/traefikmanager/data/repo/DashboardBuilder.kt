@@ -224,6 +224,8 @@ object DashboardBuilder {
             servers.isNullOrEmpty() && obj.type != null && obj.type != "loadBalancer" ->
                 ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
             servers.isNullOrEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, "no health check configured", obj.provider)
+            down == servers.size ->
+                ObjectSignal(obj.shortName, ObjectState.Err, "all ${servers.size} backends down", obj.provider)
             down > 0 -> ObjectSignal(obj.shortName, ObjectState.Warn, "$down of ${servers.size} backends down", obj.provider)
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
         }

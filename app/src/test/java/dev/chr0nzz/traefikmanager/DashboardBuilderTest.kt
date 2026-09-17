@@ -50,6 +50,14 @@ class DashboardBuilderTest {
 
         val unchecked = TraefikObject(name = "svc2@file", status = "enabled")
         assertEquals(ObjectState.Idle, DashboardBuilder.classifyService(unchecked).state)
+
+        val dead = TraefikObject(
+            name = "svc3@file",
+            status = "enabled",
+            serverStatus = mapOf("a" to "DOWN", "b" to "DOWN"),
+        )
+        assertEquals(ObjectState.Err, DashboardBuilder.classifyService(dead).state)
+        assertEquals("all 2 backends down", DashboardBuilder.classifyService(dead).reason)
     }
 
     @Test

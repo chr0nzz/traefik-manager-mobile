@@ -52,6 +52,19 @@ class ServiceRowsTest {
     }
 
     @Test
+    fun `a service with every backend down is an error, not a warning`() {
+        val service = TraefikService(
+            name = "dead@file",
+            status = "enabled",
+            serverStatus = mapOf("http://a:80" to "DOWN", "http://b:80" to "DOWN"),
+        )
+        val built = row(service)
+        assertEquals(ServiceHealth.Error, built.health)
+        assertEquals(0, built.backendsUp)
+        assertEquals("0/2 active", built.backendSummary)
+    }
+
+    @Test
     fun `disabled and unknown statuses follow the web truth table`() {
         assertEquals(ServiceHealth.Error, row(TraefikService(name = "a", status = "disabled")).health)
         assertEquals(ServiceHealth.Error, row(TraefikService(name = "a", status = "error")).health)

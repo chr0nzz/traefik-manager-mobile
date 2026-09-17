@@ -232,10 +232,15 @@ object ServiceRows {
     }
 
     fun healthOf(service: TraefikService): ServiceHealth {
-        val anyDown = service.serverStatus.orEmpty().any { it.value.uppercase() != "UP" }
+        val statuses = service.serverStatus.orEmpty()
+        val down = statuses.count { it.value.uppercase() != "UP" }
         return when (service.status?.lowercase()) {
             "disabled", "error" -> ServiceHealth.Error
-            "enabled" -> if (anyDown) ServiceHealth.Warning else ServiceHealth.Ok
+            "enabled" -> when {
+                down == 0 -> ServiceHealth.Ok
+                down == statuses.size -> ServiceHealth.Error
+                else -> ServiceHealth.Warning
+            }
             else -> ServiceHealth.Warning
         }
     }
