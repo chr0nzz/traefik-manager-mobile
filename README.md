@@ -127,3 +127,9 @@ keyPassword=...
 - [Glance](https://developer.android.com/jetpack/androidx/releases/glance) and WorkManager for the widgets
 - [UnifiedPush](https://unifiedpush.org) for push
 - Robolectric and JUnit for tests, R8 with resource shrinking for release builds
+
+---
+
+## Community
+
+Questions, help and release news: [Discord](https://discord.gg/a6NKyJsfc)
