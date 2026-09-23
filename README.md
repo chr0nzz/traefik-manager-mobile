@@ -132,4 +132,4 @@ keyPassword=...
 
 ## Community
 
-Questions, help and release news: [Discord](https://discord.gg/a6NKyJsfc)
+Questions, help and release news: [Discord](https://discord.gg/vRQCMrrjtz)
