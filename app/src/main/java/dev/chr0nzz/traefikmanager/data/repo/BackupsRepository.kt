@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.BackupEntry
 import dev.chr0nzz.traefikmanager.data.model.BackupKind
@@ -50,25 +52,25 @@ class BackupsRepository @Inject constructor(
     suspend fun create(): CreateBackupResponse = apiProvider.api().createBackup()
 
     suspend fun createStatic(): CreateBackupResponse {
-        require(onHost) { "An agent backs up its static config with the ordinary create" }
+        if (!(onHost)) fail(null, R.string.error_an_agent_backs_up_its_static)
         return apiProvider.api().createStaticBackup()
     }
 
     suspend fun delete(name: String) {
         val response = apiProvider.api().deleteBackup(name)
-        if (!response.worked) error(response.error ?: response.message ?: "Could not delete the backup")
+        if (!response.worked) fail(response.error ?: response.message, R.string.backups_error_delete)
     }
 
     suspend fun restore(name: String): RestoreResponse {
         val response = apiProvider.api().restoreBackup(name)
-        if (!response.worked) error(response.error ?: "Could not restore the backup")
+        if (!response.worked) fail(response.error, R.string.backups_error_restore)
         routesRepository.notifyChangedExternally()
         return response
     }
 
     suspend fun restartTraefik() {
         val response = apiProvider.api().restartTraefik()
-        if (!response.ok) error(response.error ?: "Could not restart Traefik")
+        if (!response.ok) fail(response.error, R.string.error_could_not_restart_traefik)
     }
 
     private suspend fun gitTarget(): String? {
@@ -85,12 +87,12 @@ class BackupsRepository @Inject constructor(
 
     suspend fun gitPush(message: String) {
         val response = apiProvider.api().gitPush(GitPushRequest(message.trim()), gitTarget())
-        if (!response.ok) error(response.error ?: response.message ?: "Could not push to Git")
+        if (!response.ok) fail(response.error ?: response.message, R.string.backups_git_error_push)
     }
 
     suspend fun gitRestore(sha: String) {
         val response = apiProvider.api().gitRestore(sha, gitTarget())
-        if (!response.ok) error(response.error ?: response.message ?: "Could not restore that commit")
+        if (!response.ok) fail(response.error ?: response.message, R.string.backups_git_error_restore)
         routesRepository.notifyChangedExternally()
     }
 

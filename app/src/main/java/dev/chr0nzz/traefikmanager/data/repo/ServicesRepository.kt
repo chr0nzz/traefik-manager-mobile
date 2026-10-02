@@ -1,5 +1,8 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.failHttp
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.ServiceOwnershipRequest
@@ -25,15 +28,15 @@ class ServicesRepository @Inject constructor(
     suspend fun load(): ServiceEnvelope = try {
         apiProvider.api().services(agentId = agent())
     } catch (exception: HttpException) {
-        error(upstreamMessage(exception) ?: "Traefik API not reachable (HTTP ${exception.code()})")
+        failHttp(upstreamMessage(exception), R.string.common_error_traefik_unreachable, exception.code())
     }
 
     suspend fun save(payload: ServicePayload): String = try {
         val response = apiProvider.api().saveService(payload.copy(agentId = agent().orEmpty()))
-        if (!response.ok) error(response.error ?: "Could not save the service")
+        if (!response.ok) fail(response.error, R.string.services_error_save)
         response.name.ifBlank { payload.name }
     } catch (exception: HttpException) {
-        error(upstreamMessage(exception) ?: "Could not save the service (HTTP ${exception.code()})")
+        failHttp(upstreamMessage(exception), R.string.services_error_save, exception.code())
     }
 
     suspend fun delete(name: String, force: Boolean = false) {
@@ -44,17 +47,17 @@ class ServicesRepository @Inject constructor(
                 force = if (force) "1" else null,
             )
         } catch (exception: HttpException) {
-            throw InUse.from(exception, "Could not delete the service")
+            throw InUse.from(exception, R.string.services_error_delete)
         }
     }
 
     suspend fun setOwnership(name: String, adopt: Boolean): Boolean = try {
         val response = apiProvider.api()
             .setServiceOwnership(name, ServiceOwnershipRequest(adopt), agentId = agent())
-        if (!response.ok) error(response.error ?: "Could not change the ownership")
+        if (!response.ok) fail(response.error, R.string.services_error_ownership)
         response.owned
     } catch (exception: HttpException) {
-        error(upstreamMessage(exception) ?: "Could not change the ownership (HTTP ${exception.code()})")
+        failHttp(upstreamMessage(exception), R.string.services_error_ownership, exception.code())
     }
 
     private fun upstreamMessage(exception: HttpException): String? {

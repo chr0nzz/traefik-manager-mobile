@@ -129,7 +129,7 @@ class PluginsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            loadError = UiText.messageOr(throwable.message, R.string.plugins_error_load),
+                            loadError = UiText.failure(throwable, R.string.plugins_error_load),
                         )
                     }
                 },
@@ -239,7 +239,7 @@ class PluginsViewModel @Inject constructor(
                     load(initial = false)
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(busy = false, formError = UiText.messageOr(throwable.message, R.string.common_error_save)) }
+                    _state.update { it.copy(busy = false, formError = UiText.failure(throwable, R.string.common_error_save)) }
                 },
             )
         }
@@ -256,7 +256,7 @@ class PluginsViewModel @Inject constructor(
                     load(initial = false)
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.common_error_save)) }
+                    _state.update { it.copy(busy = false, message = UiText.failure(throwable, R.string.common_error_save)) }
                 },
             )
         }
@@ -273,7 +273,7 @@ class PluginsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(restarting = false, message = UiText.messageOr(throwable.message, R.string.common_error_restart))
+                        it.copy(restarting = false, message = UiText.failure(throwable, R.string.common_error_restart))
                     }
                 },
             )

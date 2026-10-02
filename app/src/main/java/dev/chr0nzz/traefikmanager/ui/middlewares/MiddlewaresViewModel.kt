@@ -24,7 +24,7 @@ enum class MiddlewareFilter(val label: UiText) {
 }
 
 data class BlockedMiddlewareDelete(
-    val reason: String,
+    val reason: UiText,
     val routers: List<String>,
     val middleware: MiddlewareDef,
 )
@@ -101,7 +101,7 @@ class MiddlewaresViewModel @Inject constructor(
                             it.copy(
                                 deletingName = null,
                                 blockedDelete = BlockedMiddlewareDelete(
-                                    reason = throwable.message,
+                                    reason = throwable.reason,
                                     routers = throwable.routers,
                                     middleware = middleware,
                                 ),
@@ -112,7 +112,7 @@ class MiddlewaresViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             deletingName = null,
-                            message = UiText.messageOr(throwable.message, R.string.middlewares_error_delete),
+                            message = UiText.failure(throwable, R.string.middlewares_error_delete),
                         )
                     }
                 },
@@ -142,7 +142,7 @@ class MiddlewaresViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = UiText.messageOr(throwable.message, R.string.middlewares_error_load),
+                            error = UiText.failure(throwable, R.string.middlewares_error_load),
                         )
                     }
                 },

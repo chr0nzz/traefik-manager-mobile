@@ -83,7 +83,7 @@ class ConnectViewModel @Inject constructor(
             else -> UiText.of(R.string.connect_error_server, throwable.code())
         }
         is IOException -> UiText.of(R.string.connect_error_unreachable)
-        else -> throwable.message?.let(UiText::Raw) ?: UiText.of(R.string.connect_error_failed)
+        else -> UiText.failure(throwable, R.string.connect_error_failed)
     }
 
     companion object {

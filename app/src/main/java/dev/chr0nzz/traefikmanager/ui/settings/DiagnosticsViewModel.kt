@@ -45,7 +45,7 @@ class DiagnosticsViewModel @Inject constructor(
                             error = if (throwable is HttpException && throwable.code() == 404) {
                                 UiText.of(R.string.diagnostics_error_too_old)
                             } else {
-                                UiText.messageOr(throwable.message, R.string.diagnostics_error_load)
+                                UiText.failure(throwable, R.string.diagnostics_error_load)
                             },
                         )
                     }

@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.Agent
 import dev.chr0nzz.traefikmanager.data.model.AgentConfig
@@ -68,9 +70,9 @@ class ServersRepository @Inject constructor(
     suspend fun select(id: String?) = preferencesStore.setActiveAgent(id)
 
     suspend fun create(name: String, url: String): String? {
-        require(name.isNotBlank() && url.isNotBlank()) { "A name and a URL are required" }
+        if (!(name.isNotBlank() && url.isNotBlank())) fail(null, R.string.error_a_name_and_a_url_are)
         val response = apiProvider.api().createAgent(CreateAgentRequest(name.trim(), url.trim().trimEnd('/')))
-        if (!response.ok) error(response.error ?: "Could not add the server")
+        if (!response.ok) fail(response.error, R.string.error_could_not_add_the_server)
         return response.rawKey
     }
 
@@ -80,22 +82,22 @@ class ServersRepository @Inject constructor(
     suspend fun update(id: String, changes: Map<String, JsonElement>) {
         val name = (changes["name"] as? JsonPrimitive)?.content
         val url = (changes["url"] as? JsonPrimitive)?.content
-        require(name == null || name.isNotBlank()) { "The name cannot be empty" }
-        require(url == null || url.isNotBlank()) { "The URL cannot be empty" }
+        if (!(name == null || name.isNotBlank())) fail(null, R.string.error_the_name_cannot_be_empty)
+        if (!(url == null || url.isNotBlank())) fail(null, R.string.error_the_url_cannot_be_empty)
         val response = apiProvider.api().updateAgent(id, JsonObject(changes))
-        if (!response.ok) error(response.error ?: "Could not save the server")
+        if (!response.ok) fail(response.error, R.string.error_could_not_save_the_server)
     }
 
     suspend fun delete(id: String) {
         if (preferencesStore.preferences.first().activeAgentId == id) preferencesStore.setActiveAgent(null)
         val response = apiProvider.api().deleteAgent(id)
-        if (!response.ok) error(response.error ?: "Could not remove the server")
+        if (!response.ok) fail(response.error, R.string.error_could_not_remove_the_server)
     }
 
     suspend fun rotateKey(id: String): String {
         val response = apiProvider.api().rotateAgentKey(id)
-        if (!response.ok) error(response.error ?: "Could not rotate the key")
-        return response.rawKey ?: error("The server did not return a new key")
+        if (!response.ok) fail(response.error, R.string.error_could_not_rotate_the_key)
+        return response.rawKey ?: fail(null, R.string.error_the_server_did_not_return_a)
     }
 
     suspend fun reconcileActive(agents: List<Agent>): Boolean {

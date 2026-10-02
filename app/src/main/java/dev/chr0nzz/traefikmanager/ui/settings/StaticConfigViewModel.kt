@@ -87,7 +87,7 @@ class StaticConfigViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             loading = false,
-                            loadError = UiText.messageOr(throwable.message, R.string.static_error_load),
+                            loadError = UiText.failure(throwable, R.string.static_error_load),
                         )
                     }
                 },
@@ -128,7 +128,7 @@ class StaticConfigViewModel @Inject constructor(
                     onDone(null)
                 },
                 onFailure = { throwable ->
-                    val message = UiText.messageOr(throwable.message, R.string.static_error_apply)
+                    val message = UiText.failure(throwable, R.string.static_error_apply)
                     _state.update { it.copy(busy = false) }
                     onDone(message)
                 },
@@ -156,7 +156,7 @@ class StaticConfigViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, saveError = UiText.messageOr(throwable.message, R.string.static_error_save))
+                        it.copy(saving = false, saveError = UiText.failure(throwable, R.string.static_error_save))
                     }
                 },
             )
@@ -174,7 +174,7 @@ class StaticConfigViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(restarting = false, message = UiText.messageOr(throwable.message, R.string.common_error_restart))
+                        it.copy(restarting = false, message = UiText.failure(throwable, R.string.common_error_restart))
                     }
                 },
             )

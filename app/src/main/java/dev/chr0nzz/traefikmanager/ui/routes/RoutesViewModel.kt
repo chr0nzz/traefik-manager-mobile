@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.routes
 
+import dev.chr0nzz.traefikmanager.data.model.LocalizedException
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -180,7 +181,7 @@ class RoutesViewModel @Inject constructor(
                     )
                 },
                 onFailure = { throwable ->
-                    PingState(running = false, ok = false, detail = UiText.messageOr(throwable.message, R.string.routes_ping_failed))
+                    PingState(running = false, ok = false, detail = UiText.failure(throwable, R.string.routes_ping_failed))
                 },
             )
             _state.update { it.copy(pingResults = it.pingResults + (route.id to next)) }
@@ -211,7 +212,7 @@ class RoutesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(togglingId = null, message = UiText.messageOr(throwable.message, R.string.routes_error_toggle))
+                        it.copy(togglingId = null, message = UiText.failure(throwable, R.string.routes_error_toggle))
                     }
                 },
             )
@@ -235,7 +236,7 @@ class RoutesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(togglingId = null, message = UiText.messageOr(throwable.message, R.string.routes_error_delete))
+                        it.copy(togglingId = null, message = UiText.failure(throwable, R.string.routes_error_delete))
                     }
                 },
             )
@@ -259,14 +260,15 @@ class RoutesViewModel @Inject constructor(
                 certificates.remove(offer.certs.map { CertRef(it.resolver, it.main) })
             }.fold(
                 onSuccess = { response -> CertCleanup.outcome(response, offer.certs.size) },
-                onFailure = { throwable -> UiText.messageOr(throwable.message, R.string.certs_error_remove) },
+                onFailure = { throwable -> UiText.failure(throwable, R.string.certs_error_remove) },
             )
             _state.update { it.copy(message = message) }
         }
     }
 
     private fun describeLoadFailure(throwable: Throwable): UiText {
-        val detail = UiText.messageOr(throwable.message ?: throwable::class.simpleName, R.string.common_error_unknown)
+        val detail = (throwable as? LocalizedException)?.text
+            ?: UiText.messageOr(throwable.message ?: throwable::class.simpleName, R.string.common_error_unknown)
         return when (throwable) {
             is kotlinx.serialization.SerializationException -> UiText.of(R.string.routes_error_unreadable, detail)
             else -> detail

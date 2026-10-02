@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.routemap
 
+import dev.chr0nzz.traefikmanager.data.model.LocalizedException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -113,7 +114,8 @@ class RouteMapViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = UiText.messageOr(throwable.message?.take(160), R.string.routemap_error),
+                            error = (throwable as? LocalizedException)?.text
+                                ?: UiText.messageOr(throwable.message?.take(160), R.string.routemap_error),
                         )
                     }
                 },

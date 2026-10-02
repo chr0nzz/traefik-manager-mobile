@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.store.SnapshotStore
 import kotlinx.serialization.Serializable
@@ -104,13 +106,13 @@ class CrowdSecRepository @Inject constructor(
 
     suspend fun addDecision(request: AddDecisionRequest) {
         val response = apiProvider.api().crowdSecAddDecision(request)
-        if (!response.isSuccessful) error(CrowdSecReader.errorMessage(response) ?: "Could not add the decision")
+        if (!response.isSuccessful) fail(CrowdSecReader.errorMessage(response), R.string.crowdsec_error_add)
         cache.remove(key())
     }
 
     suspend fun deleteDecision(id: Long) {
         val response = apiProvider.api().crowdSecDeleteDecision(id)
-        if (!response.isSuccessful) error(CrowdSecReader.errorMessage(response) ?: "Could not delete the decision")
+        if (!response.isSuccessful) fail(CrowdSecReader.errorMessage(response), R.string.crowdsec_error_delete)
         cache.remove(key())
     }
 

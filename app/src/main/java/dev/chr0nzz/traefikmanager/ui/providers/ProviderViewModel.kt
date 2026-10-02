@@ -128,7 +128,7 @@ class ProviderViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = UiText.messageOr(throwable.message, R.string.common_error_traefik_unreachable),
+                            error = UiText.failure(throwable, R.string.common_error_traefik_unreachable),
                         )
                     }
                 },

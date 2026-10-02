@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.DigestRequest
 import dev.chr0nzz.traefikmanager.data.model.HtpasswdRequest
@@ -25,7 +27,7 @@ class MiddlewaresRepository @Inject constructor(
             builder.add(key, value)
         }
         val result = ready.api.saveMiddleware(builder.build())
-        if (!result.ok) error(result.message ?: result.error ?: "Could not save the middleware")
+        if (!result.ok) fail(result.message ?: result.error, R.string.middlewares_error_save)
         routesRepository.notifyChangedExternally()
     }
 
@@ -39,9 +41,9 @@ class MiddlewaresRepository @Inject constructor(
         val result = try {
             ready.api.deleteMiddleware(name, body)
         } catch (exception: HttpException) {
-            throw InUse.from(exception, "Could not delete the middleware")
+            throw InUse.from(exception, R.string.middlewares_error_delete)
         }
-        if (!result.ok) error(result.message ?: result.error ?: "Could not delete the middleware")
+        if (!result.ok) fail(result.message ?: result.error, R.string.middlewares_error_delete)
         routesRepository.notifyChangedExternally()
     }
 
@@ -50,28 +52,28 @@ class MiddlewaresRepository @Inject constructor(
 
     suspend fun createTemplate(name: String, yaml: String) {
         val result = apiProvider.api().createMiddlewareTemplate(TemplateBody(name, yaml))
-        if (!result.ok) error(result.message ?: result.error ?: "Could not create the template")
+        if (!result.ok) fail(result.message ?: result.error, R.string.error_could_not_create_the_template)
     }
 
     suspend fun updateTemplate(id: String, name: String, yaml: String) {
         val result = apiProvider.api().updateMiddlewareTemplate(id, TemplateBody(name, yaml))
-        if (!result.ok) error(result.message ?: result.error ?: "Could not update the template")
+        if (!result.ok) fail(result.message ?: result.error, R.string.error_could_not_update_the_template)
     }
 
     suspend fun deleteTemplate(id: String) {
         val result = apiProvider.api().deleteMiddlewareTemplate(id)
-        if (!result.ok) error(result.message ?: result.error ?: "Could not delete the template")
+        if (!result.ok) fail(result.message ?: result.error, R.string.middlewares_templates_error_delete)
     }
 
     suspend fun htpasswdEntry(username: String, password: String): String {
         val result = apiProvider.api().htpasswd(HtpasswdRequest(username, password))
-        if (!result.ok) error(result.error ?: "Could not generate the entry")
+        if (!result.ok) fail(result.error, R.string.middlewares_error_generate)
         return result.entry
     }
 
     suspend fun digestEntry(username: String, password: String, realm: String): String {
         val result = apiProvider.api().digestAuth(DigestRequest(username, password, realm))
-        if (!result.ok) error(result.error ?: "Could not generate the entry")
+        if (!result.ok) fail(result.error, R.string.middlewares_error_generate)
         return result.entry
     }
 }

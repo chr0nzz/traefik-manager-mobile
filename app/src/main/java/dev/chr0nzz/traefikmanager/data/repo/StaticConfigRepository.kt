@@ -1,5 +1,8 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.failHttp
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallRequest
 import dev.chr0nzz.traefikmanager.data.model.PluginInstallResponse
@@ -35,7 +38,7 @@ class StaticConfigRepository @Inject constructor(
     suspend fun read(): StaticConfigResponse = try {
         apiProvider.apiFor(null).staticConfig(server = agent())
     } catch (exception: HttpException) {
-        error(message(exception) ?: "Could not read the static config (HTTP ${exception.code()})")
+        failHttp(message(exception), R.string.static_error_load, exception.code())
     }
 
     suspend fun write(content: String) {
@@ -47,7 +50,7 @@ class StaticConfigRepository @Inject constructor(
                 apiProvider.api().saveAgentStaticConfig(StaticSaveRequest(content))
             }
         } catch (exception: HttpException) {
-            error(message(exception) ?: "Could not save the static config (HTTP ${exception.code()})")
+            failHttp(message(exception), R.string.error_could_not_save_the_static_config, exception.code())
         }
     }
 
@@ -56,7 +59,7 @@ class StaticConfigRepository @Inject constructor(
             apiProvider.api().restartTraefik()
         } catch (exception: HttpException) {
             if (exception.code() !in setOf(502, 504)) {
-                error(message(exception) ?: "The restart failed (HTTP ${exception.code()})")
+                failHttp(message(exception), R.string.error_the_restart_failed, exception.code())
             }
         }
     }
@@ -81,7 +84,7 @@ class StaticConfigRepository @Inject constructor(
         } catch (exception: HttpException) {
             PluginInstallResponse(
                 ok = false,
-                error = message(exception) ?: "Could not install the plugin (HTTP ${exception.code()})",
+                error = message(exception),
             )
         }
     }
@@ -120,9 +123,9 @@ class StaticConfigRepository @Inject constructor(
                 ),
             )
         } catch (exception: HttpException) {
-            error(message(exception) ?: "Could not apply the change (HTTP ${exception.code()})")
+            failHttp(message(exception), R.string.static_error_apply, exception.code())
         }
-        if (!response.ok || response.raw.isBlank()) error(response.error ?: "Could not apply the change")
+        if (!response.ok || response.raw.isBlank()) fail(response.error, R.string.static_error_apply)
         return response
     }
 
@@ -140,10 +143,10 @@ class StaticConfigRepository @Inject constructor(
                 ),
             )
         } catch (exception: HttpException) {
-            error(message(exception) ?: "Could not change the plugin (HTTP ${exception.code()})")
+            failHttp(message(exception), R.string.error_could_not_change_the_plugin, exception.code())
         }
         if (!response.ok || response.raw.isBlank()) {
-            error(response.error ?: "Could not change the plugin")
+            fail(response.error, R.string.error_could_not_change_the_plugin)
         }
         write(response.raw)
     }

@@ -217,7 +217,7 @@ class MiddlewareFormViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             generating = false,
-                            generatorError = UiText.messageOr(throwable.message, R.string.middlewares_error_generate),
+                            generatorError = UiText.failure(throwable, R.string.middlewares_error_generate),
                         )
                     }
                 },
@@ -247,7 +247,7 @@ class MiddlewareFormViewModel @Inject constructor(
                 onSuccess = { _state.update { it.copy(saving = false, saved = true) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.middlewares_error_save))
+                        it.copy(saving = false, error = UiText.failure(throwable, R.string.middlewares_error_save))
                     }
                 },
             )

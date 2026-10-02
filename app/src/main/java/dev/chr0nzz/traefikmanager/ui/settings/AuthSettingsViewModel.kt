@@ -88,7 +88,7 @@ class AuthSettingsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = UiText.messageOr(throwable.message, R.string.auth_error_load))
+                        it.copy(loading = false, error = UiText.failure(throwable, R.string.auth_error_load))
                     }
                 },
             )
@@ -124,7 +124,7 @@ class AuthSettingsViewModel @Inject constructor(
                     load()
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(busy = false, message = UiText.messageOr(throwable.message, failure)) }
+                    _state.update { it.copy(busy = false, message = UiText.failure(throwable, failure)) }
                 },
             )
         }

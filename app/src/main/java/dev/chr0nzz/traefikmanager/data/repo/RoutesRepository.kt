@@ -1,5 +1,9 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.failHttp
+import androidx.annotation.StringRes
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.store.SnapshotStore
 import kotlinx.serialization.json.Json
@@ -103,10 +107,10 @@ class RoutesRepository @Inject constructor(
         return snapshot
     }
 
-    private suspend fun <T> reporting(what: String, call: suspend () -> T): T = try {
+    private suspend fun <T> reporting(@StringRes what: Int, call: suspend () -> T): T = try {
         call()
     } catch (exception: HttpException) {
-        error(upstreamMessage(exception) ?: "$what (HTTP ${exception.code()})")
+        failHttp(upstreamMessage(exception), what, exception.code())
     }
 
     private fun upstreamMessage(exception: HttpException): String? {
@@ -119,10 +123,10 @@ class RoutesRepository @Inject constructor(
 
     suspend fun toggle(routeId: String, enable: Boolean) {
         val ready = apiProvider.ready()
-        val result = reporting("Could not change the route") {
+        val result = reporting(R.string.error_could_not_change_the_route) {
             ready.api.toggleRoute(routeId, ToggleRequest(enable, ready.agentId.orEmpty()))
         }
-        if (!result.ok) error(result.message ?: result.error ?: "Could not toggle the route")
+        if (!result.ok) fail(result.message ?: result.error, R.string.routes_error_toggle)
     }
 
     suspend fun save(form: RouteForm) {
@@ -132,8 +136,8 @@ class RoutesRepository @Inject constructor(
                 add(name, value)
             }
         }.build()
-        val result = reporting("Could not save the route") { ready.api.saveRoute(body) }
-        if (!result.ok) error(result.message ?: result.error ?: "Could not save the route")
+        val result = reporting(R.string.routes_error_save) { ready.api.saveRoute(body) }
+        if (!result.ok) fail(result.message ?: result.error, R.string.routes_error_save)
         notifyChanged()
     }
 
@@ -143,24 +147,24 @@ class RoutesRepository @Inject constructor(
             .add("configFile", route.configFile)
             .add("agent_id", ready.agentId.orEmpty())
             .build()
-        val result = reporting("Could not delete the route") { ready.api.deleteRoute(route.id, body) }
-        if (!result.ok) error(result.message ?: result.error ?: "Could not delete the route")
+        val result = reporting(R.string.routes_error_delete) { ready.api.deleteRoute(route.id, body) }
+        if (!result.ok) fail(result.message ?: result.error, R.string.routes_error_delete)
         notifyChanged()
     }
 
     suspend fun rawYaml(routeId: String): RawRoute = apiProvider.api().routeRaw(routeId)
 
     suspend fun saveRawYaml(routeId: String, content: String) {
-        val result = reporting("Could not save the YAML") {
+        val result = reporting(R.string.routes_raw_error_save) {
             apiProvider.api().saveRouteRaw(routeId, RawRouteSave(content))
         }
-        if (!result.ok) error(result.error ?: result.message ?: "Could not save the YAML")
+        if (!result.ok) fail(result.error ?: result.message, R.string.routes_raw_error_save)
         notifyChanged()
     }
 
     suspend fun ping(route: Route): PingResult {
         val host = route.hosts.firstOrNull()
-            ?: return PingResult(ok = false, error = "This route has no host to ping")
+            ?: fail(null, R.string.routes_ping_no_host)
         val fallback = route.target.takeIf { it.isNotEmpty() && it != "N/A" && !it.endsWith("@internal") }
         return apiProvider.api().ping("https://$host", fallback, route.servers.takeIf { it.isNotEmpty() })
     }

@@ -373,7 +373,7 @@ class RouteFormViewModel @Inject constructor(
                 onSuccess = { _state.update { it.copy(saving = false, saved = true) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.routes_error_save))
+                        it.copy(saving = false, error = UiText.failure(throwable, R.string.routes_error_save))
                     }
                 },
             )

@@ -74,7 +74,7 @@ class DashboardViewModel @Inject constructor(
                         state.copy(
                             loading = false,
                             refreshing = false,
-                            error = UiText.messageOr(throwable.message, R.string.dashboard_error_load),
+                            error = UiText.failure(throwable, R.string.dashboard_error_load),
                         )
                     }
                 },

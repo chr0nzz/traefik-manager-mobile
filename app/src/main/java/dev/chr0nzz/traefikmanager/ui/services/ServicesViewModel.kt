@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.services
 
+import dev.chr0nzz.traefikmanager.data.model.LocalizedException
 import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
@@ -33,7 +34,7 @@ enum class ServiceStatusFilter(@StringRes val label: Int) {
 
 data class BlockedDelete(
     val name: String,
-    val reason: String,
+    val reason: UiText,
     val routers: List<String>,
     val parents: List<String>,
     val row: ServiceRow,
@@ -155,7 +156,7 @@ class ServicesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(busy = false, editError = UiText.messageOr(throwable.message, R.string.services_error_save))
+                        it.copy(busy = false, editError = UiText.failure(throwable, R.string.services_error_save))
                     }
                 },
             )
@@ -177,7 +178,7 @@ class ServicesViewModel @Inject constructor(
                                 busy = false,
                                 blockedDelete = BlockedDelete(
                                     name = row.shortName,
-                                    reason = throwable.message,
+                                    reason = throwable.reason,
                                     routers = throwable.routers,
                                     parents = throwable.parents,
                                     row = row,
@@ -186,7 +187,7 @@ class ServicesViewModel @Inject constructor(
                         }
                     } else {
                         _state.update {
-                            it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.services_error_delete))
+                            it.copy(busy = false, message = UiText.failure(throwable, R.string.services_error_delete))
                         }
                     }
                 },
@@ -214,7 +215,7 @@ class ServicesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.services_error_ownership))
+                        it.copy(busy = false, message = UiText.failure(throwable, R.string.services_error_ownership))
                     }
                 },
             )
@@ -281,7 +282,8 @@ class ServicesViewModel @Inject constructor(
     }
 
     private fun describeFailure(throwable: Throwable): UiText {
-        val detail = UiText.messageOr(throwable.message ?: throwable::class.simpleName, R.string.common_error_unknown)
+        val detail = (throwable as? LocalizedException)?.text
+            ?: UiText.messageOr(throwable.message ?: throwable::class.simpleName, R.string.common_error_unknown)
         return when (throwable) {
             is kotlinx.serialization.SerializationException -> UiText.of(R.string.services_error_unreadable, detail)
             else -> detail

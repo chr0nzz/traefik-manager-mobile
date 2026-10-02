@@ -138,7 +138,7 @@ fun ServicesScreen(
             title = { Text(stringResource(R.string.services_blocked_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
-                    Text(blocked.reason)
+                    Text(blocked.reason.asString())
                     if (blocked.routers.isNotEmpty()) {
                         Text(
                             pluralStringResource(

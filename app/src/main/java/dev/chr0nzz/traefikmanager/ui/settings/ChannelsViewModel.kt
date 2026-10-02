@@ -100,7 +100,7 @@ class ChannelsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             supported = repository.supported.value,
-                            error = UiText.messageOr(throwable.message, R.string.channels_error_load),
+                            error = UiText.failure(throwable, R.string.channels_error_load),
                         )
                     }
                 },
@@ -156,7 +156,7 @@ class ChannelsViewModel @Inject constructor(
                     onSuccess = { saved -> replace(saved) },
                     onFailure = { throwable ->
                         _state.update {
-                            it.copy(message = UiText.messageOr(throwable.message, R.string.channels_error_update))
+                            it.copy(message = UiText.failure(throwable, R.string.channels_error_update))
                         }
                     },
                 )
@@ -191,7 +191,7 @@ class ChannelsViewModel @Inject constructor(
                     }
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(message = UiText.messageOr(throwable.message, R.string.channels_error_remove)) }
+                    _state.update { it.copy(message = UiText.failure(throwable, R.string.channels_error_remove)) }
                 },
             )
         }
@@ -215,7 +215,7 @@ class ChannelsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, editError = UiText.messageOr(throwable.message, R.string.channels_error_save))
+                        it.copy(saving = false, editError = UiText.failure(throwable, R.string.channels_error_save))
                     }
                 },
             )
@@ -250,7 +250,7 @@ class ChannelsViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             test = TestState.Idle,
-                            editError = UiText.messageOr(throwable.message, R.string.channels_error_save),
+                            editError = UiText.failure(throwable, R.string.channels_error_save),
                         )
                     }
                 },

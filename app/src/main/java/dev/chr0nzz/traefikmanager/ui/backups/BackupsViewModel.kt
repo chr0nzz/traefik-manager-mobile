@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.backups
 
+import dev.chr0nzz.traefikmanager.data.model.LocalizedException
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -224,6 +225,7 @@ class BackupsViewModel @Inject constructor(
 }
 
 private fun Throwable.readable(@StringRes fallback: Int): UiText {
+    (this as? LocalizedException)?.let { return it.text }
     val message = message?.trim().orEmpty()
     return when {
         message.isEmpty() -> UiText.of(fallback)

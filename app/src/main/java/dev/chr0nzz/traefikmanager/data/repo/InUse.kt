@@ -1,20 +1,23 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.LocalizedException
+import androidx.annotation.StringRes
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import retrofit2.HttpException
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 class InUseException(
-    override val message: String,
+    val reason: UiText,
     val routers: List<String> = emptyList(),
     val parents: List<String> = emptyList(),
-) : Exception(message)
+) : Exception()
 
 object InUse {
 
-    fun from(exception: HttpException, fallback: String): Throwable {
+    fun from(exception: HttpException, @StringRes fallback: Int): Throwable {
         val body = runCatching { exception.response()?.errorBody()?.string() }.getOrNull()
         val parsed = body
             ?.takeIf { it.isNotBlank() }
@@ -24,10 +27,10 @@ object InUse {
                 .firstNotNullOfOrNull { (obj[it] as? JsonPrimitive)?.content?.takeIf { m -> m.isNotBlank() } }
         }
         if (exception.code() != 409) {
-            return IllegalStateException(text ?: "$fallback (HTTP ${exception.code()})")
+            return LocalizedException(text?.let(UiText::Raw) ?: UiText.http(fallback, exception.code()))
         }
         return InUseException(
-            message = text ?: fallback,
+            reason = UiText.messageOr(text, fallback),
             routers = parsed.strings("inUseBy"),
             parents = parsed.strings("parents"),
         )

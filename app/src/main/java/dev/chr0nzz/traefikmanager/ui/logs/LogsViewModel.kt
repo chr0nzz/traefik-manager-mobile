@@ -252,7 +252,7 @@ class LogsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            loadError = UiText.messageOr(throwable.message, R.string.logs_error_load),
+                            loadError = UiText.failure(throwable, R.string.logs_error_load),
                         )
                     }
                 },

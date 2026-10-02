@@ -110,7 +110,7 @@ class LauncherViewModel @Inject constructor(
                 it.copy(
                     saving = false,
                     editing = null,
-                    message = result.exceptionOrNull()?.message?.take(120)?.let(UiText::Raw) ?: success,
+                    message = result.exceptionOrNull()?.let { UiText.failure(it, R.string.error_could_not_save_the_dashboard) } ?: success,
                 )
             }
             load()

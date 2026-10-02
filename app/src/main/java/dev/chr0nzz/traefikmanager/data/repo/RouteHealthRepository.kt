@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSettings
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
@@ -46,9 +48,9 @@ class RouteHealthRepository @Inject constructor(
         val response = try {
             apiProvider.apiFor(null).saveRouteHealth(RouteHealthSettings(enabled, interval))
         } catch (exception: HttpException) {
-            throw InUse.from(exception, "Could not save the route checks")
+            throw InUse.from(exception, R.string.route_checks_error_save)
         }
-        if (!response.ok) error(response.error ?: "Could not save the route checks")
+        if (!response.ok) fail(response.error, R.string.route_checks_error_save)
         _snapshot.value = _snapshot.value?.copy(enabled = response.enabled, interval = response.interval)
         return RouteHealthSettings(response.enabled, response.interval)
     }

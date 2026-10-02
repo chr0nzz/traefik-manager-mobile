@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager.data.model
 import android.content.res.Resources
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
+import dev.chr0nzz.traefikmanager.R
 
 sealed interface UiText {
 
@@ -38,7 +39,20 @@ sealed interface UiText {
         fun messageOr(message: String?, @StringRes fallback: Int): UiText =
             message?.takeIf { it.isNotBlank() }?.let(::Raw) ?: Res(fallback)
 
+        fun http(@StringRes what: Int, code: Int): UiText = Res(R.string.common_error_http, listOf(Res(what), code))
+
+        fun failure(throwable: Throwable, @StringRes fallback: Int): UiText =
+            (throwable as? LocalizedException)?.text ?: messageOr(throwable.message, fallback)
+
         private fun resolved(args: List<Any>, resources: Resources): Array<Any> =
             args.map { if (it is UiText) it.resolve(resources) else it }.toTypedArray()
     }
 }
+
+class LocalizedException(val text: UiText) : Exception()
+
+fun fail(message: String?, @StringRes fallback: Int): Nothing =
+    throw LocalizedException(UiText.messageOr(message, fallback))
+
+fun failHttp(message: String?, @StringRes fallback: Int, code: Int): Nothing =
+    throw LocalizedException(message?.takeIf { it.isNotBlank() }?.let(UiText::Raw) ?: UiText.http(fallback, code))

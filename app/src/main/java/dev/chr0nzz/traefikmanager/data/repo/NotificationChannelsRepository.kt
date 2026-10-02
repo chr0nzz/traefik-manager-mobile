@@ -1,5 +1,8 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.failHttp
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.ChannelPayload
 import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
@@ -35,29 +38,29 @@ class NotificationChannelsRepository @Inject constructor(
             _supported.value = false
             emptyList()
         } else {
-            error(message(exception) ?: "Could not read the channels (HTTP ${exception.code()})")
+            failHttp(message(exception), R.string.error_could_not_read_the_channels, exception.code())
         }
     }
 
     suspend fun create(payload: ChannelPayload): NotificationChannel = try {
         val response = apiProvider.api().createNotificationChannel(payload)
-        response.channel ?: error(response.error ?: "Could not save the channel")
+        response.channel ?: fail(response.error, R.string.error_could_not_save_the_channel)
     } catch (exception: HttpException) {
-        error(message(exception) ?: "Could not save the channel (HTTP ${exception.code()})")
+        failHttp(message(exception), R.string.error_could_not_save_the_channel, exception.code())
     }
 
     suspend fun update(id: String, payload: ChannelPayload): NotificationChannel = try {
         val response = apiProvider.api().updateNotificationChannel(id, payload)
-        response.channel ?: error(response.error ?: "Could not save the channel")
+        response.channel ?: fail(response.error, R.string.error_could_not_save_the_channel)
     } catch (exception: HttpException) {
-        error(message(exception) ?: "Could not save the channel (HTTP ${exception.code()})")
+        failHttp(message(exception), R.string.error_could_not_save_the_channel, exception.code())
     }
 
     suspend fun delete(id: String) {
         try {
             apiProvider.api().deleteNotificationChannel(id)
         } catch (exception: HttpException) {
-            error(message(exception) ?: "Could not remove the channel (HTTP ${exception.code()})")
+            failHttp(message(exception), R.string.error_could_not_remove_the_channel, exception.code())
         }
     }
 
@@ -70,7 +73,7 @@ class NotificationChannelsRepository @Inject constructor(
     } catch (exception: HttpException) {
         ChannelTestOutcome(
             ok = false,
-            message = message(exception) ?: "The test failed (HTTP ${exception.code()})",
+            message = message(exception).orEmpty(),
         )
     }
 

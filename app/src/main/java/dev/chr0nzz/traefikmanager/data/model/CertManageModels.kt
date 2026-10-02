@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class CertVerdict(
@@ -33,7 +34,14 @@ data class CertManageState(
     @SerialName("restart_method") val restartMethod: String = "",
     val reason: String = "",
     val paths: List<String> = emptyList(),
-)
+) {
+    val reasonText: UiText
+        get() = if (reason == TOO_OLD) UiText.of(R.string.certs_note_too_old) else UiText.Raw(reason)
+
+    companion object {
+        const val TOO_OLD = "too_old"
+    }
+}
 
 @Serializable
 data class CertRef(

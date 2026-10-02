@@ -285,7 +285,7 @@ class CrowdSecViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, message = UiText.messageOr(throwable.message, R.string.crowdsec_error_add))
+                        it.copy(saving = false, message = UiText.failure(throwable, R.string.crowdsec_error_add))
                     }
                 },
             )
@@ -301,7 +301,7 @@ class CrowdSecViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = UiText.messageOr(throwable.message, R.string.crowdsec_error_delete))
+                        it.copy(message = UiText.failure(throwable, R.string.crowdsec_error_delete))
                     }
                 },
             )
@@ -364,7 +364,7 @@ class CrowdSecViewModel @Inject constructor(
                             it.copy(
                                 loading = false,
                                 refreshing = false,
-                                loadError = UiText.messageOr(throwable.message, R.string.crowdsec_error_load),
+                                loadError = UiText.failure(throwable, R.string.crowdsec_error_load),
                             )
                         }
                     },

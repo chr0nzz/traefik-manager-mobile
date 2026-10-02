@@ -104,7 +104,7 @@ class MiddlewareTemplatesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.middlewares_templates_error_save))
+                        it.copy(saving = false, error = UiText.failure(throwable, R.string.middlewares_templates_error_save))
                     }
                 },
             )
@@ -120,7 +120,7 @@ class MiddlewareTemplatesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = UiText.messageOr(throwable.message, R.string.middlewares_templates_error_delete))
+                        it.copy(message = UiText.failure(throwable, R.string.middlewares_templates_error_delete))
                     }
                 },
             )

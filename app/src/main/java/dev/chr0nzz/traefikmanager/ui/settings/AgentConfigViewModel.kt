@@ -104,7 +104,7 @@ class AgentConfigViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = UiText.messageOr(throwable.message, R.string.agent_error_load))
+                        it.copy(loading = false, error = UiText.failure(throwable, R.string.agent_error_load))
                     }
                 },
             )
@@ -194,7 +194,7 @@ class AgentConfigViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, message = UiText.messageOr(throwable.message, R.string.agent_error_save))
+                        it.copy(saving = false, message = UiText.failure(throwable, R.string.agent_error_save))
                     }
                 },
             )

@@ -2532,4 +2532,30 @@
     <string name="static_option_headers_redact">Redact</string>
     <string name="static_option_syntax_v3">v3 (default)</string>
     <string name="static_option_syntax_v2">v2 (compatibility)</string>
+
+    <!-- %1$s is an error message, %2$d is the HTTP status code -->
+    <string name="common_error_http">%1$s (HTTP %2$d)</string>
+    <string name="error_could_not_restart_traefik">Could not restart Traefik</string>
+    <string name="error_an_agent_backs_up_its_static">An agent backs up its static config with the ordinary create</string>
+    <string name="error_could_not_save_the_dashboard">Could not save the dashboard</string>
+    <string name="error_could_not_create_the_template">Could not create the template</string>
+    <string name="error_could_not_update_the_template">Could not update the template</string>
+    <string name="error_could_not_read_the_channels">Could not read the channels</string>
+    <string name="error_could_not_save_the_channel">Could not save the channel</string>
+    <string name="error_could_not_remove_the_channel">Could not remove the channel</string>
+    <string name="error_could_not_change_the_route">Could not change the route</string>
+    <string name="error_could_not_add_the_server">Could not add the server</string>
+    <string name="error_could_not_save_the_server">Could not save the server</string>
+    <string name="error_could_not_remove_the_server">Could not remove the server</string>
+    <string name="error_could_not_rotate_the_key">Could not rotate the key</string>
+    <string name="error_the_server_did_not_return_a">The server did not return a new key</string>
+    <string name="error_a_name_and_a_url_are">A name and a URL are required</string>
+    <string name="error_the_name_cannot_be_empty">The name cannot be empty</string>
+    <string name="error_the_url_cannot_be_empty">The URL cannot be empty</string>
+    <string name="error_could_not_save_the_static_config">Could not save the static config</string>
+    <string name="error_the_restart_failed">The restart failed</string>
+    <string name="error_could_not_change_the_plugin">Could not change the plugin</string>
+    <string name="routes_ping_no_host">This route has no host to ping</string>
+    <string name="certs_error_lost_connection">Lost the connection while Traefik restarted. Pull to refresh to check.</string>
+    <string name="certs_note_too_old">This server is too old to remove certificates</string>
 </resources>

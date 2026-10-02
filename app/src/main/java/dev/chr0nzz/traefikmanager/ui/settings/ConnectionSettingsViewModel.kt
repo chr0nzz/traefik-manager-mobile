@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import dev.chr0nzz.traefikmanager.data.model.LocalizedException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -114,7 +115,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = UiText.messageOr(throwable.message, R.string.connection_error_load))
+                        it.copy(loading = false, error = UiText.failure(throwable, R.string.connection_error_load))
                     }
                 },
             )
@@ -178,7 +179,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.connection_error_save))
+                        it.copy(saving = false, error = UiText.failure(throwable, R.string.connection_error_save))
                     }
                 },
             )
@@ -188,6 +189,7 @@ class ConnectionSettingsViewModel @Inject constructor(
     fun consumeSaved() = _state.update { it.copy(saved = false) }
 
     private fun describeTestFailure(throwable: Throwable): UiText {
+        (throwable as? LocalizedException)?.let { return it.text }
         val message = throwable.message.orEmpty()
         return when {
             message.contains("Target address not allowed") -> UiText.of(R.string.connection_error_host)

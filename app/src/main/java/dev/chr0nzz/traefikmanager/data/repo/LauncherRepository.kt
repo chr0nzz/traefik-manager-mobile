@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.CustomGroup
 import dev.chr0nzz.traefikmanager.data.model.DashboardConfig
@@ -55,7 +57,7 @@ class LauncherRepository @Inject constructor(
             body = config.copy(server = ready.agentId.orEmpty()),
             server = ready.agentId,
         )
-        if (!response.ok) error(response.error ?: response.message ?: "Could not save the dashboard")
+        if (!response.ok) fail(response.error ?: response.message, R.string.error_could_not_save_the_dashboard)
     }
 
     suspend fun saveOverride(config: DashboardConfig, routeId: String, override: RouteOverride) {

@@ -125,7 +125,7 @@ class NotificationsViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             savingRouteCheck = false,
-                            message = UiText.messageOr(throwable.message, R.string.route_checks_error_save),
+                            message = UiText.failure(throwable, R.string.route_checks_error_save),
                         )
                     }
                 },
@@ -146,7 +146,7 @@ class NotificationsViewModel @Inject constructor(
                 onSuccess = { _state.update { it.copy(message = UiText.of(R.string.notifications_deleted)) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = UiText.messageOr(throwable.message, R.string.notifications_error_delete))
+                        it.copy(message = UiText.failure(throwable, R.string.notifications_error_delete))
                     }
                 },
             )
@@ -162,7 +162,7 @@ class NotificationsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = UiText.messageOr(throwable.message, R.string.notifications_error_clear))
+                        it.copy(message = UiText.failure(throwable, R.string.notifications_error_clear))
                     }
                 },
             )
@@ -205,7 +205,7 @@ class NotificationsViewModel @Inject constructor(
                     }
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(test = TestState.Failed(UiText.messageOr(throwable.message, R.string.webhook_error_delivery))) }
+                    _state.update { it.copy(test = TestState.Failed(UiText.failure(throwable, R.string.webhook_error_delivery))) }
                 },
             )
         }
@@ -229,7 +229,7 @@ class NotificationsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, message = UiText.messageOr(throwable.message, R.string.webhook_error_save))
+                        it.copy(saving = false, message = UiText.failure(throwable, R.string.webhook_error_save))
                     }
                 },
             )

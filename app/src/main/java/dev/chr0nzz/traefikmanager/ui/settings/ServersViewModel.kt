@@ -69,7 +69,7 @@ class ServersViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, message = UiText.messageOr(throwable.message, R.string.servers_error_load))
+                        it.copy(loading = false, message = UiText.failure(throwable, R.string.servers_error_load))
                     }
                 },
             )
@@ -127,7 +127,7 @@ class ServersViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.servers_error_generic))
+                        it.copy(busy = false, message = UiText.failure(throwable, R.string.servers_error_generic))
                     }
                 },
             )

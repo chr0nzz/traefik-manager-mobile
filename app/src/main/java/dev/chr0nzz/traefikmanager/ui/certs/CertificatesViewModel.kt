@@ -114,7 +114,7 @@ data class CertificatesUiState(
                 UiText.of(R.string.certs_note_managed),
                 when {
                     manage.available -> UiText.of(R.string.certs_note_removal_restarts)
-                    manage.reason.isNotBlank() -> UiText.of(R.string.certs_note_removal_off, manage.reason)
+                    manage.reason.isNotBlank() -> UiText.of(R.string.certs_note_removal_off, manage.reasonText)
                     else -> UiText.of(R.string.certs_note_renew)
                 },
                 usage?.why?.takeIf { it.isNotBlank() }?.let(UiText::Raw),
@@ -159,7 +159,7 @@ class CertificatesViewModel @Inject constructor(
         viewModelScope.launch {
             val message = runCatching { repository.remove(rows.map { CertRef(it.resolver, it.main) }) }.fold(
                 onSuccess = { response -> CertCleanup.outcome(response, rows.size) },
-                onFailure = { throwable -> UiText.messageOr(throwable.message, R.string.certs_error_remove) },
+                onFailure = { throwable -> UiText.failure(throwable, R.string.certs_error_remove) },
             )
             _state.update { it.copy(removing = false, message = message) }
             load(initial = false)
@@ -186,7 +186,7 @@ class CertificatesViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            loadError = UiText.messageOr(throwable.message, R.string.certs_error_load),
+                            loadError = UiText.failure(throwable, R.string.certs_error_load),
                         )
                     }
                 },

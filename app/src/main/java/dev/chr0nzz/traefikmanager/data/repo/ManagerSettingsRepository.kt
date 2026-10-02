@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
+import dev.chr0nzz.traefikmanager.data.model.fail
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.TestConnectionRequest
 import dev.chr0nzz.traefikmanager.data.model.TestConnectionResult
@@ -23,7 +25,7 @@ class ManagerSettingsRepository @Inject constructor(
         val current = api.settingsRaw()
         val merged = JsonObject(current.toMutableMap().apply { putAll(changes) })
         val response = api.saveSettings(merged)
-        if (!response.success) error(response.error ?: "Could not save the settings")
+        if (!response.success) fail(response.error, R.string.connection_error_save)
         serverSettingsRepository.refresh()
         return merged
     }
