@@ -279,7 +279,7 @@ class ChannelsViewModel @Inject constructor(
 
     private fun validate(draft: ChannelDraft): UiText? {
         val missing = draft.toChannel().missingFields()
-        if (missing.isNotEmpty()) return UiText.of(R.string.channels_error_missing, missing.joinToString(", "))
+        if (missing.isNotEmpty()) return UiText.of(R.string.channels_error_missing, UiText.join(missing, ", "))
         if (draft.quietStart.isBlank() != draft.quietEnd.isBlank()) {
             return UiText.of(R.string.channels_error_quiet)
         }

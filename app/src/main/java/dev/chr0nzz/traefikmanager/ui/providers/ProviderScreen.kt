@@ -136,7 +136,7 @@ fun ProviderScreen(
             },
         ) {
             when {
-                state.loading -> LoadingState(label = stringResource(R.string.providers_loading, page.label))
+                state.loading -> LoadingState(label = stringResource(R.string.providers_loading, page.label.asString()))
                 state.error != null && state.routes.isEmpty() -> ErrorState(
                     headline = stringResource(R.string.common_error_traefik_unreachable),
                     body = state.error?.asString(),
@@ -148,8 +148,8 @@ fun ProviderScreen(
                     onRetry = viewModel::refresh,
                 )
                 state.routes.isEmpty() && state.middlewares.isEmpty() -> EmptyState(
-                    headline = stringResource(R.string.providers_empty, page.label),
-                    body = page.empty,
+                    headline = stringResource(R.string.providers_empty, page.label.asString()),
+                    body = stringResource(page.empty),
                 )
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -199,11 +199,11 @@ private fun VerdictCard(state: ProviderUiState) {
     val verdict = state.verdict
     VerdictLine(
         verdict = Verdict(
-            headline = UiText.Raw(verdict.headline),
-            detail = UiText.Raw(verdict.detail),
+            headline = verdict.headline,
+            detail = verdict.detail,
             status = if (verdict.notServing > 0) TmStatus.Error else TmStatus.Ok,
         ),
-        info = state.page.note,
+        info = stringResource(state.page.note),
     )
 }
 

@@ -2098,4 +2098,267 @@
     <string name="static_error_apply">Could not apply the change</string>
     <string name="static_saved">Static config saved</string>
     <string name="static_error_save">Save failed</string>
+
+    <!-- Name of an HTTP status code. Use the usual wording for this status in the language -->
+    <string name="http_status_100">Continue</string>
+    <string name="http_status_101">Switching Protocols</string>
+    <string name="http_status_103">Early Hints</string>
+    <string name="http_status_200">OK</string>
+    <string name="http_status_201">Created</string>
+    <string name="http_status_202">Accepted</string>
+    <string name="http_status_204">No Content</string>
+    <string name="http_status_206">Partial Content</string>
+    <string name="http_status_301">Moved Permanently</string>
+    <string name="http_status_302">Found</string>
+    <string name="http_status_303">See Other</string>
+    <string name="http_status_304">Not Modified</string>
+    <string name="http_status_307">Temporary Redirect</string>
+    <string name="http_status_308">Permanent Redirect</string>
+    <string name="http_status_400">Bad Request</string>
+    <string name="http_status_401">Unauthorized</string>
+    <string name="http_status_402">Payment Required</string>
+    <string name="http_status_403">Forbidden</string>
+    <string name="http_status_404">Not Found</string>
+    <string name="http_status_405">Method Not Allowed</string>
+    <string name="http_status_406">Not Acceptable</string>
+    <string name="http_status_407">Proxy Authentication Required</string>
+    <string name="http_status_408">Request Timeout</string>
+    <string name="http_status_409">Conflict</string>
+    <string name="http_status_410">Gone</string>
+    <string name="http_status_411">Length Required</string>
+    <string name="http_status_413">Payload Too Large</string>
+    <string name="http_status_414">URI Too Long</string>
+    <string name="http_status_415">Unsupported Media Type</string>
+    <string name="http_status_418">I am a teapot</string>
+    <string name="http_status_421">Misdirected Request</string>
+    <string name="http_status_422">Unprocessable Entity</string>
+    <string name="http_status_426">Upgrade Required</string>
+    <string name="http_status_429">Too Many Requests</string>
+    <string name="http_status_431">Request Header Fields Too Large</string>
+    <string name="http_status_451">Unavailable For Legal Reasons</string>
+    <string name="http_status_500">Internal Server Error</string>
+    <string name="http_status_501">Not Implemented</string>
+    <string name="http_status_502">Bad Gateway</string>
+    <string name="http_status_503">Service Unavailable</string>
+    <string name="http_status_504">Gateway Timeout</string>
+    <string name="http_status_505">HTTP Version Not Supported</string>
+    <string name="http_status_507">Insufficient Storage</string>
+    <string name="http_status_511">Network Authentication Required</string>
+    <!-- Lowercase. Shown for a connection Traefik kept open with no HTTP status, such as a WebSocket -->
+    <string name="http_status_tunnel">tunnel</string>
+
+    <string name="providers_docker_note">Managed by Docker labels and read-only. Edit them through your container\'s labels.</string>
+    <string name="providers_docker_empty">Routes discovered through Docker labels show up here.</string>
+    <string name="providers_kubernetes_note">Managed by Kubernetes (CRD, Ingress or Gateway API) and read-only. Edit them through your Kubernetes resources.</string>
+    <string name="providers_kubernetes_empty">Routes from Kubernetes CRDs, Ingress and Gateway API show up here.</string>
+    <string name="providers_swarm_note">Discovered through Docker Swarm labels and read-only. Edit them through your Swarm service definitions.</string>
+    <string name="providers_swarm_empty">Routes discovered through Swarm labels show up here.</string>
+    <string name="providers_nomad_note">Discovered through HashiCorp Nomad and read-only. Edit them through your Nomad job definitions.</string>
+    <string name="providers_nomad_empty">Routes discovered through Nomad show up here.</string>
+    <string name="providers_ecs_note">Discovered through Amazon ECS and read-only. Edit them through your ECS task definitions.</string>
+    <string name="providers_ecs_empty">Routes discovered through ECS show up here.</string>
+    <string name="providers_consulcatalog_note">Discovered through the Consul service catalog and read-only. Edit them through your Consul service registrations.</string>
+    <string name="providers_consulcatalog_empty">Routes discovered through the Consul catalog show up here.</string>
+    <string name="providers_redis_note">Stored in Redis and read-only here. Edit them in your Redis KV store.</string>
+    <string name="providers_redis_empty">Routes stored in Redis show up here.</string>
+    <string name="providers_etcd_note">Stored in etcd and read-only here. Edit them in your etcd KV store.</string>
+    <string name="providers_etcd_empty">Routes stored in etcd show up here.</string>
+    <string name="providers_consul_note">Stored in Consul\'s key-value store and read-only here. Edit them in Consul KV.</string>
+    <string name="providers_consul_empty">Routes stored in Consul KV show up here.</string>
+    <string name="providers_zookeeper_note">Stored in ZooKeeper and read-only here. Edit them in your ZooKeeper instance.</string>
+    <string name="providers_zookeeper_empty">Routes stored in ZooKeeper show up here.</string>
+    <string name="providers_http_provider_note">Sourced from an HTTP endpoint configured in Traefik and read-only here.</string>
+    <string name="providers_http_provider_empty">Routes from the HTTP provider show up here.</string>
+    <!-- Name of the Traefik HTTP provider -->
+    <string name="providers_label_http">HTTP Provider</string>
+    <string name="providers_file_external_note">From file provider configs Traefik Manager does not manage, and read-only here. Managed routes are on Routes.</string>
+    <string name="providers_file_external_empty">Routes from external file provider configs show up here.</string>
+    <!-- Name of the page for file provider routes that Traefik Manager does not manage -->
+    <string name="providers_label_file_external">File (external)</string>
+    <string name="providers_internal_note">Traefik creates these itself. They are read-only here and turned on or off in your static config.</string>
+    <string name="providers_internal_empty">Traefik serves these itself. The dashboard, API and ping live here.</string>
+    <!-- Name of the page for routes Traefik creates itself -->
+    <string name="providers_label_internal">Internal</string>
+    <plurals name="providers_verdict_not_serving">
+        <item quantity="one">%d route not serving</item>
+        <item quantity="other">%d routes not serving</item>
+    </plurals>
+    <!-- Live means the routes are serving traffic -->
+    <plurals name="providers_verdict_live">
+        <item quantity="one">%d route live</item>
+        <item quantity="other">%d routes live</item>
+    </plurals>
+    <plurals name="common_middlewares_count">
+        <item quantity="one">%d middleware</item>
+        <item quantity="other">%d middlewares</item>
+    </plurals>
+    <string name="providers_verdict_none">No routes</string>
+
+    <!-- Channel type: a plain JSON webhook -->
+    <string name="channels_kind_generic">Generic JSON</string>
+    <string name="channels_field_server_url">Server URL</string>
+    <string name="channels_field_app_token">App Token</string>
+    <string name="channels_field_user_key">User Key</string>
+    <string name="channels_field_access_token">Access Token</string>
+    <!-- Channel type: push to the Traefik Manager app on a phone -->
+    <string name="channels_kind_mobile">Mobile app</string>
+    <string name="channels_field_endpoint">Device endpoint</string>
+    <string name="channels_field_bot_token">Bot Token</string>
+    <string name="channels_field_chat_id">Chat ID</string>
+    <string name="channels_help_where_notifications_are_delivered">Where notifications are delivered.</string>
+    <string name="channels_help_incoming_webhook_created_in_your">Incoming webhook created in your Slack workspace.</string>
+    <string name="channels_help_full_topic_url_on_ntfy">Full topic URL on ntfy.sh or your own server.</string>
+    <string name="channels_help_receives_a_json_body_you">Receives a JSON body you can shape downstream.</string>
+    <string name="channels_help_base_url_of_your_gotify">Base URL of your Gotify server.</string>
+    <string name="channels_help_application_token_from_gotify_stored">Application token from Gotify. Stored encrypted.</string>
+    <string name="channels_help_application_token_from_your_pushover">Application token from your Pushover app. Stored encrypted.</string>
+    <string name="channels_help_your_pushover_user_or_group">Your Pushover user or group key. Stored encrypted.</string>
+    <string name="channels_help_access_token_from_your_pushbullet">Access token from your Pushbullet account. Stored encrypted.</string>
+    <string name="channels_help_registered_by_the_traefik_manager">Registered by the Traefik Manager app on your phone. Editing it stops push to that device.</string>
+    <string name="channels_help_token_issued_by_botfather_stored">Token issued by BotFather. Stored encrypted.</string>
+    <string name="channels_help_target_chat_group_or_channel">Target chat, group or channel to post into.</string>
+    <!-- Notification category: changes to the Traefik config -->
+    <string name="channels_category_config">Config</string>
+    <!-- Notification category -->
+    <string name="channels_category_agents">Agents</string>
+    <!-- Notification category: new versions -->
+    <string name="channels_category_updates">Updates</string>
+    <!-- Severity level of a notification -->
+    <string name="channels_severity_info">Info</string>
+    <!-- Digest choice: send each event right away -->
+    <string name="channels_digest_immediate">Immediate</string>
+    <!-- Digest choice -->
+    <string name="channels_digest_hourly">Hourly</string>
+    <!-- Digest choice -->
+    <string name="channels_digest_daily">Daily</string>
+    <string name="channels_summary_all">All categories</string>
+    <!-- %1$s is a severity level such as Warning -->
+    <string name="channels_summary_severity">%1$s and above</string>
+    <string name="channels_summary_hourly">Hourly digest</string>
+    <string name="channels_summary_daily">Daily digest</string>
+    <!-- %1$s is a time range such as 23:00-07:00 -->
+    <string name="channels_summary_quiet">Quiet %1$s</string>
+    <!-- %1$s is a time range such as 23:00-07:00 -->
+    <string name="channels_summary_quiet_break">Quiet %1$s, errors break through</string>
+
+    <string name="mw_field_users">Users</string>
+    <string name="mw_field_realm_optional">Realm (optional)</string>
+    <string name="mw_field_auth_service_url">Auth service URL</string>
+    <string name="mw_field_trust_forward_header">Trust forward header</string>
+    <string name="mw_field_auth_response_headers">Auth response headers</string>
+    <string name="mw_field_max_response_body_size">Max response body size</string>
+    <string name="mw_field_allowed_cidrs">Allowed CIDRs</string>
+    <string name="mw_field_client_ip_source">Client IP source</string>
+    <string name="mw_field_trusted_hop_depth">Trusted hop depth</string>
+    <string name="mw_field_proxy_ips_to_exclude">Proxy IPs to exclude</string>
+    <string name="mw_field_regexes">Regexes</string>
+    <string name="mw_field_regex">Regex</string>
+    <string name="mw_field_replacement">Replacement</string>
+    <string name="mw_field_status_codes">Status codes</string>
+    <string name="mw_field_service">Service</string>
+    <string name="mw_field_query">Query</string>
+    <string name="mw_field_auto_detect_the_content_type">Auto-detect the content type</string>
+    <string name="mw_field_allowed_origins">Allowed origins</string>
+    <string name="mw_field_pass_the_whole_certificate">Pass the whole certificate</string>
+    <string name="mw_field_also_pass_selected_certificate_fields">Also pass selected certificate fields</string>
+    <string name="mw_field_subject_common_name">Subject Common Name</string>
+    <string name="mw_field_issuer_common_name">Issuer Common Name</string>
+    <string name="mw_field_serial_number">Serial Number</string>
+    <string name="mw_field_expiry_date">Expiry Date</string>
+    <string name="mw_field_gatekeeper_url">Gatekeeper URL</string>
+    <string name="mw_field_policy_optional">Policy (optional)</string>
+    <string name="mw_field_forward_authorization_header">Forward Authorization header</string>
+    <string name="mw_field_provider_url">Provider URL</string>
+    <string name="mw_field_client_id">Client ID</string>
+    <string name="mw_field_client_secret">Client secret</string>
+    <string name="mw_field_session_secret">Session secret</string>
+    <string name="mw_field_scopes">Scopes</string>
+    <string name="mw_field_session_max_age_seconds">Session max age (seconds)</string>
+    <string name="mw_field_forward_claims_as_headers">Forward claims as headers</string>
+    <string name="mw_field_bypass_rules_optional">Bypass rules (optional)</string>
+    <string name="mw_field_average_req_s">Average (req/s)</string>
+    <string name="mw_field_burst">Burst</string>
+    <string name="mw_field_period">Period</string>
+    <string name="mw_field_ssl_redirect_force_https">SSL redirect (force HTTPS)</string>
+    <string name="mw_field_hsts_strict_transport_security">HSTS (Strict Transport Security)</string>
+    <string name="mw_field_hsts_max_age_seconds">HSTS max age (seconds)</string>
+    <string name="mw_field_include_subdomains">Include subdomains</string>
+    <string name="mw_field_preload">Preload</string>
+    <string name="mw_field_x_content_type_options_nosniff">X-Content-Type-Options (nosniff)</string>
+    <string name="mw_field_x_frame_options_deny">X-Frame-Options (deny)</string>
+    <string name="mw_field_same_origin_referrer_policy">Same-origin referrer policy</string>
+    <string name="mw_field_allowed_headers">Allowed headers</string>
+    <string name="mw_field_max_age_seconds">Max age (seconds)</string>
+    <string name="mw_field_add_vary_header">Add Vary header</string>
+    <string name="mw_field_allow_encoded_slash_2f">Allow encoded slash %2F</string>
+    <string name="mw_field_allow_encoded_backslash_5c">Allow encoded backslash %5C</string>
+    <string name="mw_field_allow_encoded_semicolon_3b">Allow encoded semicolon %3B</string>
+    <string name="mw_field_allow_encoded_percent_25">Allow encoded percent %25</string>
+    <string name="mw_field_allow_encoded_question_mark_3f">Allow encoded question mark %3F</string>
+    <string name="mw_field_allow_encoded_hash_23">Allow encoded hash %23</string>
+    <string name="mw_field_scheme">Scheme</string>
+    <string name="mw_field_permanent_redirect_301">Permanent redirect (301)</string>
+    <string name="mw_field_prefixes">Prefixes</string>
+    <string name="mw_field_prefix">Prefix</string>
+    <string name="mw_field_path">Path</string>
+    <string name="mw_field_min_response_body_bytes">Min response body bytes</string>
+    <string name="mw_field_attempts">Attempts</string>
+    <string name="mw_field_initial_interval">Initial interval</string>
+    <string name="mw_field_expression">Expression</string>
+    <string name="mw_field_max_request_body_bytes">Max request body (bytes)</string>
+    <string name="mw_field_max_response_body_bytes">Max response body (bytes)</string>
+    <string name="mw_field_retry_expression_optional">Retry expression (optional)</string>
+    <string name="mw_field_middlewares">Middlewares</string>
+    <string name="mw_field_max_in_flight_requests">Max in-flight requests</string>
+    <string name="mw_help_one_per_line_format_user_htpasswd">One per line, format user:htpasswd-hash</string>
+    <string name="mw_help_bytes_traefik_3_7_warns_on">Bytes. Traefik 3.7 warns on every forward auth without one. Clear it to omit.</string>
+    <string name="mw_help_one_per_line_the_matched_prefix">One per line. The matched prefix is removed before the request is forwarded. Anchor with ^ or it can match mid-path.</string>
+    <string name="mw_help_capture_groups_are_1_2_and">Capture groups are $1, $2 and so on. In a compose file $ must be written $$.</string>
+    <string name="mw_help_one_per_line_single_codes_or">One per line. Single codes or ranges. Only these responses are replaced.</string>
+    <string name="mw_help_the_service_that_serves_the_error">The service that serves the error page. It must already exist in this config.</string>
+    <string name="mw_help_optional_status_is_replaced_with_the">Optional. {status} is replaced with the response code.</string>
+    <string name="mw_help_one_per_line_converts_grpc_web">One per line. Converts gRPC-Web requests to gRPC before forwarding. * allows any origin.</string>
+    <string name="mw_help_one_per_line_format_user_realm">One per line, format user:realm:md5hash</string>
+    <string name="mw_help_32_character_random_string">32+ character random string</string>
+    <string name="mw_help_one_per_line_format_name_claim">One per line, format Name: claim</string>
+    <string name="mw_help_regex_one_per_line">Regex, one per line</string>
+    <string name="mw_help_responses_smaller_than_this_are_not">Responses smaller than this are not compressed</string>
+    <string name="mw_help_one_per_line_applied_in_order">One per line, applied in order</string>
+    <!-- Name of a middleware template. Keep product names such as Authentik as they are -->
+    <string name="mw_template_basic_auth">Basic Auth</string>
+    <string name="mw_template_forward_auth">Forward Auth</string>
+    <string name="mw_template_ip_allow_list">IP Allow List</string>
+    <string name="mw_template_custom_error_pages">Custom Error Pages</string>
+    <string name="mw_template_content_type">Content Type</string>
+    <string name="mw_template_digest_auth">Digest Auth</string>
+    <string name="mw_template_forward_auth_authentik">Forward Auth (Authentik)</string>
+    <string name="mw_template_forward_auth_authelia">Forward Auth (Authelia)</string>
+    <string name="mw_template_forward_auth_gatekeeper">Forward Auth (Gatekeeper)</string>
+    <string name="mw_template_oidc_auth_traefik_oidc_auth">OIDC Auth (traefik-oidc-auth)</string>
+    <string name="mw_template_ip_allow_list_private_ranges">IP Allow List (Private Ranges)</string>
+    <string name="mw_template_rate_limit">Rate Limit</string>
+    <string name="mw_template_secure_headers">Secure Headers</string>
+    <string name="mw_template_cors_headers">CORS Headers</string>
+    <string name="mw_template_encoded_characters_traefik_3_7">Encoded Characters (Traefik 3.7+)</string>
+    <string name="mw_template_redirect_to_https">Redirect to HTTPS</string>
+    <string name="mw_template_redirect_regex">Redirect Regex</string>
+    <string name="mw_template_strip_prefix">Strip Prefix</string>
+    <string name="mw_template_add_prefix">Add Prefix</string>
+    <string name="mw_template_replace_path">Replace Path</string>
+    <string name="mw_template_gzip_compress">Gzip Compress</string>
+    <string name="mw_template_retry">Retry</string>
+    <string name="mw_template_circuit_breaker">Circuit Breaker</string>
+    <string name="mw_template_buffering">Buffering</string>
+    <string name="mw_template_middleware_chain">Middleware Chain</string>
+    <string name="mw_template_in_flight_limit">In-Flight Limit</string>
+    <string name="mw_template_strip_prefix_regex">Strip Prefix Regex</string>
+    <string name="mw_template_replace_path_regex">Replace Path Regex</string>
+    <string name="mw_template_pass_tls_client_cert">Pass TLS Client Cert</string>
+    <string name="mw_field_direct_connection">Direct connection</string>
+    <string name="mw_field_excluded_proxy_ips">Excluded proxy IPs</string>
+    <!-- Middleware category: authentication -->
+    <string name="middlewares_category_auth">Auth</string>
+    <string name="middlewares_category_security">Security</string>
+    <string name="middlewares_category_routing">Routing</string>
+    <string name="middlewares_category_advanced">Advanced</string>
 </resources>

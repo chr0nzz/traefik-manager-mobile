@@ -1,102 +1,105 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import androidx.annotation.StringRes
+import dev.chr0nzz.traefikmanager.R
+
 enum class ProviderPage(
     val tab: String,
-    val label: String,
+    val label: UiText,
     val providers: Set<String>,
-    val note: String,
-    val empty: String,
+    @StringRes val note: Int,
+    @StringRes val empty: Int,
 ) {
     Docker(
         tab = "docker",
-        label = "Docker",
+        label = UiText.Raw("Docker"),
         providers = setOf("docker"),
-        note = "Managed by Docker labels and read-only. Edit them through your container's labels.",
-        empty = "Routes discovered through Docker labels show up here.",
+        note = R.string.providers_docker_note,
+        empty = R.string.providers_docker_empty,
     ),
     Kubernetes(
         tab = "kubernetes",
-        label = "Kubernetes",
+        label = UiText.Raw("Kubernetes"),
         providers = setOf("kubernetes", "kubernetescrd", "kubernetesingress", "kubernetesgateway"),
-        note = "Managed by Kubernetes (CRD, Ingress or Gateway API) and read-only. Edit them through your Kubernetes resources.",
-        empty = "Routes from Kubernetes CRDs, Ingress and Gateway API show up here.",
+        note = R.string.providers_kubernetes_note,
+        empty = R.string.providers_kubernetes_empty,
     ),
     Swarm(
         tab = "swarm",
-        label = "Swarm",
+        label = UiText.Raw("Swarm"),
         providers = setOf("swarm"),
-        note = "Discovered through Docker Swarm labels and read-only. Edit them through your Swarm service definitions.",
-        empty = "Routes discovered through Swarm labels show up here.",
+        note = R.string.providers_swarm_note,
+        empty = R.string.providers_swarm_empty,
     ),
     Nomad(
         tab = "nomad",
-        label = "Nomad",
+        label = UiText.Raw("Nomad"),
         providers = setOf("nomad"),
-        note = "Discovered through HashiCorp Nomad and read-only. Edit them through your Nomad job definitions.",
-        empty = "Routes discovered through Nomad show up here.",
+        note = R.string.providers_nomad_note,
+        empty = R.string.providers_nomad_empty,
     ),
     Ecs(
         tab = "ecs",
-        label = "ECS",
+        label = UiText.Raw("ECS"),
         providers = setOf("ecs"),
-        note = "Discovered through Amazon ECS and read-only. Edit them through your ECS task definitions.",
-        empty = "Routes discovered through ECS show up here.",
+        note = R.string.providers_ecs_note,
+        empty = R.string.providers_ecs_empty,
     ),
     ConsulCatalog(
         tab = "consulcatalog",
-        label = "Consul Catalog",
+        label = UiText.Raw("Consul Catalog"),
         providers = setOf("consulcatalog"),
-        note = "Discovered through the Consul service catalog and read-only. Edit them through your Consul service registrations.",
-        empty = "Routes discovered through the Consul catalog show up here.",
+        note = R.string.providers_consulcatalog_note,
+        empty = R.string.providers_consulcatalog_empty,
     ),
     Redis(
         tab = "redis",
-        label = "Redis",
+        label = UiText.Raw("Redis"),
         providers = setOf("redis"),
-        note = "Stored in Redis and read-only here. Edit them in your Redis KV store.",
-        empty = "Routes stored in Redis show up here.",
+        note = R.string.providers_redis_note,
+        empty = R.string.providers_redis_empty,
     ),
     Etcd(
         tab = "etcd",
-        label = "etcd",
+        label = UiText.Raw("etcd"),
         providers = setOf("etcd"),
-        note = "Stored in etcd and read-only here. Edit them in your etcd KV store.",
-        empty = "Routes stored in etcd show up here.",
+        note = R.string.providers_etcd_note,
+        empty = R.string.providers_etcd_empty,
     ),
     Consul(
         tab = "consul",
-        label = "Consul KV",
+        label = UiText.Raw("Consul KV"),
         providers = setOf("consul"),
-        note = "Stored in Consul's key-value store and read-only here. Edit them in Consul KV.",
-        empty = "Routes stored in Consul KV show up here.",
+        note = R.string.providers_consul_note,
+        empty = R.string.providers_consul_empty,
     ),
     ZooKeeper(
         tab = "zookeeper",
-        label = "ZooKeeper",
+        label = UiText.Raw("ZooKeeper"),
         providers = setOf("zookeeper"),
-        note = "Stored in ZooKeeper and read-only here. Edit them in your ZooKeeper instance.",
-        empty = "Routes stored in ZooKeeper show up here.",
+        note = R.string.providers_zookeeper_note,
+        empty = R.string.providers_zookeeper_empty,
     ),
     HttpProvider(
         tab = "http_provider",
-        label = "HTTP Provider",
+        label = UiText.of(R.string.providers_label_http),
         providers = setOf("http"),
-        note = "Sourced from an HTTP endpoint configured in Traefik and read-only here.",
-        empty = "Routes from the HTTP provider show up here.",
+        note = R.string.providers_http_provider_note,
+        empty = R.string.providers_http_provider_empty,
     ),
     FileExternal(
         tab = "file_external",
-        label = "File (external)",
+        label = UiText.of(R.string.providers_label_file_external),
         providers = setOf("file"),
-        note = "From file provider configs Traefik Manager does not manage, and read-only here. Managed routes are on Routes.",
-        empty = "Routes from external file provider configs show up here.",
+        note = R.string.providers_file_external_note,
+        empty = R.string.providers_file_external_empty,
     ),
     Internal(
         tab = "internal",
-        label = "Internal",
+        label = UiText.of(R.string.providers_label_internal),
         providers = setOf("internal"),
-        note = "Traefik creates these itself. They are read-only here and turned on or off in your static config.",
-        empty = "Traefik serves these itself. The dashboard, API and ping live here.",
+        note = R.string.providers_internal_note,
+        empty = R.string.providers_internal_empty,
     ),
     ;
 
@@ -146,19 +149,19 @@ data class ProviderVerdict(
     val udp: Int,
     val middlewares: Int,
 ) {
-    val headline: String
+    val headline: UiText
         get() = when {
-            notServing > 0 -> "$notServing ${if (notServing == 1) "route" else "routes"} not serving"
-            else -> "$routes ${if (routes == 1) "route" else "routes"} live"
+            notServing > 0 -> UiText.plural(R.plurals.providers_verdict_not_serving, notServing)
+            else -> UiText.plural(R.plurals.providers_verdict_live, routes)
         }
 
-    val detail: String
+    val detail: UiText
         get() = buildList {
-            if (http > 0) add("$http HTTP")
-            if (tcp > 0) add("$tcp TCP")
-            if (udp > 0) add("$udp UDP")
-            if (middlewares > 0) add("$middlewares ${if (middlewares == 1) "middleware" else "middlewares"}")
-        }.joinToString(" · ").ifEmpty { "No routes" }
+            if (http > 0) add(UiText.Raw("$http HTTP"))
+            if (tcp > 0) add(UiText.Raw("$tcp TCP"))
+            if (udp > 0) add(UiText.Raw("$udp UDP"))
+            if (middlewares > 0) add(UiText.plural(R.plurals.common_middlewares_count, middlewares))
+        }.takeIf { it.isNotEmpty() }?.let { UiText.join(it) } ?: UiText.of(R.string.providers_verdict_none)
 }
 
 object ProviderRows {

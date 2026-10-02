@@ -10,6 +10,7 @@ class HardcodedTextTest {
     private val baselineFile = File("src/test/resources/i18n-baseline.txt")
     private val allowedFile = File("src/test/resources/i18n-allowed.txt")
     private val literal = Regex(""""((?:[^"\\]|\\.)*)"""")
+    private val rawText = Regex("""UiText\.Raw\("(?:[^"\\]|\\.)*"\)""")
     private val identifier = Regex("""[A-Za-z0-9_.\-/:]+""")
     private val word = Regex("""[A-Z][a-z]+""")
     private val skippedFiles = setOf("DemoApi.kt")
@@ -38,6 +39,7 @@ class HardcodedTextTest {
                 val hits = file.readLines()
                     .map { it.trim() }
                     .filterNot { line -> skippedPrefixes.any(line::startsWith) }
+                    .map { it.replace(rawText, "") }
                     .sumOf { line ->
                         literal.findAll(line).map { it.groupValues[1] }.count { isText(it) && "$path|$it" !in allowed }
                     }

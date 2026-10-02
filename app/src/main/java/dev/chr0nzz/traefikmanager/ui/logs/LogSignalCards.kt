@@ -62,6 +62,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @Composable
 fun LogSignalCards(
@@ -111,8 +112,8 @@ fun LogSignalCards(
                 },
                 sub = window.codeRank.firstOrNull()
                     ?.let { (code, count) ->
-                        val name = LogParser.statusName(code).lowercase()
-                            .ifEmpty { stringResource(R.string.logs_status_fallback) }
+                        val name = LogParser.statusName(code)?.asString()?.lowercase()
+                            ?: stringResource(R.string.logs_status_fallback)
                         val more = window.codeRank.size - 1
                         listOfNotNull(
                             "$code $name x$count",
@@ -531,8 +532,8 @@ fun LogSignalCards(
                             Text(
                                 text = stringResource(
                                     R.string.logs_failure_line,
-                                    LogParser.statusName(failure.status)
-                                        .ifEmpty { stringResource(R.string.logs_failure_fallback) },
+                                    LogParser.statusName(failure.status)?.asString()
+                                        ?: stringResource(R.string.logs_failure_fallback),
                                     failure.path,
                                     failure.share.toString(),
                                 ),

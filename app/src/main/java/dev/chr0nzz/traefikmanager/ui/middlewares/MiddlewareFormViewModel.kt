@@ -32,7 +32,7 @@ data class MiddlewareFormUiState(
     val loading: Boolean = false,
     val mode: MiddlewareMode = MiddlewareMode.Yaml,
     val templateId: String = "",
-    val templateLabel: String = "",
+    val templateLabel: UiText? = null,
     val wizardText: Map<String, String> = emptyMap(),
     val wizardToggles: Map<String, Boolean> = emptyMap(),
     val customTemplates: List<MiddlewareTemplate> = emptyList(),
@@ -100,7 +100,7 @@ class MiddlewareFormViewModel @Inject constructor(
                     loading = false,
                     mode = MiddlewareMode.Yaml,
                     templateId = "",
-                    templateLabel = "",
+                    templateLabel = null,
                     form = MiddlewareForm(
                         name = existing.name,
                         protocol = protocol,
@@ -126,7 +126,7 @@ class MiddlewareFormViewModel @Inject constructor(
                     form = current.form.copy(protocol = protocol),
                     mode = MiddlewareMode.Yaml,
                     templateId = "",
-                    templateLabel = "",
+                    templateLabel = null,
                     error = null,
                 )
             } else {
@@ -142,7 +142,7 @@ class MiddlewareFormViewModel @Inject constructor(
 
     fun selectTemplate(id: String) {
         if (id.isEmpty()) {
-            _state.update { it.copy(templateId = "", templateLabel = "", mode = MiddlewareMode.Yaml) }
+            _state.update { it.copy(templateId = "", templateLabel = null, mode = MiddlewareMode.Yaml) }
             return
         }
         val custom = _state.value.customTemplates.firstOrNull { "custom:${it.id}" == id }
@@ -151,7 +151,7 @@ class MiddlewareFormViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     templateId = id,
-                    templateLabel = custom.name,
+                    templateLabel = UiText.Raw(custom.name),
                     mode = MiddlewareMode.Yaml,
                     error = null,
                 )

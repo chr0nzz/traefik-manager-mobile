@@ -401,7 +401,8 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
                     modifier = Modifier.padding(top = 2.dp),
                 ) {
                     window.codeRank.take(3).forEach { (code, count) ->
-                        val name = LogParser.statusName(code).lowercase().ifEmpty { stringResource(R.string.logs_status_fallback) }
+                        val name = LogParser.statusName(code)?.asString()?.lowercase()
+                            ?: stringResource(R.string.logs_status_fallback)
                         VerdictItem(
                             text = "$count $code $name",
                             color = if (code >= 500) palette.red else palette.yellow,

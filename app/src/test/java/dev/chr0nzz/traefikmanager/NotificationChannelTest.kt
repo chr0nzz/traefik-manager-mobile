@@ -1,5 +1,9 @@
 package dev.chr0nzz.traefikmanager
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import dev.chr0nzz.traefikmanager.data.model.ChannelKinds
 import dev.chr0nzz.traefikmanager.data.model.NotificationChannel
 import dev.chr0nzz.traefikmanager.data.model.PluginEntry
@@ -12,7 +16,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class NotificationChannelTest {
+
+    private val resources = ApplicationProvider.getApplicationContext<Context>().resources
 
     @Test
     fun `every kind the server accepts is offered`() {
@@ -45,18 +52,21 @@ class NotificationChannelTest {
 
     @Test
     fun `missing slots are named by their label`() {
-        assertEquals(listOf("App Token", "User Key"), NotificationChannel(kind = "pushover").missingFields())
+        assertEquals(
+            listOf("App Token", "User Key"),
+            NotificationChannel(kind = "pushover").missingFields().map { it.resolve(resources) },
+        )
     }
 
     @Test
     fun `an empty category list reads as all of them`() {
-        assertEquals("All categories", NotificationChannel(kind = "discord").summary())
+        assertEquals("All categories", NotificationChannel(kind = "discord").summary().resolve(resources))
     }
 
     @Test
     fun `every category selected also reads as all of them`() {
         val channel = NotificationChannel(kind = "discord", categories = ChannelKinds.categories.map { it.first })
-        assertEquals("All categories", channel.summary())
+        assertEquals("All categories", channel.summary().resolve(resources))
     }
 
     @Test
@@ -71,14 +81,14 @@ class NotificationChannelTest {
         )
         assertEquals(
             "Certificates, CrowdSec · Warning and above · Daily digest · Quiet 23:00-07:00, errors break through",
-            channel.summary(),
+            channel.summary().resolve(resources),
         )
     }
 
     @Test
     fun `defaults are left out of the summary`() {
         val channel = NotificationChannel(kind = "discord", categories = listOf("config"))
-        assertEquals("Config", channel.summary())
+        assertEquals("Config", channel.summary().resolve(resources))
     }
 }
 

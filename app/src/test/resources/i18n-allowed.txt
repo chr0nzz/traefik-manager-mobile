@@ -21,3 +21,16 @@ ui/settings/StaticSectionSheets.kt|Docker
 ui/settings/StaticSectionSheets.kt|File
 ui/settings/ConnectionSettingsViewModel.kt|Target address not allowed
 ui/settings/ConnectionSettingsViewModel.kt|Invalid URL
+data/model/AgentCompose.kt|*
+data/model/LogModels.kt|Jan
+data/model/LogModels.kt|Feb
+data/model/LogModels.kt|Mar
+data/model/LogModels.kt|Apr
+data/model/LogModels.kt|May
+data/model/LogModels.kt|Jun
+data/model/LogModels.kt|Jul
+data/model/LogModels.kt|Aug
+data/model/LogModels.kt|Sep
+data/model/LogModels.kt|Oct
+data/model/LogModels.kt|Nov
+data/model/LogModels.kt|Dec

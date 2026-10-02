@@ -504,7 +504,7 @@ private fun ChannelRow(
                         modifier = Modifier.weight(1f, fill = false),
                     )
                     Text(
-                        text = ChannelKinds.label(channel.kind),
+                        text = ChannelKinds.label(channel.kind).asString(),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         maxLines = 1,
@@ -521,7 +521,11 @@ private fun ChannelRow(
                     }
                 }
                 Text(
-                    text = if (missing.isEmpty()) channel.summary() else stringResource(R.string.channels_needs, missing.joinToString(", ")),
+                    text = if (missing.isEmpty()) {
+                        channel.summary().asString()
+                    } else {
+                        stringResource(R.string.channels_needs, missing.map { it.asString() }.joinToString(", "))
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = if (missing.isEmpty()) palette.muted else palette.yellow,
                     maxLines = 3,

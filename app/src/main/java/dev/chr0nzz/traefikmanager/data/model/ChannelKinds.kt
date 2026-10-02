@@ -1,17 +1,19 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import dev.chr0nzz.traefikmanager.R
+
 data class ChannelField(
     val key: String,
-    val label: String,
-    val description: String,
+    val label: UiText,
+    val description: UiText,
     val placeholder: String = "",
     val secret: Boolean = false,
 )
 
 data class ChannelKind(
     val key: String,
-    val label: String,
-    val pickerLabel: String,
+    val label: UiText,
+    val pickerLabel: UiText,
     val fields: List<ChannelField>,
     val basicAuth: Boolean = false,
 ) {
@@ -20,40 +22,40 @@ data class ChannelKind(
 
 object ChannelKinds {
 
-    private val url = ChannelField("url", "URL", "")
+    private val url = ChannelField("url", UiText.Raw("URL"), UiText.Raw(""))
 
     val all: List<ChannelKind> = listOf(
         ChannelKind(
             key = "discord",
-            label = "Discord",
-            pickerLabel = "Discord",
+            label = UiText.Raw("Discord"),
+            pickerLabel = UiText.Raw("Discord"),
             fields = listOf(
                 url.copy(
-                    label = "Webhook URL",
-                    description = "Where notifications are delivered.",
+                    label = UiText.of(R.string.webhook_url),
+                    description = UiText.of(R.string.channels_help_where_notifications_are_delivered),
                     placeholder = "https://discord.com/api/webhooks/...",
                 ),
             ),
         ),
         ChannelKind(
             key = "slack",
-            label = "Slack",
-            pickerLabel = "Slack",
+            label = UiText.Raw("Slack"),
+            pickerLabel = UiText.Raw("Slack"),
             fields = listOf(
                 url.copy(
-                    label = "Webhook URL",
-                    description = "Incoming webhook created in your Slack workspace.",
+                    label = UiText.of(R.string.webhook_url),
+                    description = UiText.of(R.string.channels_help_incoming_webhook_created_in_your),
                     placeholder = "https://hooks.slack.com/services/...",
                 ),
             ),
         ),
         ChannelKind(
             key = "ntfy",
-            label = "ntfy",
-            pickerLabel = "ntfy.sh / self-hosted ntfy",
+            label = UiText.Raw("ntfy"),
+            pickerLabel = UiText.Raw("ntfy.sh / self-hosted ntfy"),
             fields = listOf(
                 url.copy(
-                    description = "Full topic URL on ntfy.sh or your own server.",
+                    description = UiText.of(R.string.channels_help_full_topic_url_on_ntfy),
                     placeholder = "https://ntfy.sh/my-topic",
                 ),
             ),
@@ -61,11 +63,11 @@ object ChannelKinds {
         ),
         ChannelKind(
             key = "generic",
-            label = "Generic JSON",
-            pickerLabel = "Generic JSON",
+            label = UiText.of(R.string.channels_kind_generic),
+            pickerLabel = UiText.of(R.string.channels_kind_generic),
             fields = listOf(
                 url.copy(
-                    description = "Receives a JSON body you can shape downstream.",
+                    description = UiText.of(R.string.channels_help_receives_a_json_body_you),
                     placeholder = "https://example.com/hooks/traefik",
                 ),
             ),
@@ -73,81 +75,80 @@ object ChannelKinds {
         ),
         ChannelKind(
             key = "gotify",
-            label = "Gotify",
-            pickerLabel = "Gotify",
+            label = UiText.Raw("Gotify"),
+            pickerLabel = UiText.Raw("Gotify"),
             fields = listOf(
                 url.copy(
-                    label = "Server URL",
-                    description = "Base URL of your Gotify server.",
+                    label = UiText.of(R.string.channels_field_server_url),
+                    description = UiText.of(R.string.channels_help_base_url_of_your_gotify),
                     placeholder = "https://gotify.example.com",
                 ),
                 ChannelField(
                     key = "token",
-                    label = "App Token",
-                    description = "Application token from Gotify. Stored encrypted.",
+                    label = UiText.of(R.string.channels_field_app_token),
+                    description = UiText.of(R.string.channels_help_application_token_from_gotify_stored),
                     secret = true,
                 ),
             ),
         ),
         ChannelKind(
             key = "pushover",
-            label = "Pushover",
-            pickerLabel = "Pushover",
+            label = UiText.Raw("Pushover"),
+            pickerLabel = UiText.Raw("Pushover"),
             fields = listOf(
                 ChannelField(
                     key = "token",
-                    label = "App Token",
-                    description = "Application token from your Pushover app. Stored encrypted.",
+                    label = UiText.of(R.string.channels_field_app_token),
+                    description = UiText.of(R.string.channels_help_application_token_from_your_pushover),
                     secret = true,
                 ),
                 ChannelField(
                     key = "token2",
-                    label = "User Key",
-                    description = "Your Pushover user or group key. Stored encrypted.",
+                    label = UiText.of(R.string.channels_field_user_key),
+                    description = UiText.of(R.string.channels_help_your_pushover_user_or_group),
                     secret = true,
                 ),
             ),
         ),
         ChannelKind(
             key = "pushbullet",
-            label = "Pushbullet",
-            pickerLabel = "Pushbullet",
+            label = UiText.Raw("Pushbullet"),
+            pickerLabel = UiText.Raw("Pushbullet"),
             fields = listOf(
                 ChannelField(
                     key = "token",
-                    label = "Access Token",
-                    description = "Access token from your Pushbullet account. Stored encrypted.",
+                    label = UiText.of(R.string.channels_field_access_token),
+                    description = UiText.of(R.string.channels_help_access_token_from_your_pushbullet),
                     secret = true,
                 ),
             ),
         ),
         ChannelKind(
             key = "unifiedpush",
-            label = "Mobile app",
-            pickerLabel = "Mobile app",
+            label = UiText.of(R.string.channels_kind_mobile),
+            pickerLabel = UiText.of(R.string.channels_kind_mobile),
             fields = listOf(
                 url.copy(
-                    label = "Device endpoint",
-                    description = "Registered by the Traefik Manager app on your phone. " +
-                        "Editing it stops push to that device.",
+                    label = UiText.of(R.string.channels_field_endpoint),
+                    description = UiText.of(R.string.channels_help_registered_by_the_traefik_manager),
                 ),
             ),
         ),
         ChannelKind(
             key = "telegram",
-            label = "Telegram",
-            pickerLabel = "Telegram",
+            label = UiText.Raw("Telegram"),
+            pickerLabel = UiText.Raw("Telegram"),
             fields = listOf(
                 ChannelField(
                     key = "token",
-                    label = "Bot Token",
-                    description = "Token issued by BotFather. Stored encrypted.",
+                    label = UiText.of(R.string.channels_field_bot_token),
+                    description = UiText.of(R.string.channels_help_token_issued_by_botfather_stored),
                     secret = true,
                 ),
                 ChannelField(
                     key = "token2",
-                    label = "Chat ID",
-                    description = "Target chat, group or channel to post into.",
+                    label = UiText.of(R.string.channels_field_chat_id),
+                    description = UiText.of(R.string.channels_help_target_chat_group_or_channel),
                     placeholder = "-1001234567890",
                 ),
             ),
@@ -156,38 +157,38 @@ object ChannelKinds {
 
     fun of(key: String): ChannelKind? = all.firstOrNull { it.key == key }
 
-    fun label(key: String): String = of(key)?.label ?: key
+    fun label(key: String): UiText = of(key)?.label ?: UiText.Raw(key)
 
-    val categories: List<Pair<String, String>> = listOf(
-        "config" to "Config",
-        "backup" to "Backups",
-        "security" to "Security",
-        "traefik" to "Traefik",
-        "certs" to "Certificates",
-        "crowdsec" to "CrowdSec",
-        "agent" to "Agents",
-        "update" to "Updates",
+    val categories: List<Pair<String, UiText>> = listOf(
+        "config" to UiText.of(R.string.channels_category_config),
+        "backup" to UiText.of(R.string.nav_backups),
+        "security" to UiText.of(R.string.appearance_security),
+        "traefik" to UiText.Raw("Traefik"),
+        "certs" to UiText.of(R.string.nav_certificates),
+        "crowdsec" to UiText.Raw("CrowdSec"),
+        "agent" to UiText.of(R.string.channels_category_agents),
+        "update" to UiText.of(R.string.channels_category_updates),
     )
 
-    val severities: List<Pair<String, String>> = listOf(
-        "info" to "Info",
-        "success" to "Success",
-        "warning" to "Warning",
-        "error" to "Error",
+    val severities: List<Pair<String, UiText>> = listOf(
+        "info" to UiText.of(R.string.channels_severity_info),
+        "success" to UiText.of(R.string.services_health_ok),
+        "warning" to UiText.of(R.string.services_health_warning),
+        "error" to UiText.of(R.string.common_label_error),
     )
 
-    val digests: List<Pair<String, String>> = listOf(
-        "immediate" to "Immediate",
-        "hourly" to "Hourly",
-        "daily" to "Daily",
+    val digests: List<Pair<String, UiText>> = listOf(
+        "immediate" to UiText.of(R.string.channels_digest_immediate),
+        "hourly" to UiText.of(R.string.channels_digest_hourly),
+        "daily" to UiText.of(R.string.channels_digest_daily),
     )
 
-    fun categoryLabel(key: String): String = categories.firstOrNull { it.first == key }?.second ?: key
+    fun categoryLabel(key: String): UiText = categories.firstOrNull { it.first == key }?.second ?: UiText.Raw(key)
 
-    fun severityLabel(key: String): String = severities.firstOrNull { it.first == key }?.second ?: key
+    fun severityLabel(key: String): UiText = severities.firstOrNull { it.first == key }?.second ?: UiText.Raw(key)
 }
 
-fun NotificationChannel.missingFields(): List<String> {
+fun NotificationChannel.missingFields(): List<UiText> {
     val kind = ChannelKinds.of(kind) ?: return emptyList()
     return kind.required.filter { field -> valueOf(field.key).isBlank() }.map { it.label }
 }
@@ -201,21 +202,26 @@ fun NotificationChannel.valueOf(key: String): String = when (key) {
     else -> ""
 }
 
-fun NotificationChannel.summary(): String {
-    val parts = mutableListOf<String>()
+fun NotificationChannel.summary(): UiText {
+    val parts = mutableListOf<UiText>()
     val known = categories.filter { key -> ChannelKinds.categories.any { it.first == key } }
     parts += if (known.isEmpty() || known.size == ChannelKinds.categories.size) {
-        "All categories"
+        UiText.of(R.string.channels_summary_all)
     } else {
-        known.joinToString(", ") { ChannelKinds.categoryLabel(it) }
+        UiText.join(known.map { ChannelKinds.categoryLabel(it) }, ", ")
     }
-    if (minSeverity != "info") parts += "${ChannelKinds.severityLabel(minSeverity)} and above"
+    if (minSeverity != "info") {
+        parts += UiText.of(R.string.channels_summary_severity, ChannelKinds.severityLabel(minSeverity))
+    }
     when (digest) {
-        "hourly" -> parts += "Hourly digest"
-        "daily" -> parts += "Daily digest"
+        "hourly" -> parts += UiText.of(R.string.channels_summary_hourly)
+        "daily" -> parts += UiText.of(R.string.channels_summary_daily)
     }
     if (quietHours.isNotBlank()) {
-        parts += "Quiet $quietHours" + if (breakThrough) ", errors break through" else ""
+        parts += UiText.of(
+            if (breakThrough) R.string.channels_summary_quiet_break else R.string.channels_summary_quiet,
+            quietHours,
+        )
     }
-    return parts.joinToString(" · ")
+    return UiText.join(parts)
 }

@@ -46,6 +46,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -107,7 +108,7 @@ fun LogDetailPane(
                         color = statusColor,
                     )
                     Text(
-                        text = entry.statusName,
+                        text = entry.statusName?.asString().orEmpty(),
                         style = MaterialTheme.typography.titleSmall,
                         color = statusColor,
                         modifier = Modifier

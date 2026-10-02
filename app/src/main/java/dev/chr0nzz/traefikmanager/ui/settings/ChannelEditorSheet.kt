@@ -109,7 +109,7 @@ fun ChannelEditorSheet(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 OutlinedTextField(
-                    value = kind?.pickerLabel ?: draft.kind,
+                    value = kind?.pickerLabel?.asString() ?: draft.kind,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.common_label_type)) },
@@ -122,7 +122,7 @@ fun ChannelEditorSheet(
                 ExposedDropdownMenu(expanded = kindOpen, onDismissRequest = { kindOpen = false }) {
                     ChannelKinds.all.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option.pickerLabel) },
+                            text = { Text(option.pickerLabel.asString()) },
                             onClick = {
                                 onChange(draft.copy(kind = option.key))
                                 kindOpen = false
@@ -136,9 +136,9 @@ fun ChannelEditorSheet(
                 OutlinedTextField(
                     value = draft.valueOf(field.key),
                     onValueChange = { onChange(draft.withValue(field.key, it)) },
-                    label = { Text(field.label) },
+                    label = { Text(field.label.asString()) },
                     placeholder = { if (field.placeholder.isNotEmpty()) Text(field.placeholder) },
-                    supportingText = { Text(field.description) },
+                    supportingText = { Text(field.description.asString()) },
                     singleLine = true,
                     visualTransformation = if (field.secret) {
                         PasswordVisualTransformation()
@@ -209,7 +209,7 @@ fun ChannelEditorSheet(
                             }
                             onChange(draft.copy(categories = next))
                         },
-                        label = { Text(label) },
+                        label = { Text(label.asString()) },
                     )
                 }
             }
@@ -220,7 +220,7 @@ fun ChannelEditorSheet(
                     FilterChip(
                         selected = draft.minSeverity == key,
                         onClick = { onChange(draft.copy(minSeverity = key)) },
-                        label = { Text(label) },
+                        label = { Text(label.asString()) },
                     )
                 }
             }
@@ -231,7 +231,7 @@ fun ChannelEditorSheet(
                     FilterChip(
                         selected = draft.digest == key,
                         onClick = { onChange(draft.copy(digest = key)) },
-                        label = { Text(label) },
+                        label = { Text(label.asString()) },
                     )
                 }
             }

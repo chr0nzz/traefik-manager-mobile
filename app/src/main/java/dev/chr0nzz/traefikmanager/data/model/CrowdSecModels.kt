@@ -296,7 +296,7 @@ object CrowdSecAnalytics {
     fun percent(count: Int, total: Int): String {
         if (total <= 0) return "0%"
         val value = count * 100.0 / total
-        return if (value >= 10) "${value.toInt()}%" else String.format(java.util.Locale.US, "%.1f%%", value)
+        return if (value >= 10) "${value.toInt()}%" else String.format(java.util.Locale.getDefault(java.util.Locale.Category.FORMAT), "%.1f%%", value)
     }
 
     fun spanMillis(alerts: List<CsAlert>): Long? {

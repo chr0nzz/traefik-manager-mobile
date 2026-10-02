@@ -54,6 +54,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,13 +84,13 @@ fun ProviderTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text(page.label) },
+        title = { Text(page.label.asString()) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.providers_search, page.label))
+                Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.providers_search, page.label.asString()))
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
@@ -116,7 +117,7 @@ fun ProviderTopBar(
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.providers_refresh, page.label))
+                Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.providers_refresh, page.label.asString()))
             }
         },
         scrollBehavior = scrollBehavior,
@@ -129,7 +130,7 @@ fun ProviderTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text(stringResource(R.string.providers_search, page.label)) },
+                placeholder = { Text(stringResource(R.string.providers_search, page.label.asString())) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))

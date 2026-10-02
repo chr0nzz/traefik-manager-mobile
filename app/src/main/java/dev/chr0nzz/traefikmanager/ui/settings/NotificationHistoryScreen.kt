@@ -222,7 +222,7 @@ fun NotificationHistoryScreen(
                             text = listOfNotNull(
                                 notification.since() ?: notification.stamp,
                                 notification.category.takeIf { it.isNotBlank() }
-                                    ?.let { ChannelKinds.categoryLabel(it) },
+                                    ?.let { ChannelKinds.categoryLabel(it).asString() },
                             ).joinToString("  "),
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                             color = palette.muted,

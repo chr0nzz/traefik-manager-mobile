@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager
 
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.data.model.Countries
 import dev.chr0nzz.traefikmanager.data.model.IpClass
 import dev.chr0nzz.traefikmanager.data.model.LogAnalytics
@@ -73,7 +74,7 @@ class LogParsingTest {
         assertEquals(0, entry.status)
         assertTrue(entry.heldOpen)
         assertEquals("other", entry.statusClass)
-        assertEquals("tunnel", entry.statusName)
+        assertEquals(UiText.of(R.string.http_status_tunnel), entry.statusName)
     }
 
     @Test
@@ -210,9 +211,9 @@ class LogParsingTest {
         assertEquals("2xx", LogParser.statusClass(204))
         assertEquals("5xx", LogParser.statusClass(503))
         assertEquals("other", LogParser.statusClass(0))
-        assertEquals("I am a teapot", LogParser.statusName(418))
-        assertEquals("", LogParser.statusName(599))
-        assertEquals("tunnel", LogParser.statusName(0))
+        assertEquals(UiText.of(R.string.http_status_418), LogParser.statusName(418))
+        assertEquals(null, LogParser.statusName(599))
+        assertEquals(UiText.of(R.string.http_status_tunnel), LogParser.statusName(0))
     }
 
     @Test

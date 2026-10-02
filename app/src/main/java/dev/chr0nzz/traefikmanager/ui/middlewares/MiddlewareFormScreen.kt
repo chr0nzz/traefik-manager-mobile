@@ -75,6 +75,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -259,9 +260,9 @@ private fun MiddlewareFormBody(
                         modifier = Modifier.size(18.dp),
                     )
                     Text(
-                        text = state.templateLabel.ifEmpty { stringResource(R.string.middlewares_template_custom) },
+                        text = state.templateLabel?.asString() ?: stringResource(R.string.middlewares_template_custom),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = if (state.templateLabel.isEmpty()) palette.muted else MaterialTheme.colorScheme.onSurface,
+                        color = if (state.templateLabel == null) palette.muted else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     Text(
@@ -309,7 +310,7 @@ private fun MiddlewareFormBody(
                 }
             } else {
                 TmCard {
-                    SectionLabel(wizard.label)
+                    SectionLabel(wizard.label.asString())
                     Column(
                         verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                         modifier = Modifier.padding(top = TmSpacing.sm),
@@ -360,17 +361,13 @@ private fun WizardFieldEditor(
         is WizardField.Text -> OutlinedTextField(
             value = state.wizardText[field.key].orEmpty(),
             onValueChange = { viewModel.setWizardText(field.key, it) },
-            label = { Text(field.label) },
+            label = { Text(field.label.asString()) },
             placeholder = if (field.placeholder.isNotEmpty()) {
                 { Text(field.placeholder, maxLines = 1) }
             } else {
                 null
             },
-            supportingText = if (field.help.isNotEmpty()) {
-                { Text(field.help) }
-            } else {
-                null
-            },
+            supportingText = field.help?.let { help -> { Text(help.asString()) } },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (field.numeric) KeyboardType.Number else KeyboardType.Text,
@@ -383,13 +380,15 @@ private fun WizardFieldEditor(
         is WizardField.Lines -> OutlinedTextField(
             value = state.wizardText[field.key].orEmpty(),
             onValueChange = { viewModel.setWizardText(field.key, it) },
-            label = { Text(field.label) },
+            label = { Text(field.label.asString()) },
             placeholder = if (field.placeholder.isNotEmpty()) {
                 { Text(field.placeholder) }
             } else {
                 null
             },
-            supportingText = { Text(field.help.ifEmpty { stringResource(R.string.middlewares_form_one_per_line) }) },
+            supportingText = {
+                Text(field.help?.asString() ?: stringResource(R.string.middlewares_form_one_per_line))
+            },
             minLines = 3,
             maxLines = 8,
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = MonoFamily),
@@ -410,7 +409,7 @@ private fun WizardFieldEditor(
                 onCheckedChange = { viewModel.setWizardToggle(field.key, it) },
             )
             Text(
-                text = field.label,
+                text = field.label.asString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -419,7 +418,7 @@ private fun WizardFieldEditor(
         is WizardField.Choice -> {
             val current = state.wizardText[field.key] ?: field.default
             ChoiceField(
-                label = field.label,
+                label = field.label.asString(),
                 options = field.options,
                 selected = current,
                 onSelect = { viewModel.setWizardText(field.key, it) },
@@ -432,12 +431,12 @@ private fun WizardFieldEditor(
 @Composable
 private fun ChoiceField(
     label: String,
-    options: List<Pair<String, String>>,
+    options: List<Pair<String, UiText>>,
     selected: String,
     onSelect: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val current = options.firstOrNull { it.first == selected }?.second.orEmpty()
+    val current = options.firstOrNull { it.first == selected }?.second?.asString().orEmpty()
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it },
@@ -456,7 +455,7 @@ private fun ChoiceField(
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { (value, text) ->
                 DropdownMenuItem(
-                    text = { Text(text) },
+                    text = { Text(text.asString()) },
                     onClick = {
                         onSelect(value)
                         expanded = false
@@ -588,7 +587,7 @@ private fun TemplatePickerSheet(
                 if (wizards.isEmpty()) return@forEach
                 item(key = "cat-$category") {
                     SectionLabel(
-                        text = category,
+                        text = categoryLabel(category),
                         modifier = Modifier.padding(
                             start = TmSpacing.lg,
                             end = TmSpacing.lg,
@@ -600,7 +599,7 @@ private fun TemplatePickerSheet(
                 items(wizards.size, key = { index -> wizards[index].id }) { index ->
                     val wizard = wizards[index]
                     ListItem(
-                        headlineContent = { Text(wizard.label) },
+                        headlineContent = { Text(wizard.label.asString()) },
                         trailingContent = if (state.templateId == wizard.id) {
                             { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected)) }
                         } else {
@@ -645,4 +644,13 @@ private fun TemplatePickerSheet(
             item { Box(modifier = Modifier.height(TmSpacing.xl)) }
         }
     }
+}
+
+@Composable
+private fun categoryLabel(category: String): String = when (category) {
+    MiddlewareTemplates.CATEGORY_AUTH -> stringResource(R.string.middlewares_category_auth)
+    MiddlewareTemplates.CATEGORY_SECURITY -> stringResource(R.string.middlewares_category_security)
+    MiddlewareTemplates.CATEGORY_ROUTING -> stringResource(R.string.middlewares_category_routing)
+    MiddlewareTemplates.CATEGORY_ADVANCED -> stringResource(R.string.middlewares_category_advanced)
+    else -> category
 }

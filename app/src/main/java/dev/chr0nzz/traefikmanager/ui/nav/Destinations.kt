@@ -110,7 +110,7 @@ enum class TmDestination(
 
     constructor(page: ProviderPage, icon: ImageVector) : this(
         route = page.route,
-        label = UiText.Raw(page.label),
+        label = page.label,
         icon = icon,
         section = TmSection.Providers,
         serverTab = page.tab,

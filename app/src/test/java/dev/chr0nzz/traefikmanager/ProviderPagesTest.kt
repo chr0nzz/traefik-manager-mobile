@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager
 
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.data.model.Agent
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.ProviderPage
@@ -79,8 +80,17 @@ class ProviderPagesTest {
             ProtoEnvelope(http = listOf(TraefikObject(name = "auth@docker", type = "basicauth"), TraefikObject(name = "x@file"))),
         )
         val verdict = ProviderRows.verdict(routes, middlewares)
-        assertEquals("1 route not serving", verdict.headline)
-        assertEquals("2 HTTP · 1 TCP · 1 middleware", verdict.detail)
+        assertEquals(UiText.plural(R.plurals.providers_verdict_not_serving, 1), verdict.headline)
+        assertEquals(
+            UiText.join(
+                listOf(
+                    UiText.Raw("2 HTTP"),
+                    UiText.Raw("1 TCP"),
+                    UiText.plural(R.plurals.common_middlewares_count, 1),
+                ),
+            ),
+            verdict.detail,
+        )
         assertEquals(2, verdict.http)
         assertEquals(1, verdict.tcp)
         assertEquals(1, verdict.middlewares)

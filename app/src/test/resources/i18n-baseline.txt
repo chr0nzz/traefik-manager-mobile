@@ -1,5 +1,5 @@
-data/model 397
-data/repo 79
+data/model 90
+data/repo 77
 data/store 3
 push 8
 ui/crowdsec 1

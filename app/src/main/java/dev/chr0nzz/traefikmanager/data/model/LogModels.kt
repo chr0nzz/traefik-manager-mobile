@@ -13,6 +13,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.longOrNull
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class LogsResponse(
@@ -45,7 +46,7 @@ data class LogEntry(
 ) {
     val statusClass: String get() = LogParser.statusClass(status)
 
-    val statusName: String get() = LogParser.statusName(status)
+    val statusName: UiText? get() = LogParser.statusName(status)
 
     val heldOpen: Boolean get() = status == 101 || status == 0
 
@@ -84,20 +85,50 @@ object LogParser {
     private val LONG_HEX = Regex("""^[0-9a-f]{12,}$""", RegexOption.IGNORE_CASE)
 
     private val STATUS_NAMES = mapOf(
-        100 to "Continue", 101 to "Switching Protocols", 103 to "Early Hints",
-        200 to "OK", 201 to "Created", 202 to "Accepted", 204 to "No Content", 206 to "Partial Content",
-        301 to "Moved Permanently", 302 to "Found", 303 to "See Other", 304 to "Not Modified",
-        307 to "Temporary Redirect", 308 to "Permanent Redirect",
-        400 to "Bad Request", 401 to "Unauthorized", 402 to "Payment Required", 403 to "Forbidden",
-        404 to "Not Found", 405 to "Method Not Allowed", 406 to "Not Acceptable",
-        407 to "Proxy Authentication Required", 408 to "Request Timeout", 409 to "Conflict",
-        410 to "Gone", 411 to "Length Required", 413 to "Payload Too Large", 414 to "URI Too Long",
-        415 to "Unsupported Media Type", 418 to "I am a teapot", 421 to "Misdirected Request",
-        422 to "Unprocessable Entity", 426 to "Upgrade Required", 429 to "Too Many Requests",
-        431 to "Request Header Fields Too Large", 451 to "Unavailable For Legal Reasons",
-        500 to "Internal Server Error", 501 to "Not Implemented", 502 to "Bad Gateway",
-        503 to "Service Unavailable", 504 to "Gateway Timeout", 505 to "HTTP Version Not Supported",
-        507 to "Insufficient Storage", 511 to "Network Authentication Required",
+        100 to R.string.http_status_100,
+        101 to R.string.http_status_101,
+        103 to R.string.http_status_103,
+        200 to R.string.http_status_200,
+        201 to R.string.http_status_201,
+        202 to R.string.http_status_202,
+        204 to R.string.http_status_204,
+        206 to R.string.http_status_206,
+        301 to R.string.http_status_301,
+        302 to R.string.http_status_302,
+        303 to R.string.http_status_303,
+        304 to R.string.http_status_304,
+        307 to R.string.http_status_307,
+        308 to R.string.http_status_308,
+        400 to R.string.http_status_400,
+        401 to R.string.http_status_401,
+        402 to R.string.http_status_402,
+        403 to R.string.http_status_403,
+        404 to R.string.http_status_404,
+        405 to R.string.http_status_405,
+        406 to R.string.http_status_406,
+        407 to R.string.http_status_407,
+        408 to R.string.http_status_408,
+        409 to R.string.http_status_409,
+        410 to R.string.http_status_410,
+        411 to R.string.http_status_411,
+        413 to R.string.http_status_413,
+        414 to R.string.http_status_414,
+        415 to R.string.http_status_415,
+        418 to R.string.http_status_418,
+        421 to R.string.http_status_421,
+        422 to R.string.http_status_422,
+        426 to R.string.http_status_426,
+        429 to R.string.http_status_429,
+        431 to R.string.http_status_431,
+        451 to R.string.http_status_451,
+        500 to R.string.http_status_500,
+        501 to R.string.http_status_501,
+        502 to R.string.http_status_502,
+        503 to R.string.http_status_503,
+        504 to R.string.http_status_504,
+        505 to R.string.http_status_505,
+        507 to R.string.http_status_507,
+        511 to R.string.http_status_511,
     )
 
     fun parse(raw: String): LogEntry? {
@@ -222,7 +253,7 @@ object LogParser {
 
     fun formatDuration(nanos: Long): String = when {
         nanos <= 0L -> ""
-        nanos >= 1_000_000_000L -> String.format(Locale.US, "%.2fs", nanos / 1e9)
+        nanos >= 1_000_000_000L -> String.format(formatLocale, "%.2fs", nanos / 1e9)
         nanos >= 1_000_000L -> "${(nanos / 1e6).roundToLong()}ms"
         nanos >= 1_000L -> "${(nanos / 1e3).roundToLong()}µs"
         else -> "${nanos}ns"
@@ -260,7 +291,8 @@ object LogParser {
         else -> "other"
     }
 
-    fun statusName(status: Int): String = if (status == 0) "tunnel" else STATUS_NAMES[status].orEmpty()
+    fun statusName(status: Int): UiText? =
+        if (status == 0) UiText.of(R.string.http_status_tunnel) else STATUS_NAMES[status]?.let { UiText.of(it) }
 
     fun durBand(durMs: Double?): String = when {
         durMs == null -> ""
@@ -319,22 +351,24 @@ object LogParser {
 
     fun shortName(name: String): String = name.substringBefore('@')
 
-    fun formatCount(value: Int): String = String.format(Locale.US, "%,d", value)
+    private val formatLocale: Locale get() = Locale.getDefault(Locale.Category.FORMAT)
+
+    fun formatCount(value: Int): String = String.format(formatLocale, "%,d", value)
 
     fun formatMs(value: Double?): String = when {
         value == null -> "-"
         value >= 10_000 -> "${(value / 1000).roundToInt()}s"
-        value >= 1000 -> String.format(Locale.US, "%.2fs", value / 1000)
+        value >= 1000 -> String.format(formatLocale, "%.2fs", value / 1000)
         value >= 1 -> "${value.roundToInt()}ms"
-        value > 0 -> "${trimZeros(String.format(Locale.US, "%.2f", value))}ms"
+        value > 0 -> "${trimZeros(String.format(formatLocale, "%.2f", value))}ms"
         else -> "0ms"
     }
 
     fun heroMs(value: Double?): Pair<String, String> = when {
         value == null -> "-" to ""
-        value >= 1000 -> String.format(Locale.US, "%.1f", value / 1000) to "s"
+        value >= 1000 -> String.format(formatLocale, "%.1f", value / 1000) to "s"
         value >= 1 -> value.roundToInt().toString() to "ms"
-        else -> (trimZeros(String.format(Locale.US, "%.2f", value)).ifEmpty { "0" }) to "ms"
+        else -> (trimZeros(String.format(formatLocale, "%.2f", value)).ifEmpty { "0" }) to "ms"
     }
 
     fun spanText(millis: Long): String {
@@ -348,5 +382,5 @@ object LogParser {
     }
 
     private fun trimZeros(value: String): String =
-        value.trimEnd('0').trimEnd('.').ifEmpty { "0" }
+        value.trimEnd('0').trimEnd('.', ',').ifEmpty { "0" }
 }
