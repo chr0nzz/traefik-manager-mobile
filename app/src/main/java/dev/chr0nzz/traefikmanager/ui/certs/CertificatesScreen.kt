@@ -89,6 +89,12 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 fun CertHealth.asTmStatus(): TmStatus = when (this) {
     CertHealth.Healthy -> TmStatus.Ok
@@ -109,6 +115,7 @@ fun CertificatesScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val refreshState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val palette = LocalTmPalette.current
 
@@ -121,22 +128,25 @@ fun CertificatesScreen(
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
     pendingRemoval?.let { rows ->
         val inUse = rows.count { state.verdict(it)?.unused != true }
         TypedConfirmDialog(
-            title = if (rows.size == 1) "Remove ${rows.first().main}?" else "Remove ${rows.size} certificates?",
-            consequence = buildString {
-                append("Traefik is restarted afterwards, because it only reads acme.json at startup.")
-                if (inUse == 1) append(" One still serves a route, so Traefik requests a new certificate for it.")
-                if (inUse > 1) append(" $inUse still serve routes, so Traefik requests new certificates for them.")
-                append(" A copy of acme.json is saved to Backups first.")
+            title = if (rows.size == 1) {
+                stringResource(R.string.certs_remove_title_one, rows.first().main)
+            } else {
+                pluralStringResource(R.plurals.certs_remove_title_many, rows.size, rows.size)
             },
-            actionLabel = "Remove",
-            word = "DELETE",
+            consequence = listOfNotNull(
+                stringResource(R.string.certs_remove_restart),
+                if (inUse > 0) pluralStringResource(R.plurals.certs_remove_in_use, inUse, inUse) else null,
+                stringResource(R.string.certs_remove_backup),
+            ).joinToString(" "),
+            actionLabel = stringResource(R.string.common_remove),
+            word = stringResource(R.string.common_delete).uppercase(),
             onDismiss = { pendingRemoval = null },
             onConfirm = {
                 viewModel.remove(rows)
@@ -158,17 +168,17 @@ fun CertificatesScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Certificates") },
+                title = { Text(stringResource(R.string.nav_certificates)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                        Icon(Icons.Outlined.Search, contentDescription = "Search certificates")
+                        Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.certs_search))
                     }
                     Box {
                         IconButton(onClick = { filterMenuOpen = true }) {
-                            Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                            Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.common_filters))
                         }
                         if (state.filter != CertFilter.All) {
                             Box(
@@ -190,7 +200,7 @@ fun CertificatesScreen(
                         )
                     }
                     IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh certificates")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.certs_refresh))
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -219,27 +229,27 @@ fun CertificatesScreen(
             },
         ) {
             when {
-                state.loading -> LoadingState(label = "Loading certificates")
+                state.loading -> LoadingState(label = stringResource(R.string.certs_loading))
 
                 state.loadError != null -> ErrorState(
-                    headline = "Could not load certificate data",
-                    body = state.loadError,
+                    headline = stringResource(R.string.certs_error_load),
+                    body = state.loadError?.asString(),
                     onRetry = viewModel::refresh,
                 )
 
                 state.certs.isEmpty() && state.serverError != null -> ErrorState(
-                    headline = "No certificates",
+                    headline = stringResource(R.string.certs_empty_server),
                     body = state.serverError,
                     onRetry = viewModel::refresh,
                 )
 
                 state.certs.isEmpty() -> EmptyState(
-                    headline = "No certificates found",
-                    body = "acme.json may be empty - certs are issued on first request.",
+                    headline = stringResource(R.string.certs_empty),
+                    body = stringResource(R.string.certs_empty_body),
                 )
 
                 state.visible.isEmpty() && state.filter == CertFilter.All -> EmptyState(
-                    headline = "No certificates match your search",
+                    headline = stringResource(R.string.certs_no_search_match),
                 )
 
                 else -> LazyColumn(
@@ -253,13 +263,13 @@ fun CertificatesScreen(
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 ) {
                     item(key = "verdict") {
-                        VerdictLine(verdict = state.statusVerdict, info = state.statusNote)
+                        VerdictLine(verdict = state.statusVerdict, info = state.statusNote.asString())
                     }
                     if (state.visible.isEmpty()) {
                         item(key = "empty") {
                             EmptyState(
-                                headline = "No certificates match",
-                                body = "Try a different search or filter.",
+                                headline = stringResource(R.string.certs_no_match),
+                                body = stringResource(R.string.common_no_match_body),
                             )
                         }
                     }
@@ -294,20 +304,20 @@ private fun CertFilterMenu(
         modifier = Modifier.widthIn(min = 240.dp),
     ) {
         Text(
-            text = "SHOW",
+            text = stringResource(R.string.certs_filter_heading).uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = palette.muted,
             modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
         )
         CertFilter.entries.forEach { option ->
             DropdownMenuItem(
-                text = { Text(option.label) },
+                text = { Text(stringResource(option.label)) },
                 onClick = {
                     onFilterChange(option)
                     onDismiss()
                 },
                 trailingIcon = if (option == filter) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                    { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                 } else {
                     null
                 },
@@ -317,7 +327,7 @@ private fun CertFilterMenu(
         if (unusedCount > 0) {
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Remove $unusedCount unused") },
+                text = { Text(pluralStringResource(R.plurals.certs_remove_unused, unusedCount, unusedCount)) },
                 leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = palette.red) },
                 contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
                 onClick = {
@@ -329,7 +339,7 @@ private fun CertFilterMenu(
         if (filter != CertFilter.All) {
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Clear filters") },
+                text = { Text(stringResource(R.string.common_clear_filters)) },
                 leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
                 contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
                 onClick = {
@@ -394,7 +404,7 @@ private fun CertificateCard(
                     }
                     if (verdict?.orphaned == true) {
                         Text(
-                            text = "no resolver",
+                            text = stringResource(R.string.certs_badge_no_resolver),
                             style = MaterialTheme.typography.labelSmall,
                             color = palette.red,
                         )
@@ -405,7 +415,7 @@ private fun CertificateCard(
                 IconButton(onClick = onRemove) {
                     Icon(
                         Icons.Outlined.Delete,
-                        contentDescription = "Remove certificate",
+                        contentDescription = stringResource(R.string.certs_remove_one),
                         tint = palette.red,
                         modifier = Modifier.size(16.dp),
                     )
@@ -419,7 +429,7 @@ private fun CertificateCard(
             ) {
                 Icon(
                     Icons.Outlined.ContentCopy,
-                    contentDescription = "Copy domains",
+                    contentDescription = stringResource(R.string.certs_copy_domains),
                     tint = palette.muted,
                     modifier = Modifier.size(16.dp),
                 )
@@ -432,7 +442,11 @@ private fun CertificateCard(
         }
         if (cert.extraDomains.size > 2) {
             Text(
-                text = if (expanded) "Show less" else "+${cert.extraDomains.size - 2} more",
+                text = if (expanded) {
+                    stringResource(R.string.common_show_less)
+                } else {
+                    stringResource(R.string.certs_more_domains, cert.extraDomains.size - 2)
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.blue,
                 modifier = Modifier
@@ -449,11 +463,16 @@ private fun CertificateCard(
                 .padding(top = TmSpacing.xs),
         ) {
             Text(
-                text = buildString {
-                    append(cert.expiresOn?.let { "expires $it" } ?: "expiry unknown")
-                    if (cert.domainCount > 1) append(" · ${cert.domainCount} domains")
-                    cert.origin?.let { append(" · $it") }
-                },
+                text = listOfNotNull(
+                    cert.expiresOn?.let { stringResource(R.string.certs_expires, it) }
+                        ?: stringResource(R.string.certs_expiry_unknown),
+                    if (cert.domainCount > 1) {
+                        pluralStringResource(R.plurals.certs_domains, cert.domainCount, cert.domainCount)
+                    } else {
+                        null
+                    },
+                    cert.origin,
+                ).joinToString(UiText.SEPARATOR),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 maxLines = 1,
@@ -488,16 +507,16 @@ private fun CertificatesSearchBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search certificates") },
+                placeholder = { Text(stringResource(R.string.certs_search)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -507,9 +526,9 @@ private fun CertificatesSearchBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = if (results.isEmpty()) {
-                    "No certificates match your search"
+                    stringResource(R.string.certs_no_search_match)
                 } else {
-                    "${results.size} matching"
+                    pluralStringResource(R.plurals.common_matching, results.size, results.size)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = palette.muted,

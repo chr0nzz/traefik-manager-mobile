@@ -24,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @Composable
 fun FilterChipRow(
@@ -96,7 +98,7 @@ fun ClearFiltersChip(
     InputChip(
         selected = false,
         onClick = onClick,
-        label = { Text("Clear") },
+        label = { Text(stringResource(R.string.common_clear)) },
         avatar = {
             Icon(
                 imageVector = Icons.Outlined.Close,

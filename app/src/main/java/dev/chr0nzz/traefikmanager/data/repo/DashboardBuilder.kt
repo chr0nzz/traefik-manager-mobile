@@ -5,6 +5,7 @@ import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.toProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 
 enum class ObjectState { Err, Warn, Idle, Ok }
@@ -53,8 +54,8 @@ data class EntrypointRow(
 )
 
 data class Verdict(
-    val headline: String,
-    val detail: String,
+    val headline: UiText,
+    val detail: UiText,
     val status: TmStatus,
 )
 
@@ -397,8 +398,8 @@ object DashboardBuilder {
     private fun verdict(cards: List<SignalCard>, reachable: Boolean, backendsUp: Int, backendsTotal: Int): Verdict {
         if (!reachable) {
             return Verdict(
-                headline = "Traefik API unreachable",
-                detail = "counts and health cannot be read",
+                headline = UiText.Raw("Traefik API unreachable"),
+                detail = UiText.Raw("counts and health cannot be read"),
                 status = TmStatus.Warn,
             )
         }
@@ -406,22 +407,24 @@ object DashboardBuilder {
         val warnings = cards.sumOf { card -> card.flags.filter { it.status == TmStatus.Warn }.sumOf { it.count } }
         return when {
             errors > 0 -> Verdict(
-                headline = if (errors == 1) "1 object is down" else "$errors objects are down",
-                detail = if (warnings > 0) "$warnings degraded" else "traffic is not flowing for them",
+                headline = UiText.Raw(if (errors == 1) "1 object is down" else "$errors objects are down"),
+                detail = UiText.Raw(if (warnings > 0) "$warnings degraded" else "traffic is not flowing for them"),
                 status = TmStatus.Error,
             )
             warnings > 0 -> Verdict(
-                headline = if (warnings == 1) "1 object is degraded" else "$warnings objects are degraded",
-                detail = "still serving, worth a look",
+                headline = UiText.Raw(if (warnings == 1) "1 object is degraded" else "$warnings objects are degraded"),
+                detail = UiText.Raw("still serving, worth a look"),
                 status = TmStatus.Warn,
             )
             else -> Verdict(
-                headline = "All healthy",
-                detail = if (backendsTotal > 0) {
-                    "no errors or warnings reported · $backendsUp of $backendsTotal backends up"
-                } else {
-                    "no errors or warnings reported"
-                },
+                headline = UiText.Raw("All healthy"),
+                detail = UiText.Raw(
+                    if (backendsTotal > 0) {
+                        "no errors or warnings reported · $backendsUp of $backendsTotal backends up"
+                    } else {
+                        "no errors or warnings reported"
+                    },
+                ),
                 status = TmStatus.Ok,
             )
         }

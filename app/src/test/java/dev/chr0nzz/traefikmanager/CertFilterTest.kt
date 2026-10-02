@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import dev.chr0nzz.traefikmanager.data.model.CertEntry
 import dev.chr0nzz.traefikmanager.data.model.CertManageState
 import dev.chr0nzz.traefikmanager.data.model.CertRows
@@ -11,8 +13,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class CertFilterTest {
+
+    private val resources = ApplicationProvider.getApplicationContext<Context>().resources
 
     private val now = 1_800_000_000_000L
 
@@ -51,15 +58,15 @@ class CertFilterTest {
     @Test
     fun `the status line words the certificates the way the web Certs tab does`() {
         val verdict = state.statusVerdict
-        assertEquals("1 expiring within 7 days", verdict.headline)
+        assertEquals("1 expiring within 7 days", verdict.headline.resolve(resources))
         assertEquals(dev.chr0nzz.traefikmanager.ui.components.TmStatus.Error, verdict.status)
         assertEquals(
             "4 certificates · 1 under 7d · 3 resolvers · 2 unused · 1 no resolver · next expiry in 3d",
-            verdict.detail,
+            verdict.detail.resolve(resources),
         )
         val healthy = state.copy(certs = state.certs.filter { it.main == "old.example.com" }, usage = null)
-        assertEquals("All certificates healthy", healthy.statusVerdict.headline)
-        assertTrue(state.statusNote.contains("Removing one restarts Traefik"))
+        assertEquals("All certificates healthy", healthy.statusVerdict.headline.resolve(resources))
+        assertTrue(state.statusNote.resolve(resources).contains("Removing one restarts Traefik"))
     }
 
     @Test

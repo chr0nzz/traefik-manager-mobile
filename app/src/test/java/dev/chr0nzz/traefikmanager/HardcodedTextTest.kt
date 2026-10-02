@@ -8,6 +8,7 @@ class HardcodedTextTest {
 
     private val root = File("src/main/java/dev/chr0nzz/traefikmanager")
     private val baselineFile = File("src/test/resources/i18n-baseline.txt")
+    private val allowedFile = File("src/test/resources/i18n-allowed.txt")
     private val literal = Regex(""""((?:[^"\\]|\\.)*)"""")
     private val identifier = Regex("""[A-Za-z0-9_.\-/:]+""")
     private val word = Regex("""[A-Z][a-z]+""")
@@ -24,15 +25,21 @@ class HardcodedTextTest {
         return if (parts.size > 2) parts.take(2).joinToString("/") else parts.first()
     }
 
+    private fun allowed(): Set<String> = allowedFile.readLines().filter { it.isNotBlank() }.toSet()
+
     private fun counts(): Map<String, Int> {
         val found = sortedMapOf<String, Int>()
+        val allowed = allowed()
         root.walkTopDown()
             .filter { it.isFile && it.extension == "kt" && it.name !in skippedFiles }
             .forEach { file ->
+                val path = file.relativeTo(root).invariantSeparatorsPath
                 val hits = file.readLines()
                     .map { it.trim() }
                     .filterNot { line -> skippedPrefixes.any(line::startsWith) }
-                    .sumOf { line -> literal.findAll(line).count { isText(it.groupValues[1]) } }
+                    .sumOf { line ->
+                        literal.findAll(line).map { it.groupValues[1] }.count { isText(it) && "$path|$it" !in allowed }
+                    }
                 if (hits > 0) found.merge(folderOf(file), hits, Int::plus)
             }
         return found

@@ -11,6 +11,7 @@ import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.repo.DashboardBuilder
 import dev.chr0nzz.traefikmanager.data.repo.ObjectState
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -78,7 +79,7 @@ class DashboardBuilderTest {
         )
 
         assertEquals(TmStatus.Warn, snapshot.verdict.status)
-        assertEquals("Traefik API unreachable", snapshot.verdict.headline)
+        assertEquals(UiText.Raw("Traefik API unreachable"), snapshot.verdict.headline)
         snapshot.cards.forEach { card ->
             assertNull(card.total)
             assertEquals("Traefik API unreachable", card.sub)
@@ -136,7 +137,7 @@ class DashboardBuilderTest {
         )
 
         assertEquals(TmStatus.Error, snapshot.verdict.status)
-        assertEquals("1 object is down", snapshot.verdict.headline)
+        assertEquals(UiText.Raw("1 object is down"), snapshot.verdict.headline)
 
         val idleOnly = DashboardBuilder.build(
             overview = null,

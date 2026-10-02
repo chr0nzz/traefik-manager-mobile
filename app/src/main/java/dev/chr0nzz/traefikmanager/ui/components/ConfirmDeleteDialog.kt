@@ -16,6 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @Composable
 fun TypedConfirmDialog(
@@ -36,7 +38,7 @@ fun TypedConfirmDialog(
         text = {
             Column {
                 Text(
-                    text = "$consequence Type $word to confirm.",
+                    text = stringResource(R.string.common_confirm_type, consequence, word),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 OutlinedTextField(
@@ -56,7 +58,7 @@ fun TypedConfirmDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         },
     )
 }
@@ -66,12 +68,12 @@ fun ConfirmDeleteDialog(
     routeName: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    consequence: String = "This removes the router and its service from the config file.",
+    consequence: String = stringResource(R.string.routes_delete_consequence),
 ) {
     TypedConfirmDialog(
-        title = "Delete $routeName?",
+        title = stringResource(R.string.common_delete_named_question, routeName),
         consequence = consequence,
-        actionLabel = "Delete",
+        actionLabel = stringResource(R.string.common_delete),
         onDismiss = onDismiss,
         onConfirm = onConfirm,
     )

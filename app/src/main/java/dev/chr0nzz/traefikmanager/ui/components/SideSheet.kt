@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 private val SHEET_WIDTH = 640.dp
 private val SHEET_MIN_WIDTH = 320.dp
@@ -36,7 +38,7 @@ fun ModalSideSheet(
     visible: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    scrimLabel: String = "Close",
+    scrimLabel: String = stringResource(R.string.common_close),
     content: @Composable BoxScope.() -> Unit,
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp

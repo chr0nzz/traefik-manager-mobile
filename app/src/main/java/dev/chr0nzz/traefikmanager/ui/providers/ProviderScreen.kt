@@ -61,6 +61,10 @@ import dev.chr0nzz.traefikmanager.ui.components.ValueRow
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 fun ProviderRoute.tmStatus(): TmStatus = when (status.lowercase()) {
     "enabled" -> TmStatus.Ok
@@ -132,19 +136,19 @@ fun ProviderScreen(
             },
         ) {
             when {
-                state.loading -> LoadingState(label = "Loading ${page.label} routes")
+                state.loading -> LoadingState(label = stringResource(R.string.providers_loading, page.label))
                 state.error != null && state.routes.isEmpty() -> ErrorState(
-                    headline = "Traefik API not reachable",
-                    body = state.error,
+                    headline = stringResource(R.string.common_error_traefik_unreachable),
+                    body = state.error?.asString(),
                     onRetry = viewModel::refresh,
                 )
                 !state.reachable -> ErrorState(
-                    headline = "Traefik API not reachable",
-                    body = "Check the Traefik API URL in Settings.",
+                    headline = stringResource(R.string.common_error_traefik_unreachable),
+                    body = stringResource(R.string.providers_error_body),
                     onRetry = viewModel::refresh,
                 )
                 state.routes.isEmpty() && state.middlewares.isEmpty() -> EmptyState(
-                    headline = "No ${page.label} routes found",
+                    headline = stringResource(R.string.providers_empty, page.label),
                     body = page.empty,
                 )
                 else -> LazyColumn(
@@ -161,8 +165,8 @@ fun ProviderScreen(
                     if (state.visible.isEmpty() && state.routes.isNotEmpty()) {
                         item(key = "empty") {
                             EmptyState(
-                                headline = "No routes match",
-                                body = "Try a different search or filter.",
+                                headline = stringResource(R.string.providers_no_match),
+                                body = stringResource(R.string.common_no_match_body),
                             )
                         }
                     }
@@ -176,7 +180,7 @@ fun ProviderScreen(
                     if (state.middlewares.isNotEmpty()) {
                         item {
                             SectionLabel(
-                                "Middlewares ${state.middlewares.size}",
+                                stringResource(R.string.providers_middlewares_title, state.middlewares.size),
                                 modifier = Modifier.padding(top = TmSpacing.sm),
                             )
                         }
@@ -195,8 +199,8 @@ private fun VerdictCard(state: ProviderUiState) {
     val verdict = state.verdict
     VerdictLine(
         verdict = Verdict(
-            headline = verdict.headline,
-            detail = verdict.detail,
+            headline = UiText.Raw(verdict.headline),
+            detail = UiText.Raw(verdict.detail),
             status = if (verdict.notServing > 0) TmStatus.Error else TmStatus.Ok,
         ),
         info = state.page.note,
@@ -326,19 +330,19 @@ private fun ProviderRouteSheet(route: ProviderRoute, onDismiss: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "${route.provider} · read-only",
+                text = stringResource(R.string.providers_read_only, route.provider),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
             )
-            SheetRow("Status", route.status.ifEmpty { "unknown" })
-            SheetRow("Protocol", route.protocol.label)
-            SheetRow("Router", route.name, mono = true)
-            if (route.rule.isNotEmpty()) SheetRow("Rule", route.rule, mono = true)
-            if (route.service.isNotEmpty()) SheetRow("Service", route.service, mono = true)
-            route.target?.let { SheetRow("Target", it, mono = true) }
-            if (route.entryPoints.isNotEmpty()) SheetRow("Entry points", route.entryPoints.joinToString(", "))
-            if (route.middlewares.isNotEmpty()) SheetRow("Middlewares", route.middlewares.joinToString(", "), mono = true)
-            if (route.protocol != ProviderProtocol.Udp) SheetRow("TLS", if (route.tls) "on" else "off")
+            SheetRow(stringResource(R.string.common_label_status), route.status.ifEmpty { stringResource(R.string.common_unknown) })
+            SheetRow(stringResource(R.string.common_label_protocol), route.protocol.label)
+            SheetRow(stringResource(R.string.common_label_router), route.name, mono = true)
+            if (route.rule.isNotEmpty()) SheetRow(stringResource(R.string.common_label_rule), route.rule, mono = true)
+            if (route.service.isNotEmpty()) SheetRow(stringResource(R.string.common_label_service), route.service, mono = true)
+            route.target?.let { SheetRow(stringResource(R.string.common_label_target), it, mono = true) }
+            if (route.entryPoints.isNotEmpty()) SheetRow(stringResource(R.string.common_label_entry_points), route.entryPoints.joinToString(", "))
+            if (route.middlewares.isNotEmpty()) SheetRow(stringResource(R.string.common_label_middlewares), route.middlewares.joinToString(", "), mono = true)
+            if (route.protocol != ProviderProtocol.Udp) SheetRow("TLS", stringResource(if (route.tls) R.string.common_on else R.string.common_off))
         }
     }
 }

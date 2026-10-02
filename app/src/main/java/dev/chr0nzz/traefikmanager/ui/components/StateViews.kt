@@ -32,10 +32,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LoadingState(modifier: Modifier = Modifier, label: String = "Loading") {
+fun LoadingState(modifier: Modifier = Modifier, label: String = stringResource(R.string.common_loading)) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -119,17 +121,18 @@ fun ErrorState(
 ) {
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
+    val copied = stringResource(R.string.state_details_copied)
     MessageState(
         icon = Icons.Outlined.CloudOff,
         headline = headline,
         body = body,
-        actionLabel = if (onRetry != null) "Retry" else null,
+        actionLabel = if (onRetry != null) stringResource(R.string.common_retry) else null,
         onAction = onRetry,
         modifier = modifier,
-        secondaryLabel = "Copy details",
+        secondaryLabel = stringResource(R.string.state_copy_details),
         onSecondary = {
             clipboard.setText(AnnotatedString(diagnosticsText(headline, body)))
-            Toast.makeText(context, "Details copied", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
         },
     )
 }

@@ -49,6 +49,8 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,9 +84,9 @@ fun CardSettingsSheet(
         linkDisabled = linkDisabled,
         group = group,
     )
-    val groups = listOf("" to "Auto-detect") +
+    val groups = listOf("" to stringResource(R.string.dashboard_card_group_auto)) +
         config.customGroups.map { it.name to it.name } +
-        LauncherBuilder.builtInGroups.map { it to it }
+        LauncherBuilder.builtInGroups.map { it to builtInGroupLabel(it) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -100,28 +102,31 @@ fun CardSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = "Card settings",
+                text = stringResource(R.string.dashboard_card_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
                 Text(
-                    text = "These settings change how this app appears on the dashboard. They do " +
-                        "not touch the route itself.",
+                    text = stringResource(R.string.dashboard_card_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
                 OutlinedTextField(
                     value = displayName,
                     onValueChange = { displayName = it },
-                    label = { Text("Display name") },
-                    placeholder = { Text("Leave blank to use route name") },
+                    label = { Text(stringResource(R.string.dashboard_card_name)) },
+                    placeholder = { Text(stringResource(R.string.dashboard_card_name_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                SectionLabel("Icon")
+                SectionLabel(stringResource(R.string.dashboard_card_icon))
                 Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
-                    listOf("auto" to "Auto", "slug" to "selfh.st slug", "url" to "Custom URL")
+                    listOf(
+                        "auto" to stringResource(R.string.dashboard_card_icon_auto),
+                        "slug" to stringResource(R.string.dashboard_card_icon_slug),
+                        "url" to stringResource(R.string.dashboard_card_icon_url),
+                    )
                         .forEach { (key, label) ->
                             FilterChip(
                                 selected = iconType == key,
@@ -156,14 +161,14 @@ fun CardSettingsSheet(
                         )
                     }
 
-                SectionLabel("Group")
+                SectionLabel(stringResource(R.string.dashboard_card_group))
                 ExposedDropdownMenuBox(
                     expanded = groupOpen,
                     onExpandedChange = { groupOpen = it },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     OutlinedTextField(
-                        value = groups.firstOrNull { it.first == group }?.second ?: "Auto-detect",
+                        value = groups.firstOrNull { it.first == group }?.second ?: stringResource(R.string.dashboard_card_group_auto),
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = groupOpen) },
@@ -187,28 +192,28 @@ fun CardSettingsSheet(
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Link URL") },
-                    placeholder = { Text("Leave blank to use the route's URL") },
+                    label = { Text(stringResource(R.string.dashboard_card_link)) },
+                    placeholder = { Text(stringResource(R.string.dashboard_card_link_placeholder)) },
                     supportingText = {
-                        Text("Useful when the route has a wildcard host, or the app lives on a different port.")
+                        Text(stringResource(R.string.dashboard_card_link_help))
                     },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = linkDisabled, onCheckedChange = { linkDisabled = it })
-                    Text("Do not make this card clickable", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.dashboard_card_no_link), style = MaterialTheme.typography.bodyMedium)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = hidden, onCheckedChange = { hidden = it })
-                    Text("Hide from the dashboard", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.dashboard_card_hide), style = MaterialTheme.typography.bodyMedium)
                 }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 modifier = Modifier.padding(top = TmSpacing.sm),
             ) {
-                Button(onClick = { onSave(draft) }, modifier = Modifier.weight(1f)) { Text("Save") }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                Button(onClick = { onSave(draft) }, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.common_save)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         }
     }
@@ -242,14 +247,13 @@ fun DashboardSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = "Dashboard settings",
+                text = stringResource(R.string.dashboard_settings),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-                SectionLabel("Custom groups ${config.customGroups.size}")
+                SectionLabel(stringResource(R.string.dashboard_groups_title, config.customGroups.size))
                 Text(
-                    text = "Assign a route to a group in its card settings. A group disappears " +
-                        "when nothing uses it.",
+                    text = stringResource(R.string.dashboard_groups_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -261,7 +265,7 @@ fun DashboardSettingsSheet(
                             modifier = Modifier.weight(1f),
                         )
                         IconButton(onClick = { onRemoveGroup(group.name) }) {
-                            Icon(Icons.Outlined.Delete, contentDescription = "Remove ${group.name}")
+                            Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.common_remove_named, group.name))
                         }
                     }
                     CardDivider()
@@ -273,7 +277,7 @@ fun DashboardSettingsSheet(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        placeholder = { Text("New group name…") },
+                        placeholder = { Text(stringResource(R.string.dashboard_groups_new)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
@@ -283,13 +287,12 @@ fun DashboardSettingsSheet(
                             name = ""
                         },
                         enabled = name.isNotBlank(),
-                    ) { Text("Add") }
+                    ) { Text(stringResource(R.string.common_add)) }
                 }
 
-                SectionLabel("Hidden apps ${hidden.size}", modifier = Modifier.padding(top = TmSpacing.sm))
+                SectionLabel(stringResource(R.string.dashboard_hidden_title, hidden.size), modifier = Modifier.padding(top = TmSpacing.sm))
                 Text(
-                    text = "Hidden apps stay off the dashboard only. They keep running and still " +
-                        "appear on the Routes tab.",
+                    text = stringResource(R.string.dashboard_hidden_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -306,13 +309,13 @@ fun DashboardSettingsSheet(
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                             )
-                            Text("show", modifier = Modifier.padding(start = TmSpacing.xs))
+                            Text(stringResource(R.string.dashboard_hidden_show), modifier = Modifier.padding(start = TmSpacing.xs))
                         }
                     }
                     CardDivider()
                 }
             TextButton(onClick = onDismiss, modifier = Modifier.padding(top = TmSpacing.sm)) {
-                Text("Close")
+                Text(stringResource(R.string.common_close))
             }
         }
     }

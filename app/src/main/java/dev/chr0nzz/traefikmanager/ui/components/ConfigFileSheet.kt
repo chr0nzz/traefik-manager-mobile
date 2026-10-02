@@ -38,6 +38,8 @@ import dev.chr0nzz.traefikmanager.data.model.ConfigFile
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +69,7 @@ fun ConfigFileSheet(
     ) {
         Column(modifier = Modifier.padding(bottom = TmSpacing.lg)) {
             Text(
-                text = "Config file",
+                text = stringResource(R.string.files_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, bottom = TmSpacing.sm),
@@ -77,7 +79,7 @@ fun ConfigFileSheet(
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = { Text("Search files") },
+                    placeholder = { Text(stringResource(R.string.files_search)) },
                     leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier
@@ -98,9 +100,9 @@ fun ConfigFileSheet(
                         OutlinedTextField(
                             value = newName,
                             onValueChange = { newName = it },
-                            label = { Text("New file name") },
+                            label = { Text(stringResource(R.string.files_new_name)) },
                             placeholder = { Text("media.yml") },
-                            supportingText = { Text(".yml is added if you leave it off") },
+                            supportingText = { Text(stringResource(R.string.files_new_hint)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             modifier = Modifier.weight(1f),
@@ -115,13 +117,13 @@ fun ConfigFileSheet(
                             },
                             enabled = newName.isNotBlank(),
                         ) {
-                            Text("Create")
+                            Text(stringResource(R.string.files_create))
                         }
                     }
                 } else {
                     ListItem(
-                        headlineContent = { Text("Create a new file") },
-                        supportingContent = { Text("Written into your dynamic config directory") },
+                        headlineContent = { Text(stringResource(R.string.files_new)) },
+                        supportingContent = { Text(stringResource(R.string.files_new_body)) },
                         leadingContent = { Icon(Icons.Outlined.Add, contentDescription = null) },
                         modifier = Modifier.clickable { creating = true },
                     )
@@ -131,7 +133,7 @@ fun ConfigFileSheet(
 
             if (matches.isEmpty()) {
                 Text(
-                    text = if (files.isEmpty()) "No config files reported" else "No files match",
+                    text = stringResource(if (files.isEmpty()) R.string.files_empty else R.string.files_no_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted,
                     modifier = Modifier.padding(TmSpacing.lg),
@@ -145,7 +147,7 @@ fun ConfigFileSheet(
                             },
                             leadingContent = { Icon(Icons.Outlined.Description, contentDescription = null) },
                             trailingContent = if (file.label == selected) {
-                                { Icon(Icons.Outlined.Check, contentDescription = "Selected") }
+                                { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected)) }
                             } else {
                                 null
                             },

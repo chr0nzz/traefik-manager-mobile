@@ -15,18 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Apps
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Lan
-import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.Sell
-import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.ShowChart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +48,9 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 enum class LauncherDensity { List, Icons }
 
@@ -138,7 +132,7 @@ private fun GroupCard(
                 modifier = Modifier.size(14.dp),
             )
             Text(
-                text = group.name.uppercase(),
+                text = (if (group.custom) group.name else builtInGroupLabel(group.name)).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -171,7 +165,11 @@ private fun GroupCard(
 
         if (hidden > 0 || expanded) {
             Text(
-                text = if (expanded) "show less" else "$hidden more",
+                text = if (expanded) {
+                    stringResource(R.string.dashboard_show_less)
+                } else {
+                    pluralStringResource(R.plurals.dashboard_more, hidden, hidden)
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.blue,
                 modifier = Modifier
@@ -232,7 +230,7 @@ private fun AppRow(
         )
         Icon(
             imageVector = Icons.Outlined.Info,
-            contentDescription = "About ${app.name}",
+            contentDescription = stringResource(R.string.dashboard_app_about, app.name),
             tint = palette.muted,
             modifier = Modifier
                 .combinedClickable { onInfo(app) }
@@ -240,7 +238,7 @@ private fun AppRow(
         )
         Icon(
             imageVector = Icons.Outlined.Edit,
-            contentDescription = "Edit ${app.name}",
+            contentDescription = stringResource(R.string.common_edit_named, app.name),
             tint = palette.muted,
             modifier = Modifier
                 .combinedClickable { onEdit(app) }
@@ -354,16 +352,7 @@ private fun dotColour(app: LauncherApp, red: Color, amber: Color, quiet: Color):
 
 private fun groupIcon(group: LauncherGroup): ImageVector = when {
     group.custom -> Icons.Outlined.Sell
-    group.name == "Media" -> Icons.Outlined.Movie
-    group.name == "Monitoring" -> Icons.Outlined.ShowChart
-    group.name == "Infrastructure" -> Icons.Outlined.Build
-    group.name == "Security" -> Icons.Outlined.Shield
-    group.name == "Home" -> Icons.Outlined.Home
-    group.name == "Files & Data" -> Icons.Outlined.Folder
-    group.name == "Network" -> Icons.Outlined.Lan
-    group.name == "Dev" -> Icons.Outlined.Code
-    group.name == "Servers" -> Icons.Outlined.Dns
-    else -> Icons.Outlined.Apps
+    else -> builtInGroupIcon(group.name) ?: Icons.Outlined.Apps
 }
 
 fun openApp(context: android.content.Context, url: String) {

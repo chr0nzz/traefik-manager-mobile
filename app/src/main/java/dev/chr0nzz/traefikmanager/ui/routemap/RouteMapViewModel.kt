@@ -16,11 +16,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class RouteMapUiState(
     val loading: Boolean = true,
     val refreshing: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val routes: List<Route> = emptyList(),
     val graph: RouteMapGraph = RouteMapGraph(),
     val protocol: String? = null,
@@ -113,7 +115,7 @@ class RouteMapViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = throwable.message?.take(160) ?: "Could not read the routes",
+                            error = UiText.messageOr(throwable.message?.take(160), R.string.routemap_error),
                         )
                     }
                 },

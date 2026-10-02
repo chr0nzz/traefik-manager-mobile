@@ -103,6 +103,11 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -131,10 +136,11 @@ fun PluginsScreen(
 
     val detailOnly = navigator.canNavigateBack()
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -142,7 +148,7 @@ fun PluginsScreen(
         PluginInstallSheet(
             draft = draft,
             busy = state.busy,
-            error = state.formError,
+            error = state.formError?.asString(),
             onChange = viewModel::onInstallChange,
             onInstall = viewModel::install,
             onDismiss = viewModel::cancelInstall,
@@ -153,7 +159,7 @@ fun PluginsScreen(
         PluginEditSheet(
             draft = draft,
             busy = state.busy,
-            error = state.formError,
+            error = state.formError?.asString(),
             onChange = viewModel::onEditChange,
             onSave = viewModel::saveEdit,
             onDismiss = viewModel::cancelEdit,
@@ -163,10 +169,10 @@ fun PluginsScreen(
     state.pendingDelete?.let { plugin ->
         AlertDialog(
             onDismissRequest = { viewModel.askDelete(null) },
-            title = { Text("Remove plugin") },
-            text = { Text("Remove plugin \"${plugin.name}\"? Traefik keeps running it until it restarts.") },
-            confirmButton = { TextButton(onClick = { viewModel.delete(plugin) }) { Text("Remove") } },
-            dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.plugins_remove_title)) },
+            text = { Text(stringResource(R.string.plugins_remove_body, plugin.name)) },
+            confirmButton = { TextButton(onClick = { viewModel.delete(plugin) }) { Text(stringResource(R.string.common_remove)) } },
+            dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
@@ -180,7 +186,7 @@ fun PluginsScreen(
         floatingActionButton = {
             if (state.canManage && !detailOnly) {
                 FloatingActionButton(onClick = viewModel::startInstall) {
-                    Icon(Icons.Outlined.Add, contentDescription = "Add a plugin")
+                    Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.plugins_add))
                 }
             }
         },
@@ -191,16 +197,16 @@ fun PluginsScreen(
                         containerColor = MaterialTheme.colorScheme.background,
                         scrolledContainerColor = MaterialTheme.colorScheme.background,
                     ),
-                    title = { Text("Plugins") },
+                    title = { Text(stringResource(R.string.nav_plugins)) },
                     navigationIcon = {
                         DrawerButton(onOpenDrawer)
                     },
                     actions = {
                         IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                            Icon(Icons.Outlined.Search, contentDescription = "Search plugins")
+                            Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.plugins_search))
                         }
                         IconButton(onClick = viewModel::refresh) {
-                            Icon(Icons.Outlined.Refresh, contentDescription = "Refresh plugins")
+                            Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.plugins_refresh))
                         }
                     },
                     scrollBehavior = scrollBehavior,
@@ -283,26 +289,26 @@ private fun PluginsListPane(
         },
     ) {
         when {
-            state.loading -> LoadingState(label = "Loading plugins")
+            state.loading -> LoadingState(label = stringResource(R.string.plugins_loading))
 
             state.loadError != null -> ErrorState(
-                headline = "Could not load plugin data",
-                body = state.loadError,
+                headline = stringResource(R.string.plugins_error_load),
+                body = state.loadError?.asString(),
                 onRetry = onRefresh,
             )
 
             state.plugins.isEmpty() && state.serverError != null -> ErrorState(
-                headline = "No plugins declared",
+                headline = stringResource(R.string.plugins_empty_server),
                 body = state.serverError,
                 onRetry = onRefresh,
             )
 
             state.plugins.isEmpty() -> EmptyState(
-                headline = "No plugins configured",
-                body = "Plugins are declared under experimental.plugins in the Traefik static config.",
+                headline = stringResource(R.string.plugins_empty),
+                body = stringResource(R.string.plugins_empty_body),
             )
 
-            state.visible.isEmpty() -> EmptyState(headline = "No plugins match your search")
+            state.visible.isEmpty() -> EmptyState(headline = stringResource(R.string.plugins_no_match))
 
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -317,7 +323,7 @@ private fun PluginsListPane(
                 if (state.restartPending) {
                     item {
                         PluginRestartNotice(
-                            detail = state.restartDetail,
+                            detail = state.restartDetail?.asString().orEmpty(),
                             busy = state.restarting,
                             onRestart = onRestart,
                             onDismiss = onDismissRestart,
@@ -402,10 +408,10 @@ private fun PluginCard(
         CardDivider(modifier = Modifier.padding(top = TmSpacing.sm))
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = when (usageCount) {
-                    0 -> "not referenced"
-                    1 -> "used by 1 middleware"
-                    else -> "used by $usageCount middlewares"
+                text = if (usageCount == 0) {
+                    stringResource(R.string.plugins_not_referenced)
+                } else {
+                    pluralStringResource(R.plurals.plugins_used_by, usageCount, usageCount)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = if (usageCount == 0) palette.yellow else palette.muted,
@@ -417,14 +423,14 @@ private fun PluginCard(
                 IconButton(onClick = onEdit) {
                     Icon(
                         Icons.Outlined.Edit,
-                        contentDescription = "Edit ${plugin.name}",
+                        contentDescription = stringResource(R.string.common_edit_named, plugin.name),
                         modifier = Modifier.size(18.dp),
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Outlined.Delete,
-                        contentDescription = "Remove ${plugin.name}",
+                        contentDescription = stringResource(R.string.common_remove_named, plugin.name),
                         tint = palette.red,
                         modifier = Modifier.size(18.dp),
                     )
@@ -447,8 +453,8 @@ private fun PluginDetailPane(
     if (plugin == null) {
         MessageState(
             icon = Icons.Outlined.TouchApp,
-            headline = "Select a plugin",
-            body = "Pick one from the list to see its module and settings.",
+            headline = stringResource(R.string.plugins_select),
+            body = stringResource(R.string.plugins_select_body),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -480,7 +486,7 @@ private fun PluginDetailPane(
             ) {
                 if (showBack) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to plugins")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.plugins_back))
                     }
                 }
                 Text(
@@ -510,35 +516,35 @@ private fun PluginDetailPane(
                         modifier = Modifier.size(15.dp),
                     )
                     Text(
-                        text = "Plugin",
+                        text = stringResource(R.string.plugins_kind),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.semantics { heading() },
                     )
                 }
-                DetailRow("Name", plugin.name, mono = true)
-                DetailRow("Module", plugin.displayModule, mono = true)
+                DetailRow(stringResource(R.string.common_label_name), plugin.name, mono = true)
+                DetailRow(stringResource(R.string.plugins_module), plugin.displayModule, mono = true)
                 DetailRow(
-                    label = "Version",
+                    label = stringResource(R.string.common_label_version),
                     value = plugin.displayVersion,
                     mono = true,
                     last = latest == null,
                 )
                 if (latest != null) {
                     DetailRow(
-                        label = "Update",
-                        value = "$latest available",
+                        label = stringResource(R.string.plugins_update),
+                        value = stringResource(R.string.plugins_update_available, latest),
                         mono = true,
                         last = true,
                     )
                 }
             }
 
-            SectionLabel("Used by middlewares")
+            SectionLabel(stringResource(R.string.plugins_used_by_title))
             TmCard {
                 if (users.isEmpty()) {
                     Text(
-                        text = "No middleware references this plugin",
+                        text = stringResource(R.string.plugins_used_by_none),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.muted,
                     )
@@ -569,7 +575,7 @@ private fun PluginDetailPane(
             }
 
             if (settingsYaml != null && settingsYaml != "null") {
-                SectionLabel("Settings")
+                SectionLabel(stringResource(R.string.nav_settings))
                 TmCard {
                     YamlPreview(source = settingsYaml)
                 }
@@ -584,13 +590,13 @@ private fun PluginDetailPane(
                 .padding(bottom = TmSpacing.lg),
         ) {
             TooltipIconButton(
-                label = "Copy module name",
+                label = stringResource(R.string.plugins_copy_module),
                 icon = Icons.Outlined.ContentCopy,
                 onClick = { clipboard.setText(AnnotatedString(plugin.moduleName)) },
             )
             plugin.repoUrl?.let { url ->
                 TooltipIconButton(
-                    label = "Open repository",
+                    label = stringResource(R.string.plugins_open_repo),
                     icon = Icons.Outlined.OpenInNew,
                     onClick = { uriHandler.openUri(url) },
                 )
@@ -618,16 +624,16 @@ private fun PluginsSearchBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search plugins") },
+                placeholder = { Text(stringResource(R.string.plugins_search)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -637,7 +643,7 @@ private fun PluginsSearchBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (results.isEmpty()) {
                 Text(
-                    text = "No plugins match your search",
+                    text = stringResource(R.string.plugins_no_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted,
                     modifier = Modifier.padding(TmSpacing.lg),

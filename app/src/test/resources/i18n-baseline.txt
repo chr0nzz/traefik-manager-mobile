@@ -2,17 +2,10 @@ data/model 397
 data/repo 80
 data/store 3
 push 8
-ui/backups 87
-ui/certs 33
-ui/components 25
 ui/crowdsec 66
-ui/dashboard 51
 ui/logs 52
 ui/middlewares 103
 ui/nav 1
-ui/plugins 66
-ui/providers 24
-ui/routemap 31
 ui/routes 193
 ui/services 114
 ui/settings 588

@@ -30,6 +30,8 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,29 +60,27 @@ fun PluginInstallSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = "Add plugin",
+                text = stringResource(R.string.plugins_add_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
             TmCard(accentColor = palette.purple) {
                 Text(
-                    text = "Only install plugins from trusted sources",
+                    text = stringResource(R.string.plugins_add_warning_title),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "Plugins run inside the Traefik process with full access to your " +
-                        "traffic. Review the plugin source on GitHub before installing. A Traefik " +
-                        "restart is required to activate the plugin after saving.",
+                    text = stringResource(R.string.plugins_add_warning_body),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
             }
 
-            SectionLabel("Step 1 - static config snippet")
+            SectionLabel(stringResource(R.string.plugins_add_step_static))
             Text(
-                text = "Paste it from the plugin's page on plugins.traefik.io.",
+                text = stringResource(R.string.plugins_add_step_static_help),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
             )
@@ -89,10 +89,9 @@ fun PluginInstallSheet(
                 onValueChange = { onChange(draft.copy(staticYaml = it)) },
             )
 
-            SectionLabel("Step 2 - middleware snippet", modifier = Modifier.padding(top = TmSpacing.xs))
+            SectionLabel(stringResource(R.string.plugins_add_step_middleware), modifier = Modifier.padding(top = TmSpacing.xs))
             Text(
-                text = "Edit the settings for your needs. Replace every placeholder and any " +
-                    "{{ }} block with real values or Traefik will crash.",
+                text = stringResource(R.string.plugins_add_step_middleware_help),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.yellow,
             )
@@ -104,9 +103,9 @@ fun PluginInstallSheet(
             OutlinedTextField(
                 value = draft.middlewareFile,
                 onValueChange = { onChange(draft.copy(middlewareFile = it)) },
-                label = { Text("Middleware file") },
+                label = { Text(stringResource(R.string.plugins_add_file)) },
                 placeholder = { Text("plugin-middlewares.yml") },
-                supportingText = { Text("Which config file the middleware is written to.") },
+                supportingText = { Text(stringResource(R.string.plugins_add_file_help)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -124,9 +123,9 @@ fun PluginInstallSheet(
                 modifier = Modifier.padding(top = TmSpacing.sm),
             ) {
                 Button(onClick = onInstall, enabled = !busy, modifier = Modifier.weight(1f)) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         }
     }
@@ -159,14 +158,14 @@ fun PluginEditSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = "Edit plugin",
+                text = stringResource(R.string.plugins_edit_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = { onChange(draft.copy(name = it)) },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.common_label_name)) },
                 placeholder = { Text("myPlugin") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -174,7 +173,7 @@ fun PluginEditSheet(
             OutlinedTextField(
                 value = draft.moduleName,
                 onValueChange = { onChange(draft.copy(moduleName = it)) },
-                label = { Text("Module") },
+                label = { Text(stringResource(R.string.plugins_module)) },
                 placeholder = { Text("github.com/author/plugin") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -182,7 +181,7 @@ fun PluginEditSheet(
             OutlinedTextField(
                 value = draft.version,
                 onValueChange = { onChange(draft.copy(version = it)) },
-                label = { Text("Version") },
+                label = { Text(stringResource(R.string.common_label_version)) },
                 placeholder = { Text("v0.1.0") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -194,8 +193,8 @@ fun PluginEditSheet(
                 horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 modifier = Modifier.padding(top = TmSpacing.sm),
             ) {
-                Button(onClick = onSave, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Save") }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                Button(onClick = onSave, enabled = !busy, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.common_save)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         }
     }
@@ -206,12 +205,12 @@ fun PluginRestartNotice(detail: String, busy: Boolean, onRestart: () -> Unit, on
     val palette = LocalTmPalette.current
     TmCard(accentColor = palette.yellow) {
         Text(
-            text = "Restart Traefik to activate",
+            text = stringResource(R.string.plugins_restart_title),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = detail.ifBlank { "The static config changed. Traefik is still running the old one." },
+            text = detail.ifBlank { stringResource(R.string.plugins_restart_body) },
             style = MaterialTheme.typography.labelSmall,
             color = palette.muted,
         )
@@ -221,9 +220,9 @@ fun PluginRestartNotice(detail: String, busy: Boolean, onRestart: () -> Unit, on
         ) {
             Button(onClick = onRestart, enabled = !busy) {
                 Icon(Icons.Outlined.RestartAlt, contentDescription = null, modifier = Modifier.size(16.dp))
-                Text("Restart now", modifier = Modifier.padding(start = TmSpacing.xs))
+                Text(stringResource(R.string.plugins_restart_now), modifier = Modifier.padding(start = TmSpacing.xs))
             }
-            TextButton(onClick = onDismiss) { Text("Later") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_later)) }
         }
     }
 }

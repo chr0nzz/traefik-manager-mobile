@@ -23,12 +23,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.annotation.StringRes
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class CertFilter(val label: String) {
-    All("All"),
-    Unused("Unused"),
-    NoResolver("No resolver"),
-    Expiring("Expiring"),
+enum class CertFilter(@StringRes val label: Int) {
+    All(R.string.certs_filter_all),
+    Unused(R.string.certs_filter_unused),
+    NoResolver(R.string.certs_filter_no_resolver),
+    Expiring(R.string.certs_filter_expiring),
 }
 
 data class CertificatesUiState(
@@ -37,12 +40,12 @@ data class CertificatesUiState(
     val certs: List<CertRow> = emptyList(),
     val query: String = "",
     val serverError: String? = null,
-    val loadError: String? = null,
+    val loadError: UiText? = null,
     val filter: CertFilter = CertFilter.All,
     val usage: CertUsage? = null,
     val manage: CertManageState = CertManageState(),
     val removing: Boolean = false,
-    val message: String? = null,
+    val message: UiText? = null,
 ) {
     fun verdict(cert: CertRow): CertVerdict? = usage?.verdict(cert.resolver, cert.main)
 
@@ -82,22 +85,24 @@ data class CertificatesUiState(
             val unused = usage?.certs?.count { it.unused } ?: 0
             val orphaned = usage?.certs?.count { it.orphaned } ?: 0
             val headline = when {
-                expired > 0 -> "$expired ${if (expired == 1) "certificate has" else "certificates have"} expired"
-                critical > 0 -> "$critical expiring within 7 days"
-                expiring > 0 -> "$expiring expiring within 30 days"
-                else -> "All certificates healthy"
+                expired > 0 -> UiText.plural(R.plurals.certs_verdict_expired, expired)
+                critical > 0 -> UiText.plural(R.plurals.certs_verdict_week, critical)
+                expiring > 0 -> UiText.plural(R.plurals.certs_verdict_month, expiring)
+                else -> UiText.of(R.string.certs_verdict_healthy)
             }
-            val detail = buildList {
-                add("${certs.size} ${if (certs.size == 1) "certificate" else "certificates"}")
-                if (expired > 0) add("$expired expired")
-                if (critical > 0) add("$critical under 7d")
-                if (expiring > 0) add("$expiring under 30d")
-                if (expired == 0 && critical == 0 && expiring == 0) add("none expiring soon")
-                if (resolvers > 1) add("$resolvers resolvers")
-                if (unused > 0) add("$unused unused")
-                if (orphaned > 0) add("$orphaned no resolver")
-                next?.let { add("next expiry in ${it}d") }
-            }.joinToString(" · ")
+            val detail = UiText.join(
+                buildList {
+                    add(UiText.plural(R.plurals.certs_detail_count, certs.size))
+                    if (expired > 0) add(UiText.plural(R.plurals.certs_detail_expired, expired))
+                    if (critical > 0) add(UiText.plural(R.plurals.certs_detail_week, critical))
+                    if (expiring > 0) add(UiText.plural(R.plurals.certs_detail_month, expiring))
+                    if (expired == 0 && critical == 0 && expiring == 0) add(UiText.of(R.string.certs_detail_none_soon))
+                    if (resolvers > 1) add(UiText.plural(R.plurals.certs_detail_resolvers, resolvers))
+                    if (unused > 0) add(UiText.plural(R.plurals.certs_detail_unused, unused))
+                    if (orphaned > 0) add(UiText.plural(R.plurals.certs_detail_no_resolver, orphaned))
+                    next?.let { add(UiText.of(R.string.certs_detail_next_expiry, it)) }
+                },
+            )
             val status = when {
                 expired > 0 || critical > 0 -> TmStatus.Error
                 expiring > 0 -> TmStatus.Warn
@@ -106,16 +111,19 @@ data class CertificatesUiState(
             return Verdict(headline = headline, detail = detail, status = status)
         }
 
-    val statusNote: String
-        get() = buildString {
-            append("TLS certificates are managed automatically by Traefik's ACME resolver.")
-            when {
-                manage.available -> append(" Removing one restarts Traefik so it lets go of it.")
-                manage.reason.isNotBlank() -> append(" Removal is off: ${manage.reason}")
-                else -> append(" Renew or revoke them via your Traefik config.")
-            }
-            usage?.why?.takeIf { it.isNotBlank() }?.let { append(" $it") }
-        }
+    val statusNote: UiText
+        get() = UiText.join(
+            listOfNotNull(
+                UiText.of(R.string.certs_note_managed),
+                when {
+                    manage.available -> UiText.of(R.string.certs_note_removal_restarts)
+                    manage.reason.isNotBlank() -> UiText.of(R.string.certs_note_removal_off, manage.reason)
+                    else -> UiText.of(R.string.certs_note_renew)
+                },
+                usage?.why?.takeIf { it.isNotBlank() }?.let(UiText::Raw),
+            ),
+            separator = " ",
+        )
 }
 
 @HiltViewModel
@@ -153,8 +161,8 @@ class CertificatesViewModel @Inject constructor(
         _state.update { it.copy(removing = true) }
         viewModelScope.launch {
             val message = runCatching { repository.remove(rows.map { CertRef(it.resolver, it.main) }) }.fold(
-                onSuccess = { response -> CertCleanup.outcome(response, rows.size) },
-                onFailure = { throwable -> throwable.message ?: "Could not remove the certificate" },
+                onSuccess = { response -> UiText.Raw(CertCleanup.outcome(response, rows.size)) },
+                onFailure = { throwable -> UiText.messageOr(throwable.message, R.string.certs_error_remove) },
             )
             _state.update { it.copy(removing = false, message = message) }
             load(initial = false)
@@ -181,7 +189,7 @@ class CertificatesViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            loadError = throwable.message ?: "Could not load certificate data",
+                            loadError = UiText.messageOr(throwable.message, R.string.certs_error_load),
                         )
                     }
                 },

@@ -7,6 +7,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 val LocalTopBarMenu = compositionLocalOf { true }
 
@@ -19,6 +21,6 @@ fun ProvideTopBarMenu(show: Boolean, content: @Composable () -> Unit) {
 fun DrawerButton(onOpenDrawer: () -> Unit) {
     if (!LocalTopBarMenu.current) return
     IconButton(onClick = onOpenDrawer) {
-        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation menu")
+        Icon(Icons.Outlined.Menu, contentDescription = stringResource(R.string.nav_open_menu))
     }
 }

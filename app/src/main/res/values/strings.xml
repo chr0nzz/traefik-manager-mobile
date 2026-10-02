@@ -101,4 +101,506 @@
     <string name="settings_language_section">Language</string>
     <string name="settings_language_title">App language</string>
     <string name="settings_language_system">Follow system</string>
+
+    <string name="common_close">Close</string>
+    <string name="common_delete">Delete</string>
+    <!-- Button that removes or deletes something -->
+    <string name="common_remove">Remove</string>
+    <!-- Button -->
+    <string name="common_add">Add</string>
+    <!-- %1$s is the name of the thing being removed -->
+    <string name="common_remove_named">Remove %1$s</string>
+    <!-- %1$s is the name of the thing being edited -->
+    <string name="common_edit_named">Edit %1$s</string>
+    <string name="common_retry">Retry</string>
+    <!-- Button that puts off an action -->
+    <string name="common_later">Later</string>
+    <string name="common_filters">Filters</string>
+    <string name="common_clear_filters">Clear filters</string>
+    <string name="common_close_search">Close search</string>
+    <string name="common_clear_search">Clear search</string>
+    <!-- Read aloud for the check mark next to the chosen item -->
+    <string name="common_selected">Selected</string>
+    <string name="common_loading">Loading</string>
+    <string name="common_show_less">Show less</string>
+    <string name="common_no_match_body">Try a different search or filter.</string>
+
+    <string name="dashboard_settings">Dashboard settings</string>
+    <string name="dashboard_notifications">Notifications</string>
+    <plurals name="dashboard_notifications_unread">
+        <item quantity="one">Notifications, %d unread</item>
+        <item quantity="other">Notifications, %d unread</item>
+    </plurals>
+    <string name="dashboard_refresh">Refresh overview</string>
+    <string name="dashboard_error_load">Could not load the overview</string>
+    <string name="dashboard_entry_points">Entry Points</string>
+    <!-- Lowercase status chip. %1$s is the metrics backend, for example prometheus -->
+    <string name="dashboard_runtime_metrics">metrics %1$s</string>
+    <string name="dashboard_runtime_metrics_off">metrics off</string>
+    <string name="dashboard_runtime_access_log_on">access log on</string>
+    <string name="dashboard_runtime_access_log_off">access log off</string>
+    <!-- Lowercase status chip. %1$s is the tracing backend, for example otlp -->
+    <string name="dashboard_runtime_tracing">tracing %1$s</string>
+    <string name="dashboard_runtime_tracing_off">tracing off</string>
+    <!-- %1$s is the name of an app on the dashboard -->
+    <string name="dashboard_app_about">About %1$s</string>
+    <!-- Lowercase link that collapses a list -->
+    <string name="dashboard_show_less">show less</string>
+    <!-- Lowercase link that shows the rest of a list -->
+    <plurals name="dashboard_more">
+        <item quantity="one">%d more</item>
+        <item quantity="other">%d more</item>
+    </plurals>
+    <!-- Name of a built-in dashboard group -->
+    <string name="dashboard_group_media">Media</string>
+    <string name="dashboard_group_monitoring">Monitoring</string>
+    <string name="dashboard_group_infrastructure">Infrastructure</string>
+    <string name="dashboard_group_security">Security</string>
+    <string name="dashboard_group_home">Home</string>
+    <string name="dashboard_group_files">Files &amp; Data</string>
+    <string name="dashboard_group_network">Network</string>
+    <string name="dashboard_group_dev">Dev</string>
+    <string name="dashboard_group_servers">Servers</string>
+    <string name="dashboard_card_title">Card settings</string>
+    <string name="dashboard_card_help">These settings change how this app appears on the dashboard. They do not touch the route itself.</string>
+    <string name="dashboard_card_name">Display name</string>
+    <string name="dashboard_card_name_placeholder">Leave blank to use route name</string>
+    <!-- Section heading -->
+    <string name="dashboard_card_icon">Icon</string>
+    <!-- Icon choice: pick the icon automatically -->
+    <string name="dashboard_card_icon_auto">Auto</string>
+    <!-- selfh.st is an icon website, slug is the short icon name -->
+    <string name="dashboard_card_icon_slug">selfh.st slug</string>
+    <string name="dashboard_card_icon_url">Custom URL</string>
+    <!-- Section heading: which dashboard group the app belongs to -->
+    <string name="dashboard_card_group">Group</string>
+    <string name="dashboard_card_group_auto">Auto-detect</string>
+    <string name="dashboard_card_link">Link URL</string>
+    <string name="dashboard_card_link_placeholder">Leave blank to use the route\'s URL</string>
+    <string name="dashboard_card_link_help">Useful when the route has a wildcard host, or the app lives on a different port.</string>
+    <string name="dashboard_card_no_link">Do not make this card clickable</string>
+    <string name="dashboard_card_hide">Hide from the dashboard</string>
+    <!-- Section heading, %1$d is how many groups there are -->
+    <string name="dashboard_groups_title">Custom groups %1$d</string>
+    <string name="dashboard_groups_help">Assign a route to a group in its card settings. A group disappears when nothing uses it.</string>
+    <string name="dashboard_groups_new">New group name…</string>
+    <!-- Section heading, %1$d is how many apps are hidden -->
+    <string name="dashboard_hidden_title">Hidden apps %1$d</string>
+    <string name="dashboard_hidden_help">Hidden apps stay off the dashboard only. They keep running and still appear on the Routes tab.</string>
+    <!-- Lowercase button that puts a hidden app back on the dashboard -->
+    <string name="dashboard_hidden_show">show</string>
+    <string name="dashboard_saved_layout">Layout saved</string>
+    <string name="dashboard_saved_card">Card saved</string>
+    <!-- Confirmation after hiding an app from the dashboard -->
+    <string name="dashboard_saved_hidden">Hidden</string>
+    <!-- Confirmation after putting an app back on the dashboard -->
+    <string name="dashboard_saved_shown">Shown</string>
+    <string name="dashboard_saved_group_added">Group added</string>
+    <string name="dashboard_saved_group_removed">Group removed</string>
+
+    <!-- %1$s is a domain name -->
+    <string name="certs_remove_title_one">Remove %1$s?</string>
+    <plurals name="certs_remove_title_many">
+        <item quantity="one">Remove %d certificate?</item>
+        <item quantity="other">Remove %d certificates?</item>
+    </plurals>
+    <string name="certs_remove_restart">Traefik is restarted afterwards, because it only reads acme.json at startup.</string>
+    <!-- Follows a sentence about removing certificates. The number is how many of them are still in use -->
+    <plurals name="certs_remove_in_use">
+        <item quantity="one">One still serves a route, so Traefik requests a new certificate for it.</item>
+        <item quantity="other">%d still serve routes, so Traefik requests new certificates for them.</item>
+    </plurals>
+    <string name="certs_remove_backup">A copy of acme.json is saved to Backups first.</string>
+    <string name="certs_search">Search certificates</string>
+    <string name="certs_refresh">Refresh certificates</string>
+    <string name="certs_loading">Loading certificates</string>
+    <string name="certs_error_load">Could not load certificate data</string>
+    <string name="certs_empty_server">No certificates</string>
+    <string name="certs_empty">No certificates found</string>
+    <string name="certs_empty_body">acme.json may be empty - certs are issued on first request.</string>
+    <string name="certs_no_search_match">No certificates match your search</string>
+    <string name="certs_no_match">No certificates match</string>
+    <!-- Heading above the list of filters: show all, unused, expiring -->
+    <string name="certs_filter_heading">Show</string>
+    <!-- Menu item, the number is how many unused certificates there are -->
+    <plurals name="certs_remove_unused">
+        <item quantity="one">Remove %d unused</item>
+        <item quantity="other">Remove %d unused</item>
+    </plurals>
+    <!-- Lowercase badge on a certificate that no certificate resolver owns -->
+    <string name="certs_badge_no_resolver">no resolver</string>
+    <string name="certs_remove_one">Remove certificate</string>
+    <string name="certs_copy_domains">Copy domains</string>
+    <!-- Link that shows the rest of a list, %1$d is how many are hidden -->
+    <string name="certs_more_domains">+%1$d more</string>
+    <!-- Lowercase. %1$s is a date -->
+    <string name="certs_expires">expires %1$s</string>
+    <!-- Lowercase -->
+    <string name="certs_expiry_unknown">expiry unknown</string>
+    <plurals name="certs_domains">
+        <item quantity="one">%d domain</item>
+        <item quantity="other">%d domains</item>
+    </plurals>
+    <!-- How many search results there are -->
+    <plurals name="common_matching">
+        <item quantity="one">%d matching</item>
+        <item quantity="other">%d matching</item>
+    </plurals>
+    <!-- Filter: show all certificates -->
+    <string name="certs_filter_all">All</string>
+    <!-- Filter: certificates no route uses -->
+    <string name="certs_filter_unused">Unused</string>
+    <!-- Filter: certificates that no certificate resolver owns -->
+    <string name="certs_filter_no_resolver">No resolver</string>
+    <!-- Filter: certificates that expire soon -->
+    <string name="certs_filter_expiring">Expiring</string>
+    <plurals name="certs_verdict_expired">
+        <item quantity="one">%d certificate has expired</item>
+        <item quantity="other">%d certificates have expired</item>
+    </plurals>
+    <!-- The number counts certificates -->
+    <plurals name="certs_verdict_week">
+        <item quantity="one">%d expiring within 7 days</item>
+        <item quantity="other">%d expiring within 7 days</item>
+    </plurals>
+    <!-- The number counts certificates -->
+    <plurals name="certs_verdict_month">
+        <item quantity="one">%d expiring within 30 days</item>
+        <item quantity="other">%d expiring within 30 days</item>
+    </plurals>
+    <string name="certs_verdict_healthy">All certificates healthy</string>
+    <plurals name="certs_detail_count">
+        <item quantity="one">%d certificate</item>
+        <item quantity="other">%d certificates</item>
+    </plurals>
+    <!-- Lowercase summary, the number counts certificates -->
+    <plurals name="certs_detail_expired">
+        <item quantity="one">%d expired</item>
+        <item quantity="other">%d expired</item>
+    </plurals>
+    <!-- Lowercase summary: certificates with under 7 days left. Keep it short -->
+    <plurals name="certs_detail_week">
+        <item quantity="one">%d under 7d</item>
+        <item quantity="other">%d under 7d</item>
+    </plurals>
+    <!-- Lowercase summary: certificates with under 30 days left. Keep it short -->
+    <plurals name="certs_detail_month">
+        <item quantity="one">%d under 30d</item>
+        <item quantity="other">%d under 30d</item>
+    </plurals>
+    <!-- Lowercase summary -->
+    <string name="certs_detail_none_soon">none expiring soon</string>
+    <!-- Certificate resolvers, a Traefik term -->
+    <plurals name="certs_detail_resolvers">
+        <item quantity="one">%d resolver</item>
+        <item quantity="other">%d resolvers</item>
+    </plurals>
+    <!-- Lowercase summary, the number counts certificates -->
+    <plurals name="certs_detail_unused">
+        <item quantity="one">%d unused</item>
+        <item quantity="other">%d unused</item>
+    </plurals>
+    <!-- Lowercase summary: certificates that no resolver owns -->
+    <plurals name="certs_detail_no_resolver">
+        <item quantity="one">%d no resolver</item>
+        <item quantity="other">%d no resolver</item>
+    </plurals>
+    <!-- Lowercase summary. %1$d is a number of days and the d after it is short for days -->
+    <string name="certs_detail_next_expiry">next expiry in %1$dd</string>
+    <string name="certs_note_managed">TLS certificates are managed automatically by Traefik\'s ACME resolver.</string>
+    <!-- Follows a sentence about TLS certificates -->
+    <string name="certs_note_removal_restarts">Removing one restarts Traefik so it lets go of it.</string>
+    <!-- %1$s is the reason, sent by the server -->
+    <string name="certs_note_removal_off">Removal is off: %1$s</string>
+    <!-- Follows a sentence about TLS certificates -->
+    <string name="certs_note_renew">Renew or revoke them via your Traefik config.</string>
+    <string name="certs_error_remove">Could not remove the certificate</string>
+
+    <string name="common_label_protocol">Protocol</string>
+    <!-- Label for a host name -->
+    <string name="common_label_host">Host</string>
+    <!-- Label for a Traefik routing rule -->
+    <string name="common_label_rule">Rule</string>
+    <!-- A Traefik entry point -->
+    <string name="common_label_entry_point">Entry point</string>
+    <!-- Traefik entry points -->
+    <string name="common_label_entry_points">Entry points</string>
+    <!-- Label for one Traefik middleware -->
+    <string name="common_label_middleware">Middleware</string>
+    <string name="common_label_middlewares">Middlewares</string>
+    <!-- Label for one Traefik service -->
+    <string name="common_label_service">Service</string>
+    <string name="common_label_services">Services</string>
+    <!-- Label for a Traefik provider such as Docker -->
+    <string name="common_label_provider">Provider</string>
+    <!-- Label for one Traefik router -->
+    <string name="common_label_router">Router</string>
+    <string name="common_label_routers">Routers</string>
+    <string name="common_label_routes">Routes</string>
+    <!-- Label for the address a service sends traffic to -->
+    <string name="common_label_target">Target</string>
+    <string name="common_label_status">Status</string>
+    <!-- Label, followed by what uses this item -->
+    <string name="common_label_used_by">Used by</string>
+    <string name="common_label_name">Name</string>
+    <string name="common_label_version">Version</string>
+    <!-- Label for a URL path -->
+    <string name="common_label_path">Path</string>
+    <string name="common_label_date">Date</string>
+    <string name="common_label_country">Country</string>
+    <string name="common_label_domain">Domain</string>
+    <string name="common_label_duration">Duration</string>
+    <!-- Lowercase value shown when a list is empty -->
+    <string name="common_none">none</string>
+    <!-- Lowercase value shown when something is not known -->
+    <string name="common_unknown">unknown</string>
+    <!-- Lowercase value: switched on -->
+    <string name="common_on">on</string>
+    <!-- Lowercase value: switched off -->
+    <string name="common_off">off</string>
+    <!-- Button that clears a filter -->
+    <string name="common_clear">Clear</string>
+    <plurals name="common_routes_count">
+        <item quantity="one">%d route</item>
+        <item quantity="other">%d routes</item>
+    </plurals>
+    <plurals name="common_countries_count">
+        <item quantity="one">%d country</item>
+        <item quantity="other">%d countries</item>
+    </plurals>
+    <!-- %1$s is the name of the thing being deleted -->
+    <string name="common_delete_named_question">Delete %1$s?</string>
+    <!-- %1$s is a sentence saying what will happen. %2$s is the word the user has to type -->
+    <string name="common_confirm_type">%1$s Type %2$s to confirm.</string>
+    <string name="common_error_traefik_unreachable">Traefik API not reachable</string>
+
+    <!-- Label, followed by the routers that lead to this service -->
+    <string name="routemap_reached_via">Reached via</string>
+    <!-- Lowercase value for the label Reached via, when no router is in between -->
+    <string name="routemap_reached_directly">directly</string>
+    <string name="routemap_edit_route">Edit route</string>
+    <string name="routemap_refresh">Refresh the map</string>
+    <string name="routemap_loading">Reading the routes</string>
+    <string name="routemap_error">Could not read the routes</string>
+    <string name="routemap_no_match">Nothing matches</string>
+    <string name="routemap_empty">No routes yet</string>
+    <string name="routemap_no_match_body">Try a different filter.</string>
+    <string name="routemap_empty_body">Routes you create appear here as a map.</string>
+
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_loading">Loading %1$s routes</string>
+    <string name="providers_error_body">Check the Traefik API URL in Settings.</string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_empty">No %1$s routes found</string>
+    <string name="providers_no_match">No routes match</string>
+    <!-- Section heading, %1$d is how many there are -->
+    <string name="providers_middlewares_title">Middlewares %1$d</string>
+    <!-- %1$s is a provider name. Read-only means the route cannot be edited here -->
+    <string name="providers_read_only">%1$s · read-only</string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_search">Search %1$s routes</string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_refresh">Refresh %1$s routes</string>
+
+    <string name="files_title">Config file</string>
+    <string name="files_search">Search files</string>
+    <string name="files_new_name">New file name</string>
+    <string name="files_new_hint">.yml is added if you leave it off</string>
+    <!-- Button -->
+    <string name="files_create">Create</string>
+    <string name="files_new">Create a new file</string>
+    <string name="files_new_body">Written into your dynamic config directory</string>
+    <string name="files_empty">No config files reported</string>
+    <string name="files_no_match">No files match</string>
+    <string name="routes_delete_consequence">This removes the router and its service from the config file.</string>
+    <!-- Section heading for the list of countries traffic comes from -->
+    <string name="geo_title">Geography</string>
+    <plurals name="geo_more">
+        <item quantity="one">+%d more country</item>
+        <item quantity="other">+%d more countries</item>
+    </plurals>
+    <string name="nav_open_menu">Open navigation menu</string>
+    <string name="state_copy_details">Copy details</string>
+    <string name="state_details_copied">Details copied</string>
+    <!-- Read aloud for the map -->
+    <string name="geo_map_empty">World map, no located traffic</string>
+    <!-- Read aloud for the map -->
+    <plurals name="geo_map_countries">
+        <item quantity="one">World map, %d country with traffic</item>
+        <item quantity="other">World map, %d countries with traffic</item>
+    </plurals>
+
+    <string name="plugins_add_title">Add plugin</string>
+    <string name="plugins_add_warning_title">Only install plugins from trusted sources</string>
+    <string name="plugins_add_warning_body">Plugins run inside the Traefik process with full access to your traffic. Review the plugin source on GitHub before installing. A Traefik restart is required to activate the plugin after saving.</string>
+    <string name="plugins_add_step_static">Step 1 - static config snippet</string>
+    <string name="plugins_add_step_static_help">Paste it from the plugin\'s page on plugins.traefik.io.</string>
+    <string name="plugins_add_step_middleware">Step 2 - middleware snippet</string>
+    <!-- Keep {{ }} exactly as it is -->
+    <string name="plugins_add_step_middleware_help">Edit the settings for your needs. Replace every placeholder and any {{ }} block with real values or Traefik will crash.</string>
+    <string name="plugins_add_file">Middleware file</string>
+    <string name="plugins_add_file_help">Which config file the middleware is written to.</string>
+    <string name="plugins_edit_title">Edit plugin</string>
+    <!-- Label for the Go module path of a plugin -->
+    <string name="plugins_module">Module</string>
+    <string name="plugins_restart_title">Restart Traefik to activate</string>
+    <string name="plugins_restart_body">The static config changed. Traefik is still running the old one.</string>
+    <string name="plugins_restart_now">Restart now</string>
+    <string name="plugins_remove_title">Remove plugin</string>
+    <string name="plugins_remove_body">Remove plugin \"%1$s\"? Traefik keeps running it until it restarts.</string>
+    <string name="plugins_add">Add a plugin</string>
+    <string name="plugins_search">Search plugins</string>
+    <string name="plugins_refresh">Refresh plugins</string>
+    <string name="plugins_loading">Loading plugins</string>
+    <string name="plugins_error_load">Could not load plugin data</string>
+    <string name="plugins_empty_server">No plugins declared</string>
+    <string name="plugins_empty">No plugins configured</string>
+    <!-- Keep experimental.plugins exactly as it is -->
+    <string name="plugins_empty_body">Plugins are declared under experimental.plugins in the Traefik static config.</string>
+    <string name="plugins_no_match">No plugins match your search</string>
+    <!-- Lowercase: no middleware uses this plugin -->
+    <string name="plugins_not_referenced">not referenced</string>
+    <!-- Lowercase -->
+    <plurals name="plugins_used_by">
+        <item quantity="one">used by %d middleware</item>
+        <item quantity="other">used by %d middlewares</item>
+    </plurals>
+    <string name="plugins_select">Select a plugin</string>
+    <string name="plugins_select_body">Pick one from the list to see its module and settings.</string>
+    <string name="plugins_back">Back to plugins</string>
+    <!-- Small heading above a plugin name -->
+    <string name="plugins_kind">Plugin</string>
+    <!-- Label, followed by the newer version that is available -->
+    <string name="plugins_update">Update</string>
+    <!-- %1$s is a version number -->
+    <string name="plugins_update_available">%1$s available</string>
+    <string name="plugins_used_by_title">Used by middlewares</string>
+    <string name="plugins_used_by_none">No middleware references this plugin</string>
+    <string name="plugins_copy_module">Copy module name</string>
+    <string name="plugins_open_repo">Open repository</string>
+    <string name="plugins_error_no_snippet">Paste the static config snippet</string>
+    <!-- %1$s is one plugin name or a list of names -->
+    <plurals name="plugins_installed">
+        <item quantity="one">Plugin \"%1$s\" saved to the static config.</item>
+        <item quantity="other">Plugins \"%1$s\" saved to the static config.</item>
+    </plurals>
+    <!-- %1$s is one plugin name or a list of names, %2$s is a file name -->
+    <plurals name="plugins_installed_with_middleware">
+        <item quantity="one">Plugin \"%1$s\" saved to the static config, middleware saved to %2$s.</item>
+        <item quantity="other">Plugins \"%1$s\" saved to the static config, middleware saved to %2$s.</item>
+    </plurals>
+    <string name="plugins_error_install">Failed to install plugin</string>
+    <string name="plugins_error_required">Name, module, and version are required</string>
+    <string name="plugins_saved">Plugin saved - restart Traefik to apply</string>
+    <string name="common_error_save">Failed to save</string>
+    <string name="plugins_removed">Plugin removed - restart Traefik to apply</string>
+    <string name="common_traefik_restarted">Traefik restarted</string>
+    <string name="common_error_restart">Restart failed</string>
+
+    <!-- Button -->
+    <string name="common_restore">Restore</string>
+    <!-- %1$s is the name of a backup or a commit -->
+    <string name="common_restore_named_question">Restore %1$s?</string>
+    <!-- Button -->
+    <string name="common_restart_traefik">Restart Traefik</string>
+    <string name="backups_restore_static">This overwrites the live static config. The server backs up what is there now first, and Traefik has to restart before it takes effect.</string>
+    <string name="backups_restore_certs">This replaces every certificate in acme.json. The server backs up what is there now first, then restarts Traefik because it only reads acme.json at startup.</string>
+    <string name="backups_restore_routes">This overwrites the live config, replacing every route it holds. The server backs up what is there now first.</string>
+    <string name="backups_delete_title">Delete this backup?</string>
+    <string name="backups_restore_commit">This writes every config file from that commit over what is running now.</string>
+    <string name="backups_refresh">Refresh backups</string>
+    <!-- Tab: backups of the dynamic Traefik config -->
+    <string name="backups_tab_dynamic">Dynamic</string>
+    <!-- Tab: backups of the static Traefik config -->
+    <string name="backups_tab_static">Static</string>
+    <string name="backups_tab_git" translatable="false">Git</string>
+    <string name="backups_restart_title_certs">Traefik is still serving the old certificates</string>
+    <string name="backups_restart_title_static">Traefik is still running the old static config</string>
+    <string name="backups_restart_body_certs">A restored acme.json only takes effect after a restart.</string>
+    <string name="backups_restart_body_static">A restored static config only takes effect after a restart.</string>
+    <string name="backups_loading">Loading backups</string>
+    <string name="backups_error_load">Could not read the backups</string>
+    <string name="backups_none">No backups</string>
+    <!-- How many backups are stored -->
+    <plurals name="backups_kept">
+        <item quantity="one">%d kept</item>
+        <item quantity="other">%d kept</item>
+    </plurals>
+    <!-- Lowercase. %1$s is the date and time of the newest backup -->
+    <string name="backups_newest">newest %1$s</string>
+    <!-- Button that makes a backup now -->
+    <string name="backups_create">Back up</string>
+    <string name="backups_certs_help">Taken automatically before a certificate is removed from acme.json.</string>
+    <string name="backups_static_agent_help">This agent folds its static config into the ordinary backup, so use Back up on the Dynamic tab.</string>
+    <string name="backups_old_agent_help">This agent is too old to say which backup is which, so everything is listed as dynamic.</string>
+    <string name="backups_empty_static">No static backups</string>
+    <string name="backups_empty_certs">No certificate backups</string>
+    <string name="backups_empty">No backups yet</string>
+    <string name="backups_empty_static_body">Backing up the static config keeps a copy of entrypoints and resolvers.</string>
+    <string name="backups_empty_certs_body">A copy of acme.json is kept each time a certificate is removed.</string>
+    <string name="backups_empty_body">A backup copies every dynamic config file the server holds.</string>
+    <string name="backups_section_static">Static config</string>
+    <string name="backups_section_certs">Certificate stores</string>
+    <string name="backups_section_dynamic">Dynamic config</string>
+    <string name="backups_git_loading">Loading Git backup</string>
+    <string name="backups_git_error">Could not read Git backup</string>
+    <string name="backups_git_unconfigured">Git backup is not configured</string>
+    <string name="backups_git_unconfigured_body">The repository, branch and token are set in the web UI or by environment. Once a repo is configured, pushes and restores appear here.</string>
+    <string name="backups_git_on">Git backup on</string>
+    <!-- Git backup is set up but automatic pushes are turned off -->
+    <string name="backups_git_off">Configured, switched off</string>
+    <!-- Lowercase. %1$s is a Git branch name -->
+    <string name="backups_git_branch">branch %1$s</string>
+    <!-- Lowercase -->
+    <string name="backups_git_nothing_pushed">nothing pushed yet</string>
+    <!-- Button that pushes the config to Git -->
+    <string name="backups_git_push">Push</string>
+    <string name="backups_git_off_help">Automatic pushes are off. Pushing here still works.</string>
+    <string name="backups_git_empty">No commits yet</string>
+    <string name="backups_git_empty_body">Push once and the history shows up here.</string>
+    <!-- Section heading, %1$d is how many commits there are -->
+    <string name="backups_git_history">History %1$d</string>
+    <!-- Button that shows what a commit changed -->
+    <string name="backups_git_changes">Changes</string>
+    <string name="backups_git_push_title">Push to Git</string>
+    <string name="backups_git_push_body">Commits every config file as it stands now. A blank message uses the server\'s own wording.</string>
+    <string name="backups_git_push_message">Message (optional)</string>
+    <string name="backups_git_diff_empty">Nothing to show for this commit.</string>
+    <!-- Lowercase: a file was added in this commit -->
+    <string name="backups_diff_added">added</string>
+    <!-- Lowercase: a file was deleted in this commit -->
+    <string name="backups_diff_deleted">deleted</string>
+    <!-- Lowercase: a file was changed in this commit -->
+    <string name="backups_diff_changed">changed</string>
+    <!-- Lowercase: a file was renamed in this commit -->
+    <string name="backups_diff_renamed">renamed</string>
+    <plurals name="backups_size_bytes">
+        <item quantity="one">%d byte</item>
+        <item quantity="other">%d bytes</item>
+    </plurals>
+    <string name="backups_error_create">Could not create the backup</string>
+    <string name="backups_created">Backup created</string>
+    <!-- %1$s is a file name -->
+    <string name="backups_created_file">Backed up %1$s</string>
+    <plurals name="backups_created_files">
+        <item quantity="one">Backed up %d file</item>
+        <item quantity="other">Backed up %d files</item>
+    </plurals>
+    <string name="backups_error_create_static">Could not back up the static config</string>
+    <string name="backups_created_static">Static config backed up</string>
+    <string name="backups_error_delete">Could not delete the backup</string>
+    <!-- %1$s is the name of a backup -->
+    <string name="backups_deleted">Deleted %1$s</string>
+    <string name="backups_error_restore">Could not restore the backup</string>
+    <string name="backups_restored_static">Static config restored - Traefik needs a restart</string>
+    <!-- %1$s is the name of a backup or a commit -->
+    <string name="backups_restored">Restored %1$s</string>
+    <string name="backups_restored_certs">Certificates restored and Traefik restarted</string>
+    <!-- %1$s is the reason, sent by the server -->
+    <string name="backups_restored_certs_no_restart_reason">Certificates restored, but Traefik did not restart: %1$s</string>
+    <string name="backups_restored_certs_no_restart">Certificates restored, but Traefik did not restart</string>
+    <string name="backups_git_error_push">Could not push to Git</string>
+    <string name="backups_git_pushed">Pushed to Git</string>
+    <string name="backups_git_error_restore">Could not restore that commit</string>
+    <string name="backups_git_error_diff">Could not read that commit</string>
 </resources>

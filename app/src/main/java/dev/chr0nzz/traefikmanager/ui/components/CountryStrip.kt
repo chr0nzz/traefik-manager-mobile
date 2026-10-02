@@ -19,6 +19,9 @@ import dev.chr0nzz.traefikmanager.data.model.CountryCount
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 @Composable
 fun CountryStrip(
@@ -34,9 +37,9 @@ fun CountryStrip(
 
     TmCard(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            SectionLabel("Geography", modifier = Modifier.weight(1f))
+            SectionLabel(stringResource(R.string.geo_title), modifier = Modifier.weight(1f))
             Text(
-                text = if (countries.size == 1) "1 country" else "${countries.size} countries",
+                text = pluralStringResource(R.plurals.common_countries_count, countries.size, countries.size),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
             )
@@ -88,7 +91,7 @@ fun CountryStrip(
         }
         if (countries.size > limit) {
             Text(
-                text = "+${countries.size - limit} more ${if (countries.size - limit == 1) "country" else "countries"}",
+                text = pluralStringResource(R.plurals.geo_more, countries.size - limit, countries.size - limit),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 modifier = Modifier.padding(top = 2.dp),

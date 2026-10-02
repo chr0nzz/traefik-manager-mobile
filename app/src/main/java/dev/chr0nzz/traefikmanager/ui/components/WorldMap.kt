@@ -26,6 +26,9 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import kotlin.math.ln
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 private const val MAP_ASSET = "world-map.svg"
 
@@ -79,9 +82,9 @@ fun WorldMap(
 
     val max = counts.values.maxOrNull() ?: 0
     val label = if (counts.isEmpty()) {
-        "World map, no located traffic"
+        stringResource(R.string.geo_map_empty)
     } else {
-        "World map, ${counts.size} countries with traffic"
+        pluralStringResource(R.plurals.geo_map_countries, counts.size, counts.size)
     }
 
     Canvas(

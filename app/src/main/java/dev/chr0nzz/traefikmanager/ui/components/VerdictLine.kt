@@ -36,7 +36,7 @@ fun VerdictLine(verdict: Verdict, info: String? = null) {
         ) {
             StatusDot(verdict.status)
             Text(
-                text = verdict.headline,
+                text = verdict.headline.asString(),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
@@ -61,7 +61,7 @@ fun VerdictLine(verdict: Verdict, info: String? = null) {
             }
         }
         Text(
-            text = verdict.detail,
+            text = verdict.detail.asString(),
             style = MaterialTheme.typography.bodySmall,
             color = palette.muted,
             modifier = Modifier.padding(top = 2.dp),

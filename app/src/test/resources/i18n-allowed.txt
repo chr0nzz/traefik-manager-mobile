@@ -1,0 +1,11 @@
+ui/dashboard/LauncherGroups.kt|Media
+ui/dashboard/LauncherGroups.kt|Monitoring
+ui/dashboard/LauncherGroups.kt|Infrastructure
+ui/dashboard/LauncherGroups.kt|Security
+ui/dashboard/LauncherGroups.kt|Home
+ui/dashboard/LauncherGroups.kt|Files & Data
+ui/dashboard/LauncherGroups.kt|Network
+ui/dashboard/LauncherGroups.kt|Dev
+ui/dashboard/LauncherGroups.kt|Servers
+ui/components/StateViews.kt|Traefik Manager ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
+ui/components/StateViews.kt|Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) · ${Build.MANUFACTURER} ${Build.MODEL}

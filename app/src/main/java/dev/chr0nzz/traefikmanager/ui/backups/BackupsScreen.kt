@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.backups
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,6 +72,12 @@ import dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -82,6 +89,7 @@ fun BackupsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     val refreshState = rememberPullToRefreshState()
 
     var restoreTarget by remember { mutableStateOf<BackupEntry?>(null) }
@@ -91,25 +99,21 @@ fun BackupsScreen(
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
     restoreTarget?.let { entry ->
         TypedConfirmDialog(
-            title = "Restore ${entry.name}?",
-            consequence = when (entry.kind) {
-                BackupKind.Static ->
-                    "This overwrites the live static config. The server backs up what is there now " +
-                        "first, and Traefik has to restart before it takes effect."
-                BackupKind.Certs ->
-                    "This replaces every certificate in acme.json. The server backs up what is there " +
-                        "now first, then restarts Traefik because it only reads acme.json at startup."
-                BackupKind.Routes ->
-                    "This overwrites the live config, replacing every route it holds. The server " +
-                        "backs up what is there now first."
-            },
-            actionLabel = "Restore",
+            title = stringResource(R.string.common_restore_named_question, entry.name),
+            consequence = stringResource(
+                when (entry.kind) {
+                    BackupKind.Static -> R.string.backups_restore_static
+                    BackupKind.Certs -> R.string.backups_restore_certs
+                    BackupKind.Routes -> R.string.backups_restore_routes
+                },
+            ),
+            actionLabel = stringResource(R.string.common_restore),
             onDismiss = { restoreTarget = null },
             onConfirm = {
                 viewModel.restore(entry)
@@ -121,7 +125,7 @@ fun BackupsScreen(
     deleteTarget?.let { entry ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Delete this backup?") },
+            title = { Text(stringResource(R.string.backups_delete_title)) },
             text = { Text(entry.name) },
             confirmButton = {
                 TextButton(
@@ -129,17 +133,17 @@ fun BackupsScreen(
                         viewModel.delete(entry)
                         deleteTarget = null
                     },
-                ) { Text("Delete") }
+                ) { Text(stringResource(R.string.common_delete)) }
             },
-            dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     restoreCommitTarget?.let { commit ->
         TypedConfirmDialog(
-            title = "Restore ${commit.shaShort}?",
-            consequence = "This writes every config file from that commit over what is running now.",
-            actionLabel = "Restore",
+            title = stringResource(R.string.common_restore_named_question, commit.shaShort),
+            consequence = stringResource(R.string.backups_restore_commit),
+            actionLabel = stringResource(R.string.common_restore),
             onDismiss = { restoreCommitTarget = null },
             onConfirm = {
                 viewModel.restoreCommit(commit)
@@ -178,13 +182,13 @@ fun BackupsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Backups") },
+                title = { Text(stringResource(R.string.nav_backups)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh backups")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.backups_refresh))
                     }
                 },
             )
@@ -202,7 +206,7 @@ fun BackupsScreen(
                     FilterChip(
                         selected = state.tab == tab,
                         onClick = { viewModel.onTabChange(tab) },
-                        label = { Text(tab.label) },
+                        label = { Text(stringResource(tab.label)) },
                     )
                 }
             }
@@ -256,12 +260,12 @@ fun BackupsScreen(
     }
 }
 
-private val BackupsTab.label: String
-    get() = when (this) {
-        BackupsTab.Dynamic -> "Dynamic"
-        BackupsTab.Static -> "Static"
-        BackupsTab.Certs -> "Certificates"
-        BackupsTab.Git -> "Git"
+private val BackupsTab.label: Int
+    @StringRes get() = when (this) {
+        BackupsTab.Dynamic -> R.string.backups_tab_dynamic
+        BackupsTab.Static -> R.string.backups_tab_static
+        BackupsTab.Certs -> R.string.nav_certificates
+        BackupsTab.Git -> R.string.backups_tab_git
     }
 
 @Composable
@@ -272,16 +276,16 @@ private fun RestartNotice(certs: Boolean, busy: Boolean, onRestart: () -> Unit, 
         modifier = Modifier.padding(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
     ) {
         Text(
-            text = if (certs) "Traefik is still serving the old certificates" else "Traefik is still running the old static config",
+            text = stringResource(
+                if (certs) R.string.backups_restart_title_certs else R.string.backups_restart_title_static,
+            ),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = if (certs) {
-                "A restored acme.json only takes effect after a restart."
-            } else {
-                "A restored static config only takes effect after a restart."
-            },
+            text = stringResource(
+                if (certs) R.string.backups_restart_body_certs else R.string.backups_restart_body_static,
+            ),
             style = MaterialTheme.typography.labelSmall,
             color = palette.muted,
         )
@@ -291,9 +295,9 @@ private fun RestartNotice(certs: Boolean, busy: Boolean, onRestart: () -> Unit, 
         ) {
             Button(onClick = onRestart, enabled = !busy) {
                 Icon(Icons.Outlined.RestartAlt, contentDescription = null, modifier = Modifier.size(16.dp))
-                Text("Restart Traefik", modifier = Modifier.padding(start = TmSpacing.xs))
+                Text(stringResource(R.string.common_restart_traefik), modifier = Modifier.padding(start = TmSpacing.xs))
             }
-            TextButton(onClick = onDismiss) { Text("Later") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_later)) }
         }
     }
 }
@@ -316,11 +320,11 @@ private fun LocalPane(
     }
 
     if (state.loading) {
-        LoadingState(label = "Loading backups")
+        LoadingState(label = stringResource(R.string.backups_loading))
         return
     }
     state.error?.let { message ->
-        ErrorState(headline = "Could not read the backups", body = message, onRetry = onRetry)
+        ErrorState(headline = stringResource(R.string.backups_error_load), body = message.asString(), onRetry = onRetry)
         return
     }
 
@@ -339,15 +343,19 @@ private fun LocalPane(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (rows.isEmpty()) "No backups" else "${rows.size} kept",
+                            text = if (rows.isEmpty()) {
+                                stringResource(R.string.backups_none)
+                            } else {
+                                pluralStringResource(R.plurals.backups_kept, rows.size, rows.size)
+                            },
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = buildString {
-                                append(formatSize(rows.sumOf { it.size }))
-                                rows.firstOrNull()?.let { append(" · newest ${it.stamp}") }
-                            },
+                            text = listOfNotNull(
+                                formatSize(rows.sumOf { it.size }),
+                                rows.firstOrNull()?.let { stringResource(R.string.backups_newest, it.stamp) },
+                            ).joinToString(UiText.SEPARATOR),
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                             color = palette.muted,
                         )
@@ -355,13 +363,13 @@ private fun LocalPane(
                     if (!certs && (!static || state.onHost)) {
                         Button(onClick = onCreate, enabled = !state.busy) {
                             Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Text("Back up", modifier = Modifier.padding(start = TmSpacing.xs))
+                            Text(stringResource(R.string.backups_create), modifier = Modifier.padding(start = TmSpacing.xs))
                         }
                     }
                 }
                 if (certs) {
                     Text(
-                        text = "Taken automatically before a certificate is removed from acme.json.",
+                        text = stringResource(R.string.backups_certs_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.xs),
@@ -369,8 +377,7 @@ private fun LocalPane(
                 }
                 if (static && !state.onHost) {
                     Text(
-                        text = "This agent folds its static config into the ordinary backup, so " +
-                            "use Back up on the Dynamic tab.",
+                        text = stringResource(R.string.backups_static_agent_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.xs),
@@ -378,8 +385,7 @@ private fun LocalPane(
                 }
                 if (!state.kindKnown) {
                     Text(
-                        text = "This agent is too old to say which backup is which, so everything " +
-                            "is listed as dynamic.",
+                        text = stringResource(R.string.backups_old_agent_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.yellow,
                         modifier = Modifier.padding(top = TmSpacing.xs),
@@ -391,16 +397,20 @@ private fun LocalPane(
         if (rows.isEmpty()) {
             item {
                 EmptyState(
-                    headline = when {
-                        static -> "No static backups"
-                        certs -> "No certificate backups"
-                        else -> "No backups yet"
-                    },
-                    body = when {
-                        static -> "Backing up the static config keeps a copy of entrypoints and resolvers."
-                        certs -> "A copy of acme.json is kept each time a certificate is removed."
-                        else -> "A backup copies every dynamic config file the server holds."
-                    },
+                    headline = stringResource(
+                        when {
+                            static -> R.string.backups_empty_static
+                            certs -> R.string.backups_empty_certs
+                            else -> R.string.backups_empty
+                        },
+                    ),
+                    body = stringResource(
+                        when {
+                            static -> R.string.backups_empty_static_body
+                            certs -> R.string.backups_empty_certs_body
+                            else -> R.string.backups_empty_body
+                        },
+                    ),
                 )
             }
             return@LazyColumn
@@ -408,11 +418,13 @@ private fun LocalPane(
 
         item {
             SectionLabel(
-                when {
-                    static -> "Static config"
-                    certs -> "Certificate stores"
-                    else -> "Dynamic config"
-                },
+                stringResource(
+                    when {
+                        static -> R.string.backups_section_static
+                        certs -> R.string.backups_section_certs
+                        else -> R.string.backups_section_dynamic
+                    },
+                ),
             )
         }
 
@@ -427,7 +439,7 @@ private fun LocalPane(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "${entry.stamp} · ${formatSize(entry.size)}",
+                    text = listOf(entry.stamp, formatSize(entry.size)).joinToString(UiText.SEPARATOR),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -435,11 +447,11 @@ private fun LocalPane(
                 Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
                     OutlinedButton(onClick = { onRestore(entry) }, enabled = !state.busy) {
                         Icon(Icons.Outlined.Restore, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text("Restore", modifier = Modifier.padding(start = TmSpacing.xs))
+                        Text(stringResource(R.string.common_restore), modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                     TextButton(onClick = { onDelete(entry) }, enabled = !state.busy) {
                         Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text("Delete", modifier = Modifier.padding(start = TmSpacing.xs))
+                        Text(stringResource(R.string.common_delete), modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                 }
             }
@@ -459,18 +471,17 @@ private fun GitPane(
     val status = state.gitStatus
 
     if (state.gitLoading) {
-        LoadingState(label = "Loading Git backup")
+        LoadingState(label = stringResource(R.string.backups_git_loading))
         return
     }
     state.gitError?.let { message ->
-        ErrorState(headline = "Could not read Git backup", body = message, onRetry = onRetry)
+        ErrorState(headline = stringResource(R.string.backups_git_error), body = message.asString(), onRetry = onRetry)
         return
     }
     if (status == null || !status.configured) {
         EmptyState(
-            headline = "Git backup is not configured",
-            body = "The repository, branch and token are set in the web UI or by environment. " +
-                "Once a repo is configured, pushes and restores appear here.",
+            headline = stringResource(R.string.backups_git_unconfigured),
+            body = stringResource(R.string.backups_git_unconfigured_body),
         )
         return
     }
@@ -490,32 +501,29 @@ private fun GitPane(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (status.enabled) "Git backup on" else "Configured, switched off",
+                            text = stringResource(if (status.enabled) R.string.backups_git_on else R.string.backups_git_off),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = buildString {
-                                if (status.branch.isNotEmpty()) append("branch ${status.branch} · ")
-                                if (status.lastSha.isNotEmpty()) {
-                                    append(status.lastSha)
-                                    if (status.lastPush.isNotEmpty()) append(" · ${status.lastPush}")
-                                } else {
-                                    append("nothing pushed yet")
-                                }
-                            },
+                            text = listOfNotNull(
+                                status.branch.takeIf { it.isNotEmpty() }
+                                    ?.let { stringResource(R.string.backups_git_branch, it) },
+                                status.lastSha.ifEmpty { stringResource(R.string.backups_git_nothing_pushed) },
+                                status.lastPush.takeIf { it.isNotEmpty() && status.lastSha.isNotEmpty() },
+                            ).joinToString(UiText.SEPARATOR),
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                             color = palette.muted,
                         )
                     }
                     Button(onClick = onPush, enabled = !state.busy) {
                         Icon(Icons.Outlined.Upload, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text("Push", modifier = Modifier.padding(start = TmSpacing.xs))
+                        Text(stringResource(R.string.backups_git_push), modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                 }
                 if (!status.enabled) {
                     Text(
-                        text = "Automatic pushes are off. Pushing here still works.",
+                        text = stringResource(R.string.backups_git_off_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.xs),
@@ -527,14 +535,14 @@ private fun GitPane(
         if (state.gitCommits.isEmpty()) {
             item {
                 EmptyState(
-                    headline = "No commits yet",
-                    body = "Push once and the history shows up here.",
+                    headline = stringResource(R.string.backups_git_empty),
+                    body = stringResource(R.string.backups_git_empty_body),
                 )
             }
             return@LazyColumn
         }
 
-        item { SectionLabel("History ${state.gitCommits.size}") }
+        item { SectionLabel(stringResource(R.string.backups_git_history, state.gitCommits.size)) }
 
         items(state.gitCommits.size, key = { state.gitCommits[it].sha }) { index ->
             val commit = state.gitCommits[index]
@@ -555,11 +563,11 @@ private fun GitPane(
                 Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
                     OutlinedButton(onClick = { onDiff(commit) }) {
                         Icon(Icons.Outlined.Difference, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text("Changes", modifier = Modifier.padding(start = TmSpacing.xs))
+                        Text(stringResource(R.string.backups_git_changes), modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                     TextButton(onClick = { onRestore(commit) }, enabled = !state.busy) {
                         Icon(Icons.Outlined.Restore, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text("Restore", modifier = Modifier.padding(start = TmSpacing.xs))
+                        Text(stringResource(R.string.common_restore), modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                 }
             }
@@ -572,18 +580,17 @@ private fun PushDialog(onDismiss: () -> Unit, onPush: (String) -> Unit) {
     var message by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Push to Git") },
+        title = { Text(stringResource(R.string.backups_git_push_title)) },
         text = {
             Column {
                 Text(
-                    text = "Commits every config file as it stands now. A blank message uses the " +
-                        "server's own wording.",
+                    text = stringResource(R.string.backups_git_push_body),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 OutlinedTextField(
                     value = message,
                     onValueChange = { message = it },
-                    label = { Text("Message (optional)") },
+                    label = { Text(stringResource(R.string.backups_git_push_message)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -591,8 +598,8 @@ private fun PushDialog(onDismiss: () -> Unit, onPush: (String) -> Unit) {
                 )
             }
         },
-        confirmButton = { TextButton(onClick = { onPush(message) }) { Text("Push") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        confirmButton = { TextButton(onClick = { onPush(message) }) { Text(stringResource(R.string.backups_git_push)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -611,7 +618,7 @@ private fun DiffDialog(
             when {
                 loading -> Box(modifier = Modifier.fillMaxWidth()) { LoadingState() }
                 diff == null || (diff.stat.isEmpty() && diff.files.isEmpty()) -> Text(
-                    text = "Nothing to show for this commit.",
+                    text = stringResource(R.string.backups_git_diff_empty),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 else -> Column(
@@ -644,21 +651,22 @@ private fun DiffDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_close)) } },
     )
 }
 
+@Composable
 private fun statusWord(status: String): String = when (status.firstOrNull()) {
-    'A' -> "added"
-    'D' -> "deleted"
-    'M' -> "changed"
-    'R' -> "renamed"
+    'A' -> stringResource(R.string.backups_diff_added)
+    'D' -> stringResource(R.string.backups_diff_deleted)
+    'M' -> stringResource(R.string.backups_diff_changed)
+    'R' -> stringResource(R.string.backups_diff_renamed)
     else -> status.lowercase()
 }
 
+@Composable
 private fun formatSize(bytes: Long): String = when {
     bytes >= 1_048_576 -> "${bytes / 1_048_576} MB"
     bytes >= 1024 -> "${bytes / 1024} KB"
-    bytes == 1L -> "1 byte"
-    else -> "$bytes bytes"
+    else -> pluralStringResource(R.plurals.backups_size_bytes, bytes.toInt(), bytes.toInt())
 }

@@ -52,6 +52,8 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,11 +89,11 @@ fun ProviderTopBar(
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search ${page.label} routes")
+                Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.providers_search, page.label))
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
-                    Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                    Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.common_filters))
                 }
                 if (filtersActive) {
                     Box(
@@ -114,7 +116,7 @@ fun ProviderTopBar(
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh ${page.label} routes")
+                Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.providers_refresh, page.label))
             }
         },
         scrollBehavior = scrollBehavior,
@@ -127,16 +129,16 @@ fun ProviderTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search ${page.label} routes") },
+                placeholder = { Text(stringResource(R.string.providers_search, page.label)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -146,7 +148,7 @@ fun ProviderTopBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (results.isEmpty()) {
                 Text(
-                    text = "No routes match",
+                    text = stringResource(R.string.providers_no_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted,
                     modifier = Modifier.padding(TmSpacing.lg),

@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class ProviderUiState(
     val page: ProviderPage = ProviderPage.Docker,
@@ -36,7 +38,7 @@ data class ProviderUiState(
     val protocol: ProtocolFilter = ProtocolFilter.All,
     val status: StatusFilter = StatusFilter.All,
     val selected: ProviderRoute? = null,
-    val error: String? = null,
+    val error: UiText? = null,
 ) {
     val verdict: ProviderVerdict get() = ProviderRows.verdict(routes, middlewares)
 
@@ -126,7 +128,7 @@ class ProviderViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = throwable.message ?: "Traefik API not reachable",
+                            error = UiText.messageOr(throwable.message, R.string.common_error_traefik_unreachable),
                         )
                     }
                 },

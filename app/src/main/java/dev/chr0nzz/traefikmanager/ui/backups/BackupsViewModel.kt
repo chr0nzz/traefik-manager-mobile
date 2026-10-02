@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.backups
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 enum class BackupsTab { Dynamic, Static, Certs, Git }
 
@@ -29,16 +32,16 @@ data class BackupsUiState(
     val entries: List<BackupEntry> = emptyList(),
     val staticConfigured: Boolean = true,
     val kindKnown: Boolean = true,
-    val error: String? = null,
+    val error: UiText? = null,
     val gitLoading: Boolean = true,
     val gitStatus: GitStatus? = null,
     val gitCommits: List<GitCommit> = emptyList(),
-    val gitError: String? = null,
+    val gitError: UiText? = null,
     val diffFor: GitCommit? = null,
     val diff: GitDiff? = null,
     val diffLoading: Boolean = false,
     val restartPending: BackupKind? = null,
-    val message: String? = null,
+    val message: UiText? = null,
 ) {
     val dynamic: List<BackupEntry> get() = entries.filter { it.kind == BackupKind.Routes }
 
@@ -105,7 +108,7 @@ class BackupsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = throwable.readable("Could not read the backups"),
+                            error = throwable.readable(R.string.backups_error_load),
                         )
                     }
                 },
@@ -126,67 +129,67 @@ class BackupsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(gitLoading = false, gitError = throwable.readable("Could not read Git backup"))
+                        it.copy(gitLoading = false, gitError = throwable.readable(R.string.backups_git_error))
                     }
                 },
             )
         }
     }
 
-    fun createBackup() = run("Backup created") {
+    fun createBackup() = run(R.string.backups_error_create) {
         val response = repository.create()
-        if (!response.worked) error(response.error ?: "Could not create the backup")
+        if (!response.worked) error(response.error.orEmpty())
         val created = response.created
         when {
-            created.isEmpty() -> "Backup created"
-            created.size == 1 -> "Backed up ${created.first()}"
-            else -> "Backed up ${created.size} files"
+            created.isEmpty() -> UiText.of(R.string.backups_created)
+            created.size == 1 -> UiText.of(R.string.backups_created_file, created.first())
+            else -> UiText.plural(R.plurals.backups_created_files, created.size)
         }
     }
 
-    fun createStaticBackup() = run("Static config backed up") {
+    fun createStaticBackup() = run(R.string.backups_error_create_static) {
         val response = repository.createStatic()
-        if (!response.worked) error(response.error ?: "Could not back up the static config")
-        "Static config backed up"
+        if (!response.worked) error(response.error.orEmpty())
+        UiText.of(R.string.backups_created_static)
     }
 
-    fun delete(entry: BackupEntry) = run("Backup deleted") {
+    fun delete(entry: BackupEntry) = run(R.string.backups_error_delete) {
         repository.delete(entry.name)
-        "Deleted ${entry.name}"
+        UiText.of(R.string.backups_deleted, entry.name)
     }
 
-    fun restore(entry: BackupEntry) = run("Backup restored") {
+    fun restore(entry: BackupEntry) = run(R.string.backups_error_restore) {
         val response = repository.restore(entry.name)
         when {
             entry.kind == BackupKind.Static -> {
                 _state.update { it.copy(restartPending = BackupKind.Static) }
-                "Static config restored - Traefik needs a restart"
+                UiText.of(R.string.backups_restored_static)
             }
-            entry.kind != BackupKind.Certs -> "Restored ${entry.name}"
-            response.restarted == true -> "Certificates restored and Traefik restarted"
+            entry.kind != BackupKind.Certs -> UiText.of(R.string.backups_restored, entry.name)
+            response.restarted == true -> UiText.of(R.string.backups_restored_certs)
             else -> {
                 _state.update { it.copy(restartPending = BackupKind.Certs) }
                 response.restartError.ifBlank { null }
-                    ?.let { "Certificates restored, but Traefik did not restart: $it" }
-                    ?: "Certificates restored, but Traefik did not restart"
+                    ?.let { UiText.of(R.string.backups_restored_certs_no_restart_reason, it) }
+                    ?: UiText.of(R.string.backups_restored_certs_no_restart)
             }
         }
     }
 
-    fun restartTraefik() = run("Traefik restarted") {
+    fun restartTraefik() = run(R.string.common_error_restart) {
         repository.restartTraefik()
         _state.update { it.copy(restartPending = null) }
-        "Traefik restarted"
+        UiText.of(R.string.common_traefik_restarted)
     }
 
-    fun push(message: String) = run("Pushed to Git") {
+    fun push(message: String) = run(R.string.backups_git_error_push) {
         repository.gitPush(message)
-        "Pushed to Git"
+        UiText.of(R.string.backups_git_pushed)
     }
 
-    fun restoreCommit(commit: GitCommit) = run("Commit restored") {
+    fun restoreCommit(commit: GitCommit) = run(R.string.backups_git_error_restore) {
         repository.gitRestore(commit.sha)
-        "Restored ${commit.shaShort}"
+        UiText.of(R.string.backups_restored, commit.shaShort)
     }
 
     fun openDiff(commit: GitCommit) {
@@ -198,7 +201,7 @@ class BackupsViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             diffLoading = false,
-                            message = throwable.readable("Could not read that commit"),
+                            message = throwable.readable(R.string.backups_git_error_diff),
                         )
                     }
                 },
@@ -208,13 +211,13 @@ class BackupsViewModel @Inject constructor(
 
     fun closeDiff() = _state.update { it.copy(diffFor = null, diff = null, diffLoading = false) }
 
-    private fun run(fallback: String, block: suspend () -> String) {
+    private fun run(@StringRes failure: Int, block: suspend () -> UiText) {
         if (_state.value.busy) return
         _state.update { it.copy(busy = true) }
         viewModelScope.launch {
             val result = runCatching { block() }
             _state.update {
-                it.copy(busy = false, message = result.getOrNull() ?: result.readableFailure(fallback))
+                it.copy(busy = false, message = result.getOrNull() ?: result.readableFailure(failure))
             }
             load(initial = false)
             loadGit()
@@ -222,15 +225,15 @@ class BackupsViewModel @Inject constructor(
     }
 }
 
-private fun Throwable.readable(fallback: String): String {
+private fun Throwable.readable(@StringRes fallback: Int): UiText {
     val message = message?.trim().orEmpty()
     return when {
-        message.isEmpty() -> fallback
-        message.startsWith("<") || message.contains("<html", ignoreCase = true) -> fallback
-        message.length > 200 -> fallback
-        else -> message
+        message.isEmpty() -> UiText.of(fallback)
+        message.startsWith("<") || message.contains("<html", ignoreCase = true) -> UiText.of(fallback)
+        message.length > 200 -> UiText.of(fallback)
+        else -> UiText.Raw(message)
     }
 }
 
-private fun Result<String>.readableFailure(fallback: String): String =
-    exceptionOrNull()?.readable(fallback) ?: fallback
+private fun Result<UiText>.readableFailure(@StringRes fallback: Int): UiText =
+    exceptionOrNull()?.readable(fallback) ?: UiText.of(fallback)

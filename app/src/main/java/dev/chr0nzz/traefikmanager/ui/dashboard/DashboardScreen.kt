@@ -100,6 +100,10 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -163,14 +167,14 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Dashboard") },
+                title = { Text(stringResource(R.string.nav_dashboard)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     if (launcher.snapshot.groups.isNotEmpty()) {
                         IconButton(onClick = { launcherViewModel.openSettings(true) }) {
-                            Icon(Icons.Outlined.Tune, contentDescription = "Dashboard settings")
+                            Icon(Icons.Outlined.Tune, contentDescription = stringResource(R.string.dashboard_settings))
                         }
                     }
                     IconButton(onClick = onOpenNotifications) {
@@ -186,9 +190,9 @@ fun DashboardScreen(
                             Icon(
                                 imageVector = Icons.Outlined.Notifications,
                                 contentDescription = if (unread > 0) {
-                                    if (unread == 1) "Notifications, 1 unread" else "Notifications, $unread unread"
+                                    pluralStringResource(R.plurals.dashboard_notifications_unread, unread, unread)
                                 } else {
-                                    "Notifications"
+                                    stringResource(R.string.dashboard_notifications)
                                 },
                             )
                         }
@@ -200,7 +204,7 @@ fun DashboardScreen(
                             bellViewModel.refresh()
                         },
                     ) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh overview")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.dashboard_refresh))
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -231,8 +235,8 @@ fun DashboardScreen(
         when {
             state.loading -> LoadingState(modifier = Modifier.padding(contentPadding))
             state.snapshot == null -> ErrorState(
-                headline = "Could not load the overview",
-                body = state.error,
+                headline = stringResource(R.string.dashboard_error_load),
+                body = state.error?.asString(),
                 onRetry = viewModel::refresh,
                 modifier = Modifier.padding(contentPadding),
             )
@@ -399,7 +403,7 @@ private fun ProvidersBar(
         horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        SectionLabel("Providers")
+        SectionLabel(stringResource(R.string.nav_section_providers))
         ProviderRow(
             providers = providers,
             activeProvider = activeProvider,
@@ -414,9 +418,21 @@ private fun RuntimeFooter(runtime: RuntimeInfo) {
     val palette = LocalTmPalette.current
     val parts = buildList {
         runtime.version?.let { add("v$it" + (runtime.codename?.let { c -> " $c" } ?: "")) }
-        add(if (runtime.metrics.isNullOrEmpty()) "metrics off" else "metrics ${runtime.metrics}")
-        add(if (runtime.accessLog == true) "access log on" else "access log off")
-        add(if (runtime.tracing.isNullOrEmpty()) "tracing off" else "tracing ${runtime.tracing}")
+        add(
+            runtime.metrics?.takeIf { it.isNotEmpty() }
+                ?.let { stringResource(R.string.dashboard_runtime_metrics, it) }
+                ?: stringResource(R.string.dashboard_runtime_metrics_off),
+        )
+        add(
+            stringResource(
+                if (runtime.accessLog == true) R.string.dashboard_runtime_access_log_on else R.string.dashboard_runtime_access_log_off,
+            ),
+        )
+        add(
+            runtime.tracing?.takeIf { it.isNotEmpty() }
+                ?.let { stringResource(R.string.dashboard_runtime_tracing, it) }
+                ?: stringResource(R.string.dashboard_runtime_tracing_off),
+        )
     }
     if (parts.isEmpty()) return
     Text(
@@ -442,7 +458,7 @@ private fun EntrypointsSection(rows: List<EntrypointRow>) {
                 tint = palette.muted,
                 modifier = Modifier.size(14.dp),
             )
-            SectionLabel("Entry Points")
+            SectionLabel(stringResource(R.string.dashboard_entry_points))
             Text(
                 text = rows.size.toString(),
                 style = MaterialTheme.typography.labelMedium.copy(fontFamily = MonoFamily),

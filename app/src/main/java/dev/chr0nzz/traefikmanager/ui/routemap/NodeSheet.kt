@@ -28,6 +28,9 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,52 +86,53 @@ fun NodeSheet(
             }
 
             TmCard {
+                val none = stringResource(R.string.common_none)
                 when (node.kind) {
                     MapNodeKind.Route -> {
                         val route = node.route
-                        DetailRow("Protocol", route?.protocol?.uppercase().orEmpty().ifEmpty { "HTTP" })
-                        if (node.detail.isNotEmpty()) DetailRow("Host", node.detail, mono = true)
-                        route?.rule?.takeIf { it.isNotEmpty() }?.let { DetailRow("Rule", it, mono = true) }
-                        DetailRow("Entry points", feeds.joinToString(", ") { it.label }.ifEmpty { "none" })
+                        DetailRow(stringResource(R.string.common_label_protocol), route?.protocol?.uppercase().orEmpty().ifEmpty { "HTTP" })
+                        if (node.detail.isNotEmpty()) DetailRow(stringResource(R.string.common_label_host), node.detail, mono = true)
+                        route?.rule?.takeIf { it.isNotEmpty() }?.let { DetailRow(stringResource(R.string.common_label_rule), it, mono = true) }
+                        DetailRow(stringResource(R.string.common_label_entry_points), feeds.joinToString(", ") { it.label }.ifEmpty { none })
                         val middlewares = serves.filter { it.kind == MapNodeKind.Middleware }
                         DetailRow(
-                            label = "Middlewares",
-                            value = middlewares.joinToString(", ") { it.label }.ifEmpty { "none" },
+                            label = stringResource(R.string.common_label_middlewares),
+                            value = middlewares.joinToString(", ") { it.label }.ifEmpty { none },
                         )
                         DetailRow(
-                            label = "Service",
-                            value = route?.serviceName.orEmpty().ifEmpty { "none" },
+                            label = stringResource(R.string.common_label_service),
+                            value = route?.serviceName.orEmpty().ifEmpty { none },
                             mono = true,
                         )
-                        DetailRow("Provider", route?.provider.orEmpty().ifEmpty { "file" }, last = true)
+                        DetailRow(stringResource(R.string.common_label_provider), route?.provider.orEmpty().ifEmpty { "file" }, last = true)
                     }
                     MapNodeKind.Middleware -> {
-                        DetailRow("Used by", if (routes == 1) "1 route" else "$routes routes")
+                        DetailRow(stringResource(R.string.common_label_used_by), pluralStringResource(R.plurals.common_routes_count, routes, routes))
                         DetailRow(
-                            label = "Routers",
-                            value = feeds.joinToString(", ") { it.label }.ifEmpty { "none" },
+                            label = stringResource(R.string.common_label_routers),
+                            value = feeds.joinToString(", ") { it.label }.ifEmpty { none },
                             last = true,
                         )
                     }
                     MapNodeKind.Service -> {
-                        if (node.detail.isNotEmpty()) DetailRow("Target", node.detail, mono = true)
-                        DetailRow("Routes", routes.toString())
+                        if (node.detail.isNotEmpty()) DetailRow(stringResource(R.string.common_label_target), node.detail, mono = true)
+                        DetailRow(stringResource(R.string.common_label_routes), routes.toString())
                         DetailRow(
-                            label = "Reached via",
-                            value = feeds.joinToString(", ") { it.label }.ifEmpty { "directly" },
+                            label = stringResource(R.string.routemap_reached_via),
+                            value = feeds.joinToString(", ") { it.label }.ifEmpty { stringResource(R.string.routemap_reached_directly) },
                             last = true,
                         )
                     }
                     MapNodeKind.EntryPoint -> {
-                        DetailRow("Routers", serves.size.toString())
-                        DetailRow("Routes", routes.toString(), last = true)
+                        DetailRow(stringResource(R.string.common_label_routers), serves.size.toString())
+                        DetailRow(stringResource(R.string.common_label_routes), routes.toString(), last = true)
                     }
                     MapNodeKind.Group -> {
-                        DetailRow("Provider", node.label)
-                        DetailRow("Routes", node.members.size.toString())
+                        DetailRow(stringResource(R.string.common_label_provider), node.label)
+                        DetailRow(stringResource(R.string.common_label_routes), node.members.size.toString())
                         DetailRow(
-                            label = "Services",
-                            value = serves.joinToString(", ") { it.label }.ifEmpty { "none" },
+                            label = stringResource(R.string.common_label_services),
+                            value = serves.joinToString(", ") { it.label }.ifEmpty { none },
                             last = true,
                         )
                     }
@@ -139,16 +143,19 @@ fun NodeSheet(
                 OutlinedButton(
                     onClick = { onEdit(node.route.id) },
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Edit route") }
+                ) { Text(stringResource(R.string.routemap_edit_route)) }
             }
         }
     }
 }
 
-private fun kindLabel(node: MapNode): String = when (node.kind) {
-    MapNodeKind.EntryPoint -> "ENTRY POINT"
-    MapNodeKind.Route -> "ROUTER"
-    MapNodeKind.Group -> "PROVIDER"
-    MapNodeKind.Middleware -> "MIDDLEWARE"
-    MapNodeKind.Service -> "SERVICE"
-}
+@Composable
+private fun kindLabel(node: MapNode): String = stringResource(
+    when (node.kind) {
+        MapNodeKind.EntryPoint -> R.string.common_label_entry_point
+        MapNodeKind.Route -> R.string.common_label_router
+        MapNodeKind.Group -> R.string.common_label_provider
+        MapNodeKind.Middleware -> R.string.common_label_middleware
+        MapNodeKind.Service -> R.string.common_label_service
+    },
+).uppercase()

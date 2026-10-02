@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class PluginsUiState(
     val loading: Boolean = true,
@@ -27,17 +29,17 @@ data class PluginsUiState(
     val middlewares: List<MiddlewareDef> = emptyList(),
     val query: String = "",
     val serverError: String? = null,
-    val loadError: String? = null,
+    val loadError: UiText? = null,
     val canManage: Boolean = false,
     val installing: PluginInstall? = null,
     val editing: PluginEdit? = null,
     val pendingDelete: PluginEntry? = null,
-    val formError: String? = null,
+    val formError: UiText? = null,
     val busy: Boolean = false,
     val restartPending: Boolean = false,
-    val restartDetail: String = "",
+    val restartDetail: UiText? = null,
     val restarting: Boolean = false,
-    val message: String? = null,
+    val message: UiText? = null,
     val updates: Map<String, String> = emptyMap(),
 ) {
     val visible: List<PluginEntry>
@@ -127,7 +129,7 @@ class PluginsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            loadError = throwable.message ?: "Could not load plugin data",
+                            loadError = UiText.messageOr(throwable.message, R.string.plugins_error_load),
                         )
                     }
                 },
@@ -175,7 +177,7 @@ class PluginsViewModel @Inject constructor(
     fun install() {
         val draft = _state.value.installing ?: return
         if (draft.staticYaml.isBlank()) {
-            _state.update { it.copy(formError = "Paste the static config snippet") }
+            _state.update { it.copy(formError = UiText.of(R.string.plugins_error_no_snippet)) }
             return
         }
         _state.update { it.copy(busy = true, formError = null) }
@@ -193,19 +195,18 @@ class PluginsViewModel @Inject constructor(
                         busy = false,
                         installing = null,
                         restartPending = true,
-                        restartDetail = buildString {
-                            append(if (result.plugins.size > 1) "Plugins" else "Plugin")
-                            append(" \"").append(names).append("\" saved to the static config")
-                            if (!wrote.isNullOrBlank()) append(", middleware saved to ").append(wrote)
-                            append(".")
+                        restartDetail = if (wrote.isNullOrBlank()) {
+                            UiText.plural(R.plurals.plugins_installed, result.plugins.size, names)
+                        } else {
+                            UiText.plural(R.plurals.plugins_installed_with_middleware, result.plugins.size, names, wrote)
                         },
-                        message = result.warning,
+                        message = result.warning?.let(UiText::Raw),
                     )
                 }
                 load(initial = false)
             } else {
                 _state.update {
-                    it.copy(busy = false, formError = result.error ?: "Failed to install plugin")
+                    it.copy(busy = false, formError = UiText.messageOr(result.error, R.string.plugins_error_install))
                 }
             }
         }
@@ -214,7 +215,7 @@ class PluginsViewModel @Inject constructor(
     fun saveEdit() {
         val draft = _state.value.editing ?: return
         if (draft.name.isBlank() || draft.moduleName.isBlank() || draft.version.isBlank()) {
-            _state.update { it.copy(formError = "Name, module, and version are required") }
+            _state.update { it.copy(formError = UiText.of(R.string.plugins_error_required)) }
             return
         }
         _state.update { it.copy(busy = true, formError = null) }
@@ -232,13 +233,13 @@ class PluginsViewModel @Inject constructor(
                         it.copy(
                             busy = false,
                             editing = null,
-                            message = "Plugin saved - restart Traefik to apply",
+                            message = UiText.of(R.string.plugins_saved),
                         )
                     }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(busy = false, formError = throwable.message ?: "Failed to save") }
+                    _state.update { it.copy(busy = false, formError = UiText.messageOr(throwable.message, R.string.common_error_save)) }
                 },
             )
         }
@@ -250,12 +251,12 @@ class PluginsViewModel @Inject constructor(
             runCatching { staticConfig.removePlugin(plugin.name) }.fold(
                 onSuccess = {
                     _state.update {
-                        it.copy(busy = false, message = "Plugin removed - restart Traefik to apply")
+                        it.copy(busy = false, message = UiText.of(R.string.plugins_removed))
                     }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(busy = false, message = throwable.message ?: "Failed to save") }
+                    _state.update { it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.common_error_save)) }
                 },
             )
         }
@@ -267,12 +268,12 @@ class PluginsViewModel @Inject constructor(
             runCatching { staticConfig.restart() }.fold(
                 onSuccess = {
                     _state.update {
-                        it.copy(restarting = false, restartPending = false, message = "Traefik restarted")
+                        it.copy(restarting = false, restartPending = false, message = UiText.of(R.string.common_traefik_restarted))
                     }
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(restarting = false, message = throwable.message ?: "Restart failed")
+                        it.copy(restarting = false, message = UiText.messageOr(throwable.message, R.string.common_error_restart))
                     }
                 },
             )

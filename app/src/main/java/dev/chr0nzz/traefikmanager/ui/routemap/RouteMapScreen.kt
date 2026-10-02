@@ -56,6 +56,9 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,14 +82,14 @@ fun RouteMapScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Route map") },
+                title = { Text(stringResource(R.string.nav_route_map)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },
                 actions = {
                     Box {
                         IconButton(onClick = { filterMenuOpen = true }) {
-                            Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                            Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.common_filters))
                         }
                         if (state.filtered) {
                             Box(
@@ -109,7 +112,7 @@ fun RouteMapScreen(
                         )
                     }
                     IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh the map")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.routemap_refresh))
                     }
                 },
             )
@@ -118,18 +121,18 @@ fun RouteMapScreen(
         Column(modifier = Modifier.padding(insets)) {
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    state.loading -> LoadingState(label = "Reading the routes")
+                    state.loading -> LoadingState(label = stringResource(R.string.routemap_loading))
                     state.error != null -> ErrorState(
-                        headline = "Could not read the routes",
-                        body = state.error,
+                        headline = stringResource(R.string.routemap_error),
+                        body = state.error?.asString(),
                         onRetry = viewModel::refresh,
                     )
                     state.graph.nodes.isEmpty() -> EmptyState(
-                        headline = if (state.filtered) "Nothing matches" else "No routes yet",
+                        headline = if (state.filtered) stringResource(R.string.routemap_no_match) else stringResource(R.string.routemap_empty),
                         body = if (state.filtered) {
-                            "Try a different filter."
+                            stringResource(R.string.routemap_no_match_body)
                         } else {
-                            "Routes you create appear here as a map."
+                            stringResource(R.string.routemap_empty_body)
                         },
                     )
                     else -> RouteMapCanvas(
@@ -179,7 +182,7 @@ private fun RouteMapFilterMenu(
     val palette = LocalTmPalette.current
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         Text(
-            text = "PROTOCOL",
+            text = stringResource(R.string.common_label_protocol).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
             color = palette.muted,
             modifier = Modifier.padding(start = TmSpacing.md, top = TmSpacing.xs),
@@ -196,7 +199,7 @@ private fun RouteMapFilterMenu(
         if (state.providers.size > 1) {
             HorizontalDivider()
             Text(
-                text = "PROVIDER",
+                text = stringResource(R.string.common_label_provider).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = palette.muted,
                 modifier = Modifier.padding(start = TmSpacing.md, top = TmSpacing.xs),
@@ -214,7 +217,7 @@ private fun RouteMapFilterMenu(
         if (state.entryPoints.size > 1) {
             HorizontalDivider()
             Text(
-                text = "ENTRY POINT",
+                text = stringResource(R.string.common_label_entry_point).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = palette.muted,
                 modifier = Modifier.padding(start = TmSpacing.md, top = TmSpacing.xs),
@@ -232,7 +235,7 @@ private fun RouteMapFilterMenu(
         if (state.filtered) {
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Clear filters", color = palette.blue) },
+                text = { Text(stringResource(R.string.common_clear_filters), color = palette.blue) },
                 onClick = {
                     onClear()
                     onDismiss()

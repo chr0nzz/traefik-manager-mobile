@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class LauncherUiState(
     val loading: Boolean = true,
@@ -23,7 +25,7 @@ data class LauncherUiState(
     val snapshot: LauncherSnapshot = LauncherSnapshot(),
     val editing: LauncherApp? = null,
     val settingsOpen: Boolean = false,
-    val message: String? = null,
+    val message: UiText? = null,
 ) {
     val density: LauncherDensity
         get() = if (snapshot.density == "icons") LauncherDensity.Icons else LauncherDensity.List
@@ -79,27 +81,27 @@ class LauncherViewModel @Inject constructor(
         }
     }
 
-    fun setDensity(density: LauncherDensity) = write("Layout saved") {
+    fun setDensity(density: LauncherDensity) = write(UiText.of(R.string.dashboard_saved_layout)) {
         repository.setDensity(if (density == LauncherDensity.Icons) "icons" else "list")
     }
 
-    fun saveOverride(routeId: String, override: RouteOverride) = write("Card saved") {
+    fun saveOverride(routeId: String, override: RouteOverride) = write(UiText.of(R.string.dashboard_saved_card)) {
         repository.saveOverride(_state.value.snapshot.config, routeId, override)
     }
 
-    fun setHidden(routeId: String, hidden: Boolean) = write(if (hidden) "Hidden" else "Shown") {
+    fun setHidden(routeId: String, hidden: Boolean) = write(UiText.of(if (hidden) R.string.dashboard_saved_hidden else R.string.dashboard_saved_shown)) {
         repository.setHidden(_state.value.snapshot.config, routeId, hidden)
     }
 
-    fun addGroup(name: String) = write("Group added") {
+    fun addGroup(name: String) = write(UiText.of(R.string.dashboard_saved_group_added)) {
         repository.addGroup(_state.value.snapshot.config, name)
     }
 
-    fun removeGroup(name: String) = write("Group removed") {
+    fun removeGroup(name: String) = write(UiText.of(R.string.dashboard_saved_group_removed)) {
         repository.removeGroup(_state.value.snapshot.config, name)
     }
 
-    private fun write(success: String, block: suspend () -> Unit) {
+    private fun write(success: UiText, block: suspend () -> Unit) {
         if (_state.value.saving) return
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
@@ -108,7 +110,7 @@ class LauncherViewModel @Inject constructor(
                 it.copy(
                     saving = false,
                     editing = null,
-                    message = result.exceptionOrNull()?.message?.take(120) ?: success,
+                    message = result.exceptionOrNull()?.message?.take(120)?.let(UiText::Raw) ?: success,
                 )
             }
             load()

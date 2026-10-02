@@ -15,12 +15,14 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class DashboardUiState(
     val loading: Boolean = true,
     val refreshing: Boolean = false,
     val snapshot: DashboardSnapshot? = null,
-    val error: String? = null,
+    val error: UiText? = null,
 )
 
 @HiltViewModel
@@ -76,7 +78,7 @@ class DashboardViewModel @Inject constructor(
                         state.copy(
                             loading = false,
                             refreshing = false,
-                            error = throwable.message ?: "Could not load the overview",
+                            error = UiText.messageOr(throwable.message, R.string.dashboard_error_load),
                         )
                     }
                 },
