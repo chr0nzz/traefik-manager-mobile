@@ -2,8 +2,7 @@ data/model 397
 data/repo 80
 data/store 3
 push 8
-ui/crowdsec 66
-ui/logs 52
+ui/crowdsec 1
 ui/middlewares 103
 ui/nav 1
 ui/routes 193

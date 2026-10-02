@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.logs
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 val LOG_LINE_STEPS = listOf(100, 200, 500, 1000)
 
@@ -56,7 +59,7 @@ data class LogsUiState(
     val geoEnabled: Boolean = false,
     val countryByIp: Map<String, String> = emptyMap(),
     val serverError: String? = null,
-    val loadError: String? = null,
+    val loadError: UiText? = null,
     val lastLoadedAt: Long = 0L,
 ) {
     val parsedEntries: List<LogEntry> by lazy { lines.mapNotNull { it.entry } }
@@ -116,12 +119,12 @@ data class LogsUiState(
 
     val tlsFields: Boolean get() = parsedEntries.any { it.tls.isNotEmpty() }
 
-    val formatLabel: String
-        get() = when {
-            parsedEntries.isEmpty() -> "no parsed lines"
-            isJson -> "json access log"
-            parsedEntries.any { it.format == LogFormat.Clf } -> "clf access log"
-            else -> "generic clf access log"
+    val formatLabel: Int
+        @StringRes get() = when {
+            parsedEntries.isEmpty() -> R.string.logs_format_none
+            isJson -> R.string.logs_format_json
+            parsedEntries.any { it.format == LogFormat.Clf } -> R.string.logs_format_clf
+            else -> R.string.logs_format_generic
         }
 }
 
@@ -255,7 +258,7 @@ class LogsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            loadError = throwable.message ?: "Could not load the access log",
+                            loadError = UiText.messageOr(throwable.message, R.string.logs_error_load),
                         )
                     }
                 },

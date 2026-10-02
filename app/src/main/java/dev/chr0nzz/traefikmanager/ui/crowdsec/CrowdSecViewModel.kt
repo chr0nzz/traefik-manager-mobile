@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,10 +30,12 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class CrowdSecView(val label: String) {
-    Evidence("Attack evidence"),
-    Bans("Bans in force"),
+enum class CrowdSecView(@StringRes val label: Int) {
+    Evidence(R.string.crowdsec_view_evidence),
+    Bans(R.string.crowdsec_card_bans),
 }
 
 data class CrowdSecUiState(
@@ -45,8 +48,8 @@ data class CrowdSecUiState(
     val countryByIp: Map<String, String> = emptyMap(),
     val geoEnabled: Boolean = false,
     val saving: Boolean = false,
-    val message: String? = null,
-    val loadError: String? = null,
+    val message: UiText? = null,
+    val loadError: UiText? = null,
     val notConfigured: Boolean = false,
     val readAt: Long? = null,
     val decisionFeed: CsDecisionFeed? = null,
@@ -280,13 +283,13 @@ class CrowdSecViewModel @Inject constructor(
             }.fold(
                 onSuccess = {
                     _state.update {
-                        it.copy(saving = false, message = "Decision added for ${value.trim()}", decisionFeed = null)
+                        it.copy(saving = false, message = UiText.of(R.string.crowdsec_decision_added, value.trim()), decisionFeed = null)
                     }
                     load(initial = false, full = true)
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, message = throwable.message ?: "Could not add the decision")
+                        it.copy(saving = false, message = UiText.messageOr(throwable.message, R.string.crowdsec_error_add))
                     }
                 },
             )
@@ -297,12 +300,12 @@ class CrowdSecViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.deleteDecision(decision.id) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(message = "${decision.value} unbanned", decisionFeed = null) }
+                    _state.update { it.copy(message = UiText.of(R.string.crowdsec_unbanned, decision.value), decisionFeed = null) }
                     load(initial = false, full = true)
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = throwable.message ?: "Could not delete the decision")
+                        it.copy(message = UiText.messageOr(throwable.message, R.string.crowdsec_error_delete))
                     }
                 },
             )
@@ -365,7 +368,7 @@ class CrowdSecViewModel @Inject constructor(
                             it.copy(
                                 loading = false,
                                 refreshing = false,
-                                loadError = throwable.message ?: "Could not reach the CrowdSec LAPI",
+                                loadError = UiText.messageOr(throwable.message, R.string.crowdsec_error_load),
                             )
                         }
                     },

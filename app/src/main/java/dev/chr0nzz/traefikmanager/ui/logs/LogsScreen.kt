@@ -93,6 +93,10 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,27 +139,27 @@ fun LogsScreen(
                         containerColor = MaterialTheme.colorScheme.background,
                         scrolledContainerColor = MaterialTheme.colorScheme.background,
                     ),
-                    title = { Text("Logs") },
+                    title = { Text(stringResource(R.string.nav_logs)) },
                     navigationIcon = {
                         DrawerButton(onOpenDrawer)
                     },
                     actions = {
                         IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                            Icon(Icons.Outlined.Search, contentDescription = "Search logs")
+                            Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.logs_search))
                         }
                         IconButton(onClick = viewModel::toggleAutoRefresh) {
                             Icon(
                                 imageVector = if (state.autoRefresh) Icons.Outlined.Stop else Icons.Outlined.PlayArrow,
                                 contentDescription = if (state.autoRefresh) {
-                                    "Stop auto refresh"
+                                    stringResource(R.string.logs_auto_refresh_stop)
                                 } else {
-                                    "Start auto refresh"
+                                    stringResource(R.string.logs_auto_refresh_start)
                                 },
                                 tint = if (state.autoRefresh) palette.green else palette.muted,
                             )
                         }
                         IconButton(onClick = viewModel::refresh) {
-                            Icon(Icons.Outlined.Refresh, contentDescription = "Refresh logs")
+                            Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.logs_refresh))
                         }
                     },
                     scrollBehavior = scrollBehavior,
@@ -192,7 +196,7 @@ fun LogsScreen(
             ModalSideSheet(
                 visible = selected != null,
                 onDismiss = closeDetail,
-                scrimLabel = "Close the log record",
+                scrimLabel = stringResource(R.string.logs_close_record),
             ) {
                 LogDetailPane(
                     line = selected,
@@ -235,23 +239,23 @@ private fun LogsListPane(
         },
     ) {
         when {
-            state.loading -> LoadingState(label = "Loading logs")
+            state.loading -> LoadingState(label = stringResource(R.string.logs_loading))
 
             state.loadError != null -> ErrorState(
-                headline = "Could not load the access log",
-                body = state.loadError,
+                headline = stringResource(R.string.logs_error_load),
+                body = state.loadError?.asString(),
                 onRetry = viewModel::refresh,
             )
 
             state.serverError != null && state.lines.isEmpty() -> ErrorState(
-                headline = "Access log not available",
+                headline = stringResource(R.string.logs_unavailable),
                 body = state.serverError,
                 onRetry = viewModel::refresh,
             )
 
             state.lines.isEmpty() -> EmptyState(
-                headline = "No traffic yet",
-                body = "The access log is empty, Traefik has not served a request since it was last rotated.",
+                headline = stringResource(R.string.logs_empty),
+                body = stringResource(R.string.logs_empty_body),
             )
 
             else -> LazyColumn(
@@ -314,9 +318,9 @@ private fun LogsListPane(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = TmSpacing.xs),
                     ) {
-                        SectionLabel("Access log", modifier = Modifier.weight(1f))
+                        SectionLabel(stringResource(R.string.logs_section), modifier = Modifier.weight(1f))
                         Text(
-                            text = "${state.visible.size} of ${state.fetched} lines",
+                            text = pluralStringResource(R.plurals.logs_lines_of, state.fetched, state.visible.size, state.fetched),
                             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                             color = palette.muted,
                         )
@@ -338,7 +342,7 @@ private fun LogsListPane(
                 if (state.visible.isEmpty()) {
                     item {
                         Text(
-                            text = "0 of the last ${state.fetched} lines match the current filters",
+                            text = pluralStringResource(R.plurals.logs_no_lines_match, state.fetched, state.fetched),
                             style = MaterialTheme.typography.bodyMedium,
                             color = palette.muted,
                             modifier = Modifier.padding(TmSpacing.lg),
@@ -359,12 +363,12 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
 
     val headline = when {
         window.serverErrors > 0 ->
-            "${window.serverErrors} server error" + if (window.serverErrors == 1) "" else "s"
+            pluralStringResource(R.plurals.logs_verdict_server_errors, window.serverErrors, window.serverErrors)
         window.clientErrors > 0 ->
-            "${window.clientErrors} client error" + if (window.clientErrors == 1) "" else "s"
-        latency.slow > 0 -> "${latency.slow} slow request" + if (latency.slow == 1) "" else "s"
-        window.parsed == 0 -> "Nothing matches"
-        else -> "All clean"
+            pluralStringResource(R.plurals.logs_verdict_client_errors, window.clientErrors, window.clientErrors)
+        latency.slow > 0 -> pluralStringResource(R.plurals.logs_verdict_slow, latency.slow, latency.slow)
+        window.parsed == 0 -> stringResource(R.string.logs_verdict_no_match)
+        else -> stringResource(R.string.logs_verdict_clean)
     }
     val accent = when (health) {
         dev.chr0nzz.traefikmanager.data.model.LogHealth.Down -> palette.red
@@ -398,7 +402,7 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
                     modifier = Modifier.padding(top = 2.dp),
                 ) {
                     window.codeRank.take(3).forEach { (code, count) ->
-                        val name = LogParser.statusName(code).lowercase().ifEmpty { "response" }
+                        val name = LogParser.statusName(code).lowercase().ifEmpty { stringResource(R.string.logs_status_fallback) }
                         VerdictItem(
                             text = "$count $code $name",
                             color = if (code >= 500) palette.red else palette.yellow,
@@ -407,21 +411,23 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
                     }
                     if (latency.slow > 0) {
                         VerdictItem(
-                            text = "${latency.slow} over 500ms",
+                            text = pluralStringResource(R.plurals.logs_slow_count, latency.slow, latency.slow),
                             color = palette.yellow,
                             onClick = { onFacet(LogFacet.Duration, "slow") },
                         )
                     }
                     if (window.retries > 0) {
-                        VerdictItem(text = "${window.retries} retries", color = palette.yellow, onClick = null)
+                        VerdictItem(text = pluralStringResource(R.plurals.logs_retries_count, window.retries, window.retries), color = palette.yellow, onClick = null)
                     }
                     val calm = buildList {
-                        if (window.serverErrors == 0) add("no server errors")
-                        if (window.clientErrors == 0 && window.serverErrors > 0) add("no client errors")
+                        if (window.serverErrors == 0) add(stringResource(R.string.logs_calm_no_server_errors))
+                        if (window.clientErrors == 0 && window.serverErrors > 0) {
+                            add(stringResource(R.string.logs_calm_no_client_errors))
+                        }
                         if (latency.slow == 0) {
                             add(
-                                latency.max?.let { "nothing slower than ${LogParser.formatMs(it)}" }
-                                    ?: "no timing recorded",
+                                latency.max?.let { stringResource(R.string.logs_calm_nothing_slower, LogParser.formatMs(it)) }
+                                    ?: stringResource(R.string.logs_calm_no_timing),
                             )
                         }
                     }
@@ -436,8 +442,8 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
             }
             Text(
                 text = window.spanMillis
-                    ?.let { "${LogParser.spanText(it)} window" }
-                    ?: "${state.fetched} lines",
+                    ?.let { stringResource(R.string.logs_window_span, LogParser.spanText(it)) }
+                    ?: pluralStringResource(R.plurals.logs_lines_count, state.fetched, state.fetched),
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = palette.muted,
             )
@@ -481,13 +487,19 @@ private fun WindowKeyRow(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            SectionLabel("Window")
-            KeyItem(Icons.AutoMirrored.Outlined.ListAlt, "last ${state.fetched} lines")
+            SectionLabel(stringResource(R.string.logs_window))
+            KeyItem(
+                Icons.AutoMirrored.Outlined.ListAlt,
+                pluralStringResource(R.plurals.logs_last_lines, state.fetched, state.fetched),
+            )
             window.spanMillis?.takeIf { it > 0 }?.let {
-                KeyItem(Icons.Outlined.Schedule, "span ${LogParser.spanText(it)}")
+                KeyItem(Icons.Outlined.Schedule, stringResource(R.string.logs_span, LogParser.spanText(it)))
             }
-            window.requestsPerMinute?.let { KeyItem(Icons.Outlined.Bolt, "$it req/min") }
-            KeyItem(Icons.AutoMirrored.Outlined.ListAlt, "${state.unparsed} unparsed")
+            window.requestsPerMinute?.let { KeyItem(Icons.Outlined.Bolt, stringResource(R.string.logs_req_per_min, it.toString())) }
+            KeyItem(
+                Icons.AutoMirrored.Outlined.ListAlt,
+                pluralStringResource(R.plurals.logs_unparsed, state.unparsed, state.unparsed),
+            )
         }
 
         if (state.facets.isNotEmpty()) {
@@ -496,7 +508,7 @@ private fun WindowKeyRow(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                SectionLabel("Filters")
+                SectionLabel(stringResource(R.string.common_filters))
                 state.facets.forEach { (facet, value) ->
                     val dead = facet in state.deadFacets
                     Row(
@@ -531,14 +543,14 @@ private fun WindowKeyRow(
                         )
                         Icon(
                             imageVector = Icons.Outlined.Close,
-                            contentDescription = "Clear ${facet.key} filter",
+                            contentDescription = stringResource(R.string.logs_clear_filter, facet.key),
                             tint = if (dead) palette.muted else palette.blue,
                             modifier = Modifier.size(11.dp),
                         )
                     }
                 }
                 Text(
-                    text = "clear",
+                    text = stringResource(R.string.logs_clear_all),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.blue,
                     modifier = Modifier
@@ -551,15 +563,15 @@ private fun WindowKeyRow(
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             state.selectionSpan?.takeIf { it > 0 }?.let {
-                KeyItem(Icons.Outlined.Schedule, "selection spans ${LogParser.spanText(it)}")
+                KeyItem(Icons.Outlined.Schedule, stringResource(R.string.logs_selection_span, LogParser.spanText(it)))
             }
             Box(modifier = Modifier.weight(1f))
             val widen = state.nextLineStep
             Text(
                 text = if (state.selected) {
-                    "${state.visible.size} of the last ${state.fetched} lines"
+                    pluralStringResource(R.plurals.logs_visible_of_last, state.fetched, state.visible.size, state.fetched)
                 } else {
-                    "sample, not all traffic"
+                    stringResource(R.string.logs_sample)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.yellow,
@@ -596,18 +608,23 @@ private fun RuntimeFooter(state: LogsUiState) {
         verticalArrangement = Arrangement.spacedBy(2.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        RuntimeChip(Icons.Outlined.DataObject, state.formatLabel, state.parsedEntries.isNotEmpty())
+        RuntimeChip(Icons.Outlined.DataObject, stringResource(state.formatLabel), state.parsedEntries.isNotEmpty())
         RuntimeChip(
             icon = Icons.AutoMirrored.Outlined.ListAlt,
-            text = "${state.parsedEntries.size} of ${state.fetched} lines parsed",
+            text = pluralStringResource(
+                R.plurals.logs_lines_parsed,
+                state.fetched,
+                state.parsedEntries.size,
+                state.fetched,
+            ),
             on = state.unparsed == 0,
         )
-        RuntimeChip(Icons.Outlined.Timer, if (state.nanoPrecision) "ns precision" else "ms precision", state.nanoPrecision)
-        RuntimeChip(Icons.Outlined.VerifiedUser, if (state.tlsFields) "tls fields" else "no tls fields", state.tlsFields)
-        RuntimeChip(Icons.Outlined.Public, if (state.geoEnabled) "geoip on" else "geoip off", state.geoEnabled)
+        RuntimeChip(Icons.Outlined.Timer, stringResource(if (state.nanoPrecision) R.string.logs_chip_ns else R.string.logs_chip_ms), state.nanoPrecision)
+        RuntimeChip(Icons.Outlined.VerifiedUser, stringResource(if (state.tlsFields) R.string.logs_chip_tls else R.string.logs_chip_no_tls), state.tlsFields)
+        RuntimeChip(Icons.Outlined.Public, stringResource(if (state.geoEnabled) R.string.logs_chip_geoip_on else R.string.logs_chip_geoip_off), state.geoEnabled)
         RuntimeChip(
             icon = Icons.Outlined.Refresh,
-            text = if (state.autoRefresh) "auto refresh on" else "auto refresh off",
+            text = stringResource(if (state.autoRefresh) R.string.logs_chip_auto_on else R.string.logs_chip_auto_off),
             on = state.autoRefresh,
         )
     }
@@ -743,16 +760,16 @@ private fun LogsSearchBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Filter logs") },
+                placeholder = { Text(stringResource(R.string.logs_filter_placeholder)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -760,7 +777,7 @@ private fun LogsSearchBar(
         },
     ) {
         Text(
-            text = "$matches matching lines",
+            text = pluralStringResource(R.plurals.logs_matching_lines, matches, matches),
             style = MaterialTheme.typography.bodyMedium,
             color = palette.muted,
             modifier = Modifier.padding(TmSpacing.lg),

@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.logs
 
+import androidx.annotation.PluralsRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,10 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 @Composable
 fun LogSignalCards(
@@ -76,7 +81,7 @@ fun LogSignalCards(
             modifier = Modifier.height(IntrinsicSize.Min),
         ) {
             DeskCard(
-                title = "Status codes",
+                title = stringResource(R.string.logs_card_status),
                 glyph = Icons.Outlined.MonitorHeart,
                 accent = palette.blue,
                 health = when {
@@ -101,16 +106,24 @@ fun LogSignalCards(
                             color = palette.yellow,
                             onClick = { onFacet(LogFacet.Status, "4xx") },
                         )
-                        else -> OkPill("all 2xx")
+                        else -> OkPill(stringResource(R.string.logs_ok_all_2xx))
                     }
                 },
                 sub = window.codeRank.firstOrNull()
                     ?.let { (code, count) ->
-                        val name = LogParser.statusName(code).lowercase().ifEmpty { "response" }
-                        val tail = if (window.codeRank.size > 1) " · +${window.codeRank.size - 1} codes" else ""
-                        "$code $name x$count$tail"
+                        val name = LogParser.statusName(code).lowercase()
+                            .ifEmpty { stringResource(R.string.logs_status_fallback) }
+                        val more = window.codeRank.size - 1
+                        listOfNotNull(
+                            "$code $name x$count",
+                            if (more > 0) pluralStringResource(R.plurals.logs_more_codes, more, more) else null,
+                        ).joinToString(UiText.SEPARATOR)
                     }
-                    ?: "${buckets.twoXx} ok · ${buckets.threeXx} redirects · clean",
+                    ?: listOf(
+                        stringResource(R.string.logs_status_ok, buckets.twoXx),
+                        pluralStringResource(R.plurals.logs_status_redirects, buckets.threeXx, buckets.threeXx),
+                        stringResource(R.string.logs_status_clean),
+                    ).joinToString(UiText.SEPARATOR),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
@@ -142,7 +155,7 @@ fun LogSignalCards(
                     }
                     if (buckets.other > 0) {
                         Counter(
-                            label = "other",
+                            label = stringResource(R.string.logs_counter_other),
                             count = buckets.other,
                             icon = Icons.AutoMirrored.Outlined.HelpOutline,
                             color = palette.muted,
@@ -155,7 +168,7 @@ fun LogSignalCards(
             }
 
             DeskCard(
-                title = "Response time",
+                title = stringResource(R.string.logs_card_latency),
                 glyph = Icons.Outlined.Timer,
                 accent = palette.teal,
                 health = when {
@@ -170,29 +183,29 @@ fun LogSignalCards(
                         latency.verySlow > 0 -> Flag(
                             icon = Icons.Outlined.HourglassBottom,
                             count = latency.verySlow,
-                            label = "over 2s",
+                            label = stringResource(R.string.logs_flag_over_2s),
                             color = palette.red,
                             onClick = { onFacet(LogFacet.Duration, "slow") },
                         )
                         latency.slow > 0 -> Flag(
                             icon = Icons.Outlined.HourglassBottom,
                             count = latency.slow,
-                            label = "over 500ms",
+                            label = stringResource(R.string.logs_flag_over_500ms),
                             color = palette.yellow,
                             onClick = { onFacet(LogFacet.Duration, "slow") },
                         )
                         window.retries > 0 -> Flag(
                             icon = Icons.Outlined.SwapHoriz,
                             count = window.retries,
-                            label = "retries",
+                            label = pluralStringResource(R.plurals.logs_flag_retries, window.retries),
                             color = palette.yellow,
                             onClick = null,
                         )
-                        else -> OkPill("all under 100ms")
+                        else -> OkPill(stringResource(R.string.logs_ok_all_fast))
                     }
                 },
                 sub = if (latency.timed == 0) {
-                    if (latency.held > 0) "nothing here is a completed response" else "no duration in this format"
+                    stringResource(if (latency.held > 0) R.string.logs_latency_none_completed else R.string.logs_latency_no_duration)
                 } else {
                     buildString {
                         append("p50 ${LogParser.formatMs(latency.p50)}")
@@ -206,7 +219,7 @@ fun LogSignalCards(
                     .fillMaxHeight(),
                 footer = {
                     Counter(
-                        label = "under 100ms",
+                        label = stringResource(R.string.logs_counter_fast),
                         count = latency.fast,
                         icon = Icons.Outlined.Bolt,
                         color = palette.muted,
@@ -220,7 +233,7 @@ fun LogSignalCards(
                         active = facets[LogFacet.Duration] == "med",
                     ) { onFacet(LogFacet.Duration, "med") }
                     Counter(
-                        label = "over 500ms",
+                        label = stringResource(R.string.logs_flag_over_500ms),
                         count = latency.slow,
                         icon = Icons.Outlined.HourglassBottom,
                         color = if (latency.slow > 0) palette.red else palette.muted,
@@ -228,7 +241,7 @@ fun LogSignalCards(
                     ) { onFacet(LogFacet.Duration, "slow") }
                     if (latency.held > 0) {
                         Counter(
-                            label = if (latency.held == 1) "upgrade" else "upgrades",
+                            label = pluralStringResource(R.plurals.logs_counter_upgrades, latency.held),
                             count = latency.held,
                             icon = Icons.Outlined.SyncAlt,
                             color = palette.muted,
@@ -247,7 +260,7 @@ fun LogSignalCards(
         ) {
             val writes = window.methods.filter { it.key in WRITE_METHODS }
             DeskCard(
-                title = "Methods",
+                title = stringResource(R.string.logs_card_methods),
                 glyph = Icons.Outlined.SwapHoriz,
                 accent = palette.orange,
                 hero = window.methods.size.toString(),
@@ -257,28 +270,28 @@ fun LogSignalCards(
                         Flag(
                             icon = Icons.Outlined.SwapHoriz,
                             count = writes.sumOf { it.count },
-                            label = "writes",
+                            label = stringResource(R.string.logs_flag_writes),
                             color = if (risky) palette.yellow else palette.muted,
                             onClick = { onFacet(LogFacet.Method, writes.first().key) },
                         )
                     } else {
-                        OkPill("reads only")
+                        OkPill(stringResource(R.string.logs_ok_reads_only))
                     }
                 },
                 sub = window.methods.maxByOrNull { it.count }?.let { top ->
                     val pct = top.count * 100 / maxOf(1, window.parsed)
                     val risky = window.methods.any { it.key == "PUT" || it.key == "DELETE" }
-                    "${top.key} $pct%, ${if (risky) "PUT or DELETE present" else "no PUT or DELETE"}"
-                } ?: "no method recorded",
+                    stringResource(if (risky) R.string.logs_methods_risky else R.string.logs_methods_safe, top.key, pct)
+                } ?: stringResource(R.string.logs_methods_none),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
             ) {
-                RankedRows(window.methods, LogFacet.Method, facets, onFacet, limit = 3, noun = "methods")
+                RankedRows(window.methods, LogFacet.Method, facets, onFacet, limit = 3, more = R.plurals.logs_more_methods)
             }
 
             DeskCard(
-                title = "Domains",
+                title = stringResource(R.string.logs_card_domains),
                 glyph = Icons.Outlined.Language,
                 accent = palette.purple,
                 hero = if (window.domains.isEmpty()) "-" else window.domains.size.toString(),
@@ -288,27 +301,27 @@ fun LogSignalCards(
                         Flag(
                             icon = Icons.Outlined.Warning,
                             count = failing,
-                            label = "failing",
+                            label = stringResource(R.string.logs_flag_failing),
                             color = palette.yellow,
                             onClick = { onFacet(LogFacet.Status, "errors") },
                         )
                     } else if (window.domains.isNotEmpty()) {
-                        OkPill("all served")
+                        OkPill(stringResource(R.string.logs_ok_all_served))
                     }
                 },
                 sub = window.domains.firstOrNull()
-                    ?.let { "${it.key} ${LogParser.formatCount(it.count)} requests" }
-                    ?: "the access log has no Host field",
+                    ?.let { pluralStringResource(R.plurals.logs_top_requests, it.count, it.key, LogParser.formatCount(it.count)) }
+                    ?: stringResource(R.string.logs_domains_none),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
             ) {
-                RankedRows(window.domains, LogFacet.Domain, facets, onFacet, limit = 3, noun = "domains")
+                RankedRows(window.domains, LogFacet.Domain, facets, onFacet, limit = 3, more = R.plurals.logs_more_domains)
             }
         }
 
         DeskCard(
-            title = "Paths",
+            title = stringResource(R.string.logs_card_paths),
             glyph = Icons.Outlined.Route,
             accent = palette.teal,
             hero = window.paths.size.toString(),
@@ -318,26 +331,26 @@ fun LogSignalCards(
                     Flag(
                         icon = Icons.Outlined.Warning,
                         count = failing,
-                        label = "failing",
+                        label = stringResource(R.string.logs_flag_failing),
                         color = palette.yellow,
                         onClick = { onFacet(LogFacet.Status, "errors") },
                     )
                 } else if (window.paths.isNotEmpty()) {
-                    OkPill("all served")
+                    OkPill(stringResource(R.string.logs_ok_all_served))
                 }
             },
             sub = window.paths.firstOrNull()
                 ?.let { top ->
                     val extra = window.paths.count { it.errors > 0 } - 1
-                    buildString {
-                        append("${top.key} ${LogParser.formatCount(top.count)} requests")
-                        top.worstCode?.let { append(", ${top.worstCount} x $it") }
-                        if (extra > 0) append(", +$extra more failing")
-                    }
+                    listOfNotNull(
+                        pluralStringResource(R.plurals.logs_top_requests, top.count, top.key, LogParser.formatCount(top.count)),
+                        top.worstCode?.let { "${top.worstCount} x $it" },
+                        if (extra > 0) stringResource(R.string.logs_more_failing, extra) else null,
+                    ).joinToString(", ")
                 }
-                ?: "no path recorded",
+                ?: stringResource(R.string.logs_paths_none),
         ) {
-            RankedRows(window.paths, LogFacet.Path, facets, onFacet, limit = 4, noun = "paths", prefix = "~")
+            RankedRows(window.paths, LogFacet.Path, facets, onFacet, limit = 4, more = R.plurals.logs_more_paths, prefix = "~")
         }
 
         Row(
@@ -345,7 +358,7 @@ fun LogSignalCards(
             modifier = Modifier.height(IntrinsicSize.Min),
         ) {
             DeskCard(
-                title = "Clients",
+                title = stringResource(R.string.logs_card_clients),
                 glyph = Icons.Outlined.People,
                 accent = palette.blue,
                 hero = window.clients.size.toString(),
@@ -355,22 +368,22 @@ fun LogSignalCards(
                         Flag(
                             icon = Icons.Outlined.Warning,
                             count = failing,
-                            label = "failing",
+                            label = stringResource(R.string.logs_flag_failing),
                             color = palette.yellow,
                             onClick = { onFacet(LogFacet.Status, "errors") },
                         )
                     } else if (window.clients.isNotEmpty()) {
-                        OkPill("all served")
+                        OkPill(stringResource(R.string.logs_ok_all_served))
                     }
                 },
                 sub = window.clients.firstOrNull()
-                    ?.let { "${it.key} ${LogParser.formatCount(it.count)} requests" }
-                    ?: "no client recorded",
+                    ?.let { pluralStringResource(R.plurals.logs_top_requests, it.count, it.key, LogParser.formatCount(it.count)) }
+                    ?: stringResource(R.string.logs_clients_none),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
             ) {
-                RankedRows(window.clients, LogFacet.Ip, facets, onFacet, limit = 3, noun = "clients")
+                RankedRows(window.clients, LogFacet.Ip, facets, onFacet, limit = 3, more = R.plurals.logs_more_clients)
                 val byClass = remember(window.clients) {
                     window.clients
                         .groupBy { LogParser.ipClass(it.key) }
@@ -398,7 +411,7 @@ fun LogSignalCards(
             }
 
             DeskCard(
-                title = "Services",
+                title = stringResource(R.string.common_label_services),
                 glyph = Icons.Outlined.Dns,
                 accent = palette.green,
                 hero = if (window.services.isEmpty()) "-" else window.services.size.toString(),
@@ -408,17 +421,24 @@ fun LogSignalCards(
                         Flag(
                             icon = Icons.Outlined.Warning,
                             count = failing,
-                            label = "failing",
+                            label = stringResource(R.string.logs_flag_failing),
                             color = palette.yellow,
                             onClick = { onFacet(LogFacet.Status, "errors") },
                         )
                     } else if (window.services.isNotEmpty()) {
-                        OkPill("all healthy")
+                        OkPill(stringResource(R.string.logs_ok_all_healthy))
                     }
                 },
                 sub = window.services.firstOrNull()
-                    ?.let { "${LogParser.shortName(it.key)} ${LogParser.formatCount(it.count)} requests" }
-                    ?: "this format names no service",
+                    ?.let {
+                        pluralStringResource(
+                            R.plurals.logs_top_requests,
+                            it.count,
+                            LogParser.shortName(it.key),
+                            LogParser.formatCount(it.count),
+                        )
+                    }
+                    ?: stringResource(R.string.logs_services_none),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
@@ -443,7 +463,7 @@ fun LogSignalCards(
                     facets = facets,
                     onFacet = onFacet,
                     limit = 3,
-                    noun = "services",
+                    more = R.plurals.logs_more_services,
                     label = { LogParser.shortName(it.key) },
                 )
             }
@@ -459,13 +479,18 @@ fun LogSignalCards(
                         modifier = Modifier.size(14.dp),
                     )
                     SectionLabel(
-                        text = "Where it fails",
+                        text = stringResource(R.string.logs_failures_title),
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = TmSpacing.xs),
                     )
                     Text(
-                        text = "${window.clientErrors + window.serverErrors} of ${window.parsed} requests",
+                        text = pluralStringResource(
+                            R.plurals.logs_requests_of,
+                            window.parsed,
+                            window.clientErrors + window.serverErrors,
+                            window.parsed,
+                        ),
                         style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                         color = palette.muted,
                     )
@@ -504,8 +529,13 @@ fun LogSignalCards(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = "${LogParser.statusName(failure.status).ifEmpty { "failed" }} on " +
-                                    "${failure.path}, ${failure.share}% of that path",
+                                text = stringResource(
+                                    R.string.logs_failure_line,
+                                    LogParser.statusName(failure.status)
+                                        .ifEmpty { stringResource(R.string.logs_failure_fallback) },
+                                    failure.path,
+                                    failure.share.toString(),
+                                ),
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = palette.muted,
                                 maxLines = 1,
@@ -753,7 +783,7 @@ private fun RankedRows(
     facets: Map<LogFacet, String>,
     onFacet: (LogFacet, String) -> Unit,
     limit: Int,
-    noun: String,
+    @PluralsRes more: Int,
     prefix: String = "",
     label: (RankedGroup) -> String = { it.key },
 ) {
@@ -806,7 +836,7 @@ private fun RankedRows(
         if (groups.size > limit) {
             val remaining = groups.drop(limit).sumOf { it.count }
             Text(
-                text = "+${LogParser.formatCount(remaining)} requests across ${groups.size - limit} more $noun",
+                text = pluralStringResource(more, groups.size - limit, LogParser.formatCount(remaining), groups.size - limit),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 modifier = Modifier.padding(top = 2.dp, start = 3.dp),
@@ -815,11 +845,12 @@ private fun RankedRows(
     }
 }
 
+@Composable
 private fun ipClassLabel(kind: String): String = when (kind) {
-    "public" -> "Public"
-    "private" -> "Private"
+    "public" -> stringResource(R.string.logs_ip_public)
+    "private" -> stringResource(R.string.logs_ip_private)
     "cgnat" -> "CGNAT"
-    "loopback" -> "Loopback"
-    "link-local" -> "Link-local"
-    else -> "Unknown"
+    "loopback" -> stringResource(R.string.logs_ip_loopback)
+    "link-local" -> stringResource(R.string.logs_ip_link_local)
+    else -> stringResource(R.string.logs_ip_unknown)
 }

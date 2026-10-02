@@ -155,6 +155,8 @@ Rules for `strings.xml`:
 
 `HardcodedTextTest` counts the hardcoded text left in each folder against `app/src/test/resources/i18n-baseline.txt`. It fails when a count goes up. When a count goes down, lower the number in that file in the same change.
 
+Text that must stay as it is, such as a key the server sends, is listed in `app/src/test/resources/i18n-allowed.txt` as `path|text`.
+
 ---
 
 ## Branch guide

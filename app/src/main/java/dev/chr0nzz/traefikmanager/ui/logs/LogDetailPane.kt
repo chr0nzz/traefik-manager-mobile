@@ -44,6 +44,8 @@ import dev.chr0nzz.traefikmanager.ui.components.TooltipIconButton
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -58,8 +60,8 @@ fun LogDetailPane(
     if (line == null) {
         MessageState(
             icon = Icons.Outlined.TouchApp,
-            headline = "Select a request",
-            body = "Pick a line from the access log to see its full record.",
+            headline = stringResource(R.string.logs_select),
+            body = stringResource(R.string.logs_select_body),
             modifier = modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -95,7 +97,7 @@ fun LogDetailPane(
             ) {
                 if (showBack) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to logs")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.logs_back))
                     }
                 }
                 if (entry != null) {
@@ -119,7 +121,7 @@ fun LogDetailPane(
                     )
                 } else {
                     Text(
-                        text = "Unparsed line",
+                        text = stringResource(R.string.logs_unparsed_line),
                         style = MaterialTheme.typography.titleMedium,
                         color = palette.muted,
                         modifier = Modifier
@@ -131,41 +133,41 @@ fun LogDetailPane(
 
             if (entry != null) {
                 TmCard {
-                    DetailRow("Path", entry.path.ifEmpty { "-" }, mono = true)
+                    DetailRow(stringResource(R.string.common_label_path), entry.path.ifEmpty { "-" }, mono = true)
                     DetailRow("IP", entry.ip.ifEmpty { "-" }, mono = true)
-                    if (entry.date.isNotEmpty()) DetailRow("Date", entry.date, mono = true)
+                    if (entry.date.isNotEmpty()) DetailRow(stringResource(R.string.common_label_date), entry.date, mono = true)
                     if (country != null) {
-                        DetailRow("Country", "${Countries.flag(country)} ${Countries.name(country)}")
+                        DetailRow(stringResource(R.string.common_label_country), "${Countries.flag(country)} ${Countries.name(country)}")
                     }
-                    if (entry.domain.isNotEmpty()) DetailRow("Domain", entry.domain, mono = true)
-                    if (entry.scheme.isNotEmpty()) DetailRow("Scheme", entry.scheme, mono = true)
-                    if (entry.entryPoint.isNotEmpty()) DetailRow("Entry point", entry.entryPoint, mono = true)
-                    if (entry.router.isNotEmpty()) DetailRow("Router", entry.router, mono = true)
-                    if (entry.service.isNotEmpty()) DetailRow("Service", entry.service, mono = true)
-                    if (entry.serviceUrl.isNotEmpty()) DetailRow("Service URL", entry.serviceUrl, mono = true)
-                    if (entry.size.isNotEmpty() && entry.size != "-") DetailRow("Size", entry.size, mono = true)
+                    if (entry.domain.isNotEmpty()) DetailRow(stringResource(R.string.common_label_domain), entry.domain, mono = true)
+                    if (entry.scheme.isNotEmpty()) DetailRow(stringResource(R.string.logs_scheme), entry.scheme, mono = true)
+                    if (entry.entryPoint.isNotEmpty()) DetailRow(stringResource(R.string.common_label_entry_point), entry.entryPoint, mono = true)
+                    if (entry.router.isNotEmpty()) DetailRow(stringResource(R.string.common_label_router), entry.router, mono = true)
+                    if (entry.service.isNotEmpty()) DetailRow(stringResource(R.string.common_label_service), entry.service, mono = true)
+                    if (entry.serviceUrl.isNotEmpty()) DetailRow(stringResource(R.string.logs_service_url), entry.serviceUrl, mono = true)
+                    if (entry.size.isNotEmpty() && entry.size != "-") DetailRow(stringResource(R.string.logs_size), entry.size, mono = true)
                     DetailRow(
-                        label = "Duration",
+                        label = stringResource(R.string.common_label_duration),
                         value = entry.duration.ifEmpty { LogParser.formatMs(entry.durMs) },
                         mono = true,
                     )
                     if (entry.origin != null) {
                         DetailRow(
-                            label = "Origin status",
+                            label = stringResource(R.string.logs_origin_status),
                             value = if (entry.origin == 0) {
-                                "0 tunnel (Traefik answered ${entry.status} itself)"
+                                stringResource(R.string.logs_origin_tunnel, entry.status)
                             } else {
                                 entry.origin.toString()
                             },
                             mono = true,
                         )
                     }
-                    if (entry.retries > 0) DetailRow("Retries", entry.retries.toString(), mono = true)
+                    if (entry.retries > 0) DetailRow(stringResource(R.string.logs_retries_label), entry.retries.toString(), mono = true)
                     DetailRow("TLS", entry.tls.ifEmpty { "-" }, mono = true, last = true)
                 }
             }
 
-            SectionLabel("Raw line")
+            SectionLabel(stringResource(R.string.logs_raw_line))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -190,7 +192,7 @@ fun LogDetailPane(
                 .padding(bottom = TmSpacing.lg),
         ) {
             TooltipIconButton(
-                label = "Copy raw line",
+                label = stringResource(R.string.logs_copy_raw),
                 icon = Icons.Outlined.ContentCopy,
                 onClick = { clipboard.setText(AnnotatedString(line.raw)) },
             )

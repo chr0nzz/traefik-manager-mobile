@@ -603,4 +603,495 @@
     <string name="backups_git_pushed">Pushed to Git</string>
     <string name="backups_git_error_restore">Could not restore that commit</string>
     <string name="backups_git_error_diff">Could not read that commit</string>
+
+    <string name="logs_select">Select a request</string>
+    <string name="logs_select_body">Pick a line from the access log to see its full record.</string>
+    <string name="logs_back">Back to logs</string>
+    <string name="logs_unparsed_line">Unparsed line</string>
+    <!-- Label for the URL scheme, http or https -->
+    <string name="logs_scheme">Scheme</string>
+    <string name="logs_service_url">Service URL</string>
+    <!-- Label for the size of a response -->
+    <string name="logs_size">Size</string>
+    <!-- Label for the HTTP status the backend returned -->
+    <string name="logs_origin_status">Origin status</string>
+    <!-- %1$d is an HTTP status code. 0 means the backend sent no status -->
+    <string name="logs_origin_tunnel">0 tunnel (Traefik answered %1$d itself)</string>
+    <string name="logs_retries_label">Retries</string>
+    <string name="logs_raw_line">Raw line</string>
+    <string name="logs_copy_raw">Copy raw line</string>
+    <string name="logs_search">Search logs</string>
+    <string name="logs_auto_refresh_stop">Stop auto refresh</string>
+    <string name="logs_auto_refresh_start">Start auto refresh</string>
+    <string name="logs_refresh">Refresh logs</string>
+    <string name="logs_close_record">Close the log record</string>
+    <string name="logs_loading">Loading logs</string>
+    <string name="logs_error_load">Could not load the access log</string>
+    <string name="logs_unavailable">Access log not available</string>
+    <string name="logs_empty">No traffic yet</string>
+    <string name="logs_empty_body">The access log is empty, Traefik has not served a request since it was last rotated.</string>
+    <string name="logs_section">Access log</string>
+    <!-- How many log lines are shown out of how many were read -->
+    <plurals name="logs_lines_of">
+        <item quantity="one">%1$d of %2$d line</item>
+        <item quantity="other">%1$d of %2$d lines</item>
+    </plurals>
+    <plurals name="logs_no_lines_match">
+        <item quantity="one">0 of the last %d line match the current filters</item>
+        <item quantity="other">0 of the last %d lines match the current filters</item>
+    </plurals>
+    <plurals name="logs_verdict_server_errors">
+        <item quantity="one">%d server error</item>
+        <item quantity="other">%d server errors</item>
+    </plurals>
+    <plurals name="logs_verdict_client_errors">
+        <item quantity="one">%d client error</item>
+        <item quantity="other">%d client errors</item>
+    </plurals>
+    <plurals name="logs_verdict_slow">
+        <item quantity="one">%d slow request</item>
+        <item quantity="other">%d slow requests</item>
+    </plurals>
+    <string name="logs_verdict_no_match">Nothing matches</string>
+    <!-- Headline when the access log shows no errors and no slow requests -->
+    <string name="logs_verdict_clean">All clean</string>
+    <!-- Lowercase word used in place of an HTTP status name, as in: 12 599 response -->
+    <string name="logs_status_fallback">response</string>
+    <!-- The number counts requests that took over 500 milliseconds -->
+    <plurals name="logs_slow_count">
+        <item quantity="one">%d over 500ms</item>
+        <item quantity="other">%d over 500ms</item>
+    </plurals>
+    <plurals name="logs_retries_count">
+        <item quantity="one">%d retry</item>
+        <item quantity="other">%d retries</item>
+    </plurals>
+    <!-- Lowercase, one item in a comma-separated list -->
+    <string name="logs_calm_no_server_errors">no server errors</string>
+    <!-- Lowercase, one item in a comma-separated list -->
+    <string name="logs_calm_no_client_errors">no client errors</string>
+    <!-- Lowercase, one item in a comma-separated list. %1$s is a duration such as 240ms -->
+    <string name="logs_calm_nothing_slower">nothing slower than %1$s</string>
+    <!-- Lowercase, one item in a comma-separated list -->
+    <string name="logs_calm_no_timing">no timing recorded</string>
+    <!-- %1$s is a length of time such as 2h 10m. Window is the stretch of time the log lines cover -->
+    <string name="logs_window_span">%1$s window</string>
+    <plurals name="logs_lines_count">
+        <item quantity="one">%d line</item>
+        <item quantity="other">%d lines</item>
+    </plurals>
+    <!-- Section heading: the stretch of time and lines being looked at -->
+    <string name="logs_window">Window</string>
+    <!-- Lowercase -->
+    <plurals name="logs_last_lines">
+        <item quantity="one">last %d line</item>
+        <item quantity="other">last %d lines</item>
+    </plurals>
+    <!-- Lowercase. %1$s is the length of time the log lines cover -->
+    <string name="logs_span">span %1$s</string>
+    <!-- Requests per minute, kept short -->
+    <string name="logs_req_per_min">%1$s req/min</string>
+    <!-- Lowercase: log lines the app could not read -->
+    <plurals name="logs_unparsed">
+        <item quantity="one">%d unparsed</item>
+        <item quantity="other">%d unparsed</item>
+    </plurals>
+    <!-- %1$s is the name of a filter such as status or path -->
+    <string name="logs_clear_filter">Clear %1$s filter</string>
+    <!-- Lowercase link that removes every filter -->
+    <string name="logs_clear_all">clear</string>
+    <!-- Lowercase. %1$s is a length of time -->
+    <string name="logs_selection_span">selection spans %1$s</string>
+    <plurals name="logs_visible_of_last">
+        <item quantity="one">%1$d of the last %2$d line</item>
+        <item quantity="other">%1$d of the last %2$d lines</item>
+    </plurals>
+    <!-- Lowercase warning: the numbers come from the most recent lines only -->
+    <string name="logs_sample">sample, not all traffic</string>
+    <!-- Lowercase status chip -->
+    <plurals name="logs_lines_parsed">
+        <item quantity="one">%1$d of %2$d line parsed</item>
+        <item quantity="other">%1$d of %2$d lines parsed</item>
+    </plurals>
+    <!-- Lowercase status chip: durations are recorded in nanoseconds -->
+    <string name="logs_chip_ns">ns precision</string>
+    <!-- Lowercase status chip: durations are recorded in milliseconds -->
+    <string name="logs_chip_ms">ms precision</string>
+    <!-- Lowercase status chip: the log records TLS details -->
+    <string name="logs_chip_tls">tls fields</string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_no_tls">no tls fields</string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_geoip_on">geoip on</string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_geoip_off">geoip off</string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_auto_on">auto refresh on</string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_auto_off">auto refresh off</string>
+    <string name="logs_filter_placeholder">Filter logs</string>
+    <plurals name="logs_matching_lines">
+        <item quantity="one">%d matching line</item>
+        <item quantity="other">%d matching lines</item>
+    </plurals>
+    <!-- Lowercase status chip -->
+    <string name="logs_format_none">no parsed lines</string>
+    <!-- Lowercase status chip -->
+    <string name="logs_format_json">json access log</string>
+    <!-- Lowercase status chip. CLF is the Common Log Format -->
+    <string name="logs_format_clf">clf access log</string>
+    <!-- Lowercase status chip. CLF is the Common Log Format -->
+    <string name="logs_format_generic">generic clf access log</string>
+    <string name="logs_card_status">Status codes</string>
+    <!-- Lowercase: every response had a 2xx status code -->
+    <string name="logs_ok_all_2xx">all 2xx</string>
+    <!-- How many other HTTP status codes were seen -->
+    <plurals name="logs_more_codes">
+        <item quantity="one">+%d code</item>
+        <item quantity="other">+%d codes</item>
+    </plurals>
+    <!-- Lowercase: how many requests succeeded -->
+    <string name="logs_status_ok">%1$d ok</string>
+    <plurals name="logs_status_redirects">
+        <item quantity="one">%d redirect</item>
+        <item quantity="other">%d redirects</item>
+    </plurals>
+    <!-- Lowercase: no errors -->
+    <string name="logs_status_clean">clean</string>
+    <!-- Lowercase: status codes outside the usual ranges -->
+    <string name="logs_counter_other">other</string>
+    <string name="logs_card_latency">Response time</string>
+    <!-- Follows a number of requests -->
+    <string name="logs_flag_over_2s">over 2s</string>
+    <!-- Follows a number of requests -->
+    <string name="logs_flag_over_500ms">over 500ms</string>
+    <!-- Follows a number -->
+    <plurals name="logs_flag_retries">
+        <item quantity="one">retry</item>
+        <item quantity="other">retries</item>
+    </plurals>
+    <!-- Lowercase: every request took under 100 milliseconds -->
+    <string name="logs_ok_all_fast">all under 100ms</string>
+    <!-- Lowercase -->
+    <string name="logs_latency_none_completed">nothing here is a completed response</string>
+    <!-- Lowercase: this log format does not record how long a request took -->
+    <string name="logs_latency_no_duration">no duration in this format</string>
+    <!-- Follows a number of requests -->
+    <string name="logs_counter_fast">under 100ms</string>
+    <!-- Follows a number. An upgrade is a connection upgrade such as WebSocket -->
+    <plurals name="logs_counter_upgrades">
+        <item quantity="one">upgrade</item>
+        <item quantity="other">upgrades</item>
+    </plurals>
+    <!-- Heading: HTTP methods -->
+    <string name="logs_card_methods">Methods</string>
+    <!-- Follows a number: requests that change data, such as POST or DELETE -->
+    <string name="logs_flag_writes">writes</string>
+    <!-- Lowercase: no request changed data -->
+    <string name="logs_ok_reads_only">reads only</string>
+    <!-- %1$s is an HTTP method such as GET, %2$d is its share of requests -->
+    <string name="logs_methods_risky">%1$s %2$d%%, PUT or DELETE present</string>
+    <!-- %1$s is an HTTP method such as GET, %2$d is its share of requests -->
+    <string name="logs_methods_safe">%1$s %2$d%%, no PUT or DELETE</string>
+    <!-- Lowercase -->
+    <string name="logs_methods_none">no method recorded</string>
+    <string name="logs_card_domains">Domains</string>
+    <!-- Follows a number of domains, paths, clients or services -->
+    <string name="logs_flag_failing">failing</string>
+    <!-- Lowercase: every request got an answer -->
+    <string name="logs_ok_all_served">all served</string>
+    <!-- %1$s is a name such as a domain or a path, %2$s is a number -->
+    <plurals name="logs_top_requests">
+        <item quantity="one">%1$s %2$s request</item>
+        <item quantity="other">%1$s %2$s requests</item>
+    </plurals>
+    <!-- Lowercase -->
+    <string name="logs_domains_none">the access log has no Host field</string>
+    <string name="logs_card_paths">Paths</string>
+    <!-- Lowercase: how many other paths have errors -->
+    <string name="logs_more_failing">+%1$d more failing</string>
+    <!-- Lowercase -->
+    <string name="logs_paths_none">no path recorded</string>
+    <string name="logs_card_clients">Clients</string>
+    <!-- Lowercase -->
+    <string name="logs_clients_none">no client recorded</string>
+    <!-- Lowercase -->
+    <string name="logs_ok_all_healthy">all healthy</string>
+    <!-- Lowercase: this log format does not record the service -->
+    <string name="logs_services_none">this format names no service</string>
+    <string name="logs_failures_title">Where it fails</string>
+    <plurals name="logs_requests_of">
+        <item quantity="one">%1$d of %2$d request</item>
+        <item quantity="other">%1$d of %2$d requests</item>
+    </plurals>
+    <!-- %1$s is an HTTP status name such as Not Found, %2$s is a URL path, %3$s is a percentage -->
+    <string name="logs_failure_line">%1$s on %2$s, %3$s%% of that path</string>
+    <!-- Lowercase word used when an HTTP status has no name -->
+    <string name="logs_failure_fallback">failed</string>
+    <!-- %1$s is a number of requests -->
+    <plurals name="logs_more_methods">
+        <item quantity="one">+%1$s requests across %2$d more method</item>
+        <item quantity="other">+%1$s requests across %2$d more methods</item>
+    </plurals>
+    <plurals name="logs_more_domains">
+        <item quantity="one">+%1$s requests across %2$d more domain</item>
+        <item quantity="other">+%1$s requests across %2$d more domains</item>
+    </plurals>
+    <plurals name="logs_more_paths">
+        <item quantity="one">+%1$s requests across %2$d more path</item>
+        <item quantity="other">+%1$s requests across %2$d more paths</item>
+    </plurals>
+    <plurals name="logs_more_clients">
+        <item quantity="one">+%1$s requests across %2$d more client</item>
+        <item quantity="other">+%1$s requests across %2$d more clients</item>
+    </plurals>
+    <plurals name="logs_more_services">
+        <item quantity="one">+%1$s requests across %2$d more service</item>
+        <item quantity="other">+%1$s requests across %2$d more services</item>
+    </plurals>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_public">Public</string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_private">Private</string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_loopback">Loopback</string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_link_local">Link-local</string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_unknown">Unknown</string>
+
+    <string name="crowdsec_add_decision">Add decision</string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_unban_named">Unban %1$s</string>
+    <string name="crowdsec_add_value">IP or range</string>
+    <string name="crowdsec_add_value_help">Single IP or CIDR range.</string>
+    <!-- Section heading: the kind of decision, such as ban or captcha -->
+    <string name="crowdsec_add_type">Type</string>
+    <string name="crowdsec_add_reason">Reason (optional)</string>
+    <string name="crowdsec_add_reason_help">Stored as the decision scenario.</string>
+    <!-- Button label while a decision is being saved -->
+    <string name="crowdsec_adding">Adding</string>
+    <!-- Section heading, %1$d is how many there are -->
+    <string name="crowdsec_own_decisions">Your decisions %1$d</string>
+    <plurals name="common_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="common_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="common_years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <string name="crowdsec_remove_title">Remove decision</string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_remove_body">Unban %1$s? CrowdSec will stop blocking it immediately.</string>
+    <!-- Button that removes a ban -->
+    <string name="crowdsec_unban">Unban</string>
+    <string name="crowdsec_search">Search CrowdSec</string>
+    <string name="crowdsec_refresh">Refresh CrowdSec</string>
+    <string name="crowdsec_loading">Loading CrowdSec</string>
+    <string name="crowdsec_unconfigured">CrowdSec is not configured</string>
+    <!-- Keep CROWDSEC_LAPI_URL exactly as it is -->
+    <string name="crowdsec_unconfigured_body">Set CROWDSEC_LAPI_URL and a bouncer API key on this server, then recreate the container, to see decisions and alerts.</string>
+    <!-- LAPI is the CrowdSec Local API -->
+    <string name="crowdsec_error_load">Could not reach the CrowdSec LAPI</string>
+    <string name="crowdsec_unavailable">CrowdSec LAPI unavailable</string>
+    <string name="crowdsec_card_sources">Attacking sources</string>
+    <!-- Lowercase. Keep /v1/alerts exactly as it is -->
+    <string name="crowdsec_sources_blind">sources are only listed on /v1/alerts</string>
+    <!-- Lowercase. %1$s is an IP address, %2$s is a number -->
+    <plurals name="crowdsec_worst_events">
+        <item quantity="one">worst %1$s %2$s event</item>
+        <item quantity="other">worst %1$s %2$s events</item>
+    </plurals>
+    <!-- Lowercase -->
+    <string name="crowdsec_no_sources">no sources</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_chip_ban_unknown">ban state unknown</string>
+    <!-- Lowercase. The number counts attacking sources that are not banned -->
+    <string name="crowdsec_chip_loose">%1$s loose</string>
+    <!-- Lowercase. The number counts attacking sources that are banned -->
+    <string name="crowdsec_chip_banned">%1$s banned</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_chip_all_banned">every source banned</string>
+    <!-- Lowercase. The number counts sources that attacked more than once -->
+    <string name="crowdsec_chip_repeat">%1$s repeat</string>
+    <!-- Lowercase. The number counts sources that attacked once -->
+    <string name="crowdsec_chip_one_shot">%1$s one-shot</string>
+    <string name="crowdsec_card_networks">Networks</string>
+    <!-- Keep alert.source exactly as it is. AS is an autonomous system, a network operator -->
+    <string name="crowdsec_networks_blind">AS names ride on alert.source</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_networks_empty">this agent reports ip only</string>
+    <!-- Lowercase. %1$s is a network name, %2$s is a number -->
+    <plurals name="crowdsec_worst_alerts">
+        <item quantity="one">worst %1$s %2$s alert</item>
+        <item quantity="other">worst %1$s %2$s alerts</item>
+    </plurals>
+    <!-- CrowdSec scenarios, the attack patterns it detects -->
+    <string name="crowdsec_card_scenarios">Scenarios</string>
+    <!-- Lowercase. Keep /v1/alerts exactly as it is -->
+    <string name="crowdsec_scenarios_blind">scenarios come from /v1/alerts</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_scenarios_empty">nothing to rank in the retained window</string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_alerts">alerts</string>
+    <!-- Lowercase. %1$s is the name of the worst offender -->
+    <string name="crowdsec_worst">worst %1$s</string>
+    <!-- Lowercase. %1$s is a number -->
+    <plurals name="crowdsec_events_rolled_up">
+        <item quantity="one">%1$s event rolled up</item>
+        <item quantity="other">%1$s events rolled up</item>
+    </plurals>
+    <string name="crowdsec_card_paths">Targeted paths</string>
+    <string name="crowdsec_card_accounts">Targeted accounts</string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_paths_blind">paths live in alert.meta[]</string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_accounts_blind">accounts live in alert.meta[]</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_targets_empty">no meta reported</string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_paths">paths</string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_accounts">accounts</string>
+    <!-- Lowercase. %1$s is the path, account or route that was attacked most -->
+    <string name="crowdsec_most_wanted">most wanted %1$s</string>
+    <string name="crowdsec_card_routes">Targeted routes</string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_routes_blind">routers live in alert.meta[]</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_routes_empty_none">nothing was aimed at</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_routes_empty_match">no router matches</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_routes_empty_evidence">no router in the evidence</string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_routers">routers</string>
+    <!-- Heading: the tools and user agents attackers used -->
+    <string name="crowdsec_card_tooling">Tooling</string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_tooling_blind">user agents live in alert.meta[]</string>
+    <!-- Lowercase -->
+    <string name="crowdsec_tooling_empty">no HTTP scenario fired here</string>
+    <!-- %1$s is a number -->
+    <plurals name="crowdsec_tools">
+        <item quantity="one">%1$s tool</item>
+        <item quantity="other">%1$s tools</item>
+    </plurals>
+    <string name="crowdsec_card_bans">Bans in force</string>
+    <!-- Stale means the numbers are old -->
+    <string name="crowdsec_card_bans_stale">Bans in force (stale)</string>
+    <!-- Lowercase. Keep /v1/decisions exactly as it is -->
+    <string name="crowdsec_bans_blind">nothing was read from /v1/decisions</string>
+    <!-- Lowercase. %1$s is a number of bans -->
+    <string name="crowdsec_bans_own">%1$s from this host</string>
+    <!-- Lowercase. The number counts bans that come from a subscribed blocklist -->
+    <string name="crowdsec_bans_subscribed">%1$s subscribed</string>
+    <!-- Legend for a grid of small squares: how many bans one square stands for -->
+    <string name="crowdsec_cell_scale">1 cell = %1$s</string>
+    <!-- Tab label. %1$s is a number of alerts, or a question mark -->
+    <string name="crowdsec_tab_evidence">Evidence %1$s</string>
+    <!-- Tab label. %1$s is a number of bans, or a question mark -->
+    <string name="crowdsec_tab_bans">Bans %1$s</string>
+    <string name="crowdsec_alerts_no_match">No alerts match</string>
+    <string name="crowdsec_alerts_unavailable">Alerts unavailable</string>
+    <string name="crowdsec_decisions_none">No active decisions</string>
+    <string name="crowdsec_decisions_unavailable">Decisions unavailable</string>
+    <!-- Both values are numbers -->
+    <plurals name="crowdsec_more_networks">
+        <item quantity="one">+%1$s alerts across %2$s more network</item>
+        <item quantity="other">+%1$s alerts across %2$s more networks</item>
+    </plurals>
+    <plurals name="crowdsec_more_scenarios">
+        <item quantity="one">+%1$s alerts across %2$s more scenario</item>
+        <item quantity="other">+%1$s alerts across %2$s more scenarios</item>
+    </plurals>
+    <plurals name="crowdsec_more_paths">
+        <item quantity="one">+%1$s hits across %2$s more path</item>
+        <item quantity="other">+%1$s hits across %2$s more paths</item>
+    </plurals>
+    <plurals name="crowdsec_more_accounts">
+        <item quantity="one">+%1$s hits across %2$s more account</item>
+        <item quantity="other">+%1$s hits across %2$s more accounts</item>
+    </plurals>
+    <plurals name="crowdsec_more_routers">
+        <item quantity="one">+%1$s hits across %2$s more router</item>
+        <item quantity="other">+%1$s hits across %2$s more routers</item>
+    </plurals>
+    <!-- Agent here is a user agent, the tool an attacker used -->
+    <plurals name="crowdsec_more_agents">
+        <item quantity="one">+%1$s hits across %2$s more agent</item>
+        <item quantity="other">+%1$s hits across %2$s more agents</item>
+    </plurals>
+    <string name="crowdsec_decisions_loading">Loading decisions</string>
+    <!-- Both values are numbers of decisions -->
+    <string name="crowdsec_decisions_showing">Showing %1$s of %2$s</string>
+    <string name="common_load_more">Load more</string>
+    <!-- Lowercase state of an alert: the source is banned -->
+    <string name="crowdsec_alert_banned">banned</string>
+    <!-- Lowercase state of an alert: the source is not banned -->
+    <string name="crowdsec_alert_open">open</string>
+    <string name="crowdsec_filter_route">Filter by route</string>
+    <string name="crowdsec_filter_host">Filter by host</string>
+    <!-- %1$s is an IP address -->
+    <string name="crowdsec_ban_named">Ban %1$s</string>
+    <string name="crowdsec_search_placeholder">Filter by address, scenario, network or path</string>
+    <!-- Headline: nobody is attacking at the moment -->
+    <string name="crowdsec_verdict_quiet">Nothing probing right now</string>
+    <!-- Headline: the server is being attacked right now -->
+    <string name="crowdsec_verdict_probed">Actively probed</string>
+    <!-- Attacking sources -->
+    <plurals name="crowdsec_sources_count">
+        <item quantity="one">%d source</item>
+        <item quantity="other">%d sources</item>
+    </plurals>
+    <plurals name="crowdsec_scenarios_count">
+        <item quantity="one">%d scenario</item>
+        <item quantity="other">%d scenarios</item>
+    </plurals>
+    <!-- %1$s is a number -->
+    <plurals name="crowdsec_events_count">
+        <item quantity="one">%1$s event</item>
+        <item quantity="other">%1$s events</item>
+    </plurals>
+    <!-- Lowercase. The number counts attacking sources that have no active ban -->
+    <plurals name="crowdsec_no_active_ban">
+        <item quantity="one">%d no active ban</item>
+        <item quantity="other">%d no active ban</item>
+    </plurals>
+    <!-- Lowercase -->
+    <string name="crowdsec_no_alerts_window">no alerts in the retained window</string>
+    <!-- Lowercase. %1$s is a length of time such as 2h 10m -->
+    <string name="crowdsec_span_of_alerts">%1$s of alerts</string>
+    <!-- Lowercase. %1$s is how long ago the data was read, such as 40s -->
+    <string name="crowdsec_read_ago">read %1$s ago</string>
+    <!-- Lowercase. Keep CROWDSEC_ALERT_LIMIT exactly as it is -->
+    <string name="crowdsec_alerts_capped">showing the newest %1$d alerts, the LAPI holds more (CROWDSEC_ALERT_LIMIT)</string>
+    <!-- Lowercase. %1$s is a number, or a question mark when it is not known -->
+    <plurals name="crowdsec_retained_alerts">
+        <item quantity="one">retained %1$s alert</item>
+        <item quantity="other">retained %1$s alerts</item>
+    </plurals>
+    <!-- Lowercase. %1$s is a number, or a question mark when it is not known -->
+    <plurals name="crowdsec_bans_count">
+        <item quantity="one">%1$s ban</item>
+        <item quantity="other">%1$s bans</item>
+    </plurals>
+    <string name="crowdsec_filtered_by">Filtered by</string>
+    <string name="crowdsec_clear_all">Clear all</string>
+    <!-- Lowercase label on the chip that shows the search text -->
+    <string name="crowdsec_facet_search">search</string>
+    <!-- %1$s is the name of a filter such as country or scenario -->
+    <string name="crowdsec_remove_filter">Remove the %1$s filter</string>
+    <string name="crowdsec_view_evidence">Attack evidence</string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_decision_added">Decision added for %1$s</string>
+    <string name="crowdsec_error_add">Could not add the decision</string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_unbanned">%1$s unbanned</string>
+    <string name="crowdsec_error_delete">Could not delete the decision</string>
 </resources>

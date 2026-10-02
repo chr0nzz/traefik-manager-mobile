@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
+import androidx.annotation.PluralsRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -122,6 +123,12 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 private const val UNKNOWN = "?"
 
@@ -137,6 +144,7 @@ fun CrowdSecScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val refreshState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     var addSheetFor by remember { mutableStateOf<String?>(null) }
     var addSheetOpen by remember { mutableStateOf(false) }
@@ -147,7 +155,7 @@ fun CrowdSecScreen(
     }
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -172,8 +180,8 @@ fun CrowdSecScreen(
     pendingDelete?.let { decision ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Remove decision") },
-            text = { Text("Unban ${decision.value}? CrowdSec will stop blocking it immediately.") },
+            title = { Text(stringResource(R.string.crowdsec_remove_title)) },
+            text = { Text(stringResource(R.string.crowdsec_remove_body, decision.value)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -181,11 +189,11 @@ fun CrowdSecScreen(
                         pendingDelete = null
                     },
                 ) {
-                    Text("Unban")
+                    Text(stringResource(R.string.crowdsec_unban))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -200,7 +208,7 @@ fun CrowdSecScreen(
         floatingActionButton = {
             if (!state.notConfigured) {
                 FloatingActionButton(onClick = { addSheetOpen = true }) {
-                    Icon(Icons.Outlined.Add, contentDescription = "Add decision")
+                    Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.crowdsec_add_decision))
                 }
             }
         },
@@ -216,10 +224,10 @@ fun CrowdSecScreen(
                 },
                 actions = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                        Icon(Icons.Outlined.Search, contentDescription = "Search CrowdSec")
+                        Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.crowdsec_search))
                     }
                     IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh CrowdSec")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.crowdsec_refresh))
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -252,22 +260,21 @@ fun CrowdSecScreen(
             },
         ) {
             when {
-                state.loading -> LoadingState(label = "Loading CrowdSec")
+                state.loading -> LoadingState(label = stringResource(R.string.crowdsec_loading))
 
                 state.notConfigured -> EmptyState(
-                    headline = "CrowdSec is not configured",
-                    body = "Set CROWDSEC_LAPI_URL and a bouncer API key on this server, then recreate " +
-                        "the container, to see decisions and alerts.",
+                    headline = stringResource(R.string.crowdsec_unconfigured),
+                    body = stringResource(R.string.crowdsec_unconfigured_body),
                 )
 
                 state.loadError != null -> ErrorState(
-                    headline = "Could not reach the CrowdSec LAPI",
-                    body = state.loadError,
+                    headline = stringResource(R.string.crowdsec_error_load),
+                    body = state.loadError?.asString(),
                     onRetry = viewModel::refresh,
                 )
 
                 !state.decisionsOk && !state.alertsOk -> ErrorState(
-                    headline = "CrowdSec LAPI unavailable",
+                    headline = stringResource(R.string.crowdsec_unavailable),
                     body = state.decisionsError ?: state.alertsError,
                     onRetry = viewModel::refresh,
                 )
@@ -357,7 +364,7 @@ private fun CrowdSecBody(
             val cards: List<DeskCard> = listOf(
                 DeskCard(1) { cardModifier ->
                     SignalCard(
-                        label = "Attacking sources",
+                        label = stringResource(R.string.crowdsec_card_sources),
                         hero = if (state.alertsOk) LogParser.formatCount(sources.size) else "-",
                         accent = palette.red,
                         glyph = Icons.Outlined.GpsFixed,
@@ -367,39 +374,46 @@ private fun CrowdSecBody(
                             else -> null
                         },
                         subtitle = if (!state.alertsOk) {
-                            "sources are only listed on /v1/alerts"
+                            stringResource(R.string.crowdsec_sources_blind)
                         } else {
                             sources.firstOrNull()
-                                ?.let { "worst ${it.key} ${LogParser.formatCount(it.weight)} events" }
-                                ?: "no sources"
+                                ?.let {
+                                    pluralStringResource(
+                                        R.plurals.crowdsec_worst_events,
+                                        it.weight,
+                                        it.key,
+                                        LogParser.formatCount(it.weight),
+                                    )
+                                }
+                                ?: stringResource(R.string.crowdsec_no_sources)
                         },
                         flags = when {
-                            !state.alertsOk -> listOf(SignalChip(Icons.Outlined.Info, "ban state unknown"))
-                            !state.decisionsOk -> listOf(SignalChip(Icons.Outlined.Info, "ban state unknown"))
+                            !state.alertsOk -> listOf(SignalChip(Icons.Outlined.Info, stringResource(R.string.crowdsec_chip_ban_unknown)))
+                            !state.decisionsOk -> listOf(SignalChip(Icons.Outlined.Info, stringResource(R.string.crowdsec_chip_ban_unknown)))
                             loose.isNotEmpty() -> listOf(
                                 SignalChip(
                                     Icons.Outlined.LockOpen,
-                                    "${LogParser.formatCount(loose.size)} loose",
+                                    stringResource(R.string.crowdsec_chip_loose, LogParser.formatCount(loose.size)),
                                     if (loose.any { it.count > 1 }) palette.red else palette.yellow,
                                     onClick = { onFacet(CsFacet.Outcome, "loose") },
                                 ),
                                 SignalChip(
                                     Icons.Outlined.Block,
-                                    "${LogParser.formatCount(bannedSources)} banned",
+                                    stringResource(R.string.crowdsec_chip_banned, LogParser.formatCount(bannedSources)),
                                     onClick = { onFacet(CsFacet.Outcome, "banned") },
                                 ),
                             )
                             sources.isEmpty() -> emptyList()
-                            else -> listOf(SignalChip(Icons.Outlined.CheckCircle, "every source banned", palette.green))
+                            else -> listOf(SignalChip(Icons.Outlined.CheckCircle, stringResource(R.string.crowdsec_chip_all_banned), palette.green))
                         },
                         footer = if (sources.isEmpty()) {
                             emptyList()
                         } else {
                             listOf(
-                                SignalChip(Icons.Outlined.Repeat, "${LogParser.formatCount(repeats.size)} repeat"),
+                                SignalChip(Icons.Outlined.Repeat, stringResource(R.string.crowdsec_chip_repeat, LogParser.formatCount(repeats.size))),
                                 SignalChip(
                                     Icons.AutoMirrored.Outlined.CallMissedOutgoing,
-                                    "${LogParser.formatCount(sources.size - repeats.size)} one-shot",
+                                    stringResource(R.string.crowdsec_chip_one_shot, LogParser.formatCount(sources.size - repeats.size)),
                                 ),
                             )
                         },
@@ -418,17 +432,23 @@ private fun CrowdSecBody(
                 },
                 DeskCard(1) { cardModifier ->
                     RankCard(
-                        label = "Networks",
+                        label = stringResource(R.string.crowdsec_card_networks),
                         accent = palette.purple,
                         glyph = Icons.Outlined.Public,
                         rows = networks,
                         onRowClick = { onFacet(CsFacet.Asn, it) },
                         blind = !state.alertsOk,
-                        blindReason = "AS names ride on alert.source",
-                        emptyReason = "this agent reports ip only",
-                        thing = "networks",
+                        blindReason = stringResource(R.string.crowdsec_networks_blind),
+                        emptyReason = stringResource(R.string.crowdsec_networks_empty),
                         subtitle = networks.firstOrNull()
-                            ?.let { "worst ${it.label} ${LogParser.formatCount(it.count)} alerts" },
+                            ?.let {
+                                pluralStringResource(
+                                    R.plurals.crowdsec_worst_alerts,
+                                    it.count,
+                                    it.label,
+                                    LogParser.formatCount(it.count),
+                                )
+                            },
                         rowGlyph = { row ->
                             if (row.extra.isNotEmpty()) {
                                 Text(
@@ -442,19 +462,26 @@ private fun CrowdSecBody(
                 },
                 DeskCard(2) { cardModifier ->
                     RankCard(
-                        label = "Scenarios",
+                        label = stringResource(R.string.crowdsec_card_scenarios),
                         accent = palette.orange,
                         glyph = Icons.Outlined.Bolt,
                         rows = scenarios,
                         blind = !state.alertsOk,
-                        blindReason = "scenarios come from /v1/alerts",
-                        emptyReason = "nothing to rank in the retained window",
+                        blindReason = stringResource(R.string.crowdsec_scenarios_blind),
+                        emptyReason = stringResource(R.string.crowdsec_scenarios_empty),
                         hero = LogParser.formatCount(alertTotal),
-                        heroUnit = "alerts",
-                        thing = "scenarios",
+                        heroUnit = stringResource(R.string.crowdsec_unit_alerts),
+                        more = R.plurals.crowdsec_more_scenarios,
                         subtitle = scenarios.firstOrNull()?.let {
-                            "worst ${it.label} · ${LogParser.formatCount(alerts.sumOf { a -> a.eventsCount })} " +
-                                "events rolled up"
+                            val events = alerts.sumOf { a -> a.eventsCount }
+                            listOf(
+                                stringResource(R.string.crowdsec_worst, it.label),
+                                pluralStringResource(
+                                    R.plurals.crowdsec_events_rolled_up,
+                                    events,
+                                    LogParser.formatCount(events),
+                                ),
+                            ).joinToString(UiText.SEPARATOR)
                         },
                         onRowClick = onScenarioClick,
                         rowGlyph = {
@@ -472,19 +499,20 @@ private fun CrowdSecBody(
                     val onPaths = paths.isNotEmpty() || accounts.isEmpty()
                     val targeting = if (onPaths) paths else accounts
                     RankCard(
-                        label = if (onPaths) "Targeted paths" else "Targeted accounts",
+                        label = stringResource(if (onPaths) R.string.crowdsec_card_paths else R.string.crowdsec_card_accounts),
                         accent = palette.blue,
                         glyph = Icons.Outlined.MyLocation,
                         rows = targeting,
                         onRowClick = { onFacet(if (onPaths) CsFacet.Uri else CsFacet.User, it) },
                         blind = !state.alertsOk,
-                        blindReason = if (onPaths) "paths live in alert.meta[]" else "accounts live in alert.meta[]",
-                        emptyReason = "no meta reported",
+                        blindReason = stringResource(
+                            if (onPaths) R.string.crowdsec_paths_blind else R.string.crowdsec_accounts_blind,
+                        ),
+                        emptyReason = stringResource(R.string.crowdsec_targets_empty),
                         hero = LogParser.formatCount(targeting.size),
-                        heroUnit = if (onPaths) "paths" else "accounts",
-                        noun = "hits",
-                        thing = if (onPaths) "paths" else "accounts",
-                        subtitle = targeting.firstOrNull()?.let { "most wanted ${it.label}" },
+                        heroUnit = stringResource(if (onPaths) R.string.crowdsec_unit_paths else R.string.crowdsec_unit_accounts),
+                        more = if (onPaths) R.plurals.crowdsec_more_paths else R.plurals.crowdsec_more_accounts,
+                        subtitle = targeting.firstOrNull()?.let { stringResource(R.string.crowdsec_most_wanted, it.label) },
                         rowGlyph = {
                             Icon(
                                 imageVector = if (onPaths) {
@@ -503,23 +531,22 @@ private fun CrowdSecBody(
                 DeskCard(2) { cardModifier ->
                     val named = state.alerts.any { it.routers.isNotEmpty() }
                     RankCard(
-                        label = "Targeted routes",
+                        label = stringResource(R.string.crowdsec_card_routes),
                         accent = palette.purple,
                         glyph = Icons.Outlined.AltRoute,
                         rows = routes,
                         onRowClick = { onFacet(CsFacet.Router, it) },
                         blind = !state.alertsOk,
-                        blindReason = "routers live in alert.meta[]",
+                        blindReason = stringResource(R.string.crowdsec_routes_blind),
                         emptyReason = when {
-                            state.alerts.isEmpty() -> "nothing was aimed at"
-                            named -> "no router matches"
-                            else -> "no router in the evidence"
+                            state.alerts.isEmpty() -> stringResource(R.string.crowdsec_routes_empty_none)
+                            named -> stringResource(R.string.crowdsec_routes_empty_match)
+                            else -> stringResource(R.string.crowdsec_routes_empty_evidence)
                         },
                         hero = LogParser.formatCount(routes.size),
-                        heroUnit = "routers",
-                        noun = "hits",
-                        thing = "routers",
-                        subtitle = routes.firstOrNull()?.let { "most wanted ${it.label}" },
+                        heroUnit = stringResource(R.string.crowdsec_unit_routers),
+                        more = R.plurals.crowdsec_more_routers,
+                        subtitle = routes.firstOrNull()?.let { stringResource(R.string.crowdsec_most_wanted, it.label) },
                         flags = hosts.take(3).map { host ->
                             SignalChip(
                                 Icons.Outlined.Language,
@@ -540,19 +567,18 @@ private fun CrowdSecBody(
                 },
                 DeskCard(1) { cardModifier ->
                     RankCard(
-                        label = "Tooling",
+                        label = stringResource(R.string.crowdsec_card_tooling),
                         accent = palette.teal,
                         glyph = Icons.Outlined.SmartToy,
                         rows = tooling,
                         onRowClick = { onFacet(CsFacet.Agent, it) },
                         blind = !state.alertsOk,
-                        blindReason = "user agents live in alert.meta[]",
-                        emptyReason = "no HTTP scenario fired here",
-                        noun = "hits",
-                        thing = "agents",
-                        subtitle = tooling.firstOrNull()?.let { "worst ${it.label}" },
+                        blindReason = stringResource(R.string.crowdsec_tooling_blind),
+                        emptyReason = stringResource(R.string.crowdsec_tooling_empty),
+                        more = R.plurals.crowdsec_more_agents,
+                        subtitle = tooling.firstOrNull()?.let { stringResource(R.string.crowdsec_worst, it.label) },
                         flags = listOf(
-                            SignalChip(Icons.Outlined.Code, "${LogParser.formatCount(tooling.size)} tools"),
+                            SignalChip(Icons.Outlined.Code, pluralStringResource(R.plurals.crowdsec_tools, tooling.size, LogParser.formatCount(tooling.size))),
                         ),
                         rowGlyph = {
                             Icon(
@@ -569,7 +595,7 @@ private fun CrowdSecBody(
                     val perCell = ((decisionTotal + CELL_CAP - 1) / CELL_CAP).coerceAtLeast(1)
                     val stale = snapshot.decisionsStale
                     SignalCard(
-                        label = if (stale != null) "Bans in force (stale)" else "Bans in force",
+                        label = stringResource(if (stale != null) R.string.crowdsec_card_bans_stale else R.string.crowdsec_card_bans),
                         hero = if (state.decisionsOk) LogParser.formatCount(decisionTotal) else "-",
                         accent = if (stale != null) palette.yellow else palette.green,
                         glyph = Icons.Outlined.Shield,
@@ -579,10 +605,15 @@ private fun CrowdSecBody(
                             else -> null
                         },
                         subtitle = when {
-                            !state.decisionsOk -> "nothing was read from /v1/decisions"
+                            !state.decisionsOk -> stringResource(R.string.crowdsec_bans_blind)
                             stale != null -> stale
-                            else -> "${LogParser.formatCount(snapshot.ownBans)} from this host · " +
-                                "${LogParser.formatCount(snapshot.subscribedBans)} subscribed"
+                            else -> listOf(
+                                stringResource(R.string.crowdsec_bans_own, LogParser.formatCount(snapshot.ownBans)),
+                                stringResource(
+                                    R.string.crowdsec_bans_subscribed,
+                                    LogParser.formatCount(snapshot.subscribedBans),
+                                ),
+                            ).joinToString(UiText.SEPARATOR)
                         },
                         flags = if (state.decisionsOk) {
                             listOf(
@@ -624,7 +655,7 @@ private fun CrowdSecBody(
                         )
                         if (perCell > 1) {
                             Text(
-                                text = "1 cell = ${LogParser.formatCount(perCell)}",
+                                text = stringResource(R.string.crowdsec_cell_scale, LogParser.formatCount(perCell)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted,
                                 modifier = Modifier.padding(top = 2.dp),
@@ -675,9 +706,12 @@ private fun CrowdSecBody(
                         Text(
                             text = when (view) {
                                 CrowdSecView.Evidence ->
-                                    "Evidence ${if (state.alertsOk) state.visibleAlerts.size else UNKNOWN}"
+                                    stringResource(
+                                        R.string.crowdsec_tab_evidence,
+                                        if (state.alertsOk) state.visibleAlerts.size.toString() else UNKNOWN,
+                                    )
                                 CrowdSecView.Bans ->
-                                    "Bans ${state.bansCount ?: UNKNOWN}"
+                                    stringResource(R.string.crowdsec_tab_bans, state.bansCount?.toString() ?: UNKNOWN)
                             },
                         )
                     }
@@ -705,7 +739,7 @@ private fun CrowdSecBody(
             if (state.visibleAlerts.isEmpty()) {
                 item {
                     Text(
-                        text = if (state.alertsOk) "No alerts match" else "Alerts unavailable",
+                        text = stringResource(if (state.alertsOk) R.string.crowdsec_alerts_no_match else R.string.crowdsec_alerts_unavailable),
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.muted,
                         modifier = Modifier.padding(TmSpacing.lg),
@@ -730,7 +764,9 @@ private fun CrowdSecBody(
             if (state.visibleDecisions.isEmpty()) {
                 item {
                     Text(
-                        text = if (state.decisionsOk) "No active decisions" else "Decisions unavailable",
+                        text = stringResource(
+                            if (state.decisionsOk) R.string.crowdsec_decisions_none else R.string.crowdsec_decisions_unavailable,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.muted,
                         modifier = Modifier.padding(TmSpacing.lg),
@@ -750,8 +786,7 @@ private fun RankCard(
     blindReason: String,
     emptyReason: String,
     modifier: Modifier = Modifier,
-    noun: String = "alerts",
-    thing: String = "networks",
+    @PluralsRes more: Int = R.plurals.crowdsec_more_networks,
     hero: String? = null,
     heroUnit: String? = null,
     subtitle: String? = null,
@@ -776,7 +811,7 @@ private fun RankCard(
         subtitle = when {
             blind -> blindReason
             rows.isEmpty() -> emptyReason
-            else -> subtitle ?: "worst ${rows.first().key}"
+            else -> subtitle ?: stringResource(R.string.crowdsec_worst, rows.first().key)
         },
         modifier = modifier,
     ) {
@@ -800,8 +835,12 @@ private fun RankCard(
         if (rows.size > ROW_CAP) {
             val rest = rows.drop(ROW_CAP)
             Text(
-                text = "+${LogParser.formatCount(rest.sumOf { it.count })} $noun across " +
-                    "${LogParser.formatCount(rest.size)} more $thing",
+                text = pluralStringResource(
+                    more,
+                    rest.size,
+                    LogParser.formatCount(rest.sumOf { it.count }),
+                    LogParser.formatCount(rest.size),
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 modifier = Modifier.padding(top = 2.dp),
@@ -821,11 +860,15 @@ private fun DecisionFeedFooter(state: CrowdSecUiState, onLoadMore: () -> Unit) {
         val empty = feed == null || feed.rows.isEmpty()
         Text(
             text = when {
-                !state.decisionsOk -> "Decisions unavailable"
-                feed == null || (feed.loading && !feed.loaded) -> "Loading decisions"
+                !state.decisionsOk -> stringResource(R.string.crowdsec_decisions_unavailable)
+                feed == null || (feed.loading && !feed.loaded) -> stringResource(R.string.crowdsec_decisions_loading)
                 feed.error != null && feed.rows.isEmpty() -> feed.error
-                feed.rows.isEmpty() -> "No active decisions"
-                else -> "Showing ${LogParser.formatCount(feed.rows.size)} of ${LogParser.formatCount(feed.total)}"
+                feed.rows.isEmpty() -> stringResource(R.string.crowdsec_decisions_none)
+                else -> stringResource(
+                    R.string.crowdsec_decisions_showing,
+                    LogParser.formatCount(feed.rows.size),
+                    LogParser.formatCount(feed.total),
+                )
             },
             style = if (empty) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.labelSmall,
             color = palette.muted,
@@ -840,7 +883,7 @@ private fun DecisionFeedFooter(state: CrowdSecUiState, onLoadMore: () -> Unit) {
         }
         if (feed?.more == true) {
             TextButton(onClick = onLoadMore, enabled = !feed.loading) {
-                Text(if (feed.loading) "Loading" else "Load more")
+                Text(stringResource(if (feed.loading) R.string.common_loading else R.string.common_load_more))
             }
         }
     }
@@ -873,7 +916,7 @@ private fun AlertRow(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        text = alert.ip.ifEmpty { "unknown" },
+                        text = alert.ip.ifEmpty { stringResource(R.string.common_unknown) },
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = MonoFamily,
                             fontWeight = FontWeight.Bold,
@@ -921,7 +964,7 @@ private fun AlertRow(
                             EvidenceValue(
                                 icon = Icons.Outlined.AltRoute,
                                 text = it.substringBefore('@').ifEmpty { it },
-                                description = "Filter by route",
+                                description = stringResource(R.string.crowdsec_filter_route),
                                 onClick = { onFilterRouter(it) },
                                 modifier = Modifier.weight(1f, fill = false),
                             )
@@ -930,7 +973,7 @@ private fun AlertRow(
                             EvidenceValue(
                                 icon = Icons.Outlined.Language,
                                 text = it,
-                                description = "Filter by host",
+                                description = stringResource(R.string.crowdsec_filter_host),
                                 onClick = { onFilterHost(it) },
                                 modifier = Modifier.weight(1f, fill = false),
                             )
@@ -969,8 +1012,8 @@ private fun AlertRow(
                 Text(
                     text = when {
                         !decisionsOk -> UNKNOWN
-                        handled -> "banned"
-                        else -> "open"
+                        handled -> stringResource(R.string.crowdsec_alert_banned)
+                        else -> stringResource(R.string.crowdsec_alert_open)
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = when {
@@ -983,7 +1026,7 @@ private fun AlertRow(
                     IconButton(onClick = onBan, modifier = Modifier.size(28.dp)) {
                         Icon(
                             Icons.Outlined.Block,
-                            contentDescription = "Ban ${alert.ip}",
+                            contentDescription = stringResource(R.string.crowdsec_ban_named, alert.ip),
                             tint = palette.red,
                             modifier = Modifier.size(16.dp),
                         )
@@ -1071,7 +1114,7 @@ private fun DecisionRow(decision: CsDecision, onDelete: () -> Unit) {
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Outlined.Delete,
-                        contentDescription = "Unban ${decision.value}",
+                        contentDescription = stringResource(R.string.crowdsec_unban_named, decision.value),
                         tint = palette.red,
                         modifier = Modifier.size(18.dp),
                     )
@@ -1098,16 +1141,16 @@ private fun CrowdSecSearchBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Filter by address, scenario, network or path") },
+                placeholder = { Text(stringResource(R.string.crowdsec_search_placeholder)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -1115,7 +1158,7 @@ private fun CrowdSecSearchBar(
         },
     ) {
         Text(
-            text = "$matches matching",
+            text = pluralStringResource(R.plurals.common_matching, matches, matches),
             style = MaterialTheme.typography.bodyMedium,
             color = palette.muted,
             modifier = Modifier.padding(TmSpacing.lg),
@@ -1142,9 +1185,9 @@ private fun CrowdSecVerdictCard(
         else -> palette.yellow
     }
     val headline = when {
-        !state.alertsOk -> "Alerts unavailable"
-        alerts.isEmpty() -> "Nothing probing right now"
-        else -> "Actively probed"
+        !state.alertsOk -> stringResource(R.string.crowdsec_alerts_unavailable)
+        alerts.isEmpty() -> stringResource(R.string.crowdsec_verdict_quiet)
+        else -> stringResource(R.string.crowdsec_verdict_probed)
     }
 
     TmCard(accentColor = accent) {
@@ -1171,30 +1214,30 @@ private fun CrowdSecVerdictCard(
                     if (state.alertsOk) {
                         CrowdSecVerdictItem(
                             icon = Icons.Outlined.GpsFixed,
-                            text = "${sources.size} " + if (sources.size == 1) "source" else "sources",
+                            text = pluralStringResource(R.plurals.crowdsec_sources_count, sources.size, sources.size),
                             color = palette.muted,
                         )
                         CrowdSecVerdictItem(
                             icon = Icons.Outlined.Bolt,
-                            text = "${scenarios.size} " + if (scenarios.size == 1) "scenario" else "scenarios",
+                            text = pluralStringResource(R.plurals.crowdsec_scenarios_count, scenarios.size, scenarios.size),
                             color = palette.muted,
                         )
                         CrowdSecVerdictItem(
                             icon = Icons.Outlined.Timeline,
-                            text = "${LogParser.formatCount(events)} " + if (events == 1) "event" else "events",
+                            text = pluralStringResource(R.plurals.crowdsec_events_count, events, LogParser.formatCount(events)),
                             color = palette.muted,
                         )
                     }
                     if (unbanned > 0) {
                         CrowdSecVerdictItem(
                             icon = Icons.Outlined.LockOpen,
-                            text = "$unbanned no active ban",
+                            text = pluralStringResource(R.plurals.crowdsec_no_active_ban, unbanned, unbanned),
                             color = palette.yellow,
                         )
                     }
                     if (state.alertsOk && alerts.isEmpty()) {
                         Text(
-                            text = "no alerts in the retained window",
+                            text = stringResource(R.string.crowdsec_no_alerts_window),
                             style = MaterialTheme.typography.labelSmall,
                             color = palette.muted,
                         )
@@ -1203,13 +1246,15 @@ private fun CrowdSecVerdictCard(
             }
         }
 
-        val stamp = buildString {
-            span?.let { append("${LogParser.spanText(it)} of alerts") }
+        val stamp = listOfNotNull(
+            span?.let { stringResource(R.string.crowdsec_span_of_alerts, LogParser.spanText(it)) },
             state.readAt?.let { read ->
-                if (isNotEmpty()) append(" · ")
-                append("read ${LogParser.spanText((System.currentTimeMillis() - read).coerceAtLeast(0))} ago")
-            }
-        }
+                stringResource(
+                    R.string.crowdsec_read_ago,
+                    LogParser.spanText((System.currentTimeMillis() - read).coerceAtLeast(0)),
+                )
+            },
+        ).joinToString(UiText.SEPARATOR)
         if (stamp.isNotEmpty()) {
             Text(
                 text = stamp,
@@ -1221,8 +1266,10 @@ private fun CrowdSecVerdictCard(
 
         if (state.snapshot.alertsCapped == true) {
             Text(
-                text = "showing the newest ${state.snapshot.alertLimit ?: alerts.size} alerts, " +
-                    "the LAPI holds more (CROWDSEC_ALERT_LIMIT)",
+                text = stringResource(
+                    R.string.crowdsec_alerts_capped,
+                    state.snapshot.alertLimit ?: alerts.size,
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.yellow,
             )
@@ -1264,19 +1311,25 @@ private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
             .fillMaxWidth()
             .padding(horizontal = TmSpacing.xs),
     ) {
-        SectionLabel("Window")
+        SectionLabel(stringResource(R.string.logs_window))
         Text(
-            text = buildString {
-                append(if (state.alertsOk) "retained ${state.alerts.size} alerts" else "retained $UNKNOWN alerts")
-                span?.let { append(" · span ${LogParser.spanText(it)}") }
-                append(
-                    if (state.decisionsOk) {
-                        " · ${LogParser.formatCount(state.snapshot.decisionTotal)} bans"
-                    } else {
-                        " · $UNKNOWN bans"
-                    },
-                )
-            },
+            text = listOfNotNull(
+                if (state.alertsOk) {
+                    pluralStringResource(R.plurals.crowdsec_retained_alerts, state.alerts.size, state.alerts.size.toString())
+                } else {
+                    pluralStringResource(R.plurals.crowdsec_retained_alerts, 0, UNKNOWN)
+                },
+                span?.let { stringResource(R.string.logs_span, LogParser.spanText(it)) },
+                if (state.decisionsOk) {
+                    pluralStringResource(
+                        R.plurals.crowdsec_bans_count,
+                        state.snapshot.decisionTotal,
+                        LogParser.formatCount(state.snapshot.decisionTotal),
+                    )
+                } else {
+                    pluralStringResource(R.plurals.crowdsec_bans_count, 0, UNKNOWN)
+                },
+            ).joinToString(UiText.SEPARATOR),
             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
             color = palette.muted,
             maxLines = 2,
@@ -1316,9 +1369,9 @@ private fun FilterBar(
     val palette = LocalTmPalette.current
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            SectionLabel("Filtered by", modifier = Modifier.weight(1f))
+            SectionLabel(stringResource(R.string.crowdsec_filtered_by), modifier = Modifier.weight(1f))
             Text(
-                text = "Clear all",
+                text = stringResource(R.string.crowdsec_clear_all),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.blue,
                 modifier = Modifier
@@ -1344,7 +1397,7 @@ private fun FilterBar(
                 )
             }
             if (state.query.isNotEmpty()) {
-                FacetChip(label = "search", value = state.query, onRemove = null)
+                FacetChip(label = stringResource(R.string.crowdsec_facet_search), value = state.query, onRemove = null)
             }
         }
     }
@@ -1378,7 +1431,7 @@ private fun FacetChip(label: String, value: String, onRemove: (() -> Unit)?) {
         if (onRemove != null) {
             Icon(
                 imageVector = Icons.Outlined.Close,
-                contentDescription = "Remove the $label filter",
+                contentDescription = stringResource(R.string.crowdsec_remove_filter, label),
                 tint = palette.muted,
                 modifier = Modifier.size(12.dp),
             )

@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
+import androidx.annotation.PluralsRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,16 +45,21 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 private val DECISION_TYPES = listOf("ban", "captcha", "bypass")
 
+private data class DurationOption(val code: String, @PluralsRes val unit: Int, val count: Int)
+
 private val DURATIONS = listOf(
-    "1h" to "1 hour",
-    "4h" to "4 hours",
-    "24h" to "24 hours",
-    "168h" to "7 days",
-    "720h" to "30 days",
-    "8760h" to "1 year",
+    DurationOption("1h", R.plurals.common_hours, 1),
+    DurationOption("4h", R.plurals.common_hours, 4),
+    DurationOption("24h", R.plurals.common_hours, 24),
+    DurationOption("168h", R.plurals.common_days, 7),
+    DurationOption("720h", R.plurals.common_days, 30),
+    DurationOption("8760h", R.plurals.common_years, 1),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +94,7 @@ fun AddDecisionSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = "Add decision",
+                text = stringResource(R.string.crowdsec_add_decision),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -96,15 +102,15 @@ fun AddDecisionSheet(
             OutlinedTextField(
                 value = value,
                 onValueChange = { value = it },
-                label = { Text("IP or range") },
+                label = { Text(stringResource(R.string.crowdsec_add_value)) },
                 placeholder = { Text("1.2.3.4 or 1.2.3.0/24") },
-                supportingText = { Text("Single IP or CIDR range.") },
+                supportingText = { Text(stringResource(R.string.crowdsec_add_value_help)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, showKeyboardOnFocus = false),
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            SectionLabel("Type")
+            SectionLabel(stringResource(R.string.crowdsec_add_type))
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 DECISION_TYPES.forEachIndexed { index, option ->
                     SegmentedButton(
@@ -123,21 +129,23 @@ fun AddDecisionSheet(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 OutlinedTextField(
-                    value = DURATIONS.firstOrNull { it.first == duration }?.second ?: duration,
+                    value = DURATIONS.firstOrNull { it.code == duration }
+                        ?.let { pluralStringResource(it.unit, it.count, it.count) }
+                        ?: duration,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Duration") },
+                    label = { Text(stringResource(R.string.common_label_duration)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = durationOpen) },
                     modifier = Modifier
                         .menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth(),
                 )
                 ExposedDropdownMenu(expanded = durationOpen, onDismissRequest = { durationOpen = false }) {
-                    DURATIONS.forEach { (code, label) ->
+                    DURATIONS.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(label) },
+                            text = { Text(pluralStringResource(option.unit, option.count, option.count)) },
                             onClick = {
-                                duration = code
+                                duration = option.code
                                 durationOpen = false
                             },
                         )
@@ -148,9 +156,9 @@ fun AddDecisionSheet(
             OutlinedTextField(
                 value = reason,
                 onValueChange = { reason = it },
-                label = { Text("Reason (optional)") },
+                label = { Text(stringResource(R.string.crowdsec_add_reason)) },
                 placeholder = { Text("manual ban from Traefik Manager") },
-                supportingText = { Text("Stored as the decision scenario.") },
+                supportingText = { Text(stringResource(R.string.crowdsec_add_reason_help)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(showKeyboardOnFocus = false),
                 modifier = Modifier.fillMaxWidth(),
@@ -161,12 +169,12 @@ fun AddDecisionSheet(
                 enabled = !saving && value.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(if (saving) "Adding" else "Add decision")
+                Text(stringResource(if (saving) R.string.crowdsec_adding else R.string.crowdsec_add_decision))
             }
 
             if (decisions.isNotEmpty()) {
                 CardDivider(modifier = Modifier.padding(vertical = TmSpacing.sm))
-                SectionLabel("Your decisions ${decisions.size}")
+                SectionLabel(stringResource(R.string.crowdsec_own_decisions, decisions.size))
                 decisions.take(20).forEach { decision ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -194,7 +202,7 @@ fun AddDecisionSheet(
                         IconButton(onClick = { onDelete(decision) }) {
                             Icon(
                                 Icons.Outlined.Delete,
-                                contentDescription = "Unban ${decision.value}",
+                                contentDescription = stringResource(R.string.crowdsec_unban_named, decision.value),
                                 tint = palette.red,
                                 modifier = Modifier.size(16.dp),
                             )
