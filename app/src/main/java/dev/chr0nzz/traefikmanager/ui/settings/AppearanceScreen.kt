@@ -42,6 +42,21 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.store.LanguageOption
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +70,22 @@ fun AppearanceScreen(
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val density by viewModel.density.collectAsStateWithLifecycle()
     val dynamicColorSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val languages = viewModel.languages
+    val configuration = LocalConfiguration.current
+    val selectedLanguage = remember(configuration) { viewModel.selectedLanguage() }
+    var languageSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (languageSheet) {
+        LanguageSheet(
+            languages = languages,
+            selected = selectedLanguage,
+            onSelect = { tag ->
+                languageSheet = false
+                viewModel.setLanguage(tag)
+            },
+            onDismiss = { languageSheet = false },
+        )
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -113,6 +144,44 @@ fun AppearanceScreen(
                         enabled = dynamicColorSupported,
                         onCheckedChange = viewModel::setDynamicColor,
                     )
+                }
+            }
+
+            if (languages.size > 1) {
+                item {
+                    SectionLabel(
+                        stringResource(R.string.settings_language_section),
+                        modifier = Modifier.padding(top = TmSpacing.sm),
+                    )
+                }
+                item {
+                    TmCard {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { languageSheet = true },
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.settings_language_title),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = languages.firstOrNull { it.tag == selectedLanguage }?.name
+                                        ?: stringResource(R.string.settings_language_system),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = palette.muted,
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = palette.muted,
+                            )
+                        }
+                    }
                 }
             }
 
@@ -217,6 +286,67 @@ fun AppearanceScreen(
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.xs),
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageSheet(
+    languages: List<LanguageOption>,
+    selected: String?,
+    onSelect: (String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val palette = LocalTmPalette.current
+    val choices = listOf<Pair<String?, String>>(null to stringResource(R.string.settings_language_system)) +
+        languages.map { it.tag to it.name }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = TmSpacing.lg)
+                .padding(bottom = TmSpacing.xl),
+            verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+        ) {
+            Text(
+                text = stringResource(R.string.settings_language_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            TmCard {
+                choices.forEachIndexed { index, (tag, name) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(tag) }
+                            .padding(vertical = TmSpacing.sm),
+                    ) {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (tag == selected) {
+                            Icon(
+                                imageVector = Icons.Outlined.Check,
+                                contentDescription = null,
+                                tint = palette.blue,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                    if (index < choices.lastIndex) CardDivider()
+                }
             }
         }
     }

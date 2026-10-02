@@ -11,13 +11,22 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.data.store.AppLanguage
+import dev.chr0nzz.traefikmanager.data.store.LanguageOption
 
 @HiltViewModel
 class AppearanceViewModel @Inject constructor(
     private val preferencesStore: PreferencesStore,
     private val launcherRepository: dev.chr0nzz.traefikmanager.data.repo.LauncherRepository,
     private val navEditorRequests: dev.chr0nzz.traefikmanager.ui.nav.NavEditorRequests,
+    private val appLanguage: AppLanguage,
 ) : ViewModel() {
+
+    val languages: List<LanguageOption> = appLanguage.options()
+
+    fun selectedLanguage(): String? = appLanguage.selected()
+
+    fun setLanguage(tag: String?) = appLanguage.select(tag)
 
     val density: StateFlow<String> = launcherRepository.density
 

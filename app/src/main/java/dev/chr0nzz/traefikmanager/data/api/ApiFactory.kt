@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.data.api
 
+import dev.chr0nzz.traefikmanager.data.store.AppLanguage
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.serialization.json.Json
@@ -12,6 +13,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 class ApiFactory @Inject constructor(
     private val client: OkHttpClient,
     private val json: Json,
+    private val appLanguage: AppLanguage,
 ) {
 
     fun create(baseUrl: String, apiKey: String?, agentId: String?): TmApi {
@@ -24,6 +26,7 @@ class ApiFactory @Inject constructor(
                 }
                 chain.proceed(builder.build())
             }
+            .addInterceptor(LanguageInterceptor(appLanguage::serverTag))
             .addInterceptor(AgentProxyInterceptor(agentId))
             .build()
         return Retrofit.Builder()
