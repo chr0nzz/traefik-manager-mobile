@@ -31,6 +31,8 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 fun ServiceHealth.asTmStatus(): TmStatus = when (this) {
     ServiceHealth.Ok -> TmStatus.Ok
@@ -104,7 +106,7 @@ fun ServiceCard(
         }
 
         val targets = service.servers.map { it.target to it.health } +
-            service.composite.map { it to ServerHealth.Unknown }
+            service.composite.map { it.asString() to ServerHealth.Unknown }
         targets.take(2).forEach { (target, health) ->
             ValueRow(
                 icon = Icons.Outlined.SubdirectoryArrowRight,
@@ -133,7 +135,7 @@ fun ServiceCard(
                 .padding(top = TmSpacing.xs),
         ) {
             Text(
-                text = service.metaParts.joinToString(" · "),
+                text = service.metaParts.map { it.asString() }.joinToString(UiText.SEPARATOR),
                 style = MaterialTheme.typography.labelSmall,
                 color = if (service.backendsTotal > 0 && !service.allBackendsUp) palette.orange else palette.muted,
                 maxLines = 1,
@@ -142,7 +144,7 @@ fun ServiceCard(
             )
             service.usedByLabel?.let { label ->
                 Text(
-                    text = label,
+                    text = label.asString(),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )

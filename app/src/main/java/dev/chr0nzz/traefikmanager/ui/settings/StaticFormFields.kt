@@ -37,6 +37,8 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,7 +185,7 @@ fun FormToggle(
 fun FormSelect(
     label: String,
     value: String,
-    options: List<Pair<String, String>>,
+    options: List<Pair<String, UiText>>,
     onChange: (String) -> Unit,
     help: String? = null,
 ) {
@@ -194,7 +196,7 @@ fun FormSelect(
         modifier = Modifier.fillMaxWidth(),
     ) {
         OutlinedTextField(
-            value = options.firstOrNull { it.first == value }?.second ?: value,
+            value = options.firstOrNull { it.first == value }?.second?.asString() ?: value,
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
@@ -207,7 +209,7 @@ fun FormSelect(
         ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { (key, text) ->
                 DropdownMenuItem(
-                    text = { Text(text) },
+                    text = { Text(text.asString()) },
                     onClick = {
                         onChange(key)
                         open = false

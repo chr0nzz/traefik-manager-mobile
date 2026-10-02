@@ -7,6 +7,7 @@ import java.time.format.FormatStyle
 import kotlin.math.ceil
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class CertEntry(
@@ -40,15 +41,15 @@ data class CertRow(
     val health: CertHealth,
     val origin: String?,
 ) {
-    val title: String get() = main.ifEmpty { "Unknown" }
+    val title: UiText get() = if (main.isEmpty()) UiText.of(R.string.certs_unknown) else UiText.Raw(main)
 
     val resolverLabel: String get() = resolver.ifEmpty { "-" }
 
-    val daysLeftLabel: String?
+    val daysLeftLabel: UiText?
         get() = when {
             daysLeft == null -> null
-            daysLeft <= 0 -> "expired"
-            else -> "${daysLeft}d left"
+            daysLeft <= 0 -> UiText.of(R.string.certs_expired)
+            else -> UiText.of(R.string.certs_days_left, daysLeft)
         }
 }
 

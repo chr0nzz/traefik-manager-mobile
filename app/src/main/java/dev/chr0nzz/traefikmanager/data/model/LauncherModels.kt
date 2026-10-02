@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import dev.chr0nzz.traefikmanager.R
+
 data class LauncherGroup(
     val name: String,
     val apps: List<LauncherApp>,
@@ -11,7 +13,7 @@ data class LauncherApp(
     val name: String,
     val host: String,
     val url: String?,
-    val reason: String?,
+    val reason: UiText?,
     val hidden: Boolean,
     val group: String,
 ) {
@@ -117,17 +119,17 @@ object LauncherBuilder {
         return "https://$host"
     }
 
-    private fun reason(route: Route, override: RouteOverride?): String = when {
-        override?.linkDisabled == true -> "link disabled for this route"
-        override?.url?.isNotEmpty() == true ->
-            "the link override is not an http or https URL. Fix it in edit"
-        route.protocol.equals("tcp", true) || route.protocol.equals("udp", true) ->
-            "stream route, nothing to open"
-        route.rule.isEmpty() -> "no rule, nothing to open. Set a link in edit"
-        route.hosts.any { it.contains('*') } -> "no launch URL, wildcard host. Set one in edit"
-        route.hosts.isEmpty() -> "no launch URL, the rule has no host. Set one in edit"
-        else -> "no launch URL, pattern rule. Set one in edit"
-    }
+    private fun reason(route: Route, override: RouteOverride?): UiText = UiText.of(
+        when {
+            override?.linkDisabled == true -> R.string.dashboard_no_link_disabled
+            override?.url?.isNotEmpty() == true -> R.string.dashboard_no_link_bad_override
+            route.protocol.equals("tcp", true) || route.protocol.equals("udp", true) -> R.string.dashboard_no_link_stream
+            route.rule.isEmpty() -> R.string.dashboard_no_link_no_rule
+            route.hosts.any { it.contains('*') } -> R.string.dashboard_no_link_wildcard
+            route.hosts.isEmpty() -> R.string.dashboard_no_link_no_host
+            else -> R.string.dashboard_no_link_pattern
+        },
+    )
 
     fun groupFor(route: Route, config: DashboardConfig): String {
         val chosen = config.routeOverrides[route.id]?.group.orEmpty()

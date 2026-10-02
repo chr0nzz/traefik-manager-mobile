@@ -1386,7 +1386,7 @@ private fun FilterBar(
         ) {
             state.facets.active.forEach { (facet, value) ->
                 FacetChip(
-                    label = facet.label,
+                    label = facet.label.asString(),
                     value = if (facet == CsFacet.Country) {
                         "${Countries.flag(value)} ${Countries.name(value)}"
                     } else {

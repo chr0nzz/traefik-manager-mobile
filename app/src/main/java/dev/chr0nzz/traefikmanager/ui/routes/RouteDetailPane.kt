@@ -204,7 +204,7 @@ fun RouteDetailPane(
             DetailSection(stringResource(R.string.routes_reachability), Icons.Outlined.MonitorHeart, palette.teal) {
                 DetailRow(
                     label = stringResource(R.string.routes_health_checked),
-                    value = health.summary,
+                    value = health.summary.asString(),
                     status = when (health.state) {
                         RouteHealth.STATE_UP -> TmStatus.Ok
                         RouteHealth.STATE_DEGRADED -> TmStatus.Warn
@@ -296,7 +296,7 @@ fun RouteDetailPane(
             dev.chr0nzz.traefikmanager.data.model.BackendHealth.summary(service)?.let { summary ->
                 DetailRow(
                     label = stringResource(R.string.common_label_health),
-                    value = summary,
+                    value = summary.asString(),
                     status = when {
                         service?.backendsUp == service?.backendsTotal -> TmStatus.Ok
                         service?.backendsUp == 0 -> TmStatus.Error

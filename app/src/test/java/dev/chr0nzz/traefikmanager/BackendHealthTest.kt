@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.BackendHealth
 import dev.chr0nzz.traefikmanager.data.model.ServiceLoadBalancer
 import dev.chr0nzz.traefikmanager.data.model.ServiceProtocol
@@ -11,6 +13,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class BackendHealthTest {
 
     private fun row(statuses: Map<String, String>, checked: Boolean = true) = ServiceRows.row(
@@ -27,16 +30,16 @@ class BackendHealthTest {
 
     @Test
     fun `the route info says how many backend servers answer`() {
-        assertEquals("2 of 2 servers up", BackendHealth.summary(row(mapOf("http://a:80" to "UP", "http://b:80" to "UP"))))
-        assertEquals("1 of 2 servers down", BackendHealth.summary(row(mapOf("http://a:80" to "UP", "http://b:80" to "DOWN"))))
-        assertEquals("all 2 servers down", BackendHealth.summary(row(mapOf("http://a:80" to "DOWN", "http://b:80" to "DOWN"))))
+        assertEquals("2 of 2 servers up", BackendHealth.summary(row(mapOf("http://a:80" to "UP", "http://b:80" to "UP"))).english())
+        assertEquals("1 of 2 servers down", BackendHealth.summary(row(mapOf("http://a:80" to "UP", "http://b:80" to "DOWN"))).english())
+        assertEquals("all 2 servers down", BackendHealth.summary(row(mapOf("http://a:80" to "DOWN", "http://b:80" to "DOWN"))).english())
     }
 
     @Test
     fun `nothing is claimed without a health check or a status`() {
-        assertNull(BackendHealth.summary(row(mapOf("http://a:80" to "UP"), checked = false)))
-        assertNull(BackendHealth.summary(row(emptyMap())))
-        assertNull(BackendHealth.summary(null))
+        assertNull(BackendHealth.summary(row(mapOf("http://a:80" to "UP"), checked = false)).english())
+        assertNull(BackendHealth.summary(row(emptyMap())).english())
+        assertNull(BackendHealth.summary(null).english())
     }
 
     @Test

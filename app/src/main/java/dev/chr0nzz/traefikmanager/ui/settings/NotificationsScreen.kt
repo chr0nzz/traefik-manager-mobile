@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import dev.chr0nzz.traefikmanager.data.model.PushFailure
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -261,11 +262,7 @@ fun NotificationsScreen(
                         }
                         if (push.error.isNotBlank()) {
                             Text(
-                                text = if (push.error == PushViewModel.NOTIFICATIONS_BLOCKED) {
-                                    stringResource(R.string.push_error_blocked)
-                                } else {
-                                    push.error
-                                },
+                                text = PushFailure.text(push.error).asString(),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.yellow,
                                 modifier = Modifier.padding(top = TmSpacing.xs),

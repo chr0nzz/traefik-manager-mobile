@@ -1,8 +1,10 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import androidx.annotation.StringRes
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class BackendServer(
@@ -158,20 +160,20 @@ data class RouteForm(
 
     val effectivePassHostHeader: Boolean get() = if (streamingEnabled) true else passHostHeader
 
-    val validationError: String?
+    val validationError: UiText?
         get() = when {
-            name.isBlank() -> "A route name is required."
+            name.isBlank() -> UiText.of(R.string.routes_error_no_name)
             EntityNames.problem(name) != null -> EntityNames.problem(name)
             usesSharedService && serviceRef.isBlank() ->
-                "Pick the service this route points at."
+                UiText.of(R.string.routes_error_no_service)
             usesSharedService -> null
             !isManagedService -> null
             backends.any { it.isService && it.serviceName.isBlank() } ->
-                "Pick a service for every service backend."
+                UiText.of(R.string.routes_error_backend_service)
             backends.none { it.filled } ->
-                "A backend host is required."
+                UiText.of(R.string.routes_error_no_host)
             protocol != RouteProtocol.Http && backends.any { it.host.isNotBlank() && it.port.isBlank() } ->
-                "${protocol.wire.uppercase()} routes need a backend port."
+                UiText.of(R.string.routes_error_no_port, protocol.wire.uppercase())
             else -> null
         }
 
@@ -182,18 +184,19 @@ data class RouteForm(
         const val CERT_RESOLVER_NONE = "__none__"
         const val LOAD_BALANCER = "loadBalancer"
 
-        val compositeTypes: List<Pair<String, String>> = listOf(
-            LOAD_BALANCER to "Load balanced",
-            "weighted" to "Weighted",
-            "mirroring" to "Mirroring",
-            "failover" to "Failover",
+        val compositeTypes: List<Pair<String, Int>> = listOf(
+            LOAD_BALANCER to R.string.routes_combine_load_balanced,
+            "weighted" to R.string.services_type_weighted,
+            "mirroring" to R.string.services_type_mirroring,
+            "failover" to R.string.services_type_failover,
         )
 
-        fun combineHint(type: String): String = when (type) {
-            "weighted" -> "Traffic is split by weight."
-            "mirroring" -> "The first backend serves. The rest get a copy."
-            "failover" -> "The first backend serves. The second takes over if it fails."
-            else -> "Traffic is load balanced across every backend."
+        @StringRes
+        fun combineHint(type: String): Int = when (type) {
+            "weighted" -> R.string.routes_combine_hint_weighted
+            "mirroring" -> R.string.routes_combine_hint_mirroring
+            "failover" -> R.string.routes_combine_hint_failover
+            else -> R.string.routes_combine_hint_load_balanced
         }
     }
 }

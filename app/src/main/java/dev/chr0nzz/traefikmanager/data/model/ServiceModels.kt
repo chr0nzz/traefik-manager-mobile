@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class ServiceServer(
@@ -130,7 +131,7 @@ data class ServiceRow(
     val backendsUp: Int,
     val backendsTotal: Int,
     val servers: List<ServiceServerRow>,
-    val composite: List<String>,
+    val composite: List<UiText>,
     val sticky: Boolean,
     val healthCheck: Boolean,
     val passHostHeader: Boolean?,
@@ -142,25 +143,22 @@ data class ServiceRow(
 
     val authorable: Boolean get() = proto == ServiceProtocol.Http
 
-    val usedByLabel: String?
-        get() = when (usedBy.size) {
-            0 -> null
-            1 -> "used by 1 route"
-            else -> "used by ${usedBy.size} routes"
-        }
+    val usedByLabel: UiText?
+        get() = if (usedBy.isEmpty()) null else UiText.plural(R.plurals.middlewares_used_by, usedBy.size)
 
-    val backendSummary: String? get() = if (backendsTotal > 0) "$backendsUp/$backendsTotal active" else null
+    val backendSummary: UiText?
+        get() = if (backendsTotal > 0) UiText.of(R.string.services_backends_active, backendsUp, backendsTotal) else null
 
     val allBackendsUp: Boolean get() = backendsTotal > 0 && backendsUp == backendsTotal
 
-    val metaParts: List<String>
+    val metaParts: List<UiText>
         get() = buildList {
             if (composite.isEmpty() && servers.isNotEmpty()) {
-                add(if (servers.size == 1) "1 server" else "${servers.size} servers")
+                add(UiText.plural(R.plurals.common_servers_count, servers.size))
             }
             backendSummary?.let(::add)
-            if (sticky) add("sticky")
-            if (healthCheck) add("health check")
+            if (sticky) add(UiText.of(R.string.services_meta_sticky))
+            if (healthCheck) add(UiText.of(R.string.services_meta_health_check))
         }
 }
 
@@ -245,18 +243,18 @@ object ServiceRows {
         }
     }
 
-    private fun compositeTargets(service: TraefikService): List<String> = buildList {
+    private fun compositeTargets(service: TraefikService): List<UiText> = buildList {
         service.weighted?.services?.forEach { child ->
-            add(if (child.weight != null) "${child.name} (${child.weight})" else child.name)
+            add(UiText.Raw(if (child.weight != null) "${child.name} (${child.weight})" else child.name))
         }
-        service.mirroring?.service?.let(::add)
+        service.mirroring?.service?.let { add(UiText.Raw(it)) }
         service.mirroring?.mirrors?.forEach { mirror ->
-            add("${mirror.name} mirror (${mirror.percent ?: 0}%)")
+            add(UiText.of(R.string.services_target_mirror, mirror.name, mirror.percent ?: 0))
         }
-        service.failover?.service?.let(::add)
-        service.failover?.fallback?.let { add("$it fallback") }
+        service.failover?.service?.let { add(UiText.Raw(it)) }
+        service.failover?.fallback?.let { add(UiText.of(R.string.services_target_fallback, it)) }
         service.highestRandomWeight?.services?.forEach { child ->
-            add(if (child.weight != null) "${child.name} (${child.weight})" else child.name)
+            add(UiText.Raw(if (child.weight != null) "${child.name} (${child.weight})" else child.name))
         }
     }
 
@@ -313,28 +311,28 @@ data class ServiceOwnershipResponse(
 
 object ServiceTypes {
 
-    val authorable: List<Pair<String, String>> = listOf(
-        "loadBalancer" to "Load balancer",
-        "weighted" to "Weighted",
-        "mirroring" to "Mirroring",
-        "failover" to "Failover",
+    val authorable: List<Pair<String, UiText>> = listOf(
+        "loadBalancer" to UiText.of(R.string.services_type_load_balancer),
+        "weighted" to UiText.of(R.string.services_type_weighted),
+        "mirroring" to UiText.of(R.string.services_type_mirroring),
+        "failover" to UiText.of(R.string.services_type_failover),
     )
 
-    fun label(type: String): String =
+    fun label(type: String): UiText =
         authorable.firstOrNull { it.first == type }?.second
-            ?: if (type == "highestRandomWeight") "Highest random weight" else type
+            ?: if (type == "highestRandomWeight") UiText.of(R.string.services_type_hrw) else UiText.Raw(type)
 
-    fun shareLabel(type: String): String = when (type) {
-        "mirroring" -> "Percent"
-        "failover" -> ""
-        else -> "Weight"
+    fun shareLabel(type: String): UiText = when (type) {
+        "mirroring" -> UiText.of(R.string.routes_form_percent)
+        "failover" -> UiText.Raw("")
+        else -> UiText.of(R.string.routes_form_weight)
     }
 
-    fun rowHint(type: String, index: Int): String? = when {
-        type == "mirroring" && index == 0 -> "serves traffic"
-        type == "mirroring" -> "mirror"
-        type == "failover" && index == 0 -> "primary"
-        type == "failover" && index == 1 -> "fallback"
+    fun rowHint(type: String, index: Int): UiText? = when {
+        type == "mirroring" && index == 0 -> UiText.of(R.string.services_row_serves)
+        type == "mirroring" -> UiText.of(R.string.services_row_mirror)
+        type == "failover" && index == 0 -> UiText.of(R.string.services_row_primary)
+        type == "failover" && index == 1 -> UiText.of(R.string.services_row_fallback)
         else -> null
     }
 

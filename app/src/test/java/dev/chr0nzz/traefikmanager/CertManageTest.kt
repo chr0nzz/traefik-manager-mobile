@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.CertCleanup
 import dev.chr0nzz.traefikmanager.data.model.CertDeleteResponse
 import dev.chr0nzz.traefikmanager.data.model.CertEntry
@@ -14,6 +16,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class CertManageTest {
 
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
@@ -68,11 +71,11 @@ class CertManageTest {
 
     @Test
     fun `the outcome says when Traefik did not restart`() {
-        assertEquals("Removed 2 certificates", CertCleanup.outcome(CertDeleteResponse(ok = true, removed = 2, restarted = true), 2))
+        assertEquals("Removed 2 certificates", CertCleanup.outcome(CertDeleteResponse(ok = true, removed = 2, restarted = true), 2).english())
         assertEquals(
             "Removed 1 certificate, but Traefik did not restart: no socket. The change is undone until it does.",
-            CertCleanup.outcome(CertDeleteResponse(ok = true, removed = 1, restartError = "no socket"), 1),
+            CertCleanup.outcome(CertDeleteResponse(ok = true, removed = 1, restartError = "no socket"), 1).english(),
         )
-        assertEquals("Read only", CertCleanup.outcome(CertDeleteResponse(error = "Read only"), 1))
+        assertEquals("Read only", CertCleanup.outcome(CertDeleteResponse(error = "Read only"), 1).english())
     }
 }

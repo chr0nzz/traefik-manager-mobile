@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareForm
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareFormEncoder
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareProtocol
@@ -7,6 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class MiddlewareFormEncoderTest {
 
     private fun encode(form: MiddlewareForm, agentId: String? = null): Map<String, String> =
@@ -70,12 +73,12 @@ class MiddlewareFormEncoderTest {
     fun `a blank name or body is rejected before the request is built`() {
         assertEquals(
             "A middleware name is required.",
-            MiddlewareForm(name = "   ", yaml = "compress: {}").validationError,
+            MiddlewareForm(name = "   ", yaml = "compress: {}").validationError.english(),
         )
         assertEquals(
             "Middleware content cannot be empty.",
-            MiddlewareForm(name = "n", yaml = "  \n ").validationError,
+            MiddlewareForm(name = "n", yaml = "  \n ").validationError.english(),
         )
-        assertNull(MiddlewareForm(name = "n", yaml = "compress: {}").validationError)
+        assertNull(MiddlewareForm(name = "n", yaml = "compress: {}").validationError.english())
     }
 }

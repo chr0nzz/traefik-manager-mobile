@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import dev.chr0nzz.traefikmanager.data.model.PushFailure
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -92,13 +93,9 @@ class PushViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        const val NOTIFICATIONS_BLOCKED = "notifications_blocked"
-    }
-
     fun onPermissionDenied() {
         viewModelScope.launch {
-            preferencesStore.setPushError(NOTIFICATIONS_BLOCKED)
+            preferencesStore.setPushError(PushFailure.NOTIFICATIONS_BLOCKED)
         }
     }
 }

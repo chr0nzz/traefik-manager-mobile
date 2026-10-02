@@ -56,6 +56,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -241,7 +242,7 @@ fun ServiceDetailPane(
                     )
                     service.composite.forEachIndexed { index, target ->
                         Text(
-                            text = target,
+                            text = target.asString(),
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(vertical = TmSpacing.sm),

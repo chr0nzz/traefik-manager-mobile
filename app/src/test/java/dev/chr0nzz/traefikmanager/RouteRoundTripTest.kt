@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.BackendKind
 import dev.chr0nzz.traefikmanager.data.model.BackendMode
 import dev.chr0nzz.traefikmanager.data.model.BackendServer
@@ -19,6 +21,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class RouteRoundTripTest {
 
     private val domains = listOf("xyzlab.app", "xyzlab.dev", "example.com")
@@ -290,10 +293,10 @@ class RouteRoundTripTest {
 
     @Test
     fun `validation explains what is missing`() {
-        assertEquals("A route name is required.", RouteForm().validationError)
+        assertEquals("A route name is required.", RouteForm().validationError.english())
         assertEquals(
             "A backend host is required.",
-            RouteForm(name = "app").validationError,
+            RouteForm(name = "app").validationError.english(),
         )
         assertEquals(
             "TCP routes need a backend port.",
@@ -301,28 +304,28 @@ class RouteRoundTripTest {
                 name = "db",
                 protocol = RouteProtocol.Tcp,
                 backends = listOf(backend(port = "")),
-            ).validationError,
+            ).validationError.english(),
         )
         assertEquals(
             "Pick the service this route points at.",
-            RouteForm(name = "app", backendMode = BackendMode.ExistingService).validationError,
+            RouteForm(name = "app", backendMode = BackendMode.ExistingService).validationError.english(),
         )
         assertEquals(
             "Pick a service for every service backend.",
             RouteForm(
                 name = "app",
                 backends = listOf(BackendServer(kind = BackendKind.SERVICE)),
-            ).validationError,
+            ).validationError.english(),
         )
         assertNull(
-            RouteForm(name = "app", backends = listOf(backend())).validationError,
+            RouteForm(name = "app", backends = listOf(backend())).validationError.english(),
         )
     }
 
     @Test
     fun `a non-loadBalancer service is savable without backends`() {
         val form = RouteForm(name = "app", serviceType = "weighted", backends = emptyList())
-        assertNull(form.validationError)
+        assertNull(form.validationError.english())
         assertNull(encode(form).valueOf("backendsJsonHttp"))
     }
 
@@ -441,6 +444,7 @@ class CompositeRoutePayloadTest {
     }
 }
 
+@RunWith(RobolectricTestRunner::class)
 class BackendModeTest {
 
     private fun encode(form: RouteForm) = RouteFormEncoder.fields(form, null)
@@ -458,7 +462,7 @@ class BackendModeTest {
         )
         assertEquals("db-service", valueOf(form, "serviceRef"))
         assertNull(valueOf(form, "backendsJsonTcp"))
-        assertNull(form.validationError)
+        assertNull(form.validationError.english())
     }
 
     @Test

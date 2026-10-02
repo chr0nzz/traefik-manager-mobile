@@ -1,6 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.model
 
 import kotlinx.serialization.Serializable
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class MiddlewareTemplate(
@@ -60,11 +61,11 @@ data class MiddlewareForm(
     val originalName: String = "",
     val originalProtocol: MiddlewareProtocol = MiddlewareProtocol.Http,
 ) {
-    val validationError: String?
+    val validationError: UiText?
         get() = when {
-            name.isBlank() -> "A middleware name is required."
+            name.isBlank() -> UiText.of(R.string.middlewares_error_no_name)
             EntityNames.problem(name) != null -> EntityNames.problem(name)
-            yaml.isBlank() -> "Middleware content cannot be empty."
+            yaml.isBlank() -> UiText.of(R.string.middlewares_error_empty)
             else -> null
         }
 

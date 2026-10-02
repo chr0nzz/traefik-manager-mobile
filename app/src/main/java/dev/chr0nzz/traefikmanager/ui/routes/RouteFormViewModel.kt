@@ -364,7 +364,7 @@ class RouteFormViewModel @Inject constructor(
         val form = _state.value.form
         val problem = form.validationError
         if (problem != null) {
-            _state.update { it.copy(error = UiText.Raw(problem)) }
+            _state.update { it.copy(error = problem) }
             return
         }
         _state.update { it.copy(saving = true, error = null) }

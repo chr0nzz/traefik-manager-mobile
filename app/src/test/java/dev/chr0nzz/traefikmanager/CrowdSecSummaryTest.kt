@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecSummary
@@ -212,6 +214,7 @@ class CrowdSecSummaryTest {
     }
 }
 
+@RunWith(RobolectricTestRunner::class)
 class CrowdSecRoutesTest {
 
     private fun alert(ip: String, vararg meta: Pair<String, String>, handled: Boolean? = null) = CsAlert(
@@ -252,8 +255,8 @@ class CrowdSecRoutesTest {
 
     @Test
     fun `route and host facets are alert only and labelled for people`() {
-        assertEquals("route", CsFacet.Router.label)
-        assertEquals("host", CsFacet.Host.label)
+        assertEquals("route", CsFacet.Router.label.english())
+        assertEquals("host", CsFacet.Host.label.english())
         assertEquals(CsReads.Alerts, CsFacet.Router.reads)
         assertEquals(CsReads.Alerts, CsFacet.Host.reads)
         assertEquals(CsDecisionQuery(), CsFacets().toggle(CsFacet.Router, "x").toggle(CsFacet.Host, "y").decisionQuery(""))

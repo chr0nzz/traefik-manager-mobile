@@ -158,7 +158,7 @@ class CertificatesViewModel @Inject constructor(
         _state.update { it.copy(removing = true) }
         viewModelScope.launch {
             val message = runCatching { repository.remove(rows.map { CertRef(it.resolver, it.main) }) }.fold(
-                onSuccess = { response -> UiText.Raw(CertCleanup.outcome(response, rows.size)) },
+                onSuccess = { response -> CertCleanup.outcome(response, rows.size) },
                 onFailure = { throwable -> UiText.messageOr(throwable.message, R.string.certs_error_remove) },
             )
             _state.update { it.copy(removing = false, message = message) }

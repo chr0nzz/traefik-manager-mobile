@@ -1,11 +1,25 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import dev.chr0nzz.traefikmanager.R
+
 object PushFailure {
 
-    fun describe(reason: String): String = when (reason.uppercase()) {
-        "NETWORK" -> "No network when registering for push. It will be retried."
-        "ACTION_REQUIRED" -> "The distributor app needs attention before it will register this app."
-        "VAPID_REQUIRED" -> "This distributor requires a VAPID key, which this app does not use."
-        else -> "The distributor could not register this app for push."
+    const val NOTIFICATIONS_BLOCKED = "notifications_blocked"
+
+    private const val PREFIX = "push_failure:"
+
+    fun code(reason: String): String = PREFIX + reason.uppercase()
+
+    fun text(stored: String): UiText = when {
+        stored == NOTIFICATIONS_BLOCKED -> UiText.of(R.string.push_error_blocked)
+        !stored.startsWith(PREFIX) -> UiText.Raw(stored)
+        else -> UiText.of(
+            when (stored.removePrefix(PREFIX)) {
+                "NETWORK" -> R.string.push_error_network
+                "ACTION_REQUIRED" -> R.string.push_error_action
+                "VAPID_REQUIRED" -> R.string.push_error_vapid
+                else -> R.string.push_error_register
+            },
+        )
     }
 }

@@ -51,6 +51,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 enum class LauncherDensity { List, Icons }
 
@@ -213,7 +214,7 @@ private fun AppRow(
             )
             app.reason?.let { reason ->
                 Text(
-                    text = reason,
+                    text = reason.asString(),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                     maxLines = 1,

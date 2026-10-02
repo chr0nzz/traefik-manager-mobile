@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import dev.chr0nzz.traefikmanager.R
 
 object StaticSections {
 
@@ -108,9 +109,9 @@ data class EntrypointForm(
         }
 
         val underscoreOptions = listOf(
-            "" to "Keep (default)",
-            "delete" to "Delete - strip underscore headers",
-            "reject" to "Reject - 400 on underscore headers",
+            "" to UiText.of(R.string.static_option_keep_default),
+            "delete" to UiText.of(R.string.static_option_underscore_delete),
+            "reject" to UiText.of(R.string.static_option_underscore_reject),
         )
     }
 }
@@ -172,19 +173,19 @@ data class ResolverForm(
         }
 
         val challengeOptions = listOf(
-            "dnsChallenge" to "DNS Challenge",
-            "httpChallenge" to "HTTP Challenge",
-            "tlsChallenge" to "TLS Challenge",
+            "dnsChallenge" to UiText.of(R.string.static_option_challenge_dns),
+            "httpChallenge" to UiText.of(R.string.static_option_challenge_http),
+            "tlsChallenge" to UiText.of(R.string.static_option_challenge_tls),
         )
 
         val keyTypeOptions = listOf(
-            "" to "Default (RSA4096)",
-            "EC256" to "EC256",
-            "EC384" to "EC384",
-            "RSA2048" to "RSA2048",
-            "RSA3072" to "RSA3072",
-            "RSA4096" to "RSA4096",
-            "RSA8192" to "RSA8192",
+            "" to UiText.of(R.string.static_option_key_default),
+            "EC256" to UiText.Raw("EC256"),
+            "EC384" to UiText.Raw("EC384"),
+            "RSA2048" to UiText.Raw("RSA2048"),
+            "RSA3072" to UiText.Raw("RSA3072"),
+            "RSA4096" to UiText.Raw("RSA4096"),
+            "RSA8192" to UiText.Raw("RSA8192"),
         )
     }
 }
@@ -332,12 +333,12 @@ data class LogForm(
         }
 
         val levels = listOf("DEBUG", "INFO", "WARN", "ERROR")
-        val formats = listOf("" to "Text (default)", "json" to "JSON")
-        val accessFormats = listOf("" to "CLF (default)", "json" to "JSON")
+        val formats = listOf("" to UiText.of(R.string.static_option_format_text), "json" to UiText.Raw("JSON"))
+        val accessFormats = listOf("" to UiText.of(R.string.static_option_format_clf), "json" to UiText.Raw("JSON"))
         val headerModes = listOf(
-            "" to "Drop (default)",
-            "keep" to "Keep",
-            "redact" to "Redact",
+            "" to UiText.of(R.string.static_option_headers_drop),
+            "keep" to UiText.of(R.string.static_option_headers_keep),
+            "redact" to UiText.of(R.string.static_option_headers_redact),
         )
     }
 }
@@ -425,7 +426,10 @@ data class SystemForm(
             )
         }
 
-        val ruleSyntaxOptions = listOf("" to "v3 (default)", "v2" to "v2 (compatibility)")
+        val ruleSyntaxOptions = listOf(
+            "" to UiText.of(R.string.static_option_syntax_v3),
+            "v2" to UiText.of(R.string.static_option_syntax_v2),
+        )
     }
 }
 

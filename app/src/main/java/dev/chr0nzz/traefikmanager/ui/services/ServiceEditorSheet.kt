@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.services
 
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -242,7 +244,11 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
                 FormSelect(
                     label = stringResource(R.string.common_label_scheme),
                     value = health.scheme,
-                    options = listOf("" to stringResource(R.string.services_form_port_placeholder), "http" to "http", "https" to "https"),
+                    options = listOf(
+                        "" to UiText.of(R.string.services_form_port_placeholder),
+                        "http" to UiText.Raw("http"),
+                        "https" to UiText.Raw("https"),
+                    ),
                     onChange = { onChange(health.copy(scheme = it)) },
                 )
             }
@@ -269,7 +275,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
                 FormSelect(
                     label = stringResource(R.string.services_form_mode),
                     value = health.mode,
-                    options = listOf("" to "http", "grpc" to "grpc"),
+                    options = listOf("" to UiText.Raw("http"), "grpc" to UiText.Raw("grpc")),
                     onChange = { onChange(health.copy(mode = it)) },
                 )
             }
@@ -341,7 +347,7 @@ private fun ChildRow(
             modifier = Modifier.fillMaxWidth(),
         ) {
             ServiceTypes.rowHint(type, index)?.let { hint ->
-                Text(text = hint, style = MaterialTheme.typography.labelSmall, color = palette.muted)
+                Text(text = hint.asString(), style = MaterialTheme.typography.labelSmall, color = palette.muted)
             }
             FilterChip(
                 selected = child.kind == ServiceChildDraft.MANUAL,
@@ -369,14 +375,14 @@ private fun ChildRow(
             FormSelect(
                 label = stringResource(R.string.common_label_service),
                 value = child.name,
-                options = services.map { it to it },
+                options = services.map { it to UiText.Raw(it) },
                 onChange = { onChange(child.copy(name = it)) },
             )
         } else {
             FormSelect(
                 label = stringResource(R.string.common_label_scheme),
                 value = child.scheme,
-                options = listOf("http" to "http", "https" to "https", "h2c" to "h2c"),
+                options = listOf("http" to UiText.Raw("http"), "https" to UiText.Raw("https"), "h2c" to UiText.Raw("h2c")),
                 onChange = { onChange(child.copy(scheme = it)) },
             )
             FormField(
@@ -391,7 +397,7 @@ private fun ChildRow(
         if (ServiceTypes.usesShare(type)) {
             Row(modifier = Modifier.width(160.dp)) {
                 FormField(
-                    label = ServiceTypes.shareLabel(type),
+                    label = ServiceTypes.shareLabel(type).asString(),
                     value = child.share,
                     onChange = { onChange(child.copy(share = it)) },
                     numeric = true,

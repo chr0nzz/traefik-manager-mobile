@@ -56,7 +56,7 @@ data class ServiceDraft(
 
     fun problem(): UiText? = when {
         name.isBlank() -> UiText.of(R.string.services_error_no_name)
-        EntityNames.problem(name) != null -> EntityNames.problem(name)?.let(UiText::Raw)
+        EntityNames.problem(name) != null -> EntityNames.problem(name)
         payload().children.isEmpty() -> UiText.of(R.string.services_error_no_backend)
         type == "loadBalancer" && payload().children.none { it.kind == ServiceChildDraft.MANUAL } ->
             UiText.of(R.string.services_error_no_address)

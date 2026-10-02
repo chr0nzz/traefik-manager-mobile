@@ -2361,4 +2361,175 @@
     <string name="middlewares_category_security">Security</string>
     <string name="middlewares_category_routing">Routing</string>
     <string name="middlewares_category_advanced">Advanced</string>
+
+    <string name="names_error_empty">Give it a name</string>
+    <string name="names_error_reserved">That name is reserved</string>
+    <string name="names_error_long">Keep the name to %1$d characters or fewer</string>
+    <string name="names_error_characters">A name cannot contain @ / , : { or }</string>
+    <string name="middlewares_error_no_name">A middleware name is required.</string>
+    <string name="middlewares_error_empty">Middleware content cannot be empty.</string>
+    <string name="routes_error_no_name">A route name is required.</string>
+    <string name="routes_error_no_service">Pick the service this route points at.</string>
+    <string name="routes_error_backend_service">Pick a service for every service backend.</string>
+    <string name="routes_error_no_host">A backend host is required.</string>
+    <!-- %1$s is TCP or UDP -->
+    <string name="routes_error_no_port">%1$s routes need a backend port.</string>
+    <!-- Way of combining backends: spread traffic across them -->
+    <string name="routes_combine_load_balanced">Load balanced</string>
+    <!-- A Traefik service type: traffic split by weight -->
+    <string name="services_type_weighted">Weighted</string>
+    <!-- A Traefik service type: traffic copied to other backends -->
+    <string name="services_type_mirroring">Mirroring</string>
+    <!-- A Traefik service type: a second backend takes over when the first fails -->
+    <string name="services_type_failover">Failover</string>
+    <string name="routes_combine_hint_weighted">Traffic is split by weight.</string>
+    <string name="routes_combine_hint_mirroring">The first backend serves. The rest get a copy.</string>
+    <string name="routes_combine_hint_failover">The first backend serves. The second takes over if it fails.</string>
+    <string name="routes_combine_hint_load_balanced">Traffic is load balanced across every backend.</string>
+    <string name="health_up_self">Reachable, this app</string>
+    <plurals name="health_up_servers">
+        <item quantity="one">Reachable, %1$d of %2$d server up</item>
+        <item quantity="other">Reachable, %1$d of %2$d servers up</item>
+    </plurals>
+    <!-- %1$d is a time in milliseconds -->
+    <string name="health_up_latency">Reachable in %1$dms</string>
+    <!-- State of a route: it answers -->
+    <string name="health_up">Reachable</string>
+    <plurals name="health_degraded_servers">
+        <item quantity="one">Degraded, %1$d of %2$d server up</item>
+        <item quantity="other">Degraded, %1$d of %2$d servers up</item>
+    </plurals>
+    <!-- State of a route: some backend servers are down -->
+    <string name="health_degraded">Degraded</string>
+    <plurals name="health_down_servers">
+        <item quantity="one">Down, 0 of %d server up</item>
+        <item quantity="other">Down, 0 of %d servers up</item>
+    </plurals>
+    <!-- %1$s is the reason, sent by the server -->
+    <string name="health_down_reason">Down: %1$s</string>
+    <!-- State of a route: it does not answer -->
+    <string name="health_down">Down</string>
+    <string name="health_unchecked">Not checked yet</string>
+    <!-- Shown in place of a certificate that has no domain -->
+    <string name="certs_unknown">Unknown</string>
+    <!-- Lowercase -->
+    <string name="certs_expired">expired</string>
+    <!-- Lowercase. %1$d is a number of days and the d after it is short for days. Keep it short -->
+    <string name="certs_days_left">%1$dd left</string>
+    <plurals name="certs_removed">
+        <item quantity="one">Removed %d certificate</item>
+        <item quantity="other">Removed %d certificates</item>
+    </plurals>
+    <plurals name="certs_removed_no_restart">
+        <item quantity="one">Removed %d certificate, but Traefik did not restart. The change is undone until it does.</item>
+        <item quantity="other">Removed %d certificates, but Traefik did not restart. The change is undone until it does.</item>
+    </plurals>
+    <!-- %2$s is the reason, sent by the server -->
+    <plurals name="certs_removed_no_restart_reason">
+        <item quantity="one">Removed %1$d certificate, but Traefik did not restart: %2$s. The change is undone until it does.</item>
+        <item quantity="other">Removed %1$d certificates, but Traefik did not restart: %2$s. The change is undone until it does.</item>
+    </plurals>
+    <string name="certs_error_partial">Certificate removal stopped partway</string>
+    <!-- Lowercase name of a filter. A CrowdSec scenario, an attack pattern -->
+    <string name="crowdsec_facet_scenario">scenario</string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_network">network</string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_country">country</string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_path">path</string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_account">account</string>
+    <!-- Lowercase name of a filter. The tool or user agent an attacker used -->
+    <string name="crowdsec_facet_tool">tool</string>
+    <!-- Lowercase name of a filter. HTTP method -->
+    <string name="crowdsec_facet_method">method</string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_route">route</string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_host">host</string>
+    <!-- Lowercase name of a filter. Whether the source ended up banned -->
+    <string name="crowdsec_facet_outcome">outcome</string>
+    <!-- Lowercase name of a filter. Where a ban came from -->
+    <string name="crowdsec_facet_origin">origin</string>
+    <!-- Lowercase name of a filter. The kind of decision, such as ban -->
+    <string name="crowdsec_facet_type">type</string>
+    <!-- Lowercase. Why an app on the dashboard cannot be opened -->
+    <string name="dashboard_no_link_disabled">link disabled for this route</string>
+    <string name="dashboard_no_link_bad_override">the link override is not an http or https URL. Fix it in edit</string>
+    <string name="dashboard_no_link_stream">stream route, nothing to open</string>
+    <string name="dashboard_no_link_no_rule">no rule, nothing to open. Set a link in edit</string>
+    <string name="dashboard_no_link_wildcard">no launch URL, wildcard host. Set one in edit</string>
+    <string name="dashboard_no_link_no_host">no launch URL, the rule has no host. Set one in edit</string>
+    <string name="dashboard_no_link_pattern">no launch URL, pattern rule. Set one in edit</string>
+    <!-- Name of the dashboard group for apps that fit no other group -->
+    <string name="dashboard_group_other">Other</string>
+    <string name="push_error_network">No network when registering for push. It will be retried.</string>
+    <!-- The distributor is the push app that delivers notifications -->
+    <string name="push_error_action">The distributor app needs attention before it will register this app.</string>
+    <!-- Keep VAPID as it is -->
+    <string name="push_error_vapid">This distributor requires a VAPID key, which this app does not use.</string>
+    <string name="push_error_register">The distributor could not register this app for push.</string>
+
+    <!-- Lowercase. How many backend servers answer out of the total -->
+    <string name="services_backends_active">%1$d/%2$d active</string>
+    <plurals name="common_servers_count">
+        <item quantity="one">%d server</item>
+        <item quantity="other">%d servers</item>
+    </plurals>
+    <!-- Lowercase: the service uses sticky sessions -->
+    <string name="services_meta_sticky">sticky</string>
+    <!-- Lowercase: the service has a health check -->
+    <string name="services_meta_health_check">health check</string>
+    <!-- %1$s is a service name, %2$d is the share of traffic copied to it -->
+    <string name="services_target_mirror">%1$s mirror (%2$d%%)</string>
+    <!-- %1$s is the name of the service that takes over on failure -->
+    <string name="services_target_fallback">%1$s fallback</string>
+    <!-- A Traefik service type -->
+    <string name="services_type_load_balancer">Load balancer</string>
+    <!-- A Traefik service type -->
+    <string name="services_type_hrw">Highest random weight</string>
+    <!-- Lowercase role of the first backend in a mirroring service -->
+    <string name="services_row_serves">serves traffic</string>
+    <!-- Lowercase role of a backend: it gets a copy of the traffic -->
+    <string name="services_row_mirror">mirror</string>
+    <!-- Lowercase role of the first backend in a failover service -->
+    <string name="services_row_primary">primary</string>
+    <!-- Lowercase role of the backend that takes over on failure -->
+    <string name="services_row_fallback">fallback</string>
+    <!-- Lowercase -->
+    <plurals name="health_all_servers_down">
+        <item quantity="one">all %d server down</item>
+        <item quantity="other">all %d servers down</item>
+    </plurals>
+    <!-- Lowercase -->
+    <plurals name="health_servers_down">
+        <item quantity="one">%1$d of %2$d server down</item>
+        <item quantity="other">%1$d of %2$d servers down</item>
+    </plurals>
+    <!-- Choice: leave headers as they are -->
+    <string name="static_option_keep_default">Keep (default)</string>
+    <string name="static_option_underscore_delete">Delete - strip underscore headers</string>
+    <!-- 400 is the HTTP status the request is answered with -->
+    <string name="static_option_underscore_reject">Reject - 400 on underscore headers</string>
+    <!-- An ACME challenge type -->
+    <string name="static_option_challenge_dns">DNS Challenge</string>
+    <!-- An ACME challenge type -->
+    <string name="static_option_challenge_http">HTTP Challenge</string>
+    <!-- An ACME challenge type -->
+    <string name="static_option_challenge_tls">TLS Challenge</string>
+    <!-- Keep RSA4096 as it is -->
+    <string name="static_option_key_default">Default (RSA4096)</string>
+    <!-- Log format choice: plain text -->
+    <string name="static_option_format_text">Text (default)</string>
+    <!-- Log format choice. CLF is the Common Log Format, keep it as it is -->
+    <string name="static_option_format_clf">CLF (default)</string>
+    <!-- Choice: leave HTTP headers out of the access log -->
+    <string name="static_option_headers_drop">Drop (default)</string>
+    <!-- Choice: write HTTP headers to the access log -->
+    <string name="static_option_headers_keep">Keep</string>
+    <!-- Choice: write HTTP header names to the access log but hide their values -->
+    <string name="static_option_headers_redact">Redact</string>
+    <string name="static_option_syntax_v3">v3 (default)</string>
+    <string name="static_option_syntax_v2">v2 (compatibility)</string>
 </resources>

@@ -17,7 +17,7 @@ class TmPushService : PushService() {
     }
 
     override fun onRegistrationFailed(reason: FailedReason, instance: String) {
-        PushSyncWorker.failed(this, PushFailure.describe(reason.name))
+        PushSyncWorker.failed(this, PushFailure.code(reason.name))
     }
 
     override fun onUnregistered(instance: String) {

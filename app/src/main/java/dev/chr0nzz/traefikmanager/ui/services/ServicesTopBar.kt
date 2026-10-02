@@ -56,6 +56,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -160,7 +161,7 @@ fun ServicesTopBar(
                             supportingContent = {
                                 Text(
                                     text = service.servers.firstOrNull()?.target
-                                        ?: service.composite.firstOrNull()
+                                        ?: service.composite.firstOrNull()?.asString()
                                         ?: service.provider,
                                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                                 )

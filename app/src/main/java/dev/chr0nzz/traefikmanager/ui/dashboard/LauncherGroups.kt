@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.dashboard
 
+import androidx.compose.material.icons.outlined.Apps
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Build
@@ -28,6 +29,7 @@ private val BUILT_IN_GROUPS = mapOf(
     "Network" to BuiltInGroup(R.string.dashboard_group_network, Icons.Outlined.Lan),
     "Dev" to BuiltInGroup(R.string.dashboard_group_dev, Icons.Outlined.Code),
     "Servers" to BuiltInGroup(R.string.dashboard_group_servers, Icons.Outlined.Dns),
+    "Other" to BuiltInGroup(R.string.dashboard_group_other, Icons.Outlined.Apps),
 )
 
 fun builtInGroupIcon(name: String): ImageVector? = BUILT_IN_GROUPS[name]?.icon

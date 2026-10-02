@@ -1,4 +1,4 @@
-data/model 90
+data/model 33
 data/repo 77
 data/store 3
 push 8

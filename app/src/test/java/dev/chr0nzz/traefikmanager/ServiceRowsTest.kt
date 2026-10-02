@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.FailoverService
 import dev.chr0nzz.traefikmanager.data.model.MirrorChild
 import dev.chr0nzz.traefikmanager.data.model.MirroringService
@@ -26,6 +28,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class ServiceRowsTest {
 
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
@@ -49,7 +52,7 @@ class ServiceRowsTest {
         assertEquals(ServiceHealth.Warning, built.health)
         assertEquals(1, built.backendsUp)
         assertEquals(2, built.backendsTotal)
-        assertEquals("1/2 active", built.backendSummary)
+        assertEquals("1/2 active", built.backendSummary.english())
     }
 
     @Test
@@ -62,7 +65,7 @@ class ServiceRowsTest {
         val built = row(service)
         assertEquals(ServiceHealth.Error, built.health)
         assertEquals(0, built.backendsUp)
-        assertEquals("0/2 active", built.backendSummary)
+        assertEquals("0/2 active", built.backendSummary.english())
     }
 
     @Test
@@ -150,7 +153,7 @@ class ServiceRowsTest {
         )
         assertEquals(
             listOf("a@file (3)", "b@file (0)", "c@file", "main@file", "shadow@file mirror (10%)", "primary@file", "backup@file fallback"),
-            row(service).composite,
+            row(service).composite.map { it.english() },
         )
     }
 
@@ -163,7 +166,7 @@ class ServiceRowsTest {
                 weighted = WeightedService(listOf(WeightedChild("a@file", 1))),
             ),
         )
-        assertTrue(weighted.metaParts.none { it.endsWith("server") || it.endsWith("servers") })
+        assertTrue(weighted.metaParts.mapNotNull { it.english() }.none { it.endsWith("server") || it.endsWith("servers") })
 
         val plain = row(
             TraefikService(
@@ -173,7 +176,7 @@ class ServiceRowsTest {
                 loadBalancer = ServiceLoadBalancer(servers = listOf(ServiceServer(url = "http://a:80"))),
             ),
         )
-        assertEquals(listOf("1 server", "1/1 active"), plain.metaParts)
+        assertEquals(listOf("1 server", "1/1 active"), plain.metaParts.map { it.english() })
     }
 
     @Test
@@ -199,7 +202,7 @@ class ServiceRowsTest {
         val built = row(service)
         assertTrue(built.sticky)
         assertTrue(built.healthCheck)
-        assertEquals(listOf("sticky", "health check"), built.metaParts)
+        assertEquals(listOf("sticky", "health check"), built.metaParts.map { it.english() })
     }
 
     @Test
@@ -214,11 +217,11 @@ class ServiceRowsTest {
 
     @Test
     fun `used by labels are pluralised like the web`() {
-        assertNull(row(TraefikService(name = "a")).usedByLabel)
-        assertEquals("used by 1 route", row(TraefikService(name = "a", usedBy = listOf("r@file"))).usedByLabel)
+        assertNull(row(TraefikService(name = "a")).usedByLabel.english())
+        assertEquals("used by 1 route", row(TraefikService(name = "a", usedBy = listOf("r@file"))).usedByLabel.english())
         assertEquals(
             "used by 2 routes",
-            row(TraefikService(name = "a", usedBy = listOf("r@file", "s@file"))).usedByLabel,
+            row(TraefikService(name = "a", usedBy = listOf("r@file", "s@file"))).usedByLabel.english(),
         )
     }
 
@@ -265,6 +268,7 @@ class ServiceRowsTest {
     }
 }
 
+@RunWith(RobolectricTestRunner::class)
 class HighestRandomWeightTest {
 
     private fun row(service: TraefikService) = ServiceRows.row(service, ServiceProtocol.Http)
@@ -304,7 +308,7 @@ class HighestRandomWeightTest {
                 ),
             ),
         )
-        assertEquals(listOf("blue (3)", "green"), row(service).composite)
+        assertEquals(listOf("blue (3)", "green"), row(service).composite.map { it.english() })
     }
 
     @Test
@@ -315,6 +319,7 @@ class HighestRandomWeightTest {
     }
 }
 
+@RunWith(RobolectricTestRunner::class)
 class MirrorPercentTest {
 
     private fun row(service: TraefikService) = ServiceRows.row(service, ServiceProtocol.Http)
@@ -326,7 +331,7 @@ class MirrorPercentTest {
             type = "mirroring",
             mirroring = MirroringService(service = "main", mirrors = listOf(MirrorChild("shadow", 10))),
         )
-        assertEquals(listOf("main", "shadow mirror (10%)"), row(service).composite)
+        assertEquals(listOf("main", "shadow mirror (10%)"), row(service).composite.map { it.english() })
     }
 
     @Test
@@ -336,7 +341,7 @@ class MirrorPercentTest {
             type = "mirroring",
             mirroring = MirroringService(service = "main", mirrors = listOf(MirrorChild("shadow"))),
         )
-        assertEquals(listOf("main", "shadow mirror (0%)"), row(service).composite)
+        assertEquals(listOf("main", "shadow mirror (0%)"), row(service).composite.map { it.english() })
     }
 }
 
@@ -374,6 +379,7 @@ class ServiceOwnershipTest {
     }
 }
 
+@RunWith(RobolectricTestRunner::class)
 class ServiceDraftTest {
 
     @Test
@@ -420,7 +426,7 @@ class ServiceDraftTest {
     @Test
     fun `a name the server would reject is refused here first`() {
         assertEquals(
-            UiText.Raw("A name cannot contain @ / , : { or }"),
+            UiText.of(R.string.names_error_characters),
             ServiceDraft(name = "bad@file").problem(),
         )
     }

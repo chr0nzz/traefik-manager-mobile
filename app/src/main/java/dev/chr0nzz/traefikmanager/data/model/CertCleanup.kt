@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import dev.chr0nzz.traefikmanager.R
+
 object CertCleanup {
     private val HOST_RULE = Regex("""(!?)\s*Host(?:SNI)?\(`([^`]+)`\)""")
 
@@ -22,18 +24,15 @@ object CertCleanup {
         }
     }
 
-    fun outcome(response: CertDeleteResponse, asked: Int): String {
+    fun outcome(response: CertDeleteResponse, asked: Int): UiText {
         val removed = response.removed.takeIf { it > 0 } ?: asked
-        val noun = if (removed == 1) "certificate" else "certificates"
         return when {
-            response.ok && response.restarted -> "Removed $removed $noun"
-            response.ok -> buildString {
-                append("Removed $removed $noun, but Traefik did not restart")
-                response.restartError.takeIf { it.isNotBlank() }?.let { append(": $it") }
-                append(". The change is undone until it does.")
-            }
-            response.partial -> response.error ?: "Certificate removal stopped partway"
-            else -> response.error ?: "Could not remove the certificate"
+            response.ok && response.restarted -> UiText.plural(R.plurals.certs_removed, removed)
+            response.ok -> response.restartError.takeIf { it.isNotBlank() }
+                ?.let { UiText.plural(R.plurals.certs_removed_no_restart_reason, removed, removed, it) }
+                ?: UiText.plural(R.plurals.certs_removed_no_restart, removed)
+            response.partial -> UiText.messageOr(response.error, R.string.certs_error_partial)
+            else -> UiText.messageOr(response.error, R.string.certs_error_remove)
         }
     }
 }

@@ -258,7 +258,7 @@ class RoutesViewModel @Inject constructor(
             val message = runCatching {
                 certificates.remove(offer.certs.map { CertRef(it.resolver, it.main) })
             }.fold(
-                onSuccess = { response -> UiText.Raw(CertCleanup.outcome(response, offer.certs.size)) },
+                onSuccess = { response -> CertCleanup.outcome(response, offer.certs.size) },
                 onFailure = { throwable -> UiText.messageOr(throwable.message, R.string.certs_error_remove) },
             )
             _state.update { it.copy(message = message) }

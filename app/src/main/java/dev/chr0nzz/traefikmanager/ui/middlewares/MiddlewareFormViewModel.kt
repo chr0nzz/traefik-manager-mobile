@@ -271,6 +271,6 @@ class MiddlewareFormViewModel @Inject constructor(
             }
             if (wizardProblem != null) return wizardProblem
         }
-        return form.validationError?.let(UiText::Raw)
+        return form.validationError
     }
 }

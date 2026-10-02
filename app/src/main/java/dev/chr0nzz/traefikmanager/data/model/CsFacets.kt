@@ -1,19 +1,21 @@
 package dev.chr0nzz.traefikmanager.data.model
 
-enum class CsFacet(val key: String, val label: String, val reads: CsReads) {
-    Scenario("scenario", "scenario", CsReads.Both),
-    Ip("ip", "IP", CsReads.Both),
-    Asn("asn", "network", CsReads.Alerts),
-    Country("cc", "country", CsReads.Alerts),
-    Uri("uri", "path", CsReads.Alerts),
-    User("user", "account", CsReads.Alerts),
-    Agent("agent", "tool", CsReads.Alerts),
-    Verb("verb", "method", CsReads.Alerts),
-    Router("router", "route", CsReads.Alerts),
-    Host("host", "host", CsReads.Alerts),
-    Outcome("outcome", "outcome", CsReads.Alerts),
-    Origin("origin", "origin", CsReads.Decisions),
-    Type("type", "type", CsReads.Decisions),
+import dev.chr0nzz.traefikmanager.R
+
+enum class CsFacet(val key: String, val label: UiText, val reads: CsReads) {
+    Scenario("scenario", UiText.of(R.string.crowdsec_facet_scenario), CsReads.Both),
+    Ip("ip", UiText.Raw("IP"), CsReads.Both),
+    Asn("asn", UiText.of(R.string.crowdsec_facet_network), CsReads.Alerts),
+    Country("cc", UiText.of(R.string.crowdsec_facet_country), CsReads.Alerts),
+    Uri("uri", UiText.of(R.string.crowdsec_facet_path), CsReads.Alerts),
+    User("user", UiText.of(R.string.crowdsec_facet_account), CsReads.Alerts),
+    Agent("agent", UiText.of(R.string.crowdsec_facet_tool), CsReads.Alerts),
+    Verb("verb", UiText.of(R.string.crowdsec_facet_method), CsReads.Alerts),
+    Router("router", UiText.of(R.string.crowdsec_facet_route), CsReads.Alerts),
+    Host("host", UiText.of(R.string.crowdsec_facet_host), CsReads.Alerts),
+    Outcome("outcome", UiText.of(R.string.crowdsec_facet_outcome), CsReads.Alerts),
+    Origin("origin", UiText.of(R.string.crowdsec_facet_origin), CsReads.Decisions),
+    Type("type", UiText.of(R.string.crowdsec_facet_type), CsReads.Decisions),
 }
 
 enum class CsReads { Alerts, Decisions, Both }

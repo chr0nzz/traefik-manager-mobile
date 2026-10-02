@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.CertEntry
 import dev.chr0nzz.traefikmanager.data.model.CertHealth
 import dev.chr0nzz.traefikmanager.data.model.CertRows
@@ -14,6 +16,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class CertAndPluginTest {
 
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true; explicitNulls = false }
@@ -44,14 +47,14 @@ class CertAndPluginTest {
 
         val justExpired = CertRows.row(CertEntry(main = "a", notAfter = daysOut(-1, 12)), now)
         assertEquals(0, justExpired.daysLeft)
-        assertEquals("expired", justExpired.daysLeftLabel)
+        assertEquals("expired", justExpired.daysLeftLabel.english())
     }
 
     @Test
     fun `a missing or unparseable not_after is unknown, not expired`() {
         val missing = CertRows.row(CertEntry(main = "a"), now)
         assertNull(missing.daysLeft)
-        assertNull(missing.daysLeftLabel)
+        assertNull(missing.daysLeftLabel.english())
         assertEquals(CertHealth.Unknown, missing.health)
 
         val broken = CertRows.row(CertEntry(main = "a", notAfter = "not-a-date"), now)
@@ -90,7 +93,7 @@ class CertAndPluginTest {
         assertEquals(listOf("a.com", "7", ""), entry.sans)
 
         val row = CertRows.row(entry, now)
-        assertEquals("Unknown", row.title)
+        assertEquals("Unknown", row.title.english())
         assertEquals(listOf("a.com", "7"), row.extraDomains)
     }
 

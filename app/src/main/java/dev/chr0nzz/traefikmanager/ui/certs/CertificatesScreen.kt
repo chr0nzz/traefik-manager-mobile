@@ -382,7 +382,7 @@ private fun CertificateCard(
             IconTile(icon = Icons.Outlined.VerifiedUser, status = status)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = cert.title,
+                    text = cert.title.asString(),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -480,7 +480,7 @@ private fun CertificateCard(
             )
             cert.daysLeftLabel?.let { label ->
                 Text(
-                    text = label,
+                    text = label.asString(),
                     style = MaterialTheme.typography.labelSmall,
                     color = statusColor,
                 )

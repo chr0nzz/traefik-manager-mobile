@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
@@ -14,6 +16,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class RouteHealthTest {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -74,15 +77,15 @@ class RouteHealthTest {
     fun `the summary says what the check found`() {
         assertEquals(
             "Degraded, 1 of 2 servers up",
-            RouteHealth(state = "degraded", servers = RouteServerTally(1, 2)).summary,
+            RouteHealth(state = "degraded", servers = RouteServerTally(1, 2)).summary.english(),
         )
         assertEquals(
             "Down: Connection refused",
-            RouteHealth(state = "down", error = "Connection refused").summary,
+            RouteHealth(state = "down", error = "Connection refused").summary.english(),
         )
-        assertEquals("Reachable in 42ms", RouteHealth(state = "up", latencyMs = 42).summary)
-        assertEquals("Reachable, this app", RouteHealth(state = "up", self = true).summary)
-        assertEquals("Not checked yet", RouteHealth().summary)
+        assertEquals("Reachable in 42ms", RouteHealth(state = "up", latencyMs = 42).summary.english())
+        assertEquals("Reachable, this app", RouteHealth(state = "up", self = true).summary.english())
+        assertEquals("Not checked yet", RouteHealth().summary.english())
     }
 }
 

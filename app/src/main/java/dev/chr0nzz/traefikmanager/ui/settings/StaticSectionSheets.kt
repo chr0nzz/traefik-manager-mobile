@@ -15,6 +15,7 @@ import dev.chr0nzz.traefikmanager.data.model.StaticPluginForm
 import dev.chr0nzz.traefikmanager.data.model.SystemForm
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 @Composable
 fun EntrypointSheet(
@@ -381,7 +382,7 @@ fun LogSheet(
         FormSelect(
             label = stringResource(R.string.static_log_level),
             value = form.level,
-            options = LogForm.levels.map { it to it },
+            options = LogForm.levels.map { it to UiText.Raw(it) },
             onChange = { form = form.copy(level = it) },
         )
         FormSelect(

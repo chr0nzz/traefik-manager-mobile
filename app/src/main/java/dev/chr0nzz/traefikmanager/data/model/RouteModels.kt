@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class CompositeChild(
@@ -220,20 +221,22 @@ data class RouteHealth(
 ) {
     val known: Boolean get() = state == STATE_UP || state == STATE_DEGRADED || state == STATE_DOWN
 
-    val summary: String
+    val summary: UiText
         get() {
             val tally = servers
             return when {
-                state == STATE_UP && self -> "Reachable, this app"
-                state == STATE_UP && tally != null -> "Reachable, ${tally.up} of ${tally.total} servers up"
-                state == STATE_UP && latencyMs != null -> "Reachable in ${latencyMs}ms"
-                state == STATE_UP -> "Reachable"
+                state == STATE_UP && self -> UiText.of(R.string.health_up_self)
+                state == STATE_UP && tally != null ->
+                    UiText.plural(R.plurals.health_up_servers, tally.total, tally.up, tally.total)
+                state == STATE_UP && latencyMs != null -> UiText.of(R.string.health_up_latency, latencyMs)
+                state == STATE_UP -> UiText.of(R.string.health_up)
                 state == STATE_DEGRADED && tally != null ->
-                    "Degraded, ${tally.up} of ${tally.total} servers up"
-                state == STATE_DEGRADED -> "Degraded"
-                state == STATE_DOWN && tally != null -> "Down, 0 of ${tally.total} servers up"
-                state == STATE_DOWN -> error?.takeIf { it.isNotBlank() }?.let { "Down: $it" } ?: "Down"
-                else -> note?.takeIf { it.isNotBlank() } ?: "Not checked yet"
+                    UiText.plural(R.plurals.health_degraded_servers, tally.total, tally.up, tally.total)
+                state == STATE_DEGRADED -> UiText.of(R.string.health_degraded)
+                state == STATE_DOWN && tally != null -> UiText.plural(R.plurals.health_down_servers, tally.total)
+                state == STATE_DOWN -> error?.takeIf { it.isNotBlank() }?.let { UiText.of(R.string.health_down_reason, it) }
+                    ?: UiText.of(R.string.health_down)
+                else -> UiText.messageOr(note, R.string.health_unchecked)
             }
         }
 

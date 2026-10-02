@@ -557,20 +557,21 @@ private fun BackendSection(
                     .fillMaxWidth()
                     .padding(top = TmSpacing.sm),
             ) {
+                val compositeTypes = RouteForm.compositeTypes.map { it.first to stringResource(it.second) }
                 DropdownField(
                     label = stringResource(R.string.routes_form_combine),
-                    value = RouteForm.compositeTypes.firstOrNull { it.first == form.compositeType }?.second
+                    value = compositeTypes.firstOrNull { it.first == form.compositeType }?.second
                         ?: form.compositeType,
-                    options = RouteForm.compositeTypes.map { it.second },
+                    options = compositeTypes.map { it.second },
                     onSelect = { label ->
-                        val picked = RouteForm.compositeTypes.firstOrNull { it.second == label }?.first
+                        val picked = compositeTypes.firstOrNull { it.second == label }?.first
                         if (picked != null) viewModel.setCompositeType(picked)
                     },
                     modifier = Modifier.weight(1f),
                 )
             }
             Text(
-                text = RouteForm.combineHint(form.compositeType),
+                text = stringResource(RouteForm.combineHint(form.compositeType)),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
             )

@@ -32,17 +32,6 @@ data class AgentHealth(
     val error: String? = null,
 )
 
-data class ServerTarget(
-    val id: String?,
-    val name: String,
-) {
-    val isHost: Boolean get() = id == null
-
-    companion object {
-        val Host = ServerTarget(null, "Host")
-    }
-}
-
 @Serializable
 data class AgentConfig(
     val id: String = "",
