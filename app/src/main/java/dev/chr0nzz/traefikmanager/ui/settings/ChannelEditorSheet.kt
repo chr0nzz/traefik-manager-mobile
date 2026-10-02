@@ -52,6 +52,9 @@ import dev.chr0nzz.traefikmanager.data.model.ChannelKinds
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -85,7 +88,7 @@ fun ChannelEditorSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = if (draft.adding) "Add channel" else "Edit channel",
+                text = stringResource(if (draft.adding) R.string.channels_add_title else R.string.channels_edit_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -93,9 +96,9 @@ fun ChannelEditorSheet(
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = { onChange(draft.copy(name = it)) },
-                label = { Text("Name") },
-                placeholder = { Text("e.g. Ops Discord") },
-                supportingText = { Text("Label for this destination in the channel list.") },
+                label = { Text(stringResource(R.string.common_label_name)) },
+                placeholder = { Text(stringResource(R.string.channels_name_placeholder)) },
+                supportingText = { Text(stringResource(R.string.channels_name_help)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -109,8 +112,8 @@ fun ChannelEditorSheet(
                     value = kind?.pickerLabel ?: draft.kind,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Type") },
-                    supportingText = { Text("Payload format for the target service.") },
+                    label = { Text(stringResource(R.string.common_label_type)) },
+                    supportingText = { Text(stringResource(R.string.channels_type_help)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = kindOpen) },
                     modifier = Modifier
                         .menuAnchor(MenuAnchorType.PrimaryNotEditable)
@@ -155,25 +158,25 @@ fun ChannelEditorSheet(
             }
 
             if (kind?.basicAuth == true) {
-                SectionLabel("Basic auth", modifier = Modifier.padding(top = TmSpacing.xs))
+                SectionLabel(stringResource(R.string.channels_auth_section), modifier = Modifier.padding(top = TmSpacing.xs))
                 Text(
-                    text = "Optional credentials for endpoints that require authentication.",
+                    text = stringResource(R.string.channels_auth_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
                 OutlinedTextField(
                     value = draft.username,
                     onValueChange = { onChange(draft.copy(username = it)) },
-                    label = { Text("Username") },
-                    placeholder = { Text("Leave empty if not required") },
+                    label = { Text(stringResource(R.string.middlewares_generate_username)) },
+                    placeholder = { Text(stringResource(R.string.channels_auth_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = draft.password,
                     onValueChange = { onChange(draft.copy(password = it)) },
-                    label = { Text("Password") },
-                    placeholder = { Text("Leave empty if not required") },
+                    label = { Text(stringResource(R.string.middlewares_generate_password)) },
+                    placeholder = { Text(stringResource(R.string.channels_auth_placeholder)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -184,16 +187,16 @@ fun ChannelEditorSheet(
                 )
             }
 
-            SectionLabel("Delivery", modifier = Modifier.padding(top = TmSpacing.sm))
+            SectionLabel(stringResource(R.string.channels_delivery_section), modifier = Modifier.padding(top = TmSpacing.sm))
 
             ToggleLine(
-                title = "Enabled",
-                subtitle = "Deliver events to this channel.",
+                title = stringResource(R.string.common_enabled),
+                subtitle = stringResource(R.string.channels_enabled_body),
                 checked = draft.enabled,
                 onChange = { onChange(draft.copy(enabled = it)) },
             )
 
-            FieldLabel("Categories", "Which kinds of event reach this channel. Select none to send every category.")
+            FieldLabel(stringResource(R.string.channels_categories), stringResource(R.string.channels_categories_help))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                 ChannelKinds.categories.forEach { (key, label) ->
                     FilterChip(
@@ -211,7 +214,7 @@ fun ChannelEditorSheet(
                 }
             }
 
-            FieldLabel("Minimum severity", "Anything below this level is dropped for this channel.")
+            FieldLabel(stringResource(R.string.channels_severity), stringResource(R.string.channels_severity_help))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                 ChannelKinds.severities.forEach { (key, label) ->
                     FilterChip(
@@ -222,7 +225,7 @@ fun ChannelEditorSheet(
                 }
             }
 
-            FieldLabel("Digest", "Send each event as it happens, or batch them into one message.")
+            FieldLabel(stringResource(R.string.channels_digest), stringResource(R.string.channels_digest_help))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                 ChannelKinds.digests.forEach { (key, label) ->
                     FilterChip(
@@ -234,8 +237,8 @@ fun ChannelEditorSheet(
             }
 
             FieldLabel(
-                "Quiet hours",
-                "Hold messages inside this window and send them once it ends. Leave empty for none.",
+                stringResource(R.string.channels_quiet),
+                stringResource(R.string.channels_quiet_help),
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -244,25 +247,25 @@ fun ChannelEditorSheet(
             ) {
                 TimeField(
                     value = draft.quietStart,
-                    label = "From",
+                    label = stringResource(R.string.channels_quiet_from),
                     onClick = { picking = "start" },
                     modifier = Modifier.weight(1f),
                 )
-                Text(text = "to", style = MaterialTheme.typography.labelSmall, color = palette.muted)
+                Text(text = stringResource(R.string.channels_quiet_between), style = MaterialTheme.typography.labelSmall, color = palette.muted)
                 TimeField(
                     value = draft.quietEnd,
-                    label = "To",
+                    label = stringResource(R.string.channels_quiet_to),
                     onClick = { picking = "end" },
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = { onChange(draft.copy(quietStart = "", quietEnd = "")) }) {
-                    Icon(Icons.Outlined.Close, contentDescription = "Clear quiet hours", modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.channels_quiet_clear), modifier = Modifier.size(18.dp))
                 }
             }
 
             ToggleLine(
-                title = "Break through quiet hours",
-                subtitle = "Deliver errors right away even inside the quiet window.",
+                title = stringResource(R.string.channels_break_through),
+                subtitle = stringResource(R.string.channels_break_through_body),
                 checked = draft.breakThrough,
                 onChange = { onChange(draft.copy(breakThrough = it)) },
             )
@@ -281,20 +284,20 @@ fun ChannelEditorSheet(
                 horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 modifier = Modifier.padding(top = TmSpacing.sm),
             ) {
-                Button(onClick = onSave, enabled = !saving, modifier = Modifier.weight(1f)) { Text("Save") }
-                OutlinedButton(onClick = onTest, enabled = !saving && test != TestState.Running) { Text("Test") }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                Button(onClick = onSave, enabled = !saving, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.common_save)) }
+                OutlinedButton(onClick = onTest, enabled = !saving && test != TestState.Running) { Text(stringResource(R.string.channels_test)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
             when (test) {
                 TestState.Idle -> Unit
                 TestState.Running -> LoadingIndicator(modifier = Modifier.size(24.dp))
                 is TestState.Ok -> Text(
-                    text = test.version,
+                    text = stringResource(R.string.channels_test_ok),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.green,
                 )
                 is TestState.Failed -> Text(
-                    text = test.message,
+                    text = test.message.asString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.red,
                 )
@@ -381,9 +384,9 @@ private fun TimePickerDialog(initial: String, onDismiss: () -> Unit, onPick: (St
                 onClick = {
                     onPick("%02d:%02d".format(state.hour, state.minute))
                 },
-            ) { Text("Set") }
+            ) { Text(stringResource(R.string.channels_quiet_set)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
         text = { TimePicker(state = state) },
     )
 }

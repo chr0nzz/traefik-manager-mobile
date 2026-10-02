@@ -97,10 +97,10 @@ fun AppearanceScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Appearance and security") },
+                title = { Text(stringResource(R.string.settings_appearance_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to settings")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
             )
@@ -118,7 +118,7 @@ fun AppearanceScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("Theme") }
+            item { SectionLabel(stringResource(R.string.appearance_theme)) }
             item {
                 TmCard {
                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -128,17 +128,25 @@ fun AppearanceScreen(
                                 onClick = { viewModel.setThemeMode(mode) },
                                 shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size),
                             ) {
-                                Text(mode.name)
+                                Text(
+                                    stringResource(
+                                        when (mode) {
+                                            ThemeMode.Light -> R.string.appearance_theme_light
+                                            ThemeMode.Dark -> R.string.appearance_theme_dark
+                                            ThemeMode.System -> R.string.appearance_theme_system
+                                        },
+                                    ),
+                                )
                             }
                         }
                     }
                     CardDivider(modifier = Modifier.padding(vertical = TmSpacing.sm))
                     ToggleRow(
-                        title = "Dynamic colour",
+                        title = stringResource(R.string.appearance_dynamic),
                         subtitle = if (dynamicColorSupported) {
-                            "Take the palette from your wallpaper"
+                            stringResource(R.string.appearance_dynamic_body)
                         } else {
-                            "Needs Android 12 or newer"
+                            stringResource(R.string.appearance_dynamic_unsupported)
                         },
                         checked = preferences.dynamicColor && dynamicColorSupported,
                         enabled = dynamicColorSupported,
@@ -185,19 +193,18 @@ fun AppearanceScreen(
                 }
             }
 
-            item { SectionLabel("Navigation", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.appearance_navigation), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Hide the navigation bar",
+                                text = stringResource(R.string.appearance_hide_nav),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "Frees the bottom of the screen. The drawer still reaches " +
-                                    "every screen.",
+                                text = stringResource(R.string.appearance_hide_nav_body),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted,
                             )
@@ -216,12 +223,12 @@ fun AppearanceScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Choose items",
+                                text = stringResource(R.string.appearance_nav_items),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "Which screens sit in the bar or the side rail, and their order.",
+                                text = stringResource(R.string.appearance_nav_items_body),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted,
                             )
@@ -235,12 +242,11 @@ fun AppearanceScreen(
                 }
             }
 
-            item { SectionLabel("Dashboard", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.nav_dashboard), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     Text(
-                        text = "How the launcher on the Overview lists your apps. Shared with the " +
-                            "web, so both show the same.",
+                        text = stringResource(R.string.appearance_density_body),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                     )
@@ -248,7 +254,10 @@ fun AppearanceScreen(
                         horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs),
                         modifier = Modifier.padding(top = TmSpacing.xs),
                     ) {
-                        listOf("list" to "Rows", "icons" to "Icons").forEach { (key, label) ->
+                        listOf(
+                            "list" to stringResource(R.string.appearance_density_rows),
+                            "icons" to stringResource(R.string.appearance_density_icons),
+                        ).forEach { (key, label) ->
                             FilterChip(
                                 selected = density == key,
                                 onClick = { viewModel.setDensity(key) },
@@ -259,18 +268,18 @@ fun AppearanceScreen(
                 }
             }
 
-            item { SectionLabel("Security", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.appearance_security), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     ToggleRow(
-                        title = "Require unlock",
+                        title = stringResource(R.string.appearance_lock),
                         subtitle = when {
                             !biometricAvailable ->
-                                "No biometric or device credential is enrolled on this device"
+                                stringResource(R.string.appearance_lock_unavailable)
                             preferences.appLock ->
-                                "Asked for on launch and whenever the app returns from the background"
+                                stringResource(R.string.appearance_lock_on)
                             else ->
-                                "Ask for biometrics or your device PIN before showing anything"
+                                stringResource(R.string.appearance_lock_off)
                         },
                         checked = preferences.appLock && biometricAvailable,
                         enabled = biometricAvailable,
@@ -281,7 +290,7 @@ fun AppearanceScreen(
 
             item {
                 Text(
-                    text = "These settings live on this device only. They are not sent to the server.",
+                    text = stringResource(R.string.appearance_local_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.xs),

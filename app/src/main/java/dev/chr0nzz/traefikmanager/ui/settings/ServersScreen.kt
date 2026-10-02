@@ -66,6 +66,9 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +82,7 @@ fun ServersScreen(
     val palette = LocalTmPalette.current
     val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     var addOpen by remember { mutableStateOf(false) }
     var renameTarget by remember { mutableStateOf<ServerEntry?>(null) }
@@ -88,7 +92,7 @@ fun ServersScreen(
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -104,10 +108,10 @@ fun ServersScreen(
 
     renameTarget?.let { target ->
         TextFieldDialog(
-            title = "Rename ${target.name}",
-            label = "Name",
+            title = stringResource(R.string.servers_rename_title, target.name),
+            label = stringResource(R.string.common_label_name),
             initial = target.name,
-            confirmLabel = "Rename",
+            confirmLabel = stringResource(R.string.servers_rename),
             onDismiss = { renameTarget = null },
             onConfirm = { value ->
                 viewModel.rename(target.id.orEmpty(), value)
@@ -119,12 +123,9 @@ fun ServersScreen(
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Remove ${target.name}?") },
+            title = { Text(stringResource(R.string.servers_remove_title, target.name)) },
             text = {
-                Text(
-                    "This only removes it from this Traefik Manager. The agent keeps running on that " +
-                        "machine with the same key.",
-                )
+                Text(stringResource(R.string.servers_remove_body))
             },
             confirmButton = {
                 TextButton(
@@ -132,22 +133,18 @@ fun ServersScreen(
                         viewModel.delete(target)
                         deleteTarget = null
                     },
-                ) { Text("Remove") }
+                ) { Text(stringResource(R.string.common_remove)) }
             },
-            dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     rotateTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { rotateTarget = null },
-            title = { Text("Rotate the key for ${target.name}?") },
+            title = { Text(stringResource(R.string.servers_rotate_title, target.name)) },
             text = {
-                Text(
-                    "The old key stops working immediately and every request to this server fails " +
-                        "until you update its compose file and recreate the container. Health checks " +
-                        "will keep looking green, because they are unauthenticated.",
-                )
+                Text(stringResource(R.string.servers_rotate_body))
             },
             confirmButton = {
                 TextButton(
@@ -155,21 +152,27 @@ fun ServersScreen(
                         viewModel.rotateKey(target)
                         rotateTarget = null
                     },
-                ) { Text("Rotate key") }
+                ) { Text(stringResource(R.string.servers_rotate_confirm)) }
             },
-            dismissButton = { TextButton(onClick = { rotateTarget = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { rotateTarget = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     state.issuedKey?.let { issued ->
         AlertDialog(
             onDismissRequest = { },
-            title = { Text(if (issued.rotated) "New key for ${issued.agentName}" else "Key for ${issued.agentName}") },
+            title = { Text(
+                    stringResource(
+                        if (issued.rotated) R.string.servers_key_title_new else R.string.servers_key_title,
+                        issued.agentName,
+                    ),
+                ) },
             text = {
                 Column {
                     Text(
-                        text = "Save this key - it will not be shown again." +
-                            if (issued.rotated) " The agent stops working until you update it." else "",
+                        text = stringResource(
+                            if (issued.rotated) R.string.servers_key_body_rotated else R.string.servers_key_body,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Box(
@@ -189,10 +192,10 @@ fun ServersScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { clipboard.setText(AnnotatedString(issued.key)) }) { Text("Copy") }
+                TextButton(onClick = { clipboard.setText(AnnotatedString(issued.key)) }) { Text(stringResource(R.string.common_copy)) }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::dismissKey) { Text("I have saved it") }
+                TextButton(onClick = viewModel::dismissKey) { Text(stringResource(R.string.servers_key_saved)) }
             },
         )
     }
@@ -201,12 +204,11 @@ fun ServersScreen(
         val snippet = viewModel.composeFor(target, null)
         AlertDialog(
             onDismissRequest = { composeTarget = null },
-            title = { Text("Install ${target.name}") },
+            title = { Text(stringResource(R.string.servers_install_title, target.name)) },
             text = {
                 Column {
                     Text(
-                        text = "Run this on the remote machine, with the key you saved when the server " +
-                            "was added.",
+                        text = stringResource(R.string.servers_install_body),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.muted,
                     )
@@ -229,9 +231,9 @@ fun ServersScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { clipboard.setText(AnnotatedString(snippet)) }) { Text("Copy") }
+                TextButton(onClick = { clipboard.setText(AnnotatedString(snippet)) }) { Text(stringResource(R.string.common_copy)) }
             },
-            dismissButton = { TextButton(onClick = { composeTarget = null }) { Text("Close") } },
+            dismissButton = { TextButton(onClick = { composeTarget = null }) { Text(stringResource(R.string.common_close)) } },
         )
     }
 
@@ -242,7 +244,7 @@ fun ServersScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = { addOpen = true }) {
-                Icon(Icons.Outlined.Add, contentDescription = "Add a server")
+                Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.servers_add))
             }
         },
         topBar = {
@@ -251,10 +253,10 @@ fun ServersScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Servers") },
+                title = { Text(stringResource(R.string.settings_servers_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to settings")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
             )
@@ -279,19 +281,18 @@ fun ServersScreen(
         ) {
             item {
                 Text(
-                    text = "Agents let one Traefik Manager reach Traefik on other machines. " +
-                        "The host itself is always available.",
+                    text = stringResource(R.string.servers_help),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.muted,
                 )
             }
-            item { SectionLabel("Agents ${state.agents.size}") }
+            item { SectionLabel(stringResource(R.string.servers_agents_title, state.agents.size)) }
 
             if (state.agents.isEmpty()) {
                 item {
                     EmptyState(
-                        headline = "No agents yet",
-                        body = "Add one to manage Traefik on another machine from this app.",
+                        headline = stringResource(R.string.servers_empty),
+                        body = stringResource(R.string.servers_empty_body),
                     )
                 }
             }
@@ -333,22 +334,22 @@ fun ServersScreen(
                     CardDivider(modifier = Modifier.padding(vertical = TmSpacing.xs))
                     Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                         IconButton(onClick = { renameTarget = entry }) {
-                            Icon(Icons.Outlined.Edit, contentDescription = "Rename ${entry.name}", modifier = Modifier.size(18.dp))
+                            Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.servers_rename_title, entry.name), modifier = Modifier.size(18.dp))
                         }
                         IconButton(onClick = { entry.id?.let(onConfigure) }) {
                             Icon(
                                 imageVector = Icons.Outlined.Tune,
-                                contentDescription = "Configure ${entry.name}",
+                                contentDescription = stringResource(R.string.servers_configure_named, entry.name),
                                 modifier = Modifier.size(18.dp),
                             )
                         }
                         IconButton(onClick = { composeTarget = entry }) {
-                            Icon(Icons.Outlined.Terminal, contentDescription = "Install snippet", modifier = Modifier.size(18.dp))
+                            Icon(Icons.Outlined.Terminal, contentDescription = stringResource(R.string.servers_install_snippet), modifier = Modifier.size(18.dp))
                         }
                         IconButton(onClick = { rotateTarget = entry }) {
                             Icon(
                                 Icons.Outlined.Key,
-                                contentDescription = "Rotate the key",
+                                contentDescription = stringResource(R.string.servers_rotate),
                                 tint = palette.yellow,
                                 modifier = Modifier.size(18.dp),
                             )
@@ -357,7 +358,7 @@ fun ServersScreen(
                         IconButton(onClick = { deleteTarget = entry }) {
                             Icon(
                                 Icons.Outlined.Delete,
-                                contentDescription = "Remove ${entry.name}",
+                                contentDescription = stringResource(R.string.common_remove_named, entry.name),
                                 tint = palette.red,
                                 modifier = Modifier.size(18.dp),
                             )
@@ -376,13 +377,13 @@ private fun AddServerDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Un
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add a server") },
+        title = { Text(stringResource(R.string.servers_add)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.common_label_name)) },
                     placeholder = { Text("edge-01") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -390,9 +391,9 @@ private fun AddServerDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Un
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Agent URL") },
+                    label = { Text(stringResource(R.string.servers_agent_url)) },
                     placeholder = { Text("http://10.0.0.5:8090") },
-                    supportingText = { Text("Where this Traefik Manager reaches the agent.") },
+                    supportingText = { Text(stringResource(R.string.servers_agent_url_help)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -404,9 +405,9 @@ private fun AddServerDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Un
             Button(
                 onClick = { onAdd(name, url) },
                 enabled = name.isNotBlank() && url.isNotBlank(),
-            ) { Text("Add") }
+            ) { Text(stringResource(R.string.common_add)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -431,7 +432,7 @@ private fun TextFieldDialog(
                 singleLine = true,
                 isError = value.isBlank(),
                 supportingText = if (value.isBlank()) {
-                    { Text("This cannot be empty - the server would be dropped.") }
+                    { Text(stringResource(R.string.servers_name_empty)) }
                 } else {
                     null
                 },
@@ -443,6 +444,6 @@ private fun TextFieldDialog(
                 Text(confirmLabel)
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

@@ -92,11 +92,13 @@ class PushViewModel @Inject constructor(
         }
     }
 
+    companion object {
+        const val NOTIFICATIONS_BLOCKED = "notifications_blocked"
+    }
+
     fun onPermissionDenied() {
         viewModelScope.launch {
-            preferencesStore.setPushError(
-                "Android is blocking notifications for this app, so pushes will arrive silently or not at all.",
-            )
+            preferencesStore.setPushError(NOTIFICATIONS_BLOCKED)
         }
     }
 }

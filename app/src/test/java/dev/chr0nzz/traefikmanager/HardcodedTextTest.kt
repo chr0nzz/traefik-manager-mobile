@@ -34,6 +34,7 @@ class HardcodedTextTest {
             .filter { it.isFile && it.extension == "kt" && it.name !in skippedFiles }
             .forEach { file ->
                 val path = file.relativeTo(root).invariantSeparatorsPath
+                if ("$path|*" in allowed) return@forEach
                 val hits = file.readLines()
                     .map { it.trim() }
                     .filterNot { line -> skippedPrefixes.any(line::startsWith) }

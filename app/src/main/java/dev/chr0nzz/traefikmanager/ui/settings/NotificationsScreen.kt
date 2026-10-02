@@ -74,6 +74,10 @@ import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -93,17 +97,18 @@ fun NotificationsScreen(
     ) { granted -> if (granted) pushViewModel.enable() else pushViewModel.onPermissionDenied() }
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     var typeMenuOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
     LaunchedEffect(channels.message) {
         val message = channels.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         channelsViewModel.consumeMessage()
     }
 
@@ -112,7 +117,7 @@ fun NotificationsScreen(
             draft = draft,
             saving = channels.saving,
             test = channels.test,
-            error = channels.editError,
+            error = channels.editError?.asString(),
             onChange = channelsViewModel::onDraftChange,
             onSave = channelsViewModel::save,
             onTest = channelsViewModel::test,
@@ -123,7 +128,7 @@ fun NotificationsScreen(
     if (push.picking) {
         AlertDialog(
             onDismissRequest = pushViewModel::cancelPicking,
-            title = { Text("Deliver push through") },
+            title = { Text(stringResource(R.string.push_pick_title)) },
             text = {
                 Column {
                     push.distributors.forEach { distributor ->
@@ -139,28 +144,28 @@ fun NotificationsScreen(
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = pushViewModel::cancelPicking) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = pushViewModel::cancelPicking) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     channels.pendingDelete?.let { channel ->
         AlertDialog(
             onDismissRequest = { channelsViewModel.askDelete(null) },
-            title = { Text("Remove channel") },
+            title = { Text(stringResource(R.string.channels_remove_title)) },
             text = {
                 Text(
                     if (channel.kind == "unifiedpush") {
-                        "Remove \"${channel.name}\"? Push to that phone stops until the app registers again."
+                        stringResource(R.string.channels_remove_body_push, channel.name)
                     } else {
-                        "Remove channel \"${channel.name}\"? Events will stop being delivered to it."
+                        stringResource(R.string.channels_remove_body, channel.name)
                     },
                 )
             },
             confirmButton = {
-                TextButton(onClick = { channelsViewModel.delete(channel) }) { Text("Remove") }
+                TextButton(onClick = { channelsViewModel.delete(channel) }) { Text(stringResource(R.string.common_remove)) }
             },
             dismissButton = {
-                TextButton(onClick = { channelsViewModel.askDelete(null) }) { Text("Cancel") }
+                TextButton(onClick = { channelsViewModel.askDelete(null) }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -173,7 +178,7 @@ fun NotificationsScreen(
         floatingActionButton = {
             if (channels.supported == true) {
                 FloatingActionButton(onClick = channelsViewModel::add) {
-                    Icon(Icons.Outlined.Add, contentDescription = "Add a channel")
+                    Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.channels_add))
                 }
             }
         },
@@ -183,15 +188,15 @@ fun NotificationsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Notifications") },
+                title = { Text(stringResource(R.string.settings_notifications_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to settings")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
                 actions = {
                     if (channels.supported == false) {
-                        TextButton(onClick = viewModel::save, enabled = !state.saving) { Text("Save") }
+                        TextButton(onClick = viewModel::save, enabled = !state.saving) { Text(stringResource(R.string.common_save)) }
                     }
                 },
             )
@@ -215,26 +220,26 @@ fun NotificationsScreen(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             if (channels.supported == true) {
-                item { SectionLabel("This device") }
+                item { SectionLabel(stringResource(R.string.push_section)) }
                 item {
                     TmCard {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Push to this device",
+                                    text = stringResource(R.string.push_title),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     text = when {
                                         push.noDistributor ->
-                                            "Needs a UnifiedPush app such as ntfy, NextPush, Sunup or " +
-                                                "Conversations. Install one and it appears here."
+                                            stringResource(R.string.push_no_distributor)
                                         push.registered ->
-                                            "Delivered through ${push.currentLabel ?: "your distributor"}, " +
-                                                "as its own channel below."
-                                        push.enabled -> "Waiting for the distributor to hand out an endpoint."
-                                        else -> "Get events on this phone as they happen."
+                                            push.currentLabel
+                                                ?.let { stringResource(R.string.push_registered_named, it) }
+                                                ?: stringResource(R.string.push_registered)
+                                        push.enabled -> stringResource(R.string.push_waiting)
+                                        else -> stringResource(R.string.push_off)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = palette.muted,
@@ -256,7 +261,11 @@ fun NotificationsScreen(
                         }
                         if (push.error.isNotBlank()) {
                             Text(
-                                text = push.error,
+                                text = if (push.error == PushViewModel.NOTIFICATIONS_BLOCKED) {
+                                    stringResource(R.string.push_error_blocked)
+                                } else {
+                                    push.error
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.yellow,
                                 modifier = Modifier.padding(top = TmSpacing.xs),
@@ -267,19 +276,18 @@ fun NotificationsScreen(
             }
 
             if (state.routeCheckSupported == true) {
-                item { SectionLabel("Route checks") }
+                item { SectionLabel(stringResource(R.string.route_checks_section)) }
                 item {
                     TmCard {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Check route reachability",
+                                    text = stringResource(R.string.route_checks_title),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
-                                    text = "Colours the status dot on Routes, and alerts under the " +
-                                        "Traefik category when a backend stops answering.",
+                                    text = stringResource(R.string.route_checks_body),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = palette.muted,
                                 )
@@ -297,7 +305,7 @@ fun NotificationsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Text(
-                                    text = "Every",
+                                    text = stringResource(R.string.route_checks_every),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f),
@@ -314,11 +322,10 @@ fun NotificationsScreen(
             }
 
             if (channels.supported != false) {
-                item { SectionLabel("Channels ${channels.channels.size}", modifier = Modifier.padding(top = TmSpacing.sm)) }
+                item { SectionLabel(stringResource(R.string.channels_title, channels.channels.size), modifier = Modifier.padding(top = TmSpacing.sm)) }
                 item {
                     Text(
-                        text = "Every enabled channel gets its own copy of an event, filtered by the " +
-                            "categories, severity, digest and quiet hours set on it.",
+                        text = stringResource(R.string.channels_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                     )
@@ -326,9 +333,8 @@ fun NotificationsScreen(
                 if (channels.channels.isEmpty() && !channels.loading) {
                     item {
                         EmptyState(
-                            headline = "No channels configured",
-                            body = "Add a channel to get a message when routes change, backups run " +
-                                "or certificates expire.",
+                            headline = stringResource(R.string.channels_empty),
+                            body = stringResource(R.string.channels_empty_body),
                         )
                     }
                 }
@@ -345,18 +351,17 @@ fun NotificationsScreen(
                 channels.error?.let { message ->
                     item {
                         Text(
-                            text = message,
+                            text = message.asString(),
                             style = MaterialTheme.typography.bodySmall,
                             color = palette.red,
                         )
                     }
                 }
             } else {
-            item { SectionLabel("Webhook") }
+            item { SectionLabel(stringResource(R.string.webhook_section)) }
             item {
                 Text(
-                    text = "Channels arrived in Traefik Manager 1.12.0. This server is older, so it " +
-                        "still takes the one webhook.",
+                    text = stringResource(R.string.webhook_legacy_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -366,7 +371,7 @@ fun NotificationsScreen(
                     OutlinedTextField(
                         value = state.webhookUrl,
                         onValueChange = viewModel::onUrlChange,
-                        label = { Text("Webhook URL") },
+                        label = { Text(stringResource(R.string.webhook_url)) },
                         placeholder = { Text("https://discord.com/api/webhooks/…") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -382,7 +387,7 @@ fun NotificationsScreen(
                             value = state.webhookType,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Provider") },
+                            label = { Text(stringResource(R.string.webhook_provider)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuOpen) },
                             modifier = Modifier
                                 .menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable)
@@ -403,7 +408,7 @@ fun NotificationsScreen(
                     OutlinedTextField(
                         value = state.webhookUsername,
                         onValueChange = viewModel::onUsernameChange,
-                        label = { Text("Username (optional)") },
+                        label = { Text(stringResource(R.string.connection_user)) },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -412,8 +417,8 @@ fun NotificationsScreen(
                     OutlinedTextField(
                         value = state.webhookPassword,
                         onValueChange = viewModel::onPasswordChange,
-                        label = { Text("Password or token (optional)") },
-                        supportingText = { Text("The server never returns this, so it always looks empty.") },
+                        label = { Text(stringResource(R.string.webhook_password)) },
+                        supportingText = { Text(stringResource(R.string.webhook_password_help)) },
                         visualTransformation = PasswordVisualTransformation(),
                         singleLine = true,
                         modifier = Modifier
@@ -430,18 +435,18 @@ fun NotificationsScreen(
                             onClick = viewModel::test,
                             enabled = state.test != TestState.Running && state.webhookUrl.isNotBlank(),
                         ) {
-                            Text("Send a test")
+                            Text(stringResource(R.string.webhook_test))
                         }
                         when (val test = state.test) {
                             TestState.Idle -> Unit
                             TestState.Running -> LoadingIndicator(modifier = Modifier.size(24.dp))
                             is TestState.Ok -> Text(
-                                text = "Request accepted",
+                                text = stringResource(R.string.webhook_test_ok),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = palette.green,
                             )
                             is TestState.Failed -> Text(
-                                text = test.message,
+                                text = test.message.asString(),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = palette.red,
                             )
@@ -449,7 +454,7 @@ fun NotificationsScreen(
                     }
                     if (state.test is TestState.Ok) {
                         Text(
-                            text = "The endpoint received the request. Check the destination to confirm it arrived.",
+                            text = stringResource(R.string.webhook_test_ok_body),
                             style = MaterialTheme.typography.labelSmall,
                             color = palette.muted,
                             modifier = Modifier.padding(top = TmSpacing.xs),
@@ -462,7 +467,7 @@ fun NotificationsScreen(
 
             item {
                 Text(
-                    text = "The bell on Home shows what the manager has reported.",
+                    text = stringResource(R.string.notifications_bell_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.sm),
@@ -507,7 +512,7 @@ private fun ChannelRow(
                     )
                     if (thisDevice) {
                         Text(
-                            text = "this device",
+                            text = stringResource(R.string.channels_this_device),
                             style = MaterialTheme.typography.labelSmall,
                             color = palette.blue,
                             maxLines = 1,
@@ -516,7 +521,7 @@ private fun ChannelRow(
                     }
                 }
                 Text(
-                    text = if (missing.isEmpty()) channel.summary() else "Needs " + missing.joinToString(", "),
+                    text = if (missing.isEmpty()) channel.summary() else stringResource(R.string.channels_needs, missing.joinToString(", ")),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (missing.isEmpty()) palette.muted else palette.yellow,
                     maxLines = 3,
@@ -530,18 +535,18 @@ private fun ChannelRow(
             IconButton(onClick = onTest) {
                 Icon(
                     Icons.AutoMirrored.Outlined.Send,
-                    contentDescription = "Send a test to ${channel.name}",
+                    contentDescription = stringResource(R.string.channels_test_named, channel.name),
                     modifier = Modifier.size(18.dp),
                 )
             }
             IconButton(onClick = onEdit) {
-                Icon(Icons.Outlined.Edit, contentDescription = "Edit ${channel.name}", modifier = Modifier.size(18.dp))
+                Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.common_edit_named, channel.name), modifier = Modifier.size(18.dp))
             }
             Box(modifier = Modifier.weight(1f))
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Outlined.Delete,
-                    contentDescription = "Remove ${channel.name}",
+                    contentDescription = stringResource(R.string.common_remove_named, channel.name),
                     tint = palette.red,
                     modifier = Modifier.size(18.dp),
                 )
@@ -556,12 +561,12 @@ private fun RouteCheckIntervalPicker(value: Int, enabled: Boolean, onSelect: (In
     var open by remember { mutableStateOf(false) }
     Box {
         TextButton(onClick = { open = true }, enabled = enabled) {
-            Text(RouteCheckIntervals.label(value))
+            Text(RouteCheckIntervals.label(value).asString())
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             RouteCheckIntervals.options.forEach { (seconds, label) ->
                 DropdownMenuItem(
-                    text = { Text(label) },
+                    text = { Text(label.asString()) },
                     onClick = {
                         open = false
                         onSelect(seconds)

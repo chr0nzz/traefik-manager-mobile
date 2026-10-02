@@ -5,6 +5,7 @@ import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
 import dev.chr0nzz.traefikmanager.data.model.RouteServerTally
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.settings.RouteCheckIntervals
 import dev.chr0nzz.traefikmanager.ui.routes.status
 import kotlinx.serialization.json.Json
@@ -97,13 +98,13 @@ class RouteCheckIntervalTest {
 
     @Test
     fun `each one reads as a duration`() {
-        assertEquals("1 minute", RouteCheckIntervals.label(60))
-        assertEquals("5 minutes", RouteCheckIntervals.label(300))
-        assertEquals("30 minutes", RouteCheckIntervals.label(1800))
+        assertEquals(UiText.plural(R.plurals.common_minutes, 1), RouteCheckIntervals.label(60))
+        assertEquals(UiText.plural(R.plurals.common_minutes, 5), RouteCheckIntervals.label(300))
+        assertEquals(UiText.plural(R.plurals.common_minutes, 30), RouteCheckIntervals.label(1800))
     }
 
     @Test
     fun `an interval the server invents still renders`() {
-        assertEquals("45 seconds", RouteCheckIntervals.label(45))
+        assertEquals(UiText.plural(R.plurals.common_seconds, 45), RouteCheckIntervals.label(45))
     }
 }

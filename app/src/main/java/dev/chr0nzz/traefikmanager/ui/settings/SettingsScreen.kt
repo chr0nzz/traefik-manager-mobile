@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,11 +44,13 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 data class SettingsEntry(
     val route: String,
-    val title: String,
-    val subtitle: String,
+    @StringRes val title: Int,
+    @StringRes val subtitle: Int,
     val icon: ImageVector,
 )
 
@@ -69,32 +72,32 @@ object SettingsRoutes {
 private val SERVER_ENTRIES = listOf(
     SettingsEntry(
         route = SettingsRoutes.CONNECTION,
-        title = "Traefik connection",
-        subtitle = "API URL, credentials and a connection test",
+        title = R.string.settings_connection_title,
+        subtitle = R.string.settings_connection_subtitle,
         icon = Icons.Outlined.Router,
     ),
     SettingsEntry(
         route = SettingsRoutes.AGENTS,
-        title = "Servers",
-        subtitle = "Add, edit and remove agents",
+        title = R.string.settings_servers_title,
+        subtitle = R.string.settings_servers_subtitle,
         icon = Icons.Outlined.Dns,
     ),
     SettingsEntry(
         route = SettingsRoutes.AUTH,
-        title = "Authentication",
-        subtitle = "Login status and API keys",
+        title = R.string.settings_auth_title,
+        subtitle = R.string.settings_auth_subtitle,
         icon = Icons.Outlined.Security,
     ),
     SettingsEntry(
         route = SettingsRoutes.NOTIFICATIONS,
-        title = "Notifications",
-        subtitle = "Channels, push and the history",
+        title = R.string.settings_notifications_title,
+        subtitle = R.string.settings_notifications_subtitle,
         icon = Icons.Outlined.Notifications,
     ),
     SettingsEntry(
         route = SettingsRoutes.STATIC_CONFIG,
-        title = "Static config",
-        subtitle = "Edit traefik.yml and restart Traefik",
+        title = R.string.settings_static_title,
+        subtitle = R.string.settings_static_subtitle,
         icon = Icons.Outlined.Description,
     ),
 )
@@ -102,20 +105,20 @@ private val SERVER_ENTRIES = listOf(
 private val APP_ENTRIES = listOf(
     SettingsEntry(
         route = SettingsRoutes.APPEARANCE,
-        title = "Appearance and security",
-        subtitle = "Theme, dynamic colour and the app lock",
+        title = R.string.settings_appearance_title,
+        subtitle = R.string.settings_appearance_subtitle,
         icon = Icons.Outlined.Palette,
     ),
     SettingsEntry(
         route = SettingsRoutes.DIAGNOSTICS,
-        title = "Diagnostics",
-        subtitle = "How this device reaches the server",
+        title = R.string.settings_diagnostics_title,
+        subtitle = R.string.settings_diagnostics_subtitle,
         icon = Icons.Outlined.Troubleshoot,
     ),
     SettingsEntry(
         route = SettingsRoutes.ABOUT,
-        title = "About",
-        subtitle = "Versions and open source licences",
+        title = R.string.settings_about_title,
+        subtitle = R.string.settings_about_subtitle,
         icon = Icons.Outlined.Info,
     ),
 )
@@ -150,7 +153,7 @@ fun SettingsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.nav_settings)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },
@@ -171,13 +174,12 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             item {
-                SectionLabel("Server · $activeServerName")
+                SectionLabel(stringResource(R.string.settings_server_section, activeServerName))
             }
             if (!hostSelected) {
                 item {
                     Text(
-                        text = "Authentication, connection and notification settings belong to the host. " +
-                            "Switch to the host to change them. Static config is this agent's own file.",
+                        text = stringResource(R.string.settings_agent_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                     )
@@ -191,7 +193,7 @@ fun SettingsScreen(
                     }
                 }
             }
-            item { SectionLabel("This app", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.settings_app_section), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     APP_ENTRIES.forEachIndexed { index, entry ->
@@ -217,12 +219,12 @@ fun SettingsScreen(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Disconnect",
+                                text = stringResource(R.string.settings_disconnect),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = palette.red,
                             )
                             Text(
-                                text = "Forget this server and its API key on this device",
+                                text = stringResource(R.string.settings_disconnect_body),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted,
                             )
@@ -253,12 +255,12 @@ private fun SettingsRow(entry: SettingsEntry, onClick: () -> Unit) {
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = entry.title,
+                text = stringResource(entry.title),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = entry.subtitle,
+                text = stringResource(entry.subtitle),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 maxLines = 2,

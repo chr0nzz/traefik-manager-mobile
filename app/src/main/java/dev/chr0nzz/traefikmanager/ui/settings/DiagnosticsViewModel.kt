@@ -12,11 +12,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class DiagnosticsUiState(
     val loading: Boolean = true,
     val diagnostic: ClientIpDiagnostic? = null,
-    val error: String? = null,
+    val error: UiText? = null,
 )
 
 @HiltViewModel
@@ -41,10 +43,9 @@ class DiagnosticsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             error = if (throwable is HttpException && throwable.code() == 404) {
-                                "This server is too old for the client IP diagnostic. " +
-                                    "Requires Traefik Manager 1.8.0 or newer."
+                                UiText.of(R.string.diagnostics_error_too_old)
                             } else {
-                                throwable.message ?: "Could not read the diagnostic"
+                                UiText.messageOr(throwable.message, R.string.diagnostics_error_load)
                             },
                         )
                     }

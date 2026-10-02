@@ -55,6 +55,10 @@ import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import androidx.compose.ui.platform.LocalResources
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,19 +70,20 @@ fun NotificationHistoryScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     var pendingDelete by remember { mutableStateOf<TmNotification?>(null) }
     var clearOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
     pendingDelete?.let { target ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete this notification?") },
+            title = { Text(stringResource(R.string.notifications_delete_title)) },
             text = { Text(target.msg) },
             confirmButton = {
                 TextButton(
@@ -86,26 +91,26 @@ fun NotificationHistoryScreen(
                         viewModel.delete(target)
                         pendingDelete = null
                     },
-                ) { Text("Delete") }
+                ) { Text(stringResource(R.string.common_delete)) }
             },
-            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     if (clearOpen) {
         AlertDialog(
             onDismissRequest = { clearOpen = false },
-            title = { Text("Clear the whole history?") },
-            text = { Text("Every notification on the server is removed. This cannot be undone.") },
+            title = { Text(stringResource(R.string.notifications_clear_title)) },
+            text = { Text(stringResource(R.string.notifications_clear_body)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.clearAll()
                         clearOpen = false
                     },
-                ) { Text("Clear all") }
+                ) { Text(stringResource(R.string.notifications_clear_all)) }
             },
-            dismissButton = { TextButton(onClick = { clearOpen = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { clearOpen = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
@@ -120,22 +125,22 @@ fun NotificationHistoryScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Notifications") },
+                title = { Text(stringResource(R.string.settings_notifications_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 actions = {
                     if (state.unread > 0) {
-                        TextButton(onClick = viewModel::markAllRead) { Text("Mark read") }
+                        TextButton(onClick = viewModel::markAllRead) { Text(stringResource(R.string.notifications_mark_read)) }
                     }
                     IconButton(onClick = viewModel::load) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh notifications")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.notifications_refresh))
                     }
                     if (state.notifications.isNotEmpty()) {
                         IconButton(onClick = { clearOpen = true }) {
-                            Icon(Icons.Outlined.DeleteSweep, contentDescription = "Clear the history")
+                            Icon(Icons.Outlined.DeleteSweep, contentDescription = stringResource(R.string.notifications_clear))
                         }
                     }
                 },
@@ -149,8 +154,8 @@ fun NotificationHistoryScreen(
 
         state.error?.takeIf { state.notifications.isEmpty() }?.let { message ->
             ErrorState(
-                headline = "Could not load notifications",
-                body = message,
+                headline = stringResource(R.string.notifications_error_load),
+                body = message.asString(),
                 onRetry = viewModel::load,
                 modifier = Modifier.padding(insets),
             )
@@ -159,8 +164,8 @@ fun NotificationHistoryScreen(
 
         if (state.notifications.isEmpty()) {
             EmptyState(
-                headline = "Nothing yet",
-                body = "Saves, pings and CrowdSec events show up here.",
+                headline = stringResource(R.string.notifications_empty),
+                body = stringResource(R.string.notifications_empty_body),
                 modifier = Modifier.padding(insets),
             )
             return@Scaffold
@@ -229,7 +234,7 @@ fun NotificationHistoryScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Close,
-                            contentDescription = "Delete this notification",
+                            contentDescription = stringResource(R.string.notifications_delete),
                             tint = palette.muted,
                             modifier = Modifier.size(16.dp),
                         )
@@ -240,7 +245,7 @@ fun NotificationHistoryScreen(
 
             item {
                 Text(
-                    text = "Times are the server's clock.",
+                    text = stringResource(R.string.notifications_clock_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.md),

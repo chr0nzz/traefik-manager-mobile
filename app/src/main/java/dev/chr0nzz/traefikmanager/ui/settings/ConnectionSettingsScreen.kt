@@ -54,6 +54,9 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -65,11 +68,12 @@ fun ConnectionSettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val savedMessage = stringResource(R.string.connection_saved)
     var showPassword by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.saved) {
         if (state.saved) {
-            snackbarHostState.showSnackbar("Connection settings saved")
+            snackbarHostState.showSnackbar(savedMessage)
             viewModel.consumeSaved()
         }
     }
@@ -85,15 +89,15 @@ fun ConnectionSettingsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Traefik connection") },
+                title = { Text(stringResource(R.string.settings_connection_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to settings")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
                 actions = {
                     TextButton(onClick = viewModel::save, enabled = state.canSave) {
-                        Text("Save")
+                        Text(stringResource(R.string.common_save))
                     }
                 },
             )
@@ -116,21 +120,21 @@ fun ConnectionSettingsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("Traefik API") }
+            item { SectionLabel(stringResource(R.string.connection_api_section)) }
             item {
                 TmCard {
                     OutlinedTextField(
                         value = state.url,
                         onValueChange = viewModel::onUrlChange,
-                        label = { Text("API URL") },
+                        label = { Text(stringResource(R.string.connection_url)) },
                         placeholder = { Text("http://traefik:8080") },
                         isError = state.url.isNotEmpty() && !state.urlValid,
                         supportingText = {
                             Text(
                                 if (state.url.isNotEmpty() && !state.urlValid) {
-                                    "Must start with http:// or https://"
+                                    stringResource(R.string.connection_url_invalid)
                                 } else {
-                                    "Where this server reaches the Traefik API, not where you reach Traefik."
+                                    stringResource(R.string.connection_url_help)
                                 },
                             )
                         },
@@ -145,7 +149,7 @@ fun ConnectionSettingsScreen(
                     OutlinedTextField(
                         value = state.user,
                         onValueChange = viewModel::onUserChange,
-                        label = { Text("Username (optional)") },
+                        label = { Text(stringResource(R.string.connection_user)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, showKeyboardOnFocus = false),
                         modifier = Modifier
@@ -155,16 +159,16 @@ fun ConnectionSettingsScreen(
                     OutlinedTextField(
                         value = state.password,
                         onValueChange = viewModel::onPasswordChange,
-                        label = { Text(if (state.passwordStored) "New password" else "Password (optional)") },
+                        label = { Text(stringResource(if (state.passwordStored) R.string.connection_password_new else R.string.connection_password)) },
                         isError = state.passwordRequired && state.password.isEmpty(),
                         supportingText = {
                             Text(
                                 if (state.passwordRequired) {
-                                    "Re-enter the password. The saved one is only sent to the saved API URL."
+                                    stringResource(R.string.connection_password_required)
                                 } else if (state.passwordStored) {
-                                    "A password is already saved. Leave this empty to keep it."
+                                    stringResource(R.string.connection_password_stored)
                                 } else {
-                                    "Only needed if the Traefik API is behind basic auth."
+                                    stringResource(R.string.connection_password_help)
                                 },
                             )
                         },
@@ -181,7 +185,7 @@ fun ConnectionSettingsScreen(
                                     } else {
                                         Icons.Outlined.Visibility
                                     },
-                                    contentDescription = if (showPassword) "Hide password" else "Show password",
+                                    contentDescription = stringResource(if (showPassword) R.string.common_hide_password else R.string.common_show_password),
                                 )
                             }
                         },
@@ -200,7 +204,7 @@ fun ConnectionSettingsScreen(
             item {
                 TmCard {
                     Text(
-                        text = "Verify the API URL and credentials against your Traefik instance.",
+                        text = stringResource(R.string.connection_test_help),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.muted,
                     )
@@ -213,14 +217,14 @@ fun ConnectionSettingsScreen(
                             onClick = viewModel::testConnection,
                             enabled = state.test != TestState.Running && state.urlValid,
                         ) {
-                            Text("Test connection")
+                            Text(stringResource(R.string.connection_test))
                         }
                         when (val test = state.test) {
                             TestState.Idle -> Unit
                             TestState.Running -> {
                                 LoadingIndicator(modifier = Modifier.size(24.dp))
                                 Text(
-                                    text = "Testing…",
+                                    text = stringResource(R.string.connection_testing),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = palette.muted,
                                 )
@@ -236,7 +240,7 @@ fun ConnectionSettingsScreen(
                                     modifier = Modifier.size(16.dp),
                                 )
                                 Text(
-                                    text = "Connected - Traefik v${test.version}",
+                                    text = stringResource(R.string.connection_test_ok, test.version),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = palette.green,
                                 )
@@ -257,7 +261,7 @@ fun ConnectionSettingsScreen(
                                 modifier = Modifier.size(16.dp),
                             )
                             Text(
-                                text = failed.message,
+                                text = failed.message.asString(),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = palette.red,
                             )
@@ -266,11 +270,11 @@ fun ConnectionSettingsScreen(
                 }
             }
 
-            item { SectionLabel("Routing defaults", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.connection_defaults), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     Text(
-                        text = "Domains",
+                        text = stringResource(R.string.common_label_domains),
                         style = MaterialTheme.typography.labelMedium,
                         color = palette.muted,
                     )
@@ -280,7 +284,7 @@ fun ConnectionSettingsScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Certificate resolvers",
+                        text = stringResource(R.string.connection_resolvers),
                         style = MaterialTheme.typography.labelMedium,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.sm),
@@ -291,7 +295,7 @@ fun ConnectionSettingsScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Edit these in the web UI. Saving here keeps them exactly as they are.",
+                        text = stringResource(R.string.connection_defaults_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.sm),
@@ -302,7 +306,7 @@ fun ConnectionSettingsScreen(
             state.error?.let { message ->
                 item {
                     Text(
-                        text = message,
+                        text = message.asString(),
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                         color = palette.red,
                     )

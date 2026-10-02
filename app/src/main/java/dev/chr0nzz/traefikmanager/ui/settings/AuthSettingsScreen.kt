@@ -56,6 +56,11 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +73,7 @@ fun AuthSettingsScreen(
     val palette = LocalTmPalette.current
     val clipboard = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     var newKeyName by remember { mutableStateOf("") }
     var revokeTarget by remember { mutableStateOf<ApiKeyEntry?>(null) }
@@ -76,34 +82,34 @@ fun AuthSettingsScreen(
     if (confirmSignOut) {
         AlertDialog(
             onDismissRequest = { confirmSignOut = false },
-            title = { Text("Sign out other sessions?") },
-            text = { Text("Every browser signed in to the web UI is signed out. API keys, including this app's, keep working.") },
+            title = { Text(stringResource(R.string.auth_sign_out_title)) },
+            text = { Text(stringResource(R.string.auth_sign_out_body)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.revokeSessions()
                         confirmSignOut = false
                     },
-                ) { Text("Sign out") }
+                ) { Text(stringResource(R.string.auth_sign_out_confirm)) }
             },
-            dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
-        if (message == "API key created") newKeyName = ""
+        if (message == UiText.of(R.string.auth_key_created)) newKeyName = ""
     }
 
     state.issuedKey?.let { key ->
         AlertDialog(
             onDismissRequest = { },
-            title = { Text("New API key") },
+            title = { Text(stringResource(R.string.auth_key_new_title)) },
             text = {
                 Column {
-                    Text("Save this key - it will not be shown again.")
+                    Text(stringResource(R.string.servers_key_body))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -121,20 +127,23 @@ fun AuthSettingsScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { clipboard.setText(AnnotatedString(key)) }) { Text("Copy") }
+                TextButton(onClick = { clipboard.setText(AnnotatedString(key)) }) { Text(stringResource(R.string.common_copy)) }
             },
-            dismissButton = { TextButton(onClick = viewModel::dismissKey) { Text("I have saved it") } },
+            dismissButton = { TextButton(onClick = viewModel::dismissKey) { Text(stringResource(R.string.servers_key_saved)) } },
         )
     }
 
     revokeTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { revokeTarget = null },
-            title = { Text("Revoke this API key?") },
+            title = { Text(stringResource(R.string.auth_revoke_title)) },
             text = {
                 Text(
-                    "Anything signed in with ${target.name.ifEmpty { "this key" }} stops working " +
-                        "immediately. If it is the key this app uses, you will have to reconnect.",
+                    if (target.name.isEmpty()) {
+                        stringResource(R.string.auth_revoke_body)
+                    } else {
+                        stringResource(R.string.auth_revoke_body_named, target.name)
+                    },
                 )
             },
             confirmButton = {
@@ -143,9 +152,9 @@ fun AuthSettingsScreen(
                         viewModel.revokeKey(target)
                         revokeTarget = null
                     },
-                ) { Text("Revoke") }
+                ) { Text(stringResource(R.string.auth_revoke)) }
             },
-            dismissButton = { TextButton(onClick = { revokeTarget = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { revokeTarget = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
@@ -160,10 +169,10 @@ fun AuthSettingsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Authentication") },
+                title = { Text(stringResource(R.string.settings_auth_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to settings")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
             )
@@ -186,16 +195,16 @@ fun AuthSettingsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("How this server lets people in") }
+            item { SectionLabel(stringResource(R.string.auth_section)) }
             item {
                 val status = state.status
                 TmCard {
                     AuthFact(
-                        label = "Authentication",
+                        label = stringResource(R.string.settings_auth_title),
                         value = when {
-                            status.noAuth -> "Off"
-                            status.authEnabled -> "On"
-                            else -> "Disabled"
+                            status.noAuth -> stringResource(R.string.auth_state_off)
+                            status.authEnabled -> stringResource(R.string.auth_state_on)
+                            else -> stringResource(R.string.common_disabled)
                         },
                         tone = when {
                             status.noAuth -> palette.red
@@ -203,37 +212,37 @@ fun AuthSettingsScreen(
                             else -> palette.yellow
                         },
                         note = when {
-                            status.envForced -> "Forced off by AUTH_ENABLED in the environment"
-                            status.noAuth && !status.hasPassword -> "No password is set, so the web UI is open"
-                            status.noAuth -> "Anyone who can reach the web UI is let straight in"
-                            else -> "The browser login is required"
+                            status.envForced -> stringResource(R.string.auth_note_env)
+                            status.noAuth && !status.hasPassword -> stringResource(R.string.auth_note_no_password)
+                            status.noAuth -> stringResource(R.string.auth_note_open)
+                            else -> stringResource(R.string.auth_note_required)
                         },
                     )
                     CardDivider()
                     AuthFact(
-                        label = "Two-factor",
-                        value = if (status.otpEnabled) "Enabled" else "Disabled",
+                        label = stringResource(R.string.auth_otp),
+                        value = stringResource(if (status.otpEnabled) R.string.common_enabled else R.string.common_disabled),
                         tone = if (status.otpEnabled) palette.green else palette.muted,
-                        note = "Covers the browser login. This app authenticates with its API key.",
+                        note = stringResource(R.string.auth_otp_note),
                     )
                     CardDivider()
                     AuthFact(
                         label = "OIDC",
                         value = when {
-                            status.oidcActive -> "Active"
-                            status.oidcEnabled -> "Configured"
-                            else -> "Off"
+                            status.oidcActive -> stringResource(R.string.routes_filter_active)
+                            status.oidcEnabled -> stringResource(R.string.auth_oidc_configured)
+                            else -> stringResource(R.string.auth_state_off)
                         },
                         tone = if (status.oidcActive) palette.green else palette.muted,
                         note = if (status.oidcEnabled && !status.oidcActive) {
-                            "Switched on but not answering, so the password login still applies"
+                            stringResource(R.string.auth_oidc_note_down)
                         } else {
-                            "Single sign-on for the browser login"
+                            stringResource(R.string.auth_oidc_note)
                         },
                         last = true,
                     )
                     Text(
-                        text = "Read-only here. Passwords, two-factor and OIDC are changed in the web UI.",
+                        text = stringResource(R.string.auth_read_only_note),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.sm),
@@ -244,12 +253,12 @@ fun AuthSettingsScreen(
             item {
                 TmCard {
                     Text(
-                        text = "Browser sessions",
+                        text = stringResource(R.string.auth_sessions_title),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Signs out every browser signed in to the web UI. API keys keep working.",
+                        text = stringResource(R.string.auth_sessions_body),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                     )
@@ -258,16 +267,15 @@ fun AuthSettingsScreen(
                         enabled = !state.busy,
                         modifier = Modifier.padding(top = TmSpacing.sm),
                     ) {
-                        Text("Sign out other sessions")
+                        Text(stringResource(R.string.auth_sign_out))
                     }
                 }
             }
 
-            item { SectionLabel("API keys ${state.keys.size}", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.auth_keys_title, state.keys.size), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 Text(
-                    text = "Each device that talks to this server needs its own key. Revoking one only " +
-                        "locks out that device.",
+                    text = stringResource(R.string.auth_keys_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -277,8 +285,8 @@ fun AuthSettingsScreen(
                     OutlinedTextField(
                         value = newKeyName,
                         onValueChange = { if (it.length <= 50) newKeyName = it },
-                        label = { Text("Device name") },
-                        placeholder = { Text("My phone") },
+                        label = { Text(stringResource(R.string.auth_key_device)) },
+                        placeholder = { Text(stringResource(R.string.auth_key_device_placeholder)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -287,7 +295,7 @@ fun AuthSettingsScreen(
                         enabled = !state.busy && newKeyName.isNotBlank(),
                         modifier = Modifier.padding(top = TmSpacing.sm),
                     ) {
-                        Text("Create key")
+                        Text(stringResource(R.string.auth_key_create))
                     }
                 }
             }
@@ -300,20 +308,20 @@ fun AuthSettingsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = key.name.ifEmpty { "Unnamed key" },
+                                text = key.name.ifEmpty { stringResource(R.string.auth_key_unnamed) },
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = key.preview.ifEmpty { "legacy key - revoke it from manager.yml" },
+                                text = key.preview.ifEmpty { stringResource(R.string.auth_key_legacy) },
                                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                                 color = palette.muted,
                             )
                             if (key.createdAt.isNotEmpty()) {
                                 Text(
-                                    text = "created ${key.createdAt} UTC",
+                                    text = stringResource(R.string.auth_key_created_at, key.createdAt),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = palette.muted,
                                 )
@@ -322,7 +330,7 @@ fun AuthSettingsScreen(
                         IconButton(onClick = { revokeTarget = key }, enabled = key.revocable) {
                             Icon(
                                 Icons.Outlined.Delete,
-                                contentDescription = "Revoke ${key.name}",
+                                contentDescription = stringResource(R.string.auth_revoke_named, key.name),
                                 tint = if (key.revocable) palette.red else palette.muted,
                                 modifier = Modifier.size(18.dp),
                             )
@@ -334,7 +342,7 @@ fun AuthSettingsScreen(
             state.error?.let { message ->
                 item {
                     Text(
-                        text = message,
+                        text = message.asString(),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.red,
                     )

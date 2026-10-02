@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 sealed interface TestState {
     data object Idle : TestState
     data object Running : TestState
     data class Ok(val version: String) : TestState
-    data class Failed(val message: String) : TestState
+    data class Failed(val message: UiText) : TestState
 }
 
 data class ConnectionSettingsUiState(
@@ -32,7 +34,7 @@ data class ConnectionSettingsUiState(
     val domains: List<String> = emptyList(),
     val certResolver: String = "",
     val test: TestState = TestState.Idle,
-    val error: String? = null,
+    val error: UiText? = null,
     val saved: Boolean = false,
 ) {
     val urlValid: Boolean
@@ -112,7 +114,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = throwable.message ?: "Could not read the settings")
+                        it.copy(loading = false, error = UiText.messageOr(throwable.message, R.string.connection_error_load))
                     }
                 },
             )
@@ -136,7 +138,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                             test = if (result.ok) {
                                 TestState.Ok(result.version ?: "?")
                             } else {
-                                TestState.Failed(result.error ?: "No response from the API")
+                                TestState.Failed(UiText.messageOr(result.error, R.string.connection_error_no_response))
                             },
                         )
                     }
@@ -176,7 +178,7 @@ class ConnectionSettingsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = throwable.message ?: "Could not save the settings")
+                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.connection_error_save))
                     }
                 },
             )
@@ -185,14 +187,12 @@ class ConnectionSettingsViewModel @Inject constructor(
 
     fun consumeSaved() = _state.update { it.copy(saved = false) }
 
-    private fun describeTestFailure(throwable: Throwable): String {
+    private fun describeTestFailure(throwable: Throwable): UiText {
         val message = throwable.message.orEmpty()
         return when {
-            message.contains("Target address not allowed") ->
-                "Could not resolve that host, or the address is not allowed."
-            message.contains("Invalid URL") -> "That URL is not valid. It must start with http:// or https://."
-            message.isNotEmpty() -> message
-            else -> "Connection failed"
+            message.contains("Target address not allowed") -> UiText.of(R.string.connection_error_host)
+            message.contains("Invalid URL") -> UiText.of(R.string.connection_error_url)
+            else -> UiText.messageOr(message, R.string.connect_error_failed)
         }
     }
 }

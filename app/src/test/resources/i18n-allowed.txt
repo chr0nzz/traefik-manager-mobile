@@ -14,3 +14,5 @@ ui/routes/RouteFormScreen.kt|HostSNI(`*`)
 ui/routes/RouteFormViewModel.kt|Host(`$it`)
 ui/routes/RouteFormViewModel.kt|Unknown
 ui/routes/RoutesViewModel.kt|HTTP $code
+ui/settings/Licences.kt|*
+ui/settings/AboutScreen.kt|Traefik

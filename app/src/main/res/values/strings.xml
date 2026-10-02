@@ -1499,4 +1499,339 @@
     <string name="middlewares_refresh">Refresh middlewares</string>
     <string name="middlewares_no_search_match">No middleware matches</string>
     <string name="middlewares_error_delete">Could not delete the middleware</string>
+
+    <string name="settings_back">Back to settings</string>
+    <string name="settings_connection_title">Traefik connection</string>
+    <string name="settings_connection_subtitle">API URL, credentials and a connection test</string>
+    <string name="settings_servers_title">Servers</string>
+    <string name="settings_servers_subtitle">Add, edit and remove agents</string>
+    <string name="settings_auth_title">Authentication</string>
+    <string name="settings_auth_subtitle">Login status and API keys</string>
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_subtitle">Channels, push and the history</string>
+    <string name="settings_static_title">Static config</string>
+    <string name="settings_static_subtitle">Edit traefik.yml and restart Traefik</string>
+    <string name="settings_appearance_title">Appearance and security</string>
+    <string name="settings_appearance_subtitle">Theme, dynamic colour and the app lock</string>
+    <string name="settings_diagnostics_title">Diagnostics</string>
+    <string name="settings_diagnostics_subtitle">How this device reaches the server</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_subtitle">Versions and open source licences</string>
+    <!-- Section heading, %1$s is the name of the selected server -->
+    <string name="settings_server_section">Server · %1$s</string>
+    <string name="settings_agent_help">Authentication, connection and notification settings belong to the host. Switch to the host to change them. Static config is this agent\'s own file.</string>
+    <string name="settings_app_section">This app</string>
+    <string name="settings_disconnect">Disconnect</string>
+    <string name="settings_disconnect_body">Forget this server and its API key on this device</string>
+    <!-- Keep GPL-3.0 and xyzlab.dev as they are -->
+    <string name="about_licence_line">GPL-3.0 licence · xyzlab.dev</string>
+    <!-- Label for the version of this app -->
+    <string name="about_app">App</string>
+    <!-- Label for the version of the Traefik Manager server -->
+    <string name="about_manager">Manager</string>
+    <string name="about_licences">Open source licences</string>
+    <string name="appearance_theme">Theme</string>
+    <!-- Theme choice -->
+    <string name="appearance_theme_light">Light</string>
+    <!-- Theme choice -->
+    <string name="appearance_theme_dark">Dark</string>
+    <!-- Theme choice: follow the device setting -->
+    <string name="appearance_theme_system">System</string>
+    <string name="appearance_dynamic">Dynamic colour</string>
+    <string name="appearance_dynamic_body">Take the palette from your wallpaper</string>
+    <string name="appearance_dynamic_unsupported">Needs Android 12 or newer</string>
+    <string name="appearance_navigation">Navigation</string>
+    <string name="appearance_hide_nav">Hide the navigation bar</string>
+    <string name="appearance_hide_nav_body">Frees the bottom of the screen. The drawer still reaches every screen.</string>
+    <string name="appearance_nav_items">Choose items</string>
+    <string name="appearance_nav_items_body">Which screens sit in the bar or the side rail, and their order.</string>
+    <string name="appearance_density_body">How the launcher on the Overview lists your apps. Shared with the web, so both show the same.</string>
+    <!-- Layout choice: apps listed as rows -->
+    <string name="appearance_density_rows">Rows</string>
+    <!-- Layout choice: apps shown as a grid of icons -->
+    <string name="appearance_density_icons">Icons</string>
+    <string name="appearance_security">Security</string>
+    <string name="appearance_lock">Require unlock</string>
+    <string name="appearance_lock_unavailable">No biometric or device credential is enrolled on this device</string>
+    <string name="appearance_lock_on">Asked for on launch and whenever the app returns from the background</string>
+    <string name="appearance_lock_off">Ask for biometrics or your device PIN before showing anything</string>
+    <string name="appearance_local_note">These settings live on this device only. They are not sent to the server.</string>
+    <string name="common_refresh">Refresh</string>
+    <string name="diagnostics_unavailable">Diagnostic unavailable</string>
+    <!-- Keep ipAllowList as it is -->
+    <string name="diagnostics_help">What the manager sees when this device calls it. This is the address that feeds rate limits, the audit log, ipAllowList and CrowdSec matching.</string>
+    <string name="diagnostics_address">Address</string>
+    <!-- Label for the IP address the server uses for this device -->
+    <string name="diagnostics_effective_ip">Effective IP</string>
+    <!-- Label for the kind of IP address, such as public or private -->
+    <string name="diagnostics_class">Class</string>
+    <!-- Label for the address that connected to the server directly -->
+    <string name="diagnostics_socket_peer">Socket peer</string>
+    <string name="diagnostics_peer_class">Peer class</string>
+    <string name="diagnostics_proxy_chain">Proxy chain</string>
+    <plurals name="diagnostics_proxy_hops">
+        <item quantity="one">%d proxy hop</item>
+        <item quantity="other">%d proxy hops</item>
+    </plurals>
+    <string name="diagnostics_peer_trusted">Socket peer is a trusted proxy</string>
+    <string name="diagnostics_peer_untrusted">Socket peer is not a trusted proxy, so forwarding headers are ignored</string>
+    <!-- %1$s is a list of proxy addresses -->
+    <string name="diagnostics_trusted">Trusted: %1$s</string>
+    <!-- Keep X-Forwarded-For as it is -->
+    <string name="diagnostics_no_chain">No X-Forwarded-For chain</string>
+    <!-- Section heading: HTTP headers -->
+    <string name="diagnostics_headers">Headers</string>
+    <string name="diagnostics_error_too_old">This server is too old for the client IP diagnostic. Requires Traefik Manager 1.8.0 or newer.</string>
+    <string name="diagnostics_error_load">Could not read the diagnostic</string>
+    <string name="push_error_blocked">Android is blocking notifications for this app, so pushes will arrive silently or not at all.</string>
+    <string name="notifications_delete_title">Delete this notification?</string>
+    <string name="notifications_clear_title">Clear the whole history?</string>
+    <string name="notifications_clear_body">Every notification on the server is removed. This cannot be undone.</string>
+    <string name="notifications_clear_all">Clear all</string>
+    <!-- Button that marks every notification as read -->
+    <string name="notifications_mark_read">Mark read</string>
+    <string name="notifications_refresh">Refresh notifications</string>
+    <string name="notifications_clear">Clear the history</string>
+    <string name="notifications_error_load">Could not load notifications</string>
+    <string name="notifications_empty">Nothing yet</string>
+    <string name="notifications_empty_body">Saves, pings and CrowdSec events show up here.</string>
+    <string name="notifications_delete">Delete this notification</string>
+    <string name="notifications_clock_note">Times are the server\'s clock.</string>
+
+    <!-- Button that copies text to the clipboard -->
+    <string name="common_copy">Copy</string>
+    <string name="connection_saved">Connection settings saved</string>
+    <string name="connection_api_section">Traefik API</string>
+    <string name="connection_url">API URL</string>
+    <string name="connection_url_invalid">Must start with http:// or https://</string>
+    <string name="connection_url_help">Where this server reaches the Traefik API, not where you reach Traefik.</string>
+    <string name="connection_user">Username (optional)</string>
+    <string name="connection_password_new">New password</string>
+    <string name="connection_password">Password (optional)</string>
+    <string name="connection_password_required">Re-enter the password. The saved one is only sent to the saved API URL.</string>
+    <string name="connection_password_stored">A password is already saved. Leave this empty to keep it.</string>
+    <string name="connection_password_help">Only needed if the Traefik API is behind basic auth.</string>
+    <string name="common_hide_password">Hide password</string>
+    <string name="common_show_password">Show password</string>
+    <string name="connection_test_help">Verify the API URL and credentials against your Traefik instance.</string>
+    <string name="connection_test">Test connection</string>
+    <string name="connection_testing">Testing…</string>
+    <!-- %1$s is a version number -->
+    <string name="connection_test_ok">Connected - Traefik v%1$s</string>
+    <string name="connection_defaults">Routing defaults</string>
+    <string name="connection_resolvers">Certificate resolvers</string>
+    <string name="connection_defaults_help">Edit these in the web UI. Saving here keeps them exactly as they are.</string>
+    <string name="connection_error_load">Could not read the settings</string>
+    <string name="connection_error_no_response">No response from the API</string>
+    <string name="connection_error_save">Could not save the settings</string>
+    <string name="connection_error_host">Could not resolve that host, or the address is not allowed.</string>
+    <string name="connection_error_url">That URL is not valid. It must start with http:// or https://.</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_rename_title">Rename %1$s</string>
+    <!-- Button -->
+    <string name="servers_rename">Rename</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_remove_title">Remove %1$s?</string>
+    <string name="servers_remove_body">This only removes it from this Traefik Manager. The agent keeps running on that machine with the same key.</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_rotate_title">Rotate the key for %1$s?</string>
+    <string name="servers_rotate_body">The old key stops working immediately and every request to this server fails until you update its compose file and recreate the container. Health checks will keep looking green, because they are unauthenticated.</string>
+    <string name="servers_rotate_confirm">Rotate key</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_key_title_new">New key for %1$s</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_key_title">Key for %1$s</string>
+    <string name="servers_key_body">Save this key - it will not be shown again.</string>
+    <string name="servers_key_body_rotated">Save this key - it will not be shown again. The agent stops working until you update it.</string>
+    <!-- Button that closes the dialog showing a new key -->
+    <string name="servers_key_saved">I have saved it</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_install_title">Install %1$s</string>
+    <string name="servers_install_body">Run this on the remote machine, with the key you saved when the server was added.</string>
+    <string name="servers_add">Add a server</string>
+    <string name="servers_help">Agents let one Traefik Manager reach Traefik on other machines. The host itself is always available.</string>
+    <!-- Section heading, %1$d is how many agents there are -->
+    <string name="servers_agents_title">Agents %1$d</string>
+    <string name="servers_empty">No agents yet</string>
+    <string name="servers_empty_body">Add one to manage Traefik on another machine from this app.</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_configure_named">Configure %1$s</string>
+    <string name="servers_install_snippet">Install snippet</string>
+    <string name="servers_rotate">Rotate the key</string>
+    <string name="servers_agent_url">Agent URL</string>
+    <string name="servers_agent_url_help">Where this Traefik Manager reaches the agent.</string>
+    <string name="servers_name_empty">This cannot be empty - the server would be dropped.</string>
+    <string name="servers_switched_to_host">That server is no longer configured - switched to Host</string>
+    <string name="servers_error_load">Could not read the servers</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_added">Added %1$s</string>
+    <!-- %1$s is the new name of a server -->
+    <string name="servers_renamed">Renamed to %1$s</string>
+    <string name="servers_error_host_remove">The host cannot be removed</string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_removed">Removed %1$s</string>
+    <string name="servers_error_host_key">The host has no agent key</string>
+    <string name="servers_key_rotated">API key rotated - update your agent</string>
+    <string name="servers_error_generic">That did not work</string>
+
+    <plurals name="common_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="common_seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+    <!-- Dialog title, followed by a list of push apps to choose from -->
+    <string name="push_pick_title">Deliver push through</string>
+    <string name="channels_remove_title">Remove channel</string>
+    <!-- %1$s is the name of a channel -->
+    <string name="channels_remove_body_push">Remove \"%1$s\"? Push to that phone stops until the app registers again.</string>
+    <!-- %1$s is the name of a channel -->
+    <string name="channels_remove_body">Remove channel \"%1$s\"? Events will stop being delivered to it.</string>
+    <string name="channels_add">Add a channel</string>
+    <string name="push_section">This device</string>
+    <string name="push_title">Push to this device</string>
+    <!-- UnifiedPush and the app names stay as they are -->
+    <string name="push_no_distributor">Needs a UnifiedPush app such as ntfy, NextPush, Sunup or Conversations. Install one and it appears here.</string>
+    <!-- %1$s is the name of a push app -->
+    <string name="push_registered_named">Delivered through %1$s, as its own channel below.</string>
+    <!-- The distributor is the push app that delivers notifications -->
+    <string name="push_registered">Delivered through your distributor, as its own channel below.</string>
+    <string name="push_waiting">Waiting for the distributor to hand out an endpoint.</string>
+    <string name="push_off">Get events on this phone as they happen.</string>
+    <string name="route_checks_section">Route checks</string>
+    <string name="route_checks_title">Check route reachability</string>
+    <string name="route_checks_body">Colours the status dot on Routes, and alerts under the Traefik category when a backend stops answering.</string>
+    <!-- Label, followed by how often routes are checked, such as 5 minutes -->
+    <string name="route_checks_every">Every</string>
+    <!-- Section heading, %1$d is how many channels there are -->
+    <string name="channels_title">Channels %1$d</string>
+    <string name="channels_help">Every enabled channel gets its own copy of an event, filtered by the categories, severity, digest and quiet hours set on it.</string>
+    <string name="channels_empty">No channels configured</string>
+    <string name="channels_empty_body">Add a channel to get a message when routes change, backups run or certificates expire.</string>
+    <string name="webhook_legacy_help">Channels arrived in Traefik Manager 1.12.0. This server is older, so it still takes the one webhook.</string>
+    <string name="webhook_section">Webhook</string>
+    <string name="webhook_url">Webhook URL</string>
+    <!-- Label for the service a webhook goes to, such as Discord or Slack -->
+    <string name="webhook_provider">Provider</string>
+    <string name="webhook_password">Password or token (optional)</string>
+    <string name="webhook_password_help">The server never returns this, so it always looks empty.</string>
+    <string name="webhook_test">Send a test</string>
+    <string name="webhook_test_ok">Request accepted</string>
+    <string name="webhook_test_ok_body">The endpoint received the request. Check the destination to confirm it arrived.</string>
+    <string name="notifications_bell_note">The bell on Home shows what the manager has reported.</string>
+    <!-- Lowercase tag on the channel that pushes to this phone -->
+    <string name="channels_this_device">this device</string>
+    <!-- %1$s is a list of the fields that are still empty -->
+    <string name="channels_needs">Needs %1$s</string>
+    <!-- %1$s is the name of a channel -->
+    <string name="channels_test_named">Send a test to %1$s</string>
+    <string name="route_checks_error_save">Could not save the route checks</string>
+    <string name="notifications_deleted">Notification deleted</string>
+    <string name="notifications_error_delete">Could not delete the notification</string>
+    <string name="notifications_cleared">History cleared</string>
+    <string name="notifications_error_clear">Could not clear the history</string>
+    <string name="webhook_error_not_delivered">The webhook was not delivered</string>
+    <string name="webhook_error_delivery">Delivery failed</string>
+    <string name="webhook_saved">Webhook saved</string>
+    <string name="webhook_error_save">Could not save the webhook</string>
+    <string name="channels_add_title">Add channel</string>
+    <string name="channels_edit_title">Edit channel</string>
+    <string name="channels_name_placeholder">e.g. Ops Discord</string>
+    <string name="channels_name_help">Label for this destination in the channel list.</string>
+    <string name="channels_type_help">Payload format for the target service.</string>
+    <!-- HTTP basic authentication -->
+    <string name="channels_auth_section">Basic auth</string>
+    <string name="channels_auth_help">Optional credentials for endpoints that require authentication.</string>
+    <string name="channels_auth_placeholder">Leave empty if not required</string>
+    <string name="channels_delivery_section">Delivery</string>
+    <string name="channels_enabled_body">Deliver events to this channel.</string>
+    <string name="channels_categories">Categories</string>
+    <string name="channels_categories_help">Which kinds of event reach this channel. Select none to send every category.</string>
+    <string name="channels_severity">Minimum severity</string>
+    <string name="channels_severity_help">Anything below this level is dropped for this channel.</string>
+    <!-- Label: whether events are sent one by one or collected into one message -->
+    <string name="channels_digest">Digest</string>
+    <string name="channels_digest_help">Send each event as it happens, or batch them into one message.</string>
+    <string name="channels_quiet">Quiet hours</string>
+    <string name="channels_quiet_help">Hold messages inside this window and send them once it ends. Leave empty for none.</string>
+    <!-- Label for the start time of quiet hours -->
+    <string name="channels_quiet_from">From</string>
+    <!-- Label for the end time of quiet hours -->
+    <string name="channels_quiet_to">To</string>
+    <!-- Lowercase word between the start and end time of quiet hours -->
+    <string name="channels_quiet_between">to</string>
+    <string name="channels_quiet_clear">Clear quiet hours</string>
+    <string name="channels_break_through">Break through quiet hours</string>
+    <string name="channels_break_through_body">Deliver errors right away even inside the quiet window.</string>
+    <!-- Button that sends a test message -->
+    <string name="channels_test">Test</string>
+    <string name="channels_test_ok">Delivered.</string>
+    <!-- Button that confirms the picked time -->
+    <string name="channels_quiet_set">Set</string>
+    <string name="channels_error_load">Failed to load channels</string>
+    <string name="channels_error_update">Failed to update channel</string>
+    <string name="channels_test_delivered">Test message delivered</string>
+    <string name="channels_test_failed">Test failed</string>
+    <string name="channels_removed">Channel removed</string>
+    <string name="channels_error_remove">Failed to remove channel</string>
+    <string name="channels_saved">Channel saved</string>
+    <string name="channels_error_save">Failed to save channel</string>
+    <string name="channels_test_failed_short">Failed.</string>
+    <!-- %1$s is a list of the fields that are still empty -->
+    <string name="channels_error_missing">Fill in %1$s first.</string>
+    <string name="channels_error_quiet">Set both a start and an end time for quiet hours, or clear them both.</string>
+
+    <string name="auth_sign_out_title">Sign out other sessions?</string>
+    <string name="auth_sign_out_body">Every browser signed in to the web UI is signed out. API keys, including this app\'s, keep working.</string>
+    <string name="auth_sign_out_confirm">Sign out</string>
+    <string name="auth_key_new_title">New API key</string>
+    <string name="auth_revoke_title">Revoke this API key?</string>
+    <string name="auth_revoke_body">Anything signed in with this key stops working immediately. If it is the key this app uses, you will have to reconnect.</string>
+    <!-- %1$s is the name of an API key, usually a device name -->
+    <string name="auth_revoke_body_named">Anything signed in with %1$s stops working immediately. If it is the key this app uses, you will have to reconnect.</string>
+    <!-- Button that cancels an API key -->
+    <string name="auth_revoke">Revoke</string>
+    <string name="auth_section">How this server lets people in</string>
+    <!-- State: switched off -->
+    <string name="auth_state_off">Off</string>
+    <!-- State: switched on -->
+    <string name="auth_state_on">On</string>
+    <!-- Keep AUTH_ENABLED as it is -->
+    <string name="auth_note_env">Forced off by AUTH_ENABLED in the environment</string>
+    <string name="auth_note_no_password">No password is set, so the web UI is open</string>
+    <string name="auth_note_open">Anyone who can reach the web UI is let straight in</string>
+    <string name="auth_note_required">The browser login is required</string>
+    <!-- Two-factor authentication -->
+    <string name="auth_otp">Two-factor</string>
+    <string name="auth_otp_note">Covers the browser login. This app authenticates with its API key.</string>
+    <!-- State of single sign-on: set up but not in use -->
+    <string name="auth_oidc_configured">Configured</string>
+    <string name="auth_oidc_note_down">Switched on but not answering, so the password login still applies</string>
+    <string name="auth_oidc_note">Single sign-on for the browser login</string>
+    <string name="auth_read_only_note">Read-only here. Passwords, two-factor and OIDC are changed in the web UI.</string>
+    <string name="auth_sessions_title">Browser sessions</string>
+    <string name="auth_sessions_body">Signs out every browser signed in to the web UI. API keys keep working.</string>
+    <string name="auth_sign_out">Sign out other sessions</string>
+    <!-- Section heading, %1$d is how many keys there are -->
+    <string name="auth_keys_title">API keys %1$d</string>
+    <string name="auth_keys_help">Each device that talks to this server needs its own key. Revoking one only locks out that device.</string>
+    <string name="auth_key_device">Device name</string>
+    <string name="auth_key_device_placeholder">My phone</string>
+    <string name="auth_key_create">Create key</string>
+    <string name="auth_key_unnamed">Unnamed key</string>
+    <!-- Lowercase. Keep manager.yml as it is -->
+    <string name="auth_key_legacy">legacy key - revoke it from manager.yml</string>
+    <!-- Lowercase. %1$s is a date and time -->
+    <string name="auth_key_created_at">created %1$s UTC</string>
+    <!-- %1$s is the name of an API key -->
+    <string name="auth_revoke_named">Revoke %1$s</string>
+    <string name="auth_error_load">Could not read the auth settings</string>
+    <string name="auth_key_created">API key created</string>
+    <string name="auth_error_create">Could not create the key</string>
+    <string name="auth_key_revoked">API key revoked</string>
+    <string name="auth_error_revoke">Could not revoke the key</string>
+    <string name="auth_sessions_revoked">Other browser sessions signed out</string>
+    <string name="auth_error_sessions">Could not sign out other sessions</string>
 </resources>

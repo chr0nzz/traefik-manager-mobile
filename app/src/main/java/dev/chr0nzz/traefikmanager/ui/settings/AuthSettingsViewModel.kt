@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.booleanOrNull
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class AuthStatus(
     val authEnabled: Boolean = false,
@@ -34,8 +37,8 @@ data class AuthSettingsUiState(
     val otpEnabled: Boolean = false,
     val busy: Boolean = false,
     val issuedKey: String? = null,
-    val message: String? = null,
-    val error: String? = null,
+    val message: UiText? = null,
+    val error: UiText? = null,
 )
 
 @HiltViewModel
@@ -85,43 +88,43 @@ class AuthSettingsViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = throwable.message ?: "Could not read the auth settings")
+                        it.copy(loading = false, error = UiText.messageOr(throwable.message, R.string.auth_error_load))
                     }
                 },
             )
         }
     }
 
-    fun generateKey(deviceName: String) = run("API key created") {
+    fun generateKey(deviceName: String) = run(R.string.auth_key_created, R.string.auth_error_create) {
         val response = apiProvider.api().generateApiKey(GenerateKeyRequest(deviceName.trim().take(50)))
-        if (!response.ok || response.key == null) error(response.error ?: "Could not create the key")
+        if (!response.ok || response.key == null) error(response.error.orEmpty())
         _state.update { it.copy(issuedKey = response.key) }
     }
 
-    fun revokeKey(entry: ApiKeyEntry) = run("API key revoked") {
+    fun revokeKey(entry: ApiKeyEntry) = run(R.string.auth_key_revoked, R.string.auth_error_revoke) {
         val response = apiProvider.api().revokeApiKey(RevokeKeyRequest(entry.preview))
-        if (!response.worked) error(response.error ?: "Could not revoke the key")
+        if (!response.worked) error(response.error.orEmpty())
     }
 
-    fun revokeSessions() = run("Other browser sessions signed out") {
+    fun revokeSessions() = run(R.string.auth_sessions_revoked, R.string.auth_error_sessions) {
         val response = apiProvider.api().revokeSessions()
-        if (!response.worked) error(response.error ?: "Could not sign out other sessions")
+        if (!response.worked) error(response.error.orEmpty())
     }
 
     fun dismissKey() = _state.update { it.copy(issuedKey = null) }
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
-    private fun run(success: String, block: suspend () -> Unit) {
+    private fun run(@StringRes success: Int, @StringRes failure: Int, block: suspend () -> Unit) {
         _state.update { it.copy(busy = true) }
         viewModelScope.launch {
             runCatching { block() }.fold(
                 onSuccess = {
-                    _state.update { it.copy(busy = false, message = success) }
+                    _state.update { it.copy(busy = false, message = UiText.of(success)) }
                     load()
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(busy = false, message = throwable.message ?: "That did not work") }
+                    _state.update { it.copy(busy = false, message = UiText.messageOr(throwable.message, failure)) }
                 },
             )
         }

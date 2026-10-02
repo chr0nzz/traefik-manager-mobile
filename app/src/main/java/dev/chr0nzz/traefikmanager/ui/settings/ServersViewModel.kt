@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class IssuedKey(
     val agentName: String,
@@ -28,8 +30,7 @@ data class ServersUiState(
     val activeId: String? = null,
     val busy: Boolean = false,
     val issuedKey: IssuedKey? = null,
-    val message: String? = null,
-    val error: String? = null,
+    val message: UiText? = null,
 ) {
     val agents: List<ServerEntry> get() = servers.filterNot { it.isHost }
 }
@@ -48,7 +49,7 @@ class ServersViewModel @Inject constructor(
     }
 
     fun load() {
-        _state.update { it.copy(loading = it.servers.isEmpty(), error = null) }
+        _state.update { it.copy(loading = it.servers.isEmpty()) }
         viewModelScope.launch {
             runCatching { repository.servers() }.fold(
                 onSuccess = { servers ->
@@ -59,7 +60,7 @@ class ServersViewModel @Inject constructor(
                             servers = servers,
                             activeId = serverScope.activeAgentId.value,
                             message = if (cleared) {
-                                "That server is no longer configured - switched to Host"
+                                UiText.of(R.string.servers_switched_to_host)
                             } else {
                                 it.message
                             },
@@ -68,7 +69,7 @@ class ServersViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = throwable.message ?: "Could not read the servers")
+                        it.copy(loading = false, message = UiText.messageOr(throwable.message, R.string.servers_error_load))
                     }
                 },
             )
@@ -80,23 +81,23 @@ class ServersViewModel @Inject constructor(
         _state.update {
             it.copy(issuedKey = key?.let { raw -> IssuedKey(name.trim(), raw, rotated = false) })
         }
-        "Added ${name.trim()}"
+        UiText.of(R.string.servers_added, name.trim())
     }
 
     fun rename(id: String, name: String) = mutate {
         repository.update(id, mapOf("name" to JsonPrimitive(name.trim())))
-        "Renamed to ${name.trim()}"
+        UiText.of(R.string.servers_renamed, name.trim())
     }
 
     fun delete(entry: ServerEntry) = mutate {
-        repository.delete(entry.id ?: error("The host cannot be removed"))
-        "Removed ${entry.name}"
+        repository.delete(entry.id ?: return@mutate UiText.of(R.string.servers_error_host_remove))
+        UiText.of(R.string.servers_removed, entry.name)
     }
 
     fun rotateKey(entry: ServerEntry) = mutate {
-        val key = repository.rotateKey(entry.id ?: error("The host has no agent key"))
+        val key = repository.rotateKey(entry.id ?: return@mutate UiText.of(R.string.servers_error_host_key))
         _state.update { it.copy(issuedKey = IssuedKey(entry.name, key, rotated = true)) }
-        "API key rotated - update your agent"
+        UiText.of(R.string.servers_key_rotated)
     }
 
     fun composeFor(entry: ServerEntry, key: String?): String {
@@ -116,8 +117,8 @@ class ServersViewModel @Inject constructor(
 
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
-    private fun mutate(block: suspend () -> String) {
-        _state.update { it.copy(busy = true, error = null) }
+    private fun mutate(block: suspend () -> UiText) {
+        _state.update { it.copy(busy = true) }
         viewModelScope.launch {
             runCatching { block() }.fold(
                 onSuccess = { message ->
@@ -126,7 +127,7 @@ class ServersViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(busy = false, message = throwable.message ?: "That did not work")
+                        it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.servers_error_generic))
                     }
                 },
             )

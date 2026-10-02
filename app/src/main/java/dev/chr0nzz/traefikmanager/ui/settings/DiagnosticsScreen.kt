@@ -36,6 +36,10 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,15 +61,15 @@ fun DiagnosticsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Diagnostics") },
+                title = { Text(stringResource(R.string.settings_diagnostics_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to settings")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = viewModel::load) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Refresh")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.common_refresh))
                     }
                 },
             )
@@ -75,8 +79,8 @@ fun DiagnosticsScreen(
             state.loading -> LoadingState(modifier = Modifier.padding(insets))
 
             state.error != null -> ErrorState(
-                headline = "Diagnostic unavailable",
-                body = state.error,
+                headline = stringResource(R.string.diagnostics_unavailable),
+                body = state.error?.asString(),
                 onRetry = viewModel::load,
                 modifier = Modifier.padding(insets),
             )
@@ -97,44 +101,43 @@ fun DiagnosticsScreen(
                 ) {
                     item {
                         Text(
-                            text = "What the manager sees when this device calls it. This is the address " +
-                                "that feeds rate limits, the audit log, ipAllowList and CrowdSec matching.",
+                            text = stringResource(R.string.diagnostics_help),
                             style = MaterialTheme.typography.bodySmall,
                             color = palette.muted,
                         )
                     }
-                    item { SectionLabel("Address") }
+                    item { SectionLabel(stringResource(R.string.diagnostics_address)) }
                     item {
                         TmCard {
-                            DetailRow("Effective IP", diagnostic.effectiveIp.ifEmpty { "-" }, mono = true)
-                            DetailRow("Class", diagnostic.effectiveClass.ifEmpty { "-" })
-                            DetailRow("Socket peer", diagnostic.socketPeer.ifEmpty { "-" }, mono = true)
+                            DetailRow(stringResource(R.string.diagnostics_effective_ip), diagnostic.effectiveIp.ifEmpty { "-" }, mono = true)
+                            DetailRow(stringResource(R.string.diagnostics_class), diagnostic.effectiveClass.ifEmpty { "-" })
+                            DetailRow(stringResource(R.string.diagnostics_socket_peer), diagnostic.socketPeer.ifEmpty { "-" }, mono = true)
                             DetailRow(
-                                label = "Peer class",
+                                label = stringResource(R.string.diagnostics_peer_class),
                                 value = diagnostic.socketPeerClass.ifEmpty { "-" },
                                 last = true,
                             )
                         }
                     }
 
-                    item { SectionLabel("Proxy chain", modifier = Modifier.padding(top = TmSpacing.sm)) }
+                    item { SectionLabel(stringResource(R.string.diagnostics_proxy_chain), modifier = Modifier.padding(top = TmSpacing.sm)) }
                     item {
                         TmCard {
                             Text(
-                                text = if (diagnostic.proxyHops == 1) {
-                                    "1 proxy hop"
-                                } else {
-                                    "${diagnostic.proxyHops} proxy hops"
-                                },
+                                text = pluralStringResource(
+                                    R.plurals.diagnostics_proxy_hops,
+                                    diagnostic.proxyHops,
+                                    diagnostic.proxyHops,
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             diagnostic.proxyTrusted?.let { trusted ->
                                 Text(
                                     text = if (trusted) {
-                                        "Socket peer is a trusted proxy"
+                                        stringResource(R.string.diagnostics_peer_trusted)
                                     } else {
-                                        "Socket peer is not a trusted proxy, so forwarding headers are ignored"
+                                        stringResource(R.string.diagnostics_peer_untrusted)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = if (trusted) palette.green else palette.yellow,
@@ -142,14 +145,14 @@ fun DiagnosticsScreen(
                             }
                             if (diagnostic.trustedProxies.isNotEmpty()) {
                                 Text(
-                                    text = "Trusted: ${diagnostic.trustedProxies.joinToString(", ")}",
+                                    text = stringResource(R.string.diagnostics_trusted, diagnostic.trustedProxies.joinToString(", ")),
                                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                                     color = palette.muted,
                                 )
                             }
                             if (diagnostic.forwardedForChain.isEmpty()) {
                                 Text(
-                                    text = "No X-Forwarded-For chain",
+                                    text = stringResource(R.string.diagnostics_no_chain),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = palette.muted,
                                 )
@@ -178,7 +181,7 @@ fun DiagnosticsScreen(
                         }
                     }
 
-                    item { SectionLabel("Headers", modifier = Modifier.padding(top = TmSpacing.sm)) }
+                    item { SectionLabel(stringResource(R.string.diagnostics_headers), modifier = Modifier.padding(top = TmSpacing.sm)) }
                     item {
                         TmCard {
                             ClientIpDiagnostic.HEADER_ORDER.forEachIndexed { index, header ->

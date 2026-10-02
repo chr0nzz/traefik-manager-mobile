@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 val WEBHOOK_TYPES = listOf("discord", "slack", "ntfy", "gotify", "generic")
 
@@ -32,8 +34,8 @@ data class NotificationsUiState(
     val webhookPassword: String = "",
     val saving: Boolean = false,
     val test: TestState = TestState.Idle,
-    val message: String? = null,
-    val error: String? = null,
+    val message: UiText? = null,
+    val error: UiText? = null,
     val unread: Int = 0,
     val routeCheckSupported: Boolean? = null,
     val routeCheckEnabled: Boolean = true,
@@ -42,15 +44,11 @@ data class NotificationsUiState(
 )
 
 object RouteCheckIntervals {
-    val options: List<Pair<Int, String>> = listOf(
-        60 to "1 minute",
-        300 to "5 minutes",
-        900 to "15 minutes",
-        1800 to "30 minutes",
-    )
+    val options: List<Pair<Int, UiText>> = listOf(60, 300, 900, 1800)
+        .map { it to UiText.plural(R.plurals.common_minutes, it / 60) }
 
-    fun label(seconds: Int): String =
-        options.firstOrNull { it.first == seconds }?.second ?: "$seconds seconds"
+    fun label(seconds: Int): UiText =
+        options.firstOrNull { it.first == seconds }?.second ?: UiText.plural(R.plurals.common_seconds, seconds)
 }
 
 @HiltViewModel
@@ -91,7 +89,7 @@ class NotificationsViewModel @Inject constructor(
                     webhookType = settings.getOrNull()?.text("webhook_type")?.ifEmpty { "discord" }
                         ?: current.webhookType,
                     webhookUsername = settings.getOrNull()?.text("webhook_username") ?: current.webhookUsername,
-                    error = history.exceptionOrNull()?.message,
+                    error = history.exceptionOrNull()?.message?.let(UiText::Raw),
                 )
             }
         }
@@ -127,7 +125,7 @@ class NotificationsViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             savingRouteCheck = false,
-                            message = throwable.message ?: "Could not save the route checks",
+                            message = UiText.messageOr(throwable.message, R.string.route_checks_error_save),
                         )
                     }
                 },
@@ -145,10 +143,10 @@ class NotificationsViewModel @Inject constructor(
     fun delete(notification: TmNotification) {
         viewModelScope.launch {
             runCatching { notifications.delete(notification) }.fold(
-                onSuccess = { _state.update { it.copy(message = "Notification deleted") } },
+                onSuccess = { _state.update { it.copy(message = UiText.of(R.string.notifications_deleted)) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = throwable.message ?: "Could not delete the notification")
+                        it.copy(message = UiText.messageOr(throwable.message, R.string.notifications_error_delete))
                     }
                 },
             )
@@ -160,11 +158,11 @@ class NotificationsViewModel @Inject constructor(
             runCatching { notifications.clear() }.fold(
                 onSuccess = {
                     PushNotifier.clear(context)
-                    _state.update { it.copy(message = "History cleared") }
+                    _state.update { it.copy(message = UiText.of(R.string.notifications_cleared)) }
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = throwable.message ?: "Could not clear the history")
+                        it.copy(message = UiText.messageOr(throwable.message, R.string.notifications_error_clear))
                     }
                 },
             )
@@ -201,13 +199,13 @@ class NotificationsViewModel @Inject constructor(
                             test = if (result.ok) {
                                 TestState.Ok("sent")
                             } else {
-                                TestState.Failed(result.error ?: "The webhook was not delivered")
+                                TestState.Failed(UiText.messageOr(result.error, R.string.webhook_error_not_delivered))
                             },
                         )
                     }
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(test = TestState.Failed(throwable.message ?: "Delivery failed")) }
+                    _state.update { it.copy(test = TestState.Failed(UiText.messageOr(throwable.message, R.string.webhook_error_delivery))) }
                 },
             )
         }
@@ -227,11 +225,11 @@ class NotificationsViewModel @Inject constructor(
             }
             runCatching { settingsRepository.patch(changes) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(saving = false, message = "Webhook saved", webhookPassword = "") }
+                    _state.update { it.copy(saving = false, message = UiText.of(R.string.webhook_saved), webhookPassword = "") }
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, message = throwable.message ?: "Could not save the webhook")
+                        it.copy(saving = false, message = UiText.messageOr(throwable.message, R.string.webhook_error_save))
                     }
                 },
             )

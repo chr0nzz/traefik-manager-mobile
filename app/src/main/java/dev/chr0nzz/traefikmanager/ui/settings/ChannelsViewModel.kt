@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class ChannelDraft(
     val id: String? = null,
@@ -54,10 +56,10 @@ data class ChannelsUiState(
     val loading: Boolean = true,
     val supported: Boolean? = null,
     val channels: List<NotificationChannel> = emptyList(),
-    val error: String? = null,
-    val message: String? = null,
+    val error: UiText? = null,
+    val message: UiText? = null,
     val editing: ChannelDraft? = null,
-    val editError: String? = null,
+    val editError: UiText? = null,
     val saving: Boolean = false,
     val test: TestState = TestState.Idle,
     val pendingDelete: NotificationChannel? = null,
@@ -98,7 +100,7 @@ class ChannelsViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             supported = repository.supported.value,
-                            error = throwable.message ?: "Failed to load channels",
+                            error = UiText.messageOr(throwable.message, R.string.channels_error_load),
                         )
                     }
                 },
@@ -154,7 +156,7 @@ class ChannelsViewModel @Inject constructor(
                     onSuccess = { saved -> replace(saved) },
                     onFailure = { throwable ->
                         _state.update {
-                            it.copy(message = throwable.message ?: "Failed to update channel")
+                            it.copy(message = UiText.messageOr(throwable.message, R.string.channels_error_update))
                         }
                     },
                 )
@@ -167,9 +169,9 @@ class ChannelsViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     message = if (outcome.ok) {
-                        "Test message delivered"
+                        UiText.of(R.string.channels_test_delivered)
                     } else {
-                        outcome.message.ifBlank { "Test failed" }
+                        UiText.messageOr(outcome.message, R.string.channels_test_failed)
                     },
                 )
             }
@@ -184,12 +186,12 @@ class ChannelsViewModel @Inject constructor(
                     _state.update { current ->
                         current.copy(
                             channels = current.channels.filterNot { it.id == channel.id },
-                            message = "Channel removed",
+                            message = UiText.of(R.string.channels_removed),
                         )
                     }
                 },
                 onFailure = { throwable ->
-                    _state.update { it.copy(message = throwable.message ?: "Failed to remove channel") }
+                    _state.update { it.copy(message = UiText.messageOr(throwable.message, R.string.channels_error_remove)) }
                 },
             )
         }
@@ -208,12 +210,12 @@ class ChannelsViewModel @Inject constructor(
                 onSuccess = { saved ->
                     replace(saved)
                     _state.update {
-                        it.copy(saving = false, editing = null, message = "Channel saved", test = TestState.Idle)
+                        it.copy(saving = false, editing = null, message = UiText.of(R.string.channels_saved), test = TestState.Idle)
                     }
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, editError = throwable.message ?: "Failed to save channel")
+                        it.copy(saving = false, editError = UiText.messageOr(throwable.message, R.string.channels_error_save))
                     }
                 },
             )
@@ -237,9 +239,9 @@ class ChannelsViewModel @Inject constructor(
                         current.copy(
                             editing = current.editing?.copy(id = saved.id),
                             test = if (outcome.ok) {
-                                TestState.Ok("Delivered.")
+                                TestState.Ok("")
                             } else {
-                                TestState.Failed(outcome.message.ifBlank { "Failed." })
+                                TestState.Failed(UiText.messageOr(outcome.message, R.string.channels_test_failed_short))
                             },
                         )
                     }
@@ -248,7 +250,7 @@ class ChannelsViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             test = TestState.Idle,
-                            editError = throwable.message ?: "Failed to save channel",
+                            editError = UiText.messageOr(throwable.message, R.string.channels_error_save),
                         )
                     }
                 },
@@ -275,11 +277,11 @@ class ChannelsViewModel @Inject constructor(
         }
     }
 
-    private fun validate(draft: ChannelDraft): String? {
+    private fun validate(draft: ChannelDraft): UiText? {
         val missing = draft.toChannel().missingFields()
-        if (missing.isNotEmpty()) return "Fill in " + missing.joinToString(" and ") + " first."
+        if (missing.isNotEmpty()) return UiText.of(R.string.channels_error_missing, missing.joinToString(", "))
         if (draft.quietStart.isBlank() != draft.quietEnd.isBlank()) {
-            return "Set both a start and an end time for quiet hours, or clear them both."
+            return UiText.of(R.string.channels_error_quiet)
         }
         return null
     }
