@@ -527,7 +527,7 @@ private fun WindowKeyRow(
                             modifier = Modifier.size(11.dp),
                         )
                         Text(
-                            text = facet.key,
+                            text = facet.label.asString(),
                             style = MaterialTheme.typography.labelSmall,
                             color = if (dead) palette.muted else palette.blue,
                         )
@@ -543,7 +543,7 @@ private fun WindowKeyRow(
                         )
                         Icon(
                             imageVector = Icons.Outlined.Close,
-                            contentDescription = stringResource(R.string.logs_clear_filter, facet.key),
+                            contentDescription = stringResource(R.string.logs_clear_filter, facet.label.asString()),
                             tint = if (dead) palette.muted else palette.blue,
                             modifier = Modifier.size(11.dp),
                         )

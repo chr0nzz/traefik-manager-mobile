@@ -6,6 +6,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class DeleteNotificationRequest(val ts: String, val id: Int? = null)
@@ -44,15 +45,15 @@ data class TmNotification(
             runCatching { LocalDateTime.parse(ts, PARSER).format(DISPLAY) }.getOrDefault(ts)
         }
 
-    fun since(now: Instant = Instant.now()): String? {
+    fun since(now: Instant = Instant.now()): UiText? {
         if (at <= 0) return null
         val seconds = now.epochSecond - at
         if (seconds < 0) return null
         return when {
-            seconds < 60 -> "just now"
-            seconds < 3600 -> "${seconds / 60} min ago"
-            seconds < 86400 -> "${seconds / 3600} h ago"
-            seconds < 604800 -> "${seconds / 86400} d ago"
+            seconds < 60 -> UiText.of(R.string.time_just_now)
+            seconds < 3600 -> UiText.of(R.string.time_minutes_ago, seconds / 60)
+            seconds < 86400 -> UiText.of(R.string.time_hours_ago, seconds / 3600)
+            seconds < 604800 -> UiText.of(R.string.time_days_ago, seconds / 86400)
             else -> null
         }
     }

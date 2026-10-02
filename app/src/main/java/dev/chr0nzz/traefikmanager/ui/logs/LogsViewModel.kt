@@ -34,17 +34,17 @@ val LOG_LINE_STEPS = listOf(100, 200, 500, 1000)
 private const val AUTO_REFRESH_FAST_MILLIS = 10_000L
 private const val AUTO_REFRESH_SLOW_MILLIS = 30_000L
 
-enum class LogFacet(val key: String) {
-    Status("status"),
-    Method("method"),
-    Domain("domain"),
-    Path("path"),
-    Ip("ip"),
-    IpClass("ipclass"),
-    Service("service"),
-    Router("router"),
-    Provider("provider"),
-    Duration("dur"),
+enum class LogFacet(val key: String, val label: UiText) {
+    Status("status", UiText.of(R.string.logs_facet_status)),
+    Method("method", UiText.of(R.string.crowdsec_facet_method)),
+    Domain("domain", UiText.of(R.string.logs_facet_domain)),
+    Path("path", UiText.of(R.string.crowdsec_facet_path)),
+    Ip("ip", UiText.Raw("ip")),
+    IpClass("ipclass", UiText.of(R.string.logs_facet_ip_class)),
+    Service("service", UiText.of(R.string.logs_facet_service)),
+    Router("router", UiText.of(R.string.logs_facet_router)),
+    Provider("provider", UiText.of(R.string.logs_facet_provider)),
+    Duration("dur", UiText.of(R.string.logs_facet_duration)),
 }
 
 data class LogsUiState(

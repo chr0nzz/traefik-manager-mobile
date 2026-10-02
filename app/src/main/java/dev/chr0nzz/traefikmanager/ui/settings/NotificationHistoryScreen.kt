@@ -220,7 +220,7 @@ fun NotificationHistoryScreen(
                         )
                         Text(
                             text = listOfNotNull(
-                                notification.since() ?: notification.stamp,
+                                notification.since()?.asString() ?: notification.stamp,
                                 notification.category.takeIf { it.isNotBlank() }
                                     ?.let { ChannelKinds.categoryLabel(it).asString() },
                             ).joinToString("  "),

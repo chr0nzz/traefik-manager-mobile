@@ -2671,4 +2671,27 @@
     <string name="dashboard_verdict_clean">no errors or warnings reported</string>
     <string name="migration_carried_over">Your server and API key were carried over from version 1.</string>
     <string name="migration_unreadable">Version 1 credentials could not be read. Please enter your server and API key again.</string>
+
+    <!-- Lowercase -->
+    <string name="time_just_now">just now</string>
+    <!-- Lowercase, kept short. %1$d is a number of minutes -->
+    <string name="time_minutes_ago">%1$d min ago</string>
+    <!-- Lowercase, kept short. %1$d is a number of hours -->
+    <string name="time_hours_ago">%1$d h ago</string>
+    <!-- Lowercase, kept short. %1$d is a number of days -->
+    <string name="time_days_ago">%1$d d ago</string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_status">status</string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_domain">domain</string>
+    <!-- Lowercase name of a filter: the kind of IP address, such as public or private. Keep it short -->
+    <string name="logs_facet_ip_class">ipclass</string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_service">service</string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_router">router</string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_provider">provider</string>
+    <!-- Lowercase name of a filter, short for duration. Keep it short -->
+    <string name="logs_facet_duration">dur</string>
 </resources>

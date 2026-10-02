@@ -92,6 +92,7 @@ class NotificationChannelTest {
     }
 }
 
+@RunWith(RobolectricTestRunner::class)
 class NotificationStampTest {
 
     @Test
@@ -115,22 +116,22 @@ class NotificationStampTest {
 
     @Test
     fun `relative time only exists when the server sent an epoch`() {
-        assertNull(TmNotification(ts = "2026-08-12 10:31:04").since())
+        assertNull(TmNotification(ts = "2026-08-12 10:31:04").since().english())
     }
 
     @Test
     fun `relative time counts back from now`() {
         val now = java.time.Instant.ofEpochSecond(1786026664L)
-        assertEquals("just now", TmNotification(at = 1786026634L).since(now))
-        assertEquals("5 min ago", TmNotification(at = 1786026364L).since(now))
-        assertEquals("2 h ago", TmNotification(at = 1786019464L).since(now))
-        assertEquals("3 d ago", TmNotification(at = 1785767464L).since(now))
+        assertEquals("just now", TmNotification(at = 1786026634L).since(now).english())
+        assertEquals("5 min ago", TmNotification(at = 1786026364L).since(now).english())
+        assertEquals("2 h ago", TmNotification(at = 1786019464L).since(now).english())
+        assertEquals("3 d ago", TmNotification(at = 1785767464L).since(now).english())
     }
 
     @Test
     fun `anything older than a week falls back to the date`() {
         val now = java.time.Instant.ofEpochSecond(1786026664L)
-        assertNull(TmNotification(at = 1785000000L).since(now))
+        assertNull(TmNotification(at = 1785000000L).since(now).english())
     }
 }
 
