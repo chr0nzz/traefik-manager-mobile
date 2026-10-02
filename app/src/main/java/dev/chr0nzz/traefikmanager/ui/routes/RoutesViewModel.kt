@@ -187,10 +187,6 @@ class RoutesViewModel @Inject constructor(
         }
     }
 
-    fun pingAll() {
-        _state.value.visible.forEach(::ping)
-    }
-
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
     fun toggle(route: Route) {

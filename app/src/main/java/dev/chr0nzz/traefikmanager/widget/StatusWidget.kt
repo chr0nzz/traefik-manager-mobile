@@ -84,14 +84,6 @@ internal object P {
 }
 
 internal val Mono = FontFamily("monospace")
-
-private val SMALL = DpSize(110.dp, 100.dp)
-private val WIDE = DpSize(250.dp, 100.dp)
-private val TALL = DpSize(110.dp, 220.dp)
-private val LARGE = DpSize(250.dp, 220.dp)
-
-private const val CELL_SLOT = 10
-private const val ROW_HEIGHT = 19
 private const val CARD_PADDING = 10
 
 private const val MAX_CELLS = 96

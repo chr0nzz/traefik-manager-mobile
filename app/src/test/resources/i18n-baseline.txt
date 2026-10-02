@@ -1,8 +1,7 @@
 data/model 397
-data/repo 80
+data/repo 79
 data/store 3
 push 8
 ui/crowdsec 1
-ui/nav 1
-ui/settings 588
+ui/settings 587
 widget 96

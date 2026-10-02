@@ -119,36 +119,6 @@ fun IconTile(
 }
 
 @Composable
-fun CardTitleRow(
-    title: String,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    status: TmStatus? = null,
-    trailing: @Composable (() -> Unit)? = null,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-    ) {
-        if (icon != null) {
-            IconTile(icon = icon, status = status)
-        } else if (status != null) {
-            StatusDot(status = status)
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        trailing?.invoke()
-    }
-}
-
-@Composable
 fun MonoText(
     text: String,
     modifier: Modifier = Modifier,

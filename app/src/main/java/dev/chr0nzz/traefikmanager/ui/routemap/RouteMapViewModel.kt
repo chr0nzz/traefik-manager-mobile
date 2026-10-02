@@ -65,8 +65,6 @@ class RouteMapViewModel @Inject constructor(
 
     fun onEntryPoint(value: String?) = update { it.copy(entryPoint = value) }
 
-    fun onQuery(value: String) = update { it.copy(query = value) }
-
     fun clearFilters() = update {
         it.copy(protocol = null, provider = null, entryPoint = null, query = "")
     }

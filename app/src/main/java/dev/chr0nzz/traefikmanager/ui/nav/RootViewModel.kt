@@ -87,7 +87,6 @@ class RootViewModel @Inject constructor(
         val entry = servers.firstOrNull { it.id == agentId }
         ServerCapabilities(
             isHost = agentId == null,
-            name = entry?.name ?: "Host",
             settings = settings,
             agent = entry?.agent,
         )

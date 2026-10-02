@@ -143,7 +143,6 @@ data class WidgetConfig(
     val needsOverview: Boolean get() = cards.contains(WidgetCardType.Overview)
 
     companion object {
-        const val MAX_CARDS = 4
 
         const val DEFAULT_INTERVAL_MINUTES = 30
 

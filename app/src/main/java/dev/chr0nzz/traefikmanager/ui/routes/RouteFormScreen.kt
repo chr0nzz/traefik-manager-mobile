@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1039,24 +1038,6 @@ private fun DropdownField(
                     },
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun RouteFormActions(
-    state: RouteFormUiState,
-    onCancel: () -> Unit,
-    onSave: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm, Alignment.End),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        OutlinedButton(onClick = onCancel, enabled = !state.saving) { Text(stringResource(R.string.common_cancel)) }
-        Button(onClick = onSave, enabled = !state.saving) {
-            Text(stringResource(if (state.form.isEdit) R.string.routes_form_save else R.string.routes_form_create))
         }
     }
 }

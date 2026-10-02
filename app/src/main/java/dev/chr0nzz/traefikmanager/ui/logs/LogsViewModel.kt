@@ -198,12 +198,6 @@ class LogsViewModel @Inject constructor(
         current.copy(facets = facets)
     }
 
-    fun applyFacets(vararg pairs: Pair<LogFacet, String>) = _state.update { current ->
-        val incoming = pairs.toMap()
-        val alreadyOn = incoming.all { (facet, value) -> current.facets[facet] == value }
-        current.copy(facets = if (alreadyOn) current.facets - incoming.keys else current.facets + incoming)
-    }
-
     fun clearFacet(facet: LogFacet) = _state.update { it.copy(facets = it.facets - facet) }
 
     fun clearFacets() = _state.update { it.copy(facets = emptyMap()) }

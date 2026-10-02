@@ -198,8 +198,6 @@ class MiddlewareFormViewModel @Inject constructor(
     fun generateDigestEntry(username: String, password: String, realm: String) =
         generateEntry { middlewaresRepository.digestEntry(username, password, realm) }
 
-    fun consumeGeneratorError() = _state.update { it.copy(generatorError = null) }
-
     private fun generateEntry(block: suspend () -> String) {
         _state.update { it.copy(generating = true, generatorError = null) }
         viewModelScope.launch {

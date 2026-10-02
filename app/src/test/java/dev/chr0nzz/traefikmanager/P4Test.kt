@@ -32,7 +32,7 @@ class P4Test {
             crowdsecLapiUrl = "http://crowdsec:8080",
         )
 
-        val onAgent = ServerCapabilities(isHost = false, name = "edge", settings = hostSettings, agent = agent)
+        val onAgent = ServerCapabilities(isHost = false, settings = hostSettings, agent = agent)
         assertTrue(onAgent.tabVisible("crowdsec"))
         assertTrue(onAgent.crowdsecConfigured)
         assertFalse(onAgent.hostOnlySettings)

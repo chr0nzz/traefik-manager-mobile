@@ -71,9 +71,6 @@ data class CertificatesUiState(
     val unusedRemovable: List<CertRow>
         get() = certs.filter { verdict(it)?.unused == true && removable(it) }
 
-    val expiringSoon: Int
-        get() = certs.count { it.health == CertHealth.Critical || it.health == CertHealth.Expiring }
-
     val statusVerdict: Verdict
         get() {
             val days = certs.mapNotNull { it.daysLeft }

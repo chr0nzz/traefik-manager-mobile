@@ -48,8 +48,6 @@ data class BackupsUiState(
     val static: List<BackupEntry> get() = entries.filter { it.kind == BackupKind.Static }
 
     val certs: List<BackupEntry> get() = entries.filter { it.kind == BackupKind.Certs }
-
-    val totalSize: Long get() = entries.sumOf { it.size }
 }
 
 @HiltViewModel

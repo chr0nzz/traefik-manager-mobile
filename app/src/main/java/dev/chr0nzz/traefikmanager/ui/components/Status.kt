@@ -6,11 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -165,38 +162,4 @@ private fun StripCell(status: TmStatus, size: Dp) {
         TmStatus.Unknown, TmStatus.Disabled ->
             Spacer(Modifier.size(size).border(1.dp, palette.muted.copy(alpha = 0.55f), shape))
     }
-}
-
-@Composable
-fun SegmentBar(
-    ok: Int,
-    warn: Int,
-    error: Int,
-    modifier: Modifier = Modifier,
-) {
-    val palette = LocalTmPalette.current
-    val total = ok + warn + error
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(TmSize.stripHeight)
-            .clip(RoundedCornerShape(TmSize.stripHeight / 2))
-            .background(palette.border),
-    ) {
-        if (total == 0) return@Row
-        Segment(weight = error, color = palette.red)
-        Segment(weight = warn, color = palette.yellow)
-        Segment(weight = ok, color = palette.muted.copy(alpha = 0.60f))
-    }
-}
-
-@Composable
-private fun RowScope.Segment(weight: Int, color: Color) {
-    if (weight <= 0) return
-    Spacer(
-        modifier = Modifier
-            .weight(weight.toFloat())
-            .fillMaxHeight()
-            .background(color),
-    )
 }

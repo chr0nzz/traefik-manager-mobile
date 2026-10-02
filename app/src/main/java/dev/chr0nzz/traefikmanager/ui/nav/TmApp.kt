@@ -61,7 +61,6 @@ import androidx.navigation.navArgument
 import android.net.Uri
 import dev.chr0nzz.traefikmanager.data.api.ApiState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
-import dev.chr0nzz.traefikmanager.ui.components.PlaceholderScreen
 import dev.chr0nzz.traefikmanager.ui.components.asString
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
 import dev.chr0nzz.traefikmanager.ui.certs.CertificatesScreen

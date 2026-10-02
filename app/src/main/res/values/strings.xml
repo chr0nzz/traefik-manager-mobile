@@ -1087,7 +1087,6 @@
     <string name="crowdsec_facet_search">search</string>
     <!-- %1$s is the name of a filter such as country or scenario -->
     <string name="crowdsec_remove_filter">Remove the %1$s filter</string>
-    <string name="crowdsec_view_evidence">Attack evidence</string>
     <!-- %1$s is an IP address or a range -->
     <string name="crowdsec_decision_added">Decision added for %1$s</string>
     <string name="crowdsec_error_add">Could not add the decision</string>
@@ -1263,8 +1262,6 @@
     <string name="routes_form_preset_frame_deny">Frame deny</string>
     <string name="routes_form_preset_referrer">Referrer policy</string>
     <string name="routes_form_preset_permissions">Permissions policy</string>
-    <string name="routes_form_save">Save route</string>
-    <string name="routes_form_create">Create route</string>
     <string name="routes_error_save">Could not save the route</string>
     <string name="routes_raw_title">Raw YAML</string>
     <string name="routes_raw_error_load">Could not load the YAML</string>

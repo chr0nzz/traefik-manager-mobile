@@ -82,6 +82,5 @@ data class Entrypoint(
     val http: EntrypointHttp? = null,
 ) {
     val isUdp: Boolean get() = address.endsWith("/udp")
-    val isTcpOnly: Boolean get() = address.endsWith("/tcp")
     val hasTls: Boolean get() = http?.tls != null
 }

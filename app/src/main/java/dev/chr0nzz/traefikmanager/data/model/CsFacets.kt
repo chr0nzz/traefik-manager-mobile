@@ -78,8 +78,6 @@ data class CsFacets(val values: Map<CsFacet, String> = emptyMap()) {
         return true
     }
 
-    fun viewFor(facet: CsFacet): CsReads = facet.reads
-
     fun decisionQuery(query: String): CsDecisionQuery = CsDecisionQuery(
         q = query.trim().lowercase().ifEmpty { null },
         origin = get(CsFacet.Origin),

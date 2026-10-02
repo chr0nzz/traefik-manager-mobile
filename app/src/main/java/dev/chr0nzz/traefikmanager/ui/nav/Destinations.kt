@@ -116,8 +116,4 @@ enum class TmDestination(
         serverTab = page.tab,
         provider = page,
     )
-
-    companion object {
-        val primaryEntries: List<TmDestination> get() = entries.filter { it.primary }
-    }
 }

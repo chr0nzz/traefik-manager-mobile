@@ -114,22 +114,6 @@ data class ChannelPayload(
     @SerialName("break_through") val breakThrough: Boolean,
 )
 
-fun NotificationChannel.toPayload() = ChannelPayload(
-    name = name,
-    kind = kind,
-    enabled = enabled,
-    url = url,
-    token = token,
-    token2 = token2,
-    username = username,
-    password = password,
-    categories = categories,
-    minSeverity = minSeverity,
-    digest = digest,
-    quietHours = quietHours,
-    breakThrough = breakThrough,
-)
-
 @Serializable
 data class ChannelListResponse(val channels: List<NotificationChannel> = emptyList())
 

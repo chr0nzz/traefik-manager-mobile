@@ -1,6 +1,5 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,10 +32,7 @@ import kotlinx.coroutines.sync.Mutex
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class CrowdSecView(@StringRes val label: Int) {
-    Evidence(R.string.crowdsec_view_evidence),
-    Bans(R.string.crowdsec_card_bans),
-}
+enum class CrowdSecView { Evidence, Bans }
 
 data class CrowdSecUiState(
     val loading: Boolean = true,

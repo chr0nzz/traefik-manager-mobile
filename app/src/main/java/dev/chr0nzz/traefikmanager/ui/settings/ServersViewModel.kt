@@ -88,11 +88,6 @@ class ServersViewModel @Inject constructor(
         "Renamed to ${name.trim()}"
     }
 
-    fun setUrl(id: String, url: String) = mutate {
-        repository.update(id, mapOf("url" to JsonPrimitive(url.trim().trimEnd('/'))))
-        "URL updated"
-    }
-
     fun delete(entry: ServerEntry) = mutate {
         repository.delete(entry.id ?: error("The host cannot be removed"))
         "Removed ${entry.name}"

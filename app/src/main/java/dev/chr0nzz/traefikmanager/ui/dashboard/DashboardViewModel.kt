@@ -60,10 +60,6 @@ class DashboardViewModel @Inject constructor(
         providerFilter.update { current -> if (current == provider) null else provider }
     }
 
-    fun clearProviderFilter() {
-        providerFilter.value = null
-    }
-
     private fun load(initial: Boolean) {
         loadState.update {
             it.copy(loading = initial && repository.raw.value == null, refreshing = !initial, error = null)

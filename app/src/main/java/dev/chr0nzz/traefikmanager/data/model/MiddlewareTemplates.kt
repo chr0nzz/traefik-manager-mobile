@@ -62,13 +62,6 @@ class WizardValues(
         return raw.split('\n').map(String::trim).filter(String::isNotEmpty)
     }
 
-    fun initialText(field: WizardField): String = when (field) {
-        is WizardField.Text -> text[field.key] ?: field.default
-        is WizardField.Lines -> text[field.key] ?: field.default
-        is WizardField.Choice -> text[field.key] ?: field.default
-        is WizardField.Toggle -> ""
-    }
-
     fun flag(key: String): Boolean {
         toggles[key]?.let { return it }
         return fields.filterIsInstance<WizardField.Toggle>().firstOrNull { it.key == key }?.default ?: false

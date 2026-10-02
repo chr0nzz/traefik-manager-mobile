@@ -1,7 +1,6 @@
 package dev.chr0nzz.traefikmanager.data.repo
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
-import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSettings
 import dev.chr0nzz.traefikmanager.data.model.RouteHealthSnapshot
 import javax.inject.Inject
@@ -29,8 +28,6 @@ class RouteHealthRepository @Inject constructor(
             _supported.value = null
         }
     }
-
-    fun healthFor(routeId: String): RouteHealth? = _snapshot.value?.routes?.get(routeId)
 
     suspend fun refresh(): RouteHealthSnapshot? = try {
         apiProvider.api().routeHealth(agentId = serverScope.activeAgentId.value)

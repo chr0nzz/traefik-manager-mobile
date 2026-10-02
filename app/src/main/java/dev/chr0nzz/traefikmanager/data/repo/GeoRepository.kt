@@ -35,8 +35,6 @@ class GeoRepository @Inject constructor(
         return fetched
     }
 
-    fun cachedCode(ip: String): String? = cache[ip]
-
     suspend fun lookup(ips: List<String>): Map<String, String> {
         if (!status().usable) return emptyMap()
 

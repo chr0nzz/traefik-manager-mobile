@@ -132,11 +132,4 @@ class NotificationsRepository @Inject constructor(
         persist(emptyList())
         if (_readUntil.value == null) preferencesStore.setNotificationsRead(0)
     }
-
-    suspend fun sharedMarker(): Boolean {
-        if (_readUntil.value != null) return true
-        return runCatching { apiProvider.api().notificationState() }
-            .onSuccess { _readUntil.value = it.readUntil }
-            .isSuccess
-    }
 }

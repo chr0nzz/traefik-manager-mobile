@@ -5,7 +5,6 @@ import dev.chr0nzz.traefikmanager.data.model.ServerSettings
 
 data class ServerCapabilities(
     val isHost: Boolean = true,
-    val name: String = "Host",
     private val settings: ServerSettings? = null,
     private val agent: Agent? = null,
 ) {
