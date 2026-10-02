@@ -46,7 +46,6 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.components.TooltipIconButton
 import dev.chr0nzz.traefikmanager.ui.components.YamlPreview
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
-import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource

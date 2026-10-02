@@ -35,7 +35,6 @@ import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.components.ValueRow
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
-import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
 fun Route.status(health: RouteHealth? = null): TmStatus = when {

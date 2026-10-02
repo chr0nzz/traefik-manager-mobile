@@ -1,7 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
@@ -49,15 +47,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.chr0nzz.traefikmanager.data.model.ApiForm
 import dev.chr0nzz.traefikmanager.data.model.EntrypointForm
-import dev.chr0nzz.traefikmanager.data.model.LogForm
-import dev.chr0nzz.traefikmanager.data.model.ObservabilityForm
-import dev.chr0nzz.traefikmanager.data.model.ProvidersForm
 import dev.chr0nzz.traefikmanager.data.model.ResolverForm
 import dev.chr0nzz.traefikmanager.data.model.StaticPluginForm
 import dev.chr0nzz.traefikmanager.data.model.StaticSections
-import dev.chr0nzz.traefikmanager.data.model.SystemForm
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState

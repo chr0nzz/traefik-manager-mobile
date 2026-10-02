@@ -50,7 +50,6 @@ import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.outlined.MoreHoriz
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Warning

@@ -1,13 +1,9 @@
 package dev.chr0nzz.traefikmanager.ui.dashboard
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,20 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AltRoute
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Hub
-import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.DoorFront
 import androidx.compose.material.icons.outlined.Extension
@@ -49,7 +36,6 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.platform.LocalResources
@@ -69,8 +55,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,7 +69,6 @@ import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
 import dev.chr0nzz.traefikmanager.data.repo.RuntimeInfo
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
 import dev.chr0nzz.traefikmanager.data.repo.SignalFlag
-import dev.chr0nzz.traefikmanager.data.repo.Verdict
 import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
@@ -103,7 +86,6 @@ import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.components.plus
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
-import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource

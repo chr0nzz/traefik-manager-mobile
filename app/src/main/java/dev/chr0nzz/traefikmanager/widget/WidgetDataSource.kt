@@ -1,7 +1,6 @@
 package dev.chr0nzz.traefikmanager.widget
 
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
-import dev.chr0nzz.traefikmanager.data.api.TmApi
 import dev.chr0nzz.traefikmanager.data.model.CertRows
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot

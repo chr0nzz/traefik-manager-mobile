@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -54,10 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Route
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
-import dev.chr0nzz.traefikmanager.ui.components.ClearFiltersChip
 import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
-import dev.chr0nzz.traefikmanager.ui.components.FilterChipRow
-import dev.chr0nzz.traefikmanager.ui.components.FilterMenuChip
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
