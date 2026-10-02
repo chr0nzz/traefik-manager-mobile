@@ -52,6 +52,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -154,6 +159,14 @@ fun DashboardScreen(
         )
     }
     val refreshState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
+
+    LaunchedEffect(launcher.message) {
+        val message = launcher.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message.resolve(resources))
+        launcherViewModel.consumeMessage()
+    }
 
     Scaffold(
         modifier = modifier
@@ -161,6 +174,7 @@ fun DashboardScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
