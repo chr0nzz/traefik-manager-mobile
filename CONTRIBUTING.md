@@ -130,6 +130,30 @@ gradle/libs.versions.toml     # Dependency versions - single source of truth
 - **Dependencies:** add versions to `gradle/libs.versions.toml`, never inline in a build file.
 - **No comments:** don't add explanatory comments to code - use clear names instead. The existing codebase follows this convention.
 - **No dead code:** don't leave commented-out blocks or unused variables.
+- **No hardcoded text:** anything the user reads goes in `app/src/main/res/values/strings.xml`. See below.
+
+---
+
+## Text and translations
+
+The app follows the device language, and Settings, Appearance can override it. Every string a user reads is a resource, so it can be translated.
+
+| Where the text is made | Use |
+|---|---|
+| In a composable | `stringResource(R.string.x)` or `pluralStringResource(R.plurals.x, count, count)` |
+| In a view model, repository or model | Return a `UiText` (`UiText.of(R.string.x, args)`, `UiText.plural(...)`), and let the screen call `asString()` |
+| Text that came from the server | `UiText.Raw(text)` |
+
+Rules for `strings.xml`:
+
+- **Keys:** `<screen>_<what>`, for example `connect_key_label`. Words shared by many screens start with `common_`.
+- **Whole sentences:** one string with numbered placeholders (`%1$s`, `%1$d`), never pieces glued together in code. Word order differs between languages.
+- **Counts:** a `<plurals>` entry, never `if (count == 1)`.
+- **Notes for translators:** an XML comment on the line above any string that could be misread, most of all single words.
+- **Not translated:** product names (Traefik Manager, CrowdSec), Traefik and YAML terms, example hostnames. Mark a resource `translatable="false"` or keep the name in code.
+- **English only:** add and edit text in `values/strings.xml`. The other languages are translated on Weblate.
+
+`HardcodedTextTest` counts the hardcoded text left in each folder against `app/src/test/resources/i18n-baseline.txt`. It fails when a count goes up. When a count goes down, lower the number in that file in the same change.
 
 ---
 
