@@ -328,7 +328,7 @@ private fun SignalCardView(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            SectionLabel(card.title, modifier = Modifier.weight(1f))
+            SectionLabel(card.title.asString(), modifier = Modifier.weight(1f))
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -353,13 +353,13 @@ private fun SignalCardView(
             )
             Spacer(modifier = Modifier.weight(1f))
             if (card.flags.isEmpty()) {
-                HealthLabel(status = card.health, text = card.healthLabel, compact = compact)
+                HealthLabel(status = card.health, text = card.healthLabel.asString(), compact = compact)
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                     card.flags.take(if (compact) 1 else 3).forEach { flag ->
                         CountChip(
                             count = flag.count,
-                            label = flag.label,
+                            label = flag.label.asString(),
                             status = flag.status,
                             showLabel = !compact,
                             onClick = { onOpen(flag) },
@@ -368,10 +368,10 @@ private fun SignalCardView(
                 }
             }
         }
-        MonoText(text = card.sub, modifier = Modifier.padding(top = TmSpacing.xs))
+        MonoText(text = card.sub.asString(), modifier = Modifier.padding(top = TmSpacing.xs))
         SignalStrip(
             cells = card.cells,
-            emptyLabel = card.stripEmptyLabel,
+            emptyLabel = card.stripEmptyLabel.asString(),
             cellSize = if (compact) 4.dp else 6.dp,
             maxCells = if (compact) 60 else 150,
             modifier = Modifier.padding(top = if (compact) TmSpacing.xs else TmSpacing.sm),
@@ -535,7 +535,7 @@ private fun EntrypointRowView(row: EntrypointRow) {
             SignalStrip(cells = row.cells, cellSize = 4.dp, emptyLabel = null)
         }
         Text(
-            text = row.facts,
+            text = row.facts.asString(),
             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
             color = palette.muted,
             maxLines = 1,

@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager
 
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.EntrypointHttp
 import dev.chr0nzz.traefikmanager.data.model.EntrypointTls
@@ -18,6 +20,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class DashboardBuilderTest {
 
     private fun router(
@@ -47,7 +50,7 @@ class DashboardBuilderTest {
             serverStatus = mapOf("a" to "UP", "b" to "DOWN"),
         )
         assertEquals(ObjectState.Warn, DashboardBuilder.classifyService(degraded).state)
-        assertEquals("1 of 2 backends down", DashboardBuilder.classifyService(degraded).reason)
+        assertEquals("1 of 2 backends down", DashboardBuilder.classifyService(degraded).reason.english())
 
         val unchecked = TraefikObject(name = "svc2@file", status = "enabled")
         assertEquals(ObjectState.Idle, DashboardBuilder.classifyService(unchecked).state)
@@ -58,7 +61,7 @@ class DashboardBuilderTest {
             serverStatus = mapOf("a" to "DOWN", "b" to "DOWN"),
         )
         assertEquals(ObjectState.Err, DashboardBuilder.classifyService(dead).state)
-        assertEquals("all 2 backends down", DashboardBuilder.classifyService(dead).reason)
+        assertEquals("all 2 backends down", DashboardBuilder.classifyService(dead).reason.english())
     }
 
     @Test
@@ -79,10 +82,10 @@ class DashboardBuilderTest {
         )
 
         assertEquals(TmStatus.Warn, snapshot.verdict.status)
-        assertEquals(UiText.Raw("Traefik API unreachable"), snapshot.verdict.headline)
+        assertEquals("Traefik API unreachable", snapshot.verdict.headline.english())
         snapshot.cards.forEach { card ->
             assertNull(card.total)
-            assertEquals("Traefik API unreachable", card.sub)
+            assertEquals("Traefik API unreachable", card.sub.english())
             assertTrue(card.cells.isEmpty())
         }
     }
@@ -100,7 +103,7 @@ class DashboardBuilderTest {
         val http = snapshot.cards.first { it.key == "http" }
         assertEquals(12, http.total)
         assertTrue(http.cells.isEmpty())
-        assertEquals("total from overview, the list is unavailable", http.sub)
+        assertEquals("total from overview, the list is unavailable", http.sub.english())
     }
 
     @Test
@@ -115,7 +118,7 @@ class DashboardBuilderTest {
 
         val http = snapshot.cards.first { it.key == "http" }
         assertEquals(0, http.total)
-        assertEquals("no HTTP routers configured", http.sub)
+        assertEquals("no HTTP routers configured", http.sub.english())
         assertEquals(TmStatus.Ok, snapshot.verdict.status)
     }
 
@@ -137,7 +140,7 @@ class DashboardBuilderTest {
         )
 
         assertEquals(TmStatus.Error, snapshot.verdict.status)
-        assertEquals(UiText.Raw("1 object is down"), snapshot.verdict.headline)
+        assertEquals("1 object is down", snapshot.verdict.headline.english())
 
         val idleOnly = DashboardBuilder.build(
             overview = null,
@@ -184,12 +187,12 @@ class DashboardBuilderTest {
 
         assertEquals("HTTPS", rows[0].proto)
         assertEquals(1, rows[0].routerCount)
-        assertEquals("TLS via letsencrypt", rows[0].facts)
+        assertEquals("TLS via letsencrypt", rows[0].facts.english())
         assertFalse(rows[0].idle)
         assertEquals("UDP", rows[1].proto)
         assertEquals("HTTP", rows[2].proto)
         assertTrue(rows[2].idle)
-        assertEquals("no router binds this entry point", rows[2].facts)
+        assertEquals("no router binds this entry point", rows[2].facts.english())
     }
 
     @Test
@@ -204,7 +207,7 @@ class DashboardBuilderTest {
         val card = snapshot.cards.first { it.key == "http" }
 
         assertEquals(listOf(TmStatus.Ok, TmStatus.Ok), card.cells)
-        assertEquals("healthy", card.healthLabel)
+        assertEquals("healthy", card.healthLabel.english())
         assertTrue(card.flags.isEmpty())
     }
 }

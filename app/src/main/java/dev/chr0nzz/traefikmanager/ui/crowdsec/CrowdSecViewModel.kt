@@ -58,10 +58,10 @@ data class CrowdSecUiState(
 
     val decisionsOk: Boolean get() = snapshot.decisions.ok
 
-    val alertsError: String?
+    val alertsError: UiText?
         get() = (snapshot.alerts as? CsRead.Failed)?.message
 
-    val decisionsError: String?
+    val decisionsError: UiText?
         get() = (snapshot.decisions as? CsRead.Failed)?.message
 
     val filtersActive: Boolean get() = !facets.isEmpty || query.isNotEmpty()
@@ -332,7 +332,7 @@ class CrowdSecViewModel @Inject constructor(
                 is CsRead.Loaded -> state.copy(decisionFeed = feed.accept(result.value))
                 is CsRead.Failed -> state.copy(decisionFeed = feed.copy(loading = false, error = result.message))
                 CsRead.NotConfigured -> state.copy(
-                    decisionFeed = feed.copy(loading = false, error = "Decisions unavailable"),
+                    decisionFeed = feed.copy(loading = false, error = UiText.of(R.string.crowdsec_decisions_unavailable)),
                 )
             }
         }

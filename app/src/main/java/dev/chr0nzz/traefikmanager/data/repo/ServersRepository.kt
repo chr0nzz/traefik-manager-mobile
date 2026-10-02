@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class ServerEntry(
     val id: String?,
@@ -28,15 +29,19 @@ data class ServerEntry(
 
     val reachable: Boolean get() = isHost || health?.ok == true
 
-    val detail: String
+    val label: UiText get() = if (isHost) UiText.of(R.string.common_host) else UiText.Raw(name)
+
+    val detail: UiText
         get() = when {
-            isHost -> "Traefik Manager"
-            health == null -> url
-            health.ok -> listOfNotNull(
-                health.version?.let { "v$it" },
-                health.latencyMs?.let { "${it}ms" },
-            ).joinToString(" · ").ifEmpty { url }
-            else -> health.error ?: "unreachable"
+            isHost -> UiText.of(R.string.app_name)
+            health == null -> UiText.Raw(url)
+            health.ok -> UiText.Raw(
+                listOfNotNull(
+                    health.version?.let { "v$it" },
+                    health.latencyMs?.let { "${it}ms" },
+                ).joinToString(UiText.SEPARATOR).ifEmpty { url },
+            )
+            else -> UiText.messageOr(health.error, R.string.server_unreachable)
         }
 }
 

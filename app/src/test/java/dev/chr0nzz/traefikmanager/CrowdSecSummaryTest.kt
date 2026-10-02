@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager
 
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import org.robolectric.RobolectricTestRunner
 import org.junit.runner.RunWith
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
@@ -94,7 +95,7 @@ class CrowdSecSummaryTest {
         )
         assertTrue(CrowdSecSummary.step(503, null, null, null) is CsSummaryStep.Failed)
         val failed = CrowdSecSummary.step(500, null, null, "boom") as CsSummaryStep.Failed
-        assertEquals("boom", failed.message)
+        assertEquals(UiText.Raw("boom"), failed.message)
         assertEquals(500, failed.status)
     }
 

@@ -17,17 +17,17 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import retrofit2.Response
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 object CrowdSecReader {
-
-    private const val UNREACHABLE = "Could not reach the CrowdSec LAPI"
 
     suspend fun read(api: TmApi, full: Boolean, previous: CrowdSecSnapshot?): CrowdSecSnapshot {
         val sent = previous?.takeIf { !full && it.decisions.ok && it.alerts.ok }?.version?.takeIf { it.isNotEmpty() }
         val response = try {
             api.crowdSecSummary(sent, if (full) "1" else null)
         } catch (failure: IOException) {
-            val message = failure.message ?: UNREACHABLE
+            val message = UiText.messageOr(failure.message, R.string.crowdsec_error_load)
             return CrowdSecSnapshot(decisions = CsRead.Failed(message, null), alerts = CsRead.Failed(message, null))
         } catch (cancelled: CancellationException) {
             throw cancelled
@@ -80,14 +80,14 @@ object CrowdSecReader {
         val decisionsResponse = decisionsCall.await()
         val decisions = decisionsResponse.fold(
             onSuccess = { response -> read(response) { it.orEmpty() } },
-            onFailure = { CsRead.Failed(it.message ?: UNREACHABLE, null) },
+            onFailure = { CsRead.Failed(UiText.messageOr(it.message, R.string.crowdsec_error_load), null) },
         )
         val alertsResponse = alertsCall.await()
         val alerts = alertsResponse.fold(
             onSuccess = { response ->
                 read(response) { list -> CrowdSecAnalytics.filterAlerts(list.orEmpty()) }
             },
-            onFailure = { CsRead.Failed(it.message ?: UNREACHABLE, null) },
+            onFailure = { CsRead.Failed(UiText.messageOr(it.message, R.string.crowdsec_error_load), null) },
         )
         val headers = alertsResponse.getOrNull()?.headers()
         val staleNote = decisionsResponse.getOrNull()?.headers()?.get("X-CS-Stale")
@@ -105,18 +105,19 @@ object CrowdSecReader {
         response.isSuccessful -> CsRead.Loaded(transform(response.body()))
         response.code() == 404 -> CsRead.NotConfigured
         else -> CsRead.Failed(
-            message = errorMessage(response) ?: "CrowdSec LAPI unavailable (HTTP ${response.code()})",
+            message = errorMessage(response)?.let(UiText::Raw)
+                ?: UiText.http(R.string.crowdsec_unavailable, response.code()),
             status = response.code(),
         )
     }
 
     private fun CsRead<List<CsDecision>>.withHint(): CsRead<List<CsDecision>> {
         val failed = this as? CsRead.Failed ?: return this
-        val message = failed.message
-        if (!message.contains("403") || message.contains("bouncer", ignoreCase = true)) return this
+        val raw = (failed.message as? UiText.Raw)?.value
+        val forbidden = failed.status == 403 || raw?.contains("403") == true
+        if (!forbidden || raw?.contains("bouncer", ignoreCase = true) == true) return this
         return CsRead.Failed(
-            message = message + ". CrowdSec only accepts a bouncer key on /v1/decisions, the machine " +
-                "token is refused there, so CROWDSEC_API_KEY has to be set as well.",
+            message = UiText.of(R.string.crowdsec_hint_bouncer, failed.message),
             status = failed.status,
         )
     }

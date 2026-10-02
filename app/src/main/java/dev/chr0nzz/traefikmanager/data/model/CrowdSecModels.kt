@@ -145,7 +145,7 @@ object CrowdSecMeta {
 
 sealed interface CsRead<out T> {
     data class Loaded<T>(val value: T) : CsRead<T>
-    data class Failed(val message: String, val status: Int?) : CsRead<Nothing>
+    data class Failed(val message: UiText, val status: Int?) : CsRead<Nothing>
     data object NotConfigured : CsRead<Nothing>
 
     val ok: Boolean get() = this is Loaded

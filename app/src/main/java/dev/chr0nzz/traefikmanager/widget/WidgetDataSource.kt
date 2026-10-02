@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.widget
 
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.CertRows
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
@@ -21,6 +23,7 @@ import kotlinx.coroutines.coroutineScope
 
 @Singleton
 class WidgetDataSource @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val apiProvider: ApiProvider,
     private val serversRepository: ServersRepository,
 ) {
@@ -325,7 +328,7 @@ class WidgetDataSource @Inject constructor(
 
     private fun SignalCard.asWidgetCard(): WidgetCard = WidgetCard(
         key = key,
-        title = title,
+        title = title.resolve(context.resources),
         hero = LogParser.formatCount(total ?: cells.size),
         unit = when {
             key == "services" -> "services"
@@ -333,10 +336,10 @@ class WidgetDataSource @Inject constructor(
             else -> "routers"
         },
         health = health.wire(),
-        healthLabel = healthLabel,
-        sub = sub,
+        healthLabel = healthLabel.resolve(context.resources),
+        sub = sub.resolve(context.resources),
         cells = cells.take(CELLS).map { it.wire() },
-        chips = flags.map { chip("${LogParser.formatCount(it.count)} ${it.label}", it.status) },
+        chips = flags.map { chip("${LogParser.formatCount(it.count)} ${it.label.resolve(context.resources)}", it.status) },
         footer = providers.map { provider ->
             chip("${provider.name} ${LogParser.formatCount(provider.count)}", provider.worst)
         },

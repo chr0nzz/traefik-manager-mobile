@@ -35,3 +35,30 @@ data/model/LogModels.kt|Oct
 data/model/LogModels.kt|Nov
 data/model/LogModels.kt|Dec
 ui/dashboard/LauncherGroups.kt|Other
+data/model/CrowdSecModels.kt|Ip
+data/model/CrowdSecModels.kt|Range
+data/model/CrowdSecModels.kt|AS$key
+data/model/LauncherModels.kt|Media
+data/model/LauncherModels.kt|Monitoring
+data/model/LauncherModels.kt|Infrastructure
+data/model/LauncherModels.kt|Security
+data/model/LauncherModels.kt|Home
+data/model/LauncherModels.kt|Files & Data
+data/model/LauncherModels.kt|Network
+data/model/LauncherModels.kt|Dev
+data/model/LauncherModels.kt|Servers
+data/model/LauncherModels.kt|Other
+data/model/LogModels.kt|Duration
+data/model/MiddlewareTemplates.kt|Auth
+data/model/MiddlewareTemplates.kt|Security
+data/model/MiddlewareTemplates.kt|Routing
+data/model/MiddlewareTemplates.kt|Advanced
+data/model/MiddlewareTemplates.kt|My Protected Area
+data/model/MiddlewareTemplates.kt|X-Auth-User\nX-Auth-Token
+data/model/MiddlewareTemplates.kt|X-authentik-username\nX-authentik-groups\nX-authentik-email\nX-authentik-name\nX-authentik-uid
+data/model/MiddlewareTemplates.kt|Remote-User\nRemote-Groups\nRemote-Name\nRemote-Email
+data/model/MiddlewareTemplates.kt|Authorization
+data/model/MiddlewareTemplates.kt|NetworkErrorRatio() > 0.30
+data/model/RouteForm.kt|HostSNI(`*`)
+data/model/RouteModels.kt|Host(`$it`)
+data/repo/ServersRepository.kt|Host

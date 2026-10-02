@@ -39,6 +39,7 @@ import dev.chr0nzz.traefikmanager.data.repo.ServerEntry
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @Composable
 fun ServerSwitcherHeader(
@@ -83,7 +84,7 @@ fun ServerSwitcherHeader(
             HealthDot(reachable = active?.reachable ?: true)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = active?.name ?: stringResource(R.string.common_host),
+                    text = active?.label?.asString() ?: stringResource(R.string.common_host),
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -92,7 +93,7 @@ fun ServerSwitcherHeader(
                 Text(
                     text = when {
                         switching -> stringResource(R.string.server_switching)
-                        else -> active?.detail.orEmpty()
+                        else -> active?.detail?.asString().orEmpty()
                     },
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                     color = palette.muted,
@@ -141,14 +142,14 @@ fun ServerSwitcherHeader(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = server.name,
+                                text = server.label.asString(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = server.detail,
+                                text = server.detail.asString(),
                                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                                 color = if (server.reachable) palette.muted else palette.red,
                                 maxLines = 1,

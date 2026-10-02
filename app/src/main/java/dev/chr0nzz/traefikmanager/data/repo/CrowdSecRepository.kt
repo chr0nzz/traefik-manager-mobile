@@ -16,6 +16,7 @@ import dev.chr0nzz.traefikmanager.data.model.CsDecisionsSummary
 import dev.chr0nzz.traefikmanager.data.model.CsRead
 import javax.inject.Inject
 import javax.inject.Singleton
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 @Serializable
 private data class StoredCrowdSec(
@@ -102,7 +103,7 @@ class CrowdSecRepository @Inject constructor(
 
     suspend fun searchDecisions(query: CsDecisionQuery, page: Int): CsRead<CsDecisionPage> =
         runCatching { CrowdSecReader.search(apiProvider.api(), query, page, CsDecisionFeed.PER) }
-            .getOrElse { CsRead.Failed(it.message ?: "Could not read decisions", null) }
+            .getOrElse { CsRead.Failed(UiText.failure(it, R.string.crowdsec_error_decisions), null) }
 
     suspend fun addDecision(request: AddDecisionRequest) {
         val response = apiProvider.api().crowdSecAddDecision(request)

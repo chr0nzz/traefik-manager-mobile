@@ -274,7 +274,7 @@ fun CrowdSecScreen(
 
                 !state.decisionsOk && !state.alertsOk -> ErrorState(
                     headline = stringResource(R.string.crowdsec_unavailable),
-                    body = state.decisionsError ?: state.alertsError,
+                    body = (state.decisionsError ?: state.alertsError)?.asString(),
                     onRetry = viewModel::refresh,
                 )
 
@@ -861,7 +861,7 @@ private fun DecisionFeedFooter(state: CrowdSecUiState, onLoadMore: () -> Unit) {
             text = when {
                 !state.decisionsOk -> stringResource(R.string.crowdsec_decisions_unavailable)
                 feed == null || (feed.loading && !feed.loaded) -> stringResource(R.string.crowdsec_decisions_loading)
-                feed.error != null && feed.rows.isEmpty() -> feed.error
+                feed.error != null && feed.rows.isEmpty() -> feed.error.asString()
                 feed.rows.isEmpty() -> stringResource(R.string.crowdsec_decisions_none)
                 else -> stringResource(
                     R.string.crowdsec_decisions_showing,
@@ -875,7 +875,7 @@ private fun DecisionFeedFooter(state: CrowdSecUiState, onLoadMore: () -> Unit) {
         )
         if (feed?.error != null && feed.rows.isNotEmpty()) {
             Text(
-                text = feed.error,
+                text = feed.error.asString(),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.red,
             )
@@ -1275,14 +1275,14 @@ private fun CrowdSecVerdictCard(
         }
         if (!state.decisionsOk) {
             Text(
-                text = state.decisionsError.orEmpty(),
+                text = state.decisionsError?.asString().orEmpty(),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.red,
             )
         }
         if (!state.alertsOk) {
             Text(
-                text = state.alertsError.orEmpty(),
+                text = state.alertsError?.asString().orEmpty(),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.red,
             )

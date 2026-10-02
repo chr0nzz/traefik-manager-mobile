@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.nav
 
+import dev.chr0nzz.traefikmanager.data.store.MigrationNotice
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.rememberScrollState
@@ -90,6 +91,7 @@ import dev.chr0nzz.traefikmanager.ui.providers.ProviderScreen
 import dev.chr0nzz.traefikmanager.ui.routemap.RouteMapScreen
 import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalResources
 
 private const val ROUTE_FORM = "route_form"
 private const val ROUTE_RAW = "route_raw"
@@ -106,10 +108,14 @@ fun TmApp(
     onWidgetTargetHandled: () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     LaunchedEffect(migrationNotice) {
         val notice = migrationNotice ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message = notice, withDismissAction = true)
+        snackbarHostState.showSnackbar(
+            message = MigrationNotice.text(notice).resolve(resources),
+            withDismissAction = true,
+        )
         onNoticeShown()
     }
 
@@ -428,7 +434,7 @@ private fun ConnectedApp(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                     onOpen = { route -> navController.navigate(route) },
                     onDisconnect = { viewModel.disconnect() },
-                    activeServerName = activeServer?.name ?: stringResource(R.string.common_host),
+                    activeServerName = activeServer?.label?.asString() ?: stringResource(R.string.common_host),
                     hostSelected = activeServer?.isHost ?: true,
                 )
             }

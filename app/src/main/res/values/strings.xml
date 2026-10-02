@@ -2558,4 +2558,117 @@
     <string name="routes_ping_no_host">This route has no host to ping</string>
     <string name="certs_error_lost_connection">Lost the connection while Traefik restarted. Pull to refresh to check.</string>
     <string name="certs_note_too_old">This server is too old to remove certificates</string>
+
+    <string name="crowdsec_error_empty">CrowdSec summary was empty</string>
+    <!-- %1$s is the error message. Keep /v1/decisions and CROWDSEC_API_KEY as they are -->
+    <string name="crowdsec_hint_bouncer">%1$s. CrowdSec only accepts a bouncer key on /v1/decisions, the machine token is refused there, so CROWDSEC_API_KEY has to be set as well.</string>
+    <string name="crowdsec_error_decisions">Could not read decisions</string>
+
+    <!-- Lowercase reason: Traefik reports the object as disabled -->
+    <string name="dashboard_reason_disabled">disabled</string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_warning">warning</string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_no_status">no status reported</string>
+    <!-- Lowercase reason: the router is attached to no entry point -->
+    <string name="dashboard_reason_unbound">bound to no entry point</string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_no_health_check">no health check configured</string>
+    <!-- Lowercase reason: no router uses this middleware -->
+    <string name="dashboard_reason_unreferenced">referenced by no router</string>
+    <!-- Lowercase -->
+    <plurals name="dashboard_reason_all_down">
+        <item quantity="one">all %d backend down</item>
+        <item quantity="other">all %d backends down</item>
+    </plurals>
+    <!-- Lowercase -->
+    <plurals name="dashboard_reason_some_down">
+        <item quantity="one">%1$d of %2$d backend down</item>
+        <item quantity="other">%1$d of %2$d backends down</item>
+    </plurals>
+    <string name="dashboard_card_http">HTTP Routers</string>
+    <string name="dashboard_card_stream">TCP / UDP Routers</string>
+    <!-- Lowercase -->
+    <string name="dashboard_empty_http">no HTTP routers configured</string>
+    <!-- Lowercase. Stream routers are TCP and UDP routers -->
+    <string name="dashboard_empty_stream">no stream routers configured</string>
+    <!-- Lowercase -->
+    <string name="dashboard_empty_services">no services configured</string>
+    <!-- Lowercase -->
+    <string name="dashboard_empty_middlewares">no middlewares configured</string>
+    <!-- Lowercase. The number counts routers that are serving traffic -->
+    <string name="dashboard_sub_live">%1$d live</string>
+    <!-- Lowercase: every TCP and UDP router is working -->
+    <string name="dashboard_sub_forwarding">all forwarding</string>
+    <!-- Lowercase -->
+    <string name="dashboard_sub_no_health_checks">no health checks configured</string>
+    <!-- Lowercase -->
+    <plurals name="dashboard_backends_up">
+        <item quantity="one">%1$d of %2$d backend up</item>
+        <item quantity="other">%1$d of %2$d backends up</item>
+    </plurals>
+    <!-- Lowercase. The number counts middlewares -->
+    <string name="dashboard_sub_in_use">%1$d in use</string>
+    <!-- Lowercase. The number counts middlewares -->
+    <string name="dashboard_sub_unused">%1$d unused</string>
+    <!-- Lowercase. Follows a number -->
+    <string name="dashboard_flag_warnings">warnings</string>
+    <!-- Lowercase. Follows a number of routers or services that carry no traffic -->
+    <string name="dashboard_flag_idle">idle</string>
+    <string name="dashboard_unreachable">Traefik API unreachable</string>
+    <!-- Lowercase -->
+    <string name="dashboard_sub_overview_only">total from overview, the list is unavailable</string>
+    <!-- Lowercase. How many routes are not shown because they come from other providers -->
+    <string name="dashboard_sub_hidden">+%1$d internal or other providers</string>
+    <!-- Lowercase health label -->
+    <string name="dashboard_health_down">down</string>
+    <!-- Lowercase health label -->
+    <string name="dashboard_health_healthy">healthy</string>
+    <!-- Lowercase -->
+    <string name="dashboard_strip_no_data">no data</string>
+    <!-- Lowercase -->
+    <string name="dashboard_strip_empty">nothing configured</string>
+    <!-- Lowercase -->
+    <string name="dashboard_entry_unlisted">router list unavailable, bindings unknown</string>
+    <!-- Lowercase -->
+    <string name="dashboard_entry_unbound">no router binds this entry point</string>
+    <!-- %1$s is the name of a certificate resolver -->
+    <string name="dashboard_entry_tls_via">TLS via %1$s</string>
+    <!-- Keep certResolver as it is -->
+    <string name="dashboard_entry_tls_no_resolver">TLS, no certResolver</string>
+    <!-- %1$s is the name of a TLS options profile -->
+    <string name="dashboard_entry_tls_options">TLS options %1$s</string>
+    <!-- Lowercase description of an entry point -->
+    <string name="dashboard_entry_udp">raw UDP datagrams</string>
+    <!-- Lowercase description of an entry point -->
+    <string name="dashboard_entry_tcp">raw TCP passthrough</string>
+    <!-- Description of an entry point -->
+    <string name="dashboard_entry_https">HTTPS front door</string>
+    <!-- Lowercase description of an entry point -->
+    <string name="dashboard_entry_http">plain HTTP entry point</string>
+    <!-- Lowercase -->
+    <string name="dashboard_verdict_unreadable">counts and health cannot be read</string>
+    <!-- An object is a router, service or middleware -->
+    <plurals name="dashboard_verdict_down">
+        <item quantity="one">%d object is down</item>
+        <item quantity="other">%d objects are down</item>
+    </plurals>
+    <!-- Lowercase -->
+    <plurals name="dashboard_verdict_also_degraded">
+        <item quantity="one">%d degraded</item>
+        <item quantity="other">%d degraded</item>
+    </plurals>
+    <!-- Lowercase. Follows a headline about objects that are down -->
+    <string name="dashboard_verdict_no_traffic">traffic is not flowing for them</string>
+    <plurals name="dashboard_verdict_degraded">
+        <item quantity="one">%d object is degraded</item>
+        <item quantity="other">%d objects are degraded</item>
+    </plurals>
+    <!-- Lowercase -->
+    <string name="dashboard_verdict_still_serving">still serving, worth a look</string>
+    <string name="dashboard_verdict_healthy">All healthy</string>
+    <!-- Lowercase -->
+    <string name="dashboard_verdict_clean">no errors or warnings reported</string>
+    <string name="migration_carried_over">Your server and API key were carried over from version 1.</string>
+    <string name="migration_unreadable">Version 1 credentials could not be read. Please enter your server and API key again.</string>
 </resources>

@@ -50,15 +50,13 @@ class LegacyCredentialsMigration @Inject constructor(
             if (!secureStoreUrl.isNullOrEmpty()) {
                 connectionStore.save(secureStoreUrl, secureStoreKey?.ifEmpty { null })
                 Log.i(TAG, "imported v1 connection from expo-secure-store")
-                preferencesStore.setMigrationNotice("Your server and API key were carried over from version 1.")
+                preferencesStore.setMigrationNotice(MigrationNotice.CARRIED_OVER)
             } else if (importFromWidgetFile()) {
                 Log.i(TAG, "imported v1 connection from the widget credentials file")
-                preferencesStore.setMigrationNotice("Your server and API key were carried over from version 1.")
+                preferencesStore.setMigrationNotice(MigrationNotice.CARRIED_OVER)
             } else if (hadV1Data) {
                 Log.w(TAG, "v1 data present but unreadable")
-                preferencesStore.setMigrationNotice(
-                    "Version 1 credentials could not be read. Please enter your server and API key again.",
-                )
+                preferencesStore.setMigrationNotice(MigrationNotice.UNREADABLE)
             } else {
                 Log.i(TAG, "no v1 connection found")
             }

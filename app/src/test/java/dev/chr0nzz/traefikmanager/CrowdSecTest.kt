@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager
 
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecAnalytics
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecMeta
 import dev.chr0nzz.traefikmanager.data.model.CrowdSecSnapshot
@@ -111,7 +112,7 @@ class CrowdSecTest {
 
     @Test
     fun `a failed decisions read never reports handled`() {
-        val snapshot = CrowdSecSnapshot(decisions = CsRead.Failed("LAPI 502", 502))
+        val snapshot = CrowdSecSnapshot(decisions = CsRead.Failed(UiText.Raw("LAPI 502"), 502))
         assertFalse(snapshot.handled(CsAlert(source = CsSource(ip = "1.1.1.1"))))
         assertFalse(snapshot.decisions.ok)
         assertTrue(snapshot.decisionList.isEmpty())

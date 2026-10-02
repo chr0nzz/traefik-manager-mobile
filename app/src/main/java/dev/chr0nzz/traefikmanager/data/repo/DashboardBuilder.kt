@@ -7,19 +7,20 @@ import dev.chr0nzz.traefikmanager.data.model.toProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
+import dev.chr0nzz.traefikmanager.R
 
 enum class ObjectState { Err, Warn, Idle, Ok }
 
 data class ObjectSignal(
     val name: String,
     val state: ObjectState,
-    val reason: String?,
+    val reason: UiText?,
     val provider: String,
 )
 
 data class SignalFlag(
     val count: Int,
-    val label: String,
+    val label: UiText,
     val status: TmStatus,
 )
 
@@ -31,15 +32,15 @@ data class ProviderCount(
 
 data class SignalCard(
     val key: String,
-    val title: String,
+    val title: UiText,
     val total: Int?,
     val cells: List<TmStatus>,
     val flags: List<SignalFlag>,
-    val sub: String,
+    val sub: UiText,
     val health: TmStatus,
-    val healthLabel: String,
+    val healthLabel: UiText,
     val providers: List<ProviderCount>,
-    val stripEmptyLabel: String,
+    val stripEmptyLabel: UiText,
 )
 
 data class EntrypointRow(
@@ -48,7 +49,7 @@ data class EntrypointRow(
     val proto: String,
     val routerCount: Int?,
     val cells: List<TmStatus>,
-    val facts: String,
+    val facts: UiText,
     val health: TmStatus,
     val idle: Boolean,
 )
@@ -139,32 +140,33 @@ object DashboardBuilder {
         val cards = listOf(
             card(
                 key = "http",
-                title = "HTTP Routers",
+                title = UiText.of(R.string.dashboard_card_http),
                 signals = httpRouters,
                 listed = routersListed,
                 overviewTotal = overview?.http?.routers?.total,
-                emptyLabel = "no HTTP routers configured",
-                okSub = { ok -> "$ok live" },
+                emptyLabel = UiText.of(R.string.dashboard_empty_http),
+                okSub = { ok -> UiText.of(R.string.dashboard_sub_live, ok) },
             ),
             card(
                 key = "stream",
-                title = "TCP / UDP Routers",
+                title = UiText.of(R.string.dashboard_card_stream),
                 signals = streamRouters,
                 listed = routersListed,
                 overviewTotal = sumOf(overview?.tcp?.routers?.total, overview?.udp?.routers?.total),
-                emptyLabel = "no stream routers configured",
+                emptyLabel = UiText.of(R.string.dashboard_empty_stream),
                 okSub = {
-                    val parts = buildList {
-                        if (tcpRouters.isNotEmpty()) add("TCP ${tcpRouters.size}")
-                        if (udpRouters.isNotEmpty()) add("UDP ${udpRouters.size}")
-                        add("all forwarding")
-                    }
-                    parts.joinToString(" · ")
+                    UiText.join(
+                        buildList {
+                            if (tcpRouters.isNotEmpty()) add(UiText.Raw("TCP ${tcpRouters.size}"))
+                            if (udpRouters.isNotEmpty()) add(UiText.Raw("UDP ${udpRouters.size}"))
+                            add(UiText.of(R.string.dashboard_sub_forwarding))
+                        },
+                    )
                 },
             ),
             card(
                 key = "services",
-                title = "Services",
+                title = UiText.of(R.string.common_label_services),
                 signals = allServices,
                 listed = servicesListed,
                 overviewTotal = sumOf(
@@ -172,22 +174,27 @@ object DashboardBuilder {
                     overview?.tcp?.services?.total,
                     overview?.udp?.services?.total,
                 ),
-                emptyLabel = "no services configured",
+                emptyLabel = UiText.of(R.string.dashboard_empty_services),
                 okSub = {
-                    if (backendsTotal == 0) "no health checks configured"
-                    else "$backendsUp of $backendsTotal backends up"
+                    if (backendsTotal == 0) UiText.of(R.string.dashboard_sub_no_health_checks)
+                    else UiText.plural(R.plurals.dashboard_backends_up, backendsTotal, backendsUp, backendsTotal)
                 },
             ),
             card(
                 key = "middlewares",
-                title = "Middlewares",
+                title = UiText.of(R.string.common_label_middlewares),
                 signals = allMiddlewares,
                 listed = middlewaresListed,
                 overviewTotal = sumOf(overview?.http?.middlewares?.total, overview?.tcp?.middlewares?.total),
-                emptyLabel = "no middlewares configured",
+                emptyLabel = UiText.of(R.string.dashboard_empty_middlewares),
                 okSub = { ok ->
                     val unused = allMiddlewares.count { it.state == ObjectState.Idle }
-                    if (unused > 0) "$ok in use · $unused unused" else "$ok in use"
+                    UiText.join(
+                        listOfNotNull(
+                            UiText.of(R.string.dashboard_sub_in_use, ok),
+                            if (unused > 0) UiText.of(R.string.dashboard_sub_unused, unused) else null,
+                        ),
+                    )
                 },
             ),
         )
@@ -207,10 +214,10 @@ object DashboardBuilder {
     fun classifyRouter(obj: TraefikObject): ObjectSignal {
         val bound = (obj.using ?: obj.entryPoints).orEmpty()
         return when {
-            obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, "disabled", obj.provider)
-            obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, "warning", obj.provider)
-            obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, "no status reported", obj.provider)
-            bound.isEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, "bound to no entry point", obj.provider)
+            obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, UiText.of(R.string.dashboard_reason_disabled), obj.provider)
+            obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, UiText.of(R.string.dashboard_reason_warning), obj.provider)
+            obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_no_status), obj.provider)
+            bound.isEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_unbound), obj.provider)
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
         }
     }
@@ -219,15 +226,25 @@ object DashboardBuilder {
         val servers = obj.serverStatus
         val down = servers?.count { it.value.uppercase() != "UP" } ?: 0
         return when {
-            obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, "disabled", obj.provider)
-            obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, "warning", obj.provider)
-            obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, "no status reported", obj.provider)
+            obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, UiText.of(R.string.dashboard_reason_disabled), obj.provider)
+            obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, UiText.of(R.string.dashboard_reason_warning), obj.provider)
+            obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_no_status), obj.provider)
             servers.isNullOrEmpty() && obj.type != null && obj.type != "loadBalancer" ->
                 ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
-            servers.isNullOrEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, "no health check configured", obj.provider)
+            servers.isNullOrEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_no_health_check), obj.provider)
             down == servers.size ->
-                ObjectSignal(obj.shortName, ObjectState.Err, "all ${servers.size} backends down", obj.provider)
-            down > 0 -> ObjectSignal(obj.shortName, ObjectState.Warn, "$down of ${servers.size} backends down", obj.provider)
+                ObjectSignal(
+                    obj.shortName,
+                    ObjectState.Err,
+                    UiText.plural(R.plurals.dashboard_reason_all_down, servers.size),
+                    obj.provider,
+                )
+            down > 0 -> ObjectSignal(
+                obj.shortName,
+                ObjectState.Warn,
+                UiText.plural(R.plurals.dashboard_reason_some_down, servers.size, down, servers.size),
+                obj.provider,
+            )
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
         }
     }
@@ -235,10 +252,10 @@ object DashboardBuilder {
     fun classifyMiddleware(obj: TraefikObject, referenced: Set<String>): ObjectSignal {
         val used = obj.usedBy?.isNotEmpty() == true || obj.shortName in referenced || obj.name in referenced
         return when {
-            obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, "disabled", obj.provider)
-            obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, "warning", obj.provider)
-            obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, "no status reported", obj.provider)
-            !used -> ObjectSignal(obj.shortName, ObjectState.Idle, "referenced by no router", obj.provider)
+            obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, UiText.of(R.string.dashboard_reason_disabled), obj.provider)
+            obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, UiText.of(R.string.dashboard_reason_warning), obj.provider)
+            obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_no_status), obj.provider)
+            !used -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_unreferenced), obj.provider)
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
         }
     }
@@ -281,12 +298,12 @@ object DashboardBuilder {
 
     private fun card(
         key: String,
-        title: String,
+        title: UiText,
         signals: List<ObjectSignal>,
         listed: Boolean,
         overviewTotal: Int?,
-        emptyLabel: String,
-        okSub: (Int) -> String,
+        emptyLabel: UiText,
+        okSub: (Int) -> UiText,
     ): SignalCard {
         val err = signals.count { it.state == ObjectState.Err }
         val warn = signals.count { it.state == ObjectState.Warn }
@@ -300,18 +317,27 @@ object DashboardBuilder {
         val hidden = if (listed && overviewTotal != null) (overviewTotal - signals.size).coerceAtLeast(0) else 0
 
         val flags = buildList {
-            if (err > 0) add(SignalFlag(err, "disabled", TmStatus.Error))
-            if (warn > 0) add(SignalFlag(warn, "warnings", TmStatus.Warn))
-            if (idle > 0) add(SignalFlag(idle, if (key == "middlewares") "unused" else "idle", TmStatus.Unknown))
+            if (err > 0) add(SignalFlag(err, UiText.of(R.string.dashboard_reason_disabled), TmStatus.Error))
+            if (warn > 0) add(SignalFlag(warn, UiText.of(R.string.dashboard_flag_warnings), TmStatus.Warn))
+            if (idle > 0) {
+                add(
+                    SignalFlag(
+                        idle,
+                        UiText.of(if (key == "middlewares") R.string.middlewares_unused else R.string.dashboard_flag_idle),
+                        TmStatus.Unknown,
+                    ),
+                )
+            }
         }
 
         val sub = when {
-            !listed && total == null -> "Traefik API unreachable"
-            !listed -> "total from overview, the list is unavailable"
+            !listed && total == null -> UiText.of(R.string.dashboard_unreachable)
+            !listed -> UiText.of(R.string.dashboard_sub_overview_only)
             total == 0 -> emptyLabel
-            hidden > 0 && err == 0 && warn == 0 -> "${okSub(ok)} · +$hidden internal or other providers"
-            err > 0 -> signals.first { it.state == ObjectState.Err }.let { "${it.name}: ${it.reason}" }
-            warn > 0 -> signals.first { it.state == ObjectState.Warn }.let { "${it.name}: ${it.reason}" }
+            hidden > 0 && err == 0 && warn == 0 ->
+                UiText.join(listOf(okSub(ok), UiText.of(R.string.dashboard_sub_hidden, hidden)))
+            err > 0 -> signals.first { it.state == ObjectState.Err }.let(::named)
+            warn > 0 -> signals.first { it.state == ObjectState.Warn }.let(::named)
             else -> okSub(ok)
         }
 
@@ -323,10 +349,10 @@ object DashboardBuilder {
         }
 
         val healthLabel = when {
-            !listed && total == null -> "unknown"
-            err > 0 -> "down"
-            warn > 0 -> "degraded"
-            else -> "healthy"
+            !listed && total == null -> UiText.of(R.string.common_unknown)
+            err > 0 -> UiText.of(R.string.dashboard_health_down)
+            warn > 0 -> UiText.of(R.string.routes_ping_degraded)
+            else -> UiText.of(R.string.dashboard_health_healthy)
         }
 
         return SignalCard(
@@ -339,7 +365,7 @@ object DashboardBuilder {
             health = health,
             healthLabel = healthLabel,
             providers = if (listed) providerCounts(signals) else emptyList(),
-            stripEmptyLabel = if (!listed) "no data" else "nothing configured",
+            stripEmptyLabel = UiText.of(if (!listed) R.string.dashboard_strip_no_data else R.string.dashboard_strip_empty),
         )
     }
 
@@ -374,32 +400,38 @@ object DashboardBuilder {
         }
     }
 
-    private fun entrypointFacts(ep: Entrypoint, boundCount: Int, proto: String, listed: Boolean): String {
-        if (!listed) return "router list unavailable, bindings unknown"
-        if (boundCount == 0) return "no router binds this entry point"
+    private fun named(signal: ObjectSignal): UiText =
+        UiText.join(listOfNotNull(UiText.Raw(signal.name), signal.reason), ": ")
+
+    private fun entrypointFacts(ep: Entrypoint, boundCount: Int, proto: String, listed: Boolean): UiText {
+        if (!listed) return UiText.of(R.string.dashboard_entry_unlisted)
+        if (boundCount == 0) return UiText.of(R.string.dashboard_entry_unbound)
         val facts = buildList {
-            if (ep.asDefault) add("asDefault")
+            if (ep.asDefault) add(UiText.Raw("asDefault"))
             val resolver = ep.http?.tls?.certResolver
-            if (!resolver.isNullOrEmpty()) add("TLS via $resolver")
-            if (ep.hasTls && resolver.isNullOrEmpty()) add("TLS, no certResolver")
-            ep.http?.tls?.options?.takeIf { it.isNotEmpty() }?.let { add("TLS options $it") }
+            if (!resolver.isNullOrEmpty()) add(UiText.of(R.string.dashboard_entry_tls_via, resolver))
+            if (ep.hasTls && resolver.isNullOrEmpty()) add(UiText.of(R.string.dashboard_entry_tls_no_resolver))
+            ep.http?.tls?.options?.takeIf { it.isNotEmpty() }
+                ?.let { add(UiText.of(R.string.dashboard_entry_tls_options, it)) }
             ep.http?.middlewares?.takeIf { it.isNotEmpty() }
-                ?.let { add(it.joinToString(", ") { name -> name.substringBefore('@') }) }
+                ?.let { add(UiText.Raw(it.joinToString(", ") { name -> name.substringBefore('@') })) }
         }
-        if (facts.isNotEmpty()) return facts.joinToString(" · ")
-        return when (proto) {
-            "UDP" -> "raw UDP datagrams"
-            "TCP" -> "raw TCP passthrough"
-            "HTTPS" -> "HTTPS front door"
-            else -> "plain HTTP entry point"
-        }
+        if (facts.isNotEmpty()) return UiText.join(facts)
+        return UiText.of(
+            when (proto) {
+                "UDP" -> R.string.dashboard_entry_udp
+                "TCP" -> R.string.dashboard_entry_tcp
+                "HTTPS" -> R.string.dashboard_entry_https
+                else -> R.string.dashboard_entry_http
+            },
+        )
     }
 
     private fun verdict(cards: List<SignalCard>, reachable: Boolean, backendsUp: Int, backendsTotal: Int): Verdict {
         if (!reachable) {
             return Verdict(
-                headline = UiText.Raw("Traefik API unreachable"),
-                detail = UiText.Raw("counts and health cannot be read"),
+                headline = UiText.of(R.string.dashboard_unreachable),
+                detail = UiText.of(R.string.dashboard_verdict_unreadable),
                 status = TmStatus.Warn,
             )
         }
@@ -407,23 +439,30 @@ object DashboardBuilder {
         val warnings = cards.sumOf { card -> card.flags.filter { it.status == TmStatus.Warn }.sumOf { it.count } }
         return when {
             errors > 0 -> Verdict(
-                headline = UiText.Raw(if (errors == 1) "1 object is down" else "$errors objects are down"),
-                detail = UiText.Raw(if (warnings > 0) "$warnings degraded" else "traffic is not flowing for them"),
+                headline = UiText.plural(R.plurals.dashboard_verdict_down, errors),
+                detail = if (warnings > 0) {
+                    UiText.plural(R.plurals.dashboard_verdict_also_degraded, warnings)
+                } else {
+                    UiText.of(R.string.dashboard_verdict_no_traffic)
+                },
                 status = TmStatus.Error,
             )
             warnings > 0 -> Verdict(
-                headline = UiText.Raw(if (warnings == 1) "1 object is degraded" else "$warnings objects are degraded"),
-                detail = UiText.Raw("still serving, worth a look"),
+                headline = UiText.plural(R.plurals.dashboard_verdict_degraded, warnings),
+                detail = UiText.of(R.string.dashboard_verdict_still_serving),
                 status = TmStatus.Warn,
             )
             else -> Verdict(
-                headline = UiText.Raw("All healthy"),
-                detail = UiText.Raw(
-                    if (backendsTotal > 0) {
-                        "no errors or warnings reported · $backendsUp of $backendsTotal backends up"
-                    } else {
-                        "no errors or warnings reported"
-                    },
+                headline = UiText.of(R.string.dashboard_verdict_healthy),
+                detail = UiText.join(
+                    listOfNotNull(
+                        UiText.of(R.string.dashboard_verdict_clean),
+                        if (backendsTotal > 0) {
+                            UiText.plural(R.plurals.dashboard_backends_up, backendsTotal, backendsUp, backendsTotal)
+                        } else {
+                            null
+                        },
+                    ),
                 ),
                 status = TmStatus.Ok,
             )

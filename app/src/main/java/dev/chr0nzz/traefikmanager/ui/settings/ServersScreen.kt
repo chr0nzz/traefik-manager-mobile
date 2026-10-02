@@ -69,6 +69,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import androidx.compose.ui.platform.LocalResources
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -316,7 +317,7 @@ fun ServersScreen(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = entry.detail,
+                                text = entry.detail.asString(),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (entry.reachable) palette.green else palette.red,
                                 maxLines = 2,

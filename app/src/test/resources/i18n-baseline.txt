@@ -1,6 +1,2 @@
-data/model 33
-data/repo 16
-data/store 3
 push 8
-ui/crowdsec 1
 widget 96
