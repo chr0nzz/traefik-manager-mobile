@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
@@ -64,7 +65,7 @@ fun ServerSwitcherHeader(
                 modifier = Modifier.size(22.dp),
             )
             Text(
-                text = "Traefik Manager",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -82,7 +83,7 @@ fun ServerSwitcherHeader(
             HealthDot(reachable = active?.reachable ?: true)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = active?.name ?: "Host",
+                    text = active?.name ?: stringResource(R.string.common_host),
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -90,7 +91,7 @@ fun ServerSwitcherHeader(
                 )
                 Text(
                     text = when {
-                        switching -> "switching…"
+                        switching -> stringResource(R.string.server_switching)
                         else -> active?.detail.orEmpty()
                     },
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
@@ -102,7 +103,9 @@ fun ServerSwitcherHeader(
             if (hasAgents) {
                 Icon(
                     imageVector = if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                    contentDescription = if (expanded) "Hide servers" else "Switch server",
+                    contentDescription = stringResource(
+                        if (expanded) R.string.server_hide_list else R.string.server_show_list,
+                    ),
                     tint = palette.muted,
                     modifier = Modifier.size(18.dp),
                 )
@@ -156,7 +159,7 @@ fun ServerSwitcherHeader(
                         if (selected) {
                             Icon(
                                 imageVector = Icons.Outlined.Check,
-                                contentDescription = "Active server",
+                                contentDescription = stringResource(R.string.server_active),
                                 tint = palette.blue,
                                 modifier = Modifier.size(16.dp),
                             )
@@ -172,11 +175,12 @@ fun ServerSwitcherHeader(
 @Composable
 private fun HealthDot(reachable: Boolean) {
     val palette = LocalTmPalette.current
+    val description = stringResource(if (reachable) R.string.server_reachable else R.string.server_unreachable)
     Box(
         modifier = Modifier
             .size(8.dp)
             .clip(CircleShape)
             .background(if (reachable) palette.green else palette.red)
-            .clearAndSetSemantics { contentDescription = if (reachable) "reachable" else "unreachable" },
+            .clearAndSetSemantics { contentDescription = description },
     )
 }

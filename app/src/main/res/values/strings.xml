@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Traefik Manager</string>
+    <string name="app_name" translatable="false">Traefik Manager</string>
     <string name="widget_description">Pick a card: CrowdSec, Traefik, all servers, entry points, certificates and more. Resize it freely and it re-flows. Stack up to four and tap to cycle.</string>
     <string name="widget_config_title">Widget setup</string>
     <string name="widget_launcher_label">App launcher</string>
@@ -8,4 +8,97 @@
     <string name="widget_small_label">Traefik Manager</string>
     <string name="widget_large_label">Traefik Manager · large</string>
     <string name="widget_large_description">The same cards, dropped in at a larger size. Resize it freely and it re-flows. Stack up to four and tap to cycle.</string>
+    <string name="common_save">Save</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_reset">Reset</string>
+    <!-- Name shown for the main server, the one the app connects to directly -->
+    <string name="common_host">Host</string>
+
+    <!-- Drawer section heading: routes, middleware, services -->
+
+    <string name="nav_section_traffic">Traffic</string>
+    <!-- Drawer section heading: logs and CrowdSec -->
+    <string name="nav_section_observability">Observability</string>
+    <!-- Drawer section heading: certificates and plugins -->
+    <string name="nav_section_infrastructure">Infrastructure</string>
+    <!-- Drawer section heading: Traefik providers such as Docker or Kubernetes -->
+    <string name="nav_section_providers">Providers</string>
+    <!-- Drawer section heading: backups and settings -->
+    <string name="nav_section_system">System</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_routes">Routes</string>
+    <!-- Navigation label for the list of Traefik middlewares -->
+    <string name="nav_middlewares">Middleware</string>
+    <string name="nav_services">Services</string>
+    <string name="nav_route_map">Route map</string>
+    <string name="nav_logs">Logs</string>
+    <string name="nav_certificates">Certificates</string>
+    <string name="nav_plugins">Plugins</string>
+    <string name="nav_backups">Backups</string>
+    <string name="nav_settings">Settings</string>
+    <!-- Button that opens the navigation drawer -->
+    <string name="nav_menu">Menu</string>
+    <plurals name="nav_badge_alerts">
+        <item quantity="one">%d alert</item>
+        <item quantity="other">%d alerts</item>
+    </plurals>
+    <!-- Read aloud for the count badge next to a navigation item -->
+    <plurals name="nav_badge_total">
+        <item quantity="one">%d total</item>
+        <item quantity="other">%d total</item>
+    </plurals>
+
+    <string name="nav_editor_title_bar">Navigation bar</string>
+    <string name="nav_editor_title_rail">Side rail</string>
+    <string name="nav_editor_help">Pick up to %1$d and order them with the arrows. Everything else stays in the drawer. This is remembered for this screen size and this server.</string>
+    <!-- Section heading, %1$d is how many items are pinned -->
+    <string name="nav_editor_pinned">Pinned %1$d</string>
+    <string name="nav_editor_rest">Everything else</string>
+    <!-- %1$s is the name of a screen, for example Routes -->
+    <string name="nav_editor_move_up">Move %1$s up</string>
+    <!-- %1$s is the name of a screen, for example Routes -->
+    <string name="nav_editor_move_down">Move %1$s down</string>
+
+    <string name="lock_prompt_title">Unlock Traefik Manager</string>
+    <string name="lock_prompt_subtitle">Confirm it is you before your servers are shown</string>
+    <!-- Heading shown while the app is locked -->
+    <string name="lock_title">Locked</string>
+    <string name="lock_hint">Unlock to see your servers.</string>
+    <!-- Button -->
+    <string name="lock_unlock">Unlock</string>
+
+    <!-- Shown in lowercase under the server name while changing server -->
+
+    <string name="server_switching">switching…</string>
+    <string name="server_show_list">Switch server</string>
+    <string name="server_hide_list">Hide servers</string>
+    <string name="server_active">Active server</string>
+    <!-- Read aloud for the green status dot -->
+    <string name="server_reachable">reachable</string>
+    <!-- Read aloud for the red status dot -->
+    <string name="server_unreachable">unreachable</string>
+
+    <string name="connect_subtitle">Connect to your instance</string>
+    <string name="connect_url_label">Instance URL</string>
+    <string name="connect_key_label">API Key</string>
+    <string name="connect_key_placeholder">Required if API key auth is enabled</string>
+    <string name="connect_key_show">Show API key</string>
+    <string name="connect_key_hide">Hide API key</string>
+    <string name="connect_key_hint">Leave the API key empty if your instance has built-in auth disabled</string>
+    <!-- Button -->
+    <string name="connect_button">Connect</string>
+    <!-- Button that opens the app with sample data -->
+    <string name="connect_demo">Try Demo</string>
+    <string name="connect_error_no_url">Enter a URL</string>
+    <string name="connect_error_key_not_enabled">API key auth is not enabled on this server</string>
+    <string name="connect_error_key_required">This server requires an API key</string>
+    <string name="connect_error_key_invalid">Invalid API key</string>
+    <!-- %1$d is an HTTP status code such as 500 -->
+    <string name="connect_error_server">Server error %1$d</string>
+    <string name="connect_error_unreachable">Could not reach the server. Check the URL, your network, and that the certificate is trusted.</string>
+    <string name="connect_error_failed">Connection failed</string>
+
+    <string name="settings_language_section">Language</string>
+    <string name="settings_language_title">App language</string>
+    <string name="settings_language_system">Follow system</string>
 </resources>

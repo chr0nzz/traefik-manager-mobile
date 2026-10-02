@@ -27,10 +27,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
+import dev.chr0nzz.traefikmanager.ui.components.asString
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
@@ -66,22 +69,22 @@ fun NavBarEditorSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = if (railLayout) "Side rail" else "Navigation bar",
+                text = stringResource(if (railLayout) R.string.nav_editor_title_rail else R.string.nav_editor_title_bar),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Pick up to $maxItems and order them with the arrows. Everything else stays " +
-                    "in the drawer. This is remembered for this screen size and this server.",
+                text = stringResource(R.string.nav_editor_help, maxItems),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
             )
 
             if (picked.isNotEmpty()) {
-                SectionLabel("Pinned ${picked.size}")
+                SectionLabel(stringResource(R.string.nav_editor_pinned, picked.size))
                 TmCard {
                     picked.forEachIndexed { index, route ->
                         val destination = available.firstOrNull { it.route == route } ?: return@forEachIndexed
+                        val label = destination.label.asString()
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth(),
@@ -93,7 +96,7 @@ fun NavBarEditorSheet(
                                 modifier = Modifier.size(18.dp),
                             )
                             Text(
-                                text = destination.label,
+                                text = label,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
                                     .weight(1f)
@@ -109,7 +112,7 @@ fun NavBarEditorSheet(
                             ) {
                                 Icon(
                                     Icons.Outlined.KeyboardArrowUp,
-                                    contentDescription = "Move ${destination.label} up",
+                                    contentDescription = stringResource(R.string.nav_editor_move_up, label),
                                 )
                             }
                             IconButton(
@@ -122,7 +125,7 @@ fun NavBarEditorSheet(
                             ) {
                                 Icon(
                                     Icons.Outlined.KeyboardArrowDown,
-                                    contentDescription = "Move ${destination.label} down",
+                                    contentDescription = stringResource(R.string.nav_editor_move_down, label),
                                 )
                             }
                         }
@@ -131,7 +134,7 @@ fun NavBarEditorSheet(
                 }
             }
 
-            SectionLabel("Everything else", modifier = Modifier.padding(top = TmSpacing.sm))
+            SectionLabel(stringResource(R.string.nav_editor_rest), modifier = Modifier.padding(top = TmSpacing.sm))
             TmCard {
                 available.forEachIndexed { index, destination ->
                     val on = destination.route in picked
@@ -146,7 +149,7 @@ fun NavBarEditorSheet(
                     ) {
                         Checkbox(checked = on, enabled = !full, onCheckedChange = null)
                         Text(
-                            text = destination.label,
+                            text = destination.label.asString(),
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (full) palette.muted else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(start = TmSpacing.xs),
@@ -157,13 +160,13 @@ fun NavBarEditorSheet(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
-                TextButton(onClick = { onSave(emptyList()) }) { Text("Reset") }
+                TextButton(onClick = { onSave(emptyList()) }) { Text(stringResource(R.string.common_reset)) }
                 Row(modifier = Modifier.weight(1f)) {}
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
                 TextButton(
                     onClick = { onSave(picked.toList()) },
                     enabled = picked.isNotEmpty(),
-                ) { Text("Save") }
+                ) { Text(stringResource(R.string.common_save)) }
             }
         }
     }

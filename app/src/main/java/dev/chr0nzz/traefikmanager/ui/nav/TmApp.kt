@@ -20,6 +20,9 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.Icon
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.ProvideTopBarMenu
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -59,6 +62,7 @@ import android.net.Uri
 import dev.chr0nzz.traefikmanager.data.api.ApiState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.PlaceholderScreen
+import dev.chr0nzz.traefikmanager.ui.components.asString
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
 import dev.chr0nzz.traefikmanager.ui.certs.CertificatesScreen
 import dev.chr0nzz.traefikmanager.ui.backups.BackupsScreen
@@ -192,7 +196,7 @@ private fun ConnectedApp(
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
                     Text(
-                        text = section.label.uppercase(),
+                        text = stringResource(section.label).uppercase(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 6.dp),
@@ -200,7 +204,7 @@ private fun ConnectedApp(
                     destinations.filter { it.section == section }.forEach { destination ->
                     val badge = badges.forRoute(destination.route)
                     NavigationDrawerItem(
-                        label = { Text(destination.label) },
+                        label = { Text(destination.label.asString()) },
                         icon = { Icon(destination.icon, contentDescription = null) },
                         badge = drawerBadge(badge),
                         selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
@@ -275,7 +279,7 @@ private fun ConnectedApp(
                     selected = false,
                     onClick = { scope.launch { drawerState.open() } },
                     icon = { Icon(Icons.Outlined.Menu, contentDescription = null) },
-                    label = { Text("Menu") },
+                    label = { Text(stringResource(R.string.nav_menu)) },
                     navigationSuiteType = suiteType,
                 )
             }
@@ -284,7 +288,7 @@ private fun ConnectedApp(
                     selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
                     onClick = { goTo(destination, null) },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(destination.label) },
+                    label = { Text(destination.label.asString()) },
                     navigationSuiteType = suiteType,
                     badge = railBadge(badges.forRoute(destination.route), counted = !bar),
                 )
@@ -426,7 +430,7 @@ private fun ConnectedApp(
                     onOpenDrawer = { scope.launch { drawerState.open() } },
                     onOpen = { route -> navController.navigate(route) },
                     onDisconnect = { viewModel.disconnect() },
-                    activeServerName = activeServer?.name ?: "Host",
+                    activeServerName = activeServer?.name ?: stringResource(R.string.common_host),
                     hostSelected = activeServer?.isHost ?: true,
                 )
             }
@@ -497,18 +501,20 @@ private fun badgeLabel(value: Int): String = if (value > 999) "999+" else value.
 private fun drawerBadge(badge: NavBadge): (@Composable () -> Unit)? = when {
     badge.alerts > 0 -> {
         {
-            Badge(modifier = Modifier.semantics { contentDescription = alertLabel(badge.alerts) }) {
+            val description = alertLabel(badge.alerts)
+            Badge(modifier = Modifier.semantics { contentDescription = description }) {
                 Text(badgeLabel(badge.alerts))
             }
         }
     }
     badge.count > 0 -> {
         {
+            val description = totalLabel(badge.count)
             Text(
                 text = badgeLabel(badge.count),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.semantics { contentDescription = "${badge.count} total" },
+                modifier = Modifier.semantics { contentDescription = description },
             )
         }
     }
@@ -518,17 +524,19 @@ private fun drawerBadge(badge: NavBadge): (@Composable () -> Unit)? = when {
 private fun railBadge(badge: NavBadge, counted: Boolean): (@Composable () -> Unit)? = when {
     badge.alerts > 0 -> {
         {
-            Badge(modifier = Modifier.semantics { contentDescription = alertLabel(badge.alerts) }) {
+            val description = alertLabel(badge.alerts)
+            Badge(modifier = Modifier.semantics { contentDescription = description }) {
                 Text(badgeLabel(badge.alerts))
             }
         }
     }
     counted && badge.count > 0 -> {
         {
+            val description = totalLabel(badge.count)
             Badge(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.semantics { contentDescription = "${badge.count} total" },
+                modifier = Modifier.semantics { contentDescription = description },
             ) {
                 Text(badgeLabel(badge.count))
             }
@@ -537,7 +545,11 @@ private fun railBadge(badge: NavBadge, counted: Boolean): (@Composable () -> Uni
     else -> null
 }
 
-private fun alertLabel(alerts: Int): String = if (alerts == 1) "1 alert" else "$alerts alerts"
+@Composable
+private fun alertLabel(alerts: Int): String = pluralStringResource(R.plurals.nav_badge_alerts, alerts, alerts)
+
+@Composable
+private fun totalLabel(count: Int): String = pluralStringResource(R.plurals.nav_badge_total, count, count)
 
 private fun navScopeOf(serverId: String?, bar: Boolean): String =
     (serverId?.takeIf { it.isNotBlank() } ?: "host") + "|" + if (bar) "bar" else "rail"

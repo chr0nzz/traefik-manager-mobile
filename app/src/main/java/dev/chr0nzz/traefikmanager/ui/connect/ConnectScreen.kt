@@ -29,6 +29,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
@@ -49,6 +51,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
+    val appName = stringResource(R.string.app_name)
 
     Column(
         modifier = Modifier
@@ -73,8 +76,8 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
             )
             Text(
                 text = buildAnnotatedString {
-                    append("Traefik ")
-                    withStyle(SpanStyle(color = palette.blue)) { append("Manager") }
+                    append(appName.substringBeforeLast(' ', "") + " ")
+                    withStyle(SpanStyle(color = palette.blue)) { append(appName.substringAfterLast(' ')) }
                 },
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -82,7 +85,7 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Connect to your instance",
+                text = stringResource(R.string.connect_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = palette.muted,
                 modifier = Modifier.fillMaxWidth(),
@@ -92,7 +95,7 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
             OutlinedTextField(
                 value = state.url,
                 onValueChange = viewModel::onUrlChange,
-                label = { Text("Instance URL") },
+                label = { Text(stringResource(R.string.connect_url_label)) },
                 placeholder = { Text("manager.example.com") },
                 singleLine = true,
                 enabled = !state.connecting,
@@ -106,8 +109,8 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
             OutlinedTextField(
                 value = state.apiKey,
                 onValueChange = viewModel::onApiKeyChange,
-                label = { Text("API Key") },
-                placeholder = { Text("Required if API key auth is enabled") },
+                label = { Text(stringResource(R.string.connect_key_label)) },
+                placeholder = { Text(stringResource(R.string.connect_key_placeholder)) },
                 singleLine = true,
                 enabled = !state.connecting,
                 visualTransformation = if (state.showKey) VisualTransformation.None else PasswordVisualTransformation(),
@@ -119,16 +122,18 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
                     IconButton(onClick = viewModel::toggleKeyVisibility) {
                         Icon(
                             imageVector = if (state.showKey) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                            contentDescription = if (state.showKey) "Hide API key" else "Show API key",
+                            contentDescription = stringResource(
+                                if (state.showKey) R.string.connect_key_hide else R.string.connect_key_show,
+                            ),
                         )
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            if (state.error != null) {
+            state.error?.let { error ->
                 Text(
-                    text = state.error.orEmpty(),
+                    text = error.asString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.red,
                     modifier = Modifier.fillMaxWidth(),
@@ -144,7 +149,7 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
                 if (state.connecting) {
                     LoadingIndicator()
                 } else {
-                    Text("Connect")
+                    Text(stringResource(R.string.connect_button))
                 }
             }
 
@@ -153,11 +158,11 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
                 enabled = !state.connecting,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Try Demo")
+                Text(stringResource(R.string.connect_demo))
             }
 
             Text(
-                text = "Leave the API key empty if your instance has built-in auth disabled",
+                text = stringResource(R.string.connect_key_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.muted,
                 modifier = Modifier.fillMaxWidth(),

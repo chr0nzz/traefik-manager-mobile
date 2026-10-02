@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.nav
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.AltRoute
@@ -23,39 +24,41 @@ import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material.icons.outlined.Workspaces
 import androidx.compose.ui.graphics.vector.ImageVector
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.ProviderPage
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class TmSection(val label: String) {
-    Traffic("Traffic"),
-    Observability("Observability"),
-    Infrastructure("Infrastructure"),
-    Providers("Providers"),
-    System("System"),
+enum class TmSection(@StringRes val label: Int) {
+    Traffic(R.string.nav_section_traffic),
+    Observability(R.string.nav_section_observability),
+    Infrastructure(R.string.nav_section_infrastructure),
+    Providers(R.string.nav_section_providers),
+    System(R.string.nav_section_system),
 }
 
 enum class TmDestination(
     val route: String,
-    val label: String,
+    val label: UiText,
     val icon: ImageVector,
     val section: TmSection,
     val primary: Boolean = false,
     val serverTab: String? = null,
     val provider: ProviderPage? = null,
 ) {
-    Home("home", "Dashboard", Icons.Outlined.Home, TmSection.Traffic, primary = true),
-    Routes("routes", "Routes", Icons.Outlined.AltRoute, TmSection.Traffic, primary = true),
-    Middlewares("middlewares", "Middleware", Icons.Outlined.Layers, TmSection.Traffic, primary = true),
-    Services("services", "Services", Icons.Outlined.Dns, TmSection.Traffic),
+    Home("home", UiText.of(R.string.nav_dashboard), Icons.Outlined.Home, TmSection.Traffic, primary = true),
+    Routes("routes", UiText.of(R.string.nav_routes), Icons.Outlined.AltRoute, TmSection.Traffic, primary = true),
+    Middlewares("middlewares", UiText.of(R.string.nav_middlewares), Icons.Outlined.Layers, TmSection.Traffic, primary = true),
+    Services("services", UiText.of(R.string.nav_services), Icons.Outlined.Dns, TmSection.Traffic),
     RouteMap(
         route = "routemap",
-        label = "Route map",
+        label = UiText.of(R.string.nav_route_map),
         icon = Icons.Outlined.AccountTree,
         section = TmSection.Traffic,
         serverTab = "routemap",
     ),
     Logs(
         route = "logs",
-        label = "Logs",
+        label = UiText.of(R.string.nav_logs),
         icon = Icons.AutoMirrored.Outlined.ReceiptLong,
         section = TmSection.Observability,
         primary = true,
@@ -63,7 +66,7 @@ enum class TmDestination(
     ),
     CrowdSec(
         route = "crowdsec",
-        label = "CrowdSec",
+        label = UiText.Raw("CrowdSec"),
         icon = Icons.Outlined.Shield,
         section = TmSection.Observability,
         primary = true,
@@ -71,14 +74,14 @@ enum class TmDestination(
     ),
     Certificates(
         route = "certificates",
-        label = "Certificates",
+        label = UiText.of(R.string.nav_certificates),
         icon = Icons.Outlined.VerifiedUser,
         section = TmSection.Infrastructure,
         serverTab = "certs",
     ),
     Plugins(
         route = "plugins",
-        label = "Plugins",
+        label = UiText.of(R.string.nav_plugins),
         icon = Icons.Outlined.Extension,
         section = TmSection.Infrastructure,
         serverTab = "plugins",
@@ -98,16 +101,16 @@ enum class TmDestination(
     Internal(ProviderPage.Internal, Icons.Outlined.Traffic),
     Backups(
         route = "backups",
-        label = "Backups",
+        label = UiText.of(R.string.nav_backups),
         icon = Icons.Outlined.Inventory2,
         section = TmSection.System,
     ),
-    Settings("settings", "Settings", Icons.Outlined.Settings, TmSection.System),
+    Settings("settings", UiText.of(R.string.nav_settings), Icons.Outlined.Settings, TmSection.System),
     ;
 
     constructor(page: ProviderPage, icon: ImageVector) : this(
         route = page.route,
-        label = page.label,
+        label = UiText.Raw(page.label),
         icon = icon,
         section = TmSection.Providers,
         serverTab = page.tab,

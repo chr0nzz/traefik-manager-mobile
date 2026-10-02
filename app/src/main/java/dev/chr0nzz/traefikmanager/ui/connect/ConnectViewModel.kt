@@ -3,7 +3,9 @@ package dev.chr0nzz.traefikmanager.ui.connect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.api.ApiFactory
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.data.store.ConnectionStore
 import java.io.IOException
 import javax.inject.Inject
@@ -19,7 +21,7 @@ data class ConnectUiState(
     val apiKey: String = "",
     val showKey: Boolean = false,
     val connecting: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
 )
 
 @HiltViewModel
@@ -40,7 +42,7 @@ class ConnectViewModel @Inject constructor(
     fun connect() {
         val baseUrl = normalizeUrl(_state.value.url)
         if (baseUrl.isEmpty()) {
-            _state.update { it.copy(error = "Enter a URL") }
+            _state.update { it.copy(error = UiText.of(R.string.connect_error_no_url)) }
             return
         }
         val key = _state.value.apiKey.trim()
@@ -52,8 +54,8 @@ class ConnectViewModel @Inject constructor(
             result.fold(
                 onSuccess = { status ->
                     val mismatch = when {
-                        !status.enabled && key.isNotEmpty() -> "API key auth is not enabled on this server"
-                        status.enabled && key.isEmpty() -> "This server requires an API key"
+                        !status.enabled && key.isNotEmpty() -> UiText.of(R.string.connect_error_key_not_enabled)
+                        status.enabled && key.isEmpty() -> UiText.of(R.string.connect_error_key_required)
                         else -> null
                     }
                     if (mismatch != null) {
@@ -73,13 +75,15 @@ class ConnectViewModel @Inject constructor(
         viewModelScope.launch { connectionStore.enterDemo() }
     }
 
-    private fun describe(throwable: Throwable, keyProvided: Boolean): String = when (throwable) {
+    private fun describe(throwable: Throwable, keyProvided: Boolean): UiText = when (throwable) {
         is HttpException -> when (throwable.code()) {
-            401 -> if (keyProvided) "Invalid API key" else "This server requires an API key"
-            else -> "Server error ${throwable.code()}"
+            401 -> UiText.of(
+                if (keyProvided) R.string.connect_error_key_invalid else R.string.connect_error_key_required,
+            )
+            else -> UiText.of(R.string.connect_error_server, throwable.code())
         }
-        is IOException -> "Could not reach the server. Check the URL, your network, and that the certificate is trusted."
-        else -> throwable.message ?: "Connection failed"
+        is IOException -> UiText.of(R.string.connect_error_unreachable)
+        else -> throwable.message?.let(UiText::Raw) ?: UiText.of(R.string.connect_error_failed)
     }
 
     companion object {

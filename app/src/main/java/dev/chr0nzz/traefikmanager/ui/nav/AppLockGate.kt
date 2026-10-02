@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -30,6 +31,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
@@ -41,7 +43,10 @@ fun AppLockGate(enabled: Boolean, content: @Composable () -> Unit) {
     var unlocked by rememberSaveable { mutableStateOf(false) }
     var lastError by remember { mutableStateOf<String?>(null) }
 
-    val prompt: () -> Unit = remember(activity) {
+    val promptTitle = stringResource(R.string.lock_prompt_title)
+    val promptSubtitle = stringResource(R.string.lock_prompt_subtitle)
+
+    val prompt: () -> Unit = remember(activity, promptTitle, promptSubtitle) {
         {
             if (activity == null) {
                 unlocked = true
@@ -57,8 +62,8 @@ fun AppLockGate(enabled: Boolean, content: @Composable () -> Unit) {
                     }
                 }
                 val info = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Unlock Traefik Manager")
-                    .setSubtitle("Confirm it is you before your servers are shown")
+                    .setTitle(promptTitle)
+                    .setSubtitle(promptSubtitle)
                     .setAllowedAuthenticators(AppLock.AUTHENTICATORS)
                     .build()
                 BiometricPrompt(activity, ContextCompat.getMainExecutor(activity), callback).authenticate(info)
@@ -98,20 +103,20 @@ fun AppLockGate(enabled: Boolean, content: @Composable () -> Unit) {
             modifier = Modifier.size(48.dp),
         )
         Text(
-            text = "Locked",
+            text = stringResource(R.string.lock_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = TmSpacing.md),
         )
         Text(
-            text = lastError ?: "Unlock to see your servers.",
+            text = lastError ?: stringResource(R.string.lock_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = palette.muted,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = TmSpacing.xs),
         )
         Button(onClick = prompt, modifier = Modifier.padding(top = TmSpacing.lg)) {
-            Text("Unlock")
+            Text(stringResource(R.string.lock_unlock))
         }
     }
 }
