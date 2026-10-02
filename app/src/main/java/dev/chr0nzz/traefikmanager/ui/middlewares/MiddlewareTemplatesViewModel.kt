@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class TemplatesUiState(
     val loading: Boolean = true,
@@ -21,8 +23,8 @@ data class TemplatesUiState(
     val editorOpen: Boolean = false,
     val name: String = "",
     val saving: Boolean = false,
-    val error: String? = null,
-    val message: String? = null,
+    val error: UiText? = null,
+    val message: UiText? = null,
 )
 
 @HiltViewModel
@@ -72,7 +74,7 @@ class MiddlewareTemplatesViewModel @Inject constructor(
         val current = _state.value
         val name = current.name.trim()
         if (name.isEmpty()) {
-            _state.update { it.copy(error = "Name is required") }
+            _state.update { it.copy(error = UiText.of(R.string.middlewares_templates_error_no_name)) }
             return
         }
         val yaml = content.text.toString().trim()
@@ -93,14 +95,16 @@ class MiddlewareTemplatesViewModel @Inject constructor(
                             editorOpen = false,
                             editing = null,
                             name = "",
-                            message = if (editing == null) "Template created" else "Template updated",
+                            message = UiText.of(
+                                if (editing == null) R.string.middlewares_templates_created else R.string.middlewares_templates_updated,
+                            ),
                         )
                     }
                     load()
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = throwable.message ?: "Could not save the template")
+                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.middlewares_templates_error_save))
                     }
                 },
             )
@@ -111,12 +115,12 @@ class MiddlewareTemplatesViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { middlewaresRepository.deleteTemplate(template.id) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(message = "Template deleted") }
+                    _state.update { it.copy(message = UiText.of(R.string.middlewares_templates_deleted)) }
                     load()
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(message = throwable.message ?: "Could not delete the template")
+                        it.copy(message = UiText.messageOr(throwable.message, R.string.middlewares_templates_error_delete))
                     }
                 },
             )

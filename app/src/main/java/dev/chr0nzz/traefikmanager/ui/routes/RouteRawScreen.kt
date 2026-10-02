@@ -33,6 +33,9 @@ import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +60,10 @@ fun RouteRawScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Raw YAML") },
+                title = { Text(stringResource(R.string.routes_raw_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close))
                     }
                 },
                 actions = {
@@ -68,7 +71,7 @@ fun RouteRawScreen(
                         onClick = viewModel::save,
                         enabled = !state.saving && !state.loading,
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.common_save))
                     }
                 },
             )
@@ -82,8 +85,8 @@ fun RouteRawScreen(
             when {
                 state.loading -> LoadingState()
                 state.loadError != null -> ErrorState(
-                    headline = "Could not load the YAML",
-                    body = state.loadError,
+                    headline = stringResource(R.string.routes_raw_error_load),
+                    body = state.loadError?.asString(),
                     onRetry = { viewModel.load(routeId) },
                 )
                 else -> {
@@ -106,7 +109,7 @@ fun RouteRawScreen(
                     }
                     if (state.error != null) {
                         Text(
-                            text = state.error.orEmpty(),
+                            text = state.error?.asString().orEmpty(),
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                             color = palette.red,
                             modifier = Modifier.padding(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),

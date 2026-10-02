@@ -54,6 +54,8 @@ import dev.chr0nzz.traefikmanager.ui.components.TooltipIconButton
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -71,8 +73,8 @@ fun ServiceDetailPane(
     if (service == null) {
         MessageState(
             icon = Icons.Outlined.TouchApp,
-            headline = "Select a service",
-            body = "Pick one from the list to see its backends.",
+            headline = stringResource(R.string.services_select),
+            body = stringResource(R.string.services_select_body),
             modifier = modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -100,7 +102,7 @@ fun ServiceDetailPane(
             ) {
                 if (showBack) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to services")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.services_back))
                     }
                 }
                 Text(
@@ -124,22 +126,22 @@ fun ServiceDetailPane(
                 CardHeader(
                     icon = if (service.composite.isNotEmpty()) Icons.Outlined.Hub else Icons.Outlined.Info,
                     tint = palette.blue,
-                    title = "Service details",
+                    title = stringResource(R.string.services_details_title),
                 )
-                DetailRow("Type", service.kindLabel, mono = true)
+                DetailRow(stringResource(R.string.common_label_type), service.kindLabel, mono = true)
                 if (service.composite.isNotEmpty()) {
                     DetailRow(
-                        "Managed",
-                        if (service.owned) "by Traefik Manager" else "in the config file",
+                        stringResource(R.string.services_managed),
+                        stringResource(if (service.owned) R.string.services_managed_here else R.string.services_managed_file),
                     )
                 }
-                DetailRow("Provider", service.provider, mono = true)
+                DetailRow(stringResource(R.string.common_label_provider), service.provider, mono = true)
                 DetailRow(
-                    label = "Status",
+                    label = stringResource(R.string.common_label_status),
                     value = when (service.health) {
-                        ServiceHealth.Ok -> "Success"
-                        ServiceHealth.Warning -> "Warning"
-                        ServiceHealth.Error -> "Error"
+                        ServiceHealth.Ok -> stringResource(R.string.services_health_ok)
+                        ServiceHealth.Warning -> stringResource(R.string.services_health_warning)
+                        ServiceHealth.Error -> stringResource(R.string.common_label_error)
                     },
                     valueColor = when (service.health) {
                         ServiceHealth.Ok -> palette.green
@@ -150,8 +152,8 @@ fun ServiceDetailPane(
                 )
                 service.passHostHeader?.let { pass ->
                     DetailRow(
-                        label = "Pass host header",
-                        value = if (pass) "Yes" else "No",
+                        label = stringResource(R.string.common_label_pass_host_header),
+                        value = stringResource(if (pass) R.string.common_yes else R.string.common_no),
                         valueColor = if (pass) palette.green else palette.muted,
                         last = true,
                     )
@@ -159,7 +161,7 @@ fun ServiceDetailPane(
             }
 
             if (service.errors.isNotEmpty()) {
-                SectionLabel("Errors")
+                SectionLabel(stringResource(R.string.services_errors_title))
                 TmCard(accent = TmStatus.Error) {
                     service.errors.forEach { message ->
                         Text(
@@ -177,12 +179,12 @@ fun ServiceDetailPane(
                     CardHeader(
                         icon = Icons.Outlined.Public,
                         tint = palette.green,
-                        title = "Servers",
+                        title = stringResource(R.string.services_servers_title),
                         trailing = service.servers.size.toString().takeIf { service.servers.isNotEmpty() },
                     )
                     if (service.servers.isEmpty()) {
                         Text(
-                            text = "No servers configured",
+                            text = stringResource(R.string.services_servers_none),
                             style = MaterialTheme.typography.bodySmall,
                             color = palette.muted,
                             modifier = Modifier.padding(top = TmSpacing.xs),
@@ -211,9 +213,9 @@ fun ServiceDetailPane(
                                 )
                                 Text(
                                     text = when (server.health) {
-                                        ServerHealth.Up -> "Up"
-                                        ServerHealth.Down -> "Down"
-                                        ServerHealth.Unknown -> "Unchecked"
+                                        ServerHealth.Up -> stringResource(R.string.services_server_up)
+                                        ServerHealth.Down -> stringResource(R.string.services_server_down)
+                                        ServerHealth.Unknown -> stringResource(R.string.services_server_unchecked)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = when (server.health) {
@@ -234,7 +236,7 @@ fun ServiceDetailPane(
                     CardHeader(
                         icon = Icons.AutoMirrored.Outlined.CallSplit,
                         tint = palette.orange,
-                        title = "Targets",
+                        title = stringResource(R.string.services_targets_title),
                         trailing = service.composite.size.toString(),
                     )
                     service.composite.forEachIndexed { index, target ->
@@ -253,12 +255,12 @@ fun ServiceDetailPane(
                 CardHeader(
                     icon = Icons.Outlined.Dns,
                     tint = palette.purple,
-                    title = "Used by routers",
+                    title = stringResource(R.string.services_used_by_title),
                     trailing = service.usedBy.size.toString().takeIf { service.usedBy.isNotEmpty() },
                 )
                 if (service.usedBy.isEmpty()) {
                     Text(
-                        text = "No router references this service",
+                        text = stringResource(R.string.services_used_by_none),
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.xs),
@@ -290,7 +292,7 @@ fun ServiceDetailPane(
             ) {
                 if (service.servers.isNotEmpty()) {
                     TooltipIconButton(
-                        label = "Copy backend URLs",
+                        label = stringResource(R.string.services_copy_urls),
                         icon = Icons.Outlined.ContentCopy,
                         onClick = {
                             clipboard.setText(AnnotatedString(service.servers.joinToString("\n") { it.target }))
@@ -299,19 +301,19 @@ fun ServiceDetailPane(
                 }
                 if (canAuthor && service.authorable && composite) {
                     TooltipIconButton(
-                        label = if (service.owned) "Stop managing" else "Manage this service",
+                        label = stringResource(if (service.owned) R.string.services_stop_managing else R.string.services_start_managing),
                         icon = if (service.owned) Icons.Outlined.LinkOff else Icons.Outlined.Link,
                         onClick = { onOwnership(!service.owned) },
                     )
                 }
                 if (canAuthor && service.authorable && (service.owned || !composite)) {
                     TooltipIconButton(
-                        label = "Edit service",
+                        label = stringResource(R.string.services_edit),
                         icon = Icons.Outlined.Edit,
                         onClick = onEdit,
                     )
                     TooltipIconButton(
-                        label = "Delete service",
+                        label = stringResource(R.string.services_delete),
                         icon = Icons.Outlined.Delete,
                         onClick = onDelete,
                     )

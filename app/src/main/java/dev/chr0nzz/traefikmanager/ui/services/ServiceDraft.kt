@@ -5,6 +5,8 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceChildPayload
 import dev.chr0nzz.traefikmanager.data.model.ServiceHealthDraft
 import dev.chr0nzz.traefikmanager.data.model.ServicePayload
 import dev.chr0nzz.traefikmanager.data.model.TraefikService
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class ServiceChildDraft(
     val kind: String = MANUAL,
@@ -52,12 +54,12 @@ data class ServiceDraft(
         },
     )
 
-    fun problem(): String? = when {
-        name.isBlank() -> "Give the service a name"
-        EntityNames.problem(name) != null -> EntityNames.problem(name)
-        payload().children.isEmpty() -> "Add at least one backend"
+    fun problem(): UiText? = when {
+        name.isBlank() -> UiText.of(R.string.services_error_no_name)
+        EntityNames.problem(name) != null -> EntityNames.problem(name)?.let(UiText::Raw)
+        payload().children.isEmpty() -> UiText.of(R.string.services_error_no_backend)
         type == "loadBalancer" && payload().children.none { it.kind == ServiceChildDraft.MANUAL } ->
-            "A load balancer needs at least one address"
+            UiText.of(R.string.services_error_no_address)
         else -> null
     }
 

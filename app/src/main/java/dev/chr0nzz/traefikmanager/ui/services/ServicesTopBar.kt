@@ -56,6 +56,8 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,17 +85,17 @@ fun ServicesTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text("Services") },
+        title = { Text(stringResource(R.string.nav_services)) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search services")
+                Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.services_search))
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
-                    Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                    Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.common_filters))
                 }
                 if (state.filtersActive) {
                     Box(
@@ -115,7 +117,7 @@ fun ServicesTopBar(
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh services")
+                Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.services_refresh))
             }
         },
         scrollBehavior = scrollBehavior,
@@ -128,16 +130,16 @@ fun ServicesTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search services") },
+                placeholder = { Text(stringResource(R.string.services_search)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -147,7 +149,7 @@ fun ServicesTopBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (results.isEmpty()) {
                 Text(
-                    text = "No services match",
+                    text = stringResource(R.string.services_no_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted,
                     modifier = Modifier.padding(TmSpacing.lg),
@@ -198,16 +200,16 @@ private fun ServiceFilterMenu(
         onDismissRequest = onDismiss,
         modifier = Modifier.widthIn(min = 240.dp),
     ) {
-        MenuSectionLabel("STATUS")
+        MenuSectionLabel(stringResource(R.string.common_label_status).uppercase())
         ServiceStatusFilter.entries.forEach { option ->
             DropdownMenuItem(
-                text = { Text(option.label) },
+                text = { Text(stringResource(option.label)) },
                 onClick = {
                     onStatusChange(option)
                     onDismiss()
                 },
                 trailingIcon = if (option == state.status) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                    { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                 } else {
                     null
                 },
@@ -217,15 +219,15 @@ private fun ServiceFilterMenu(
         val protocols = state.protocols
         if (protocols.size > 1) {
             HorizontalDivider()
-            MenuSectionLabel("PROTOCOL")
+            MenuSectionLabel(stringResource(R.string.common_label_protocol).uppercase())
             DropdownMenuItem(
-                text = { Text("All") },
+                text = { Text(stringResource(R.string.common_all)) },
                 onClick = {
                     onProtocolChange(null)
                     onDismiss()
                 },
                 trailingIcon = if (state.protocol == null) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                    { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                 } else {
                     null
                 },
@@ -239,7 +241,7 @@ private fun ServiceFilterMenu(
                         onDismiss()
                     },
                     trailingIcon = if (option == state.protocol) {
-                        { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                        { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                     } else {
                         null
                     },
@@ -250,7 +252,7 @@ private fun ServiceFilterMenu(
         if (state.filtersActive) {
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Clear filters") },
+                text = { Text(stringResource(R.string.common_clear_filters)) },
                 leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
                 contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
                 onClick = {

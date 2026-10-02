@@ -75,6 +75,9 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -93,11 +96,12 @@ fun RouteDetailPane(
     service: dev.chr0nzz.traefikmanager.data.model.ServiceRow? = null,
     modifier: Modifier = Modifier,
 ) {
+    val none = stringResource(R.string.common_none)
     if (route == null) {
         MessageState(
             icon = Icons.Outlined.TouchApp,
-            headline = "Select a route",
-            body = "Pick a route from the list to see its configuration.",
+            headline = stringResource(R.string.routes_select),
+            body = stringResource(R.string.routes_select_body),
             modifier = modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -126,7 +130,7 @@ fun RouteDetailPane(
         ) {
             if (showBack) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to routes")
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.routes_back))
                 }
             }
             Text(
@@ -147,6 +151,10 @@ fun RouteDetailPane(
                 modifier = Modifier.weight(1f),
             )
             if (route.provider == "file") {
+                val toggleLabel = stringResource(
+                    if (route.enabled) R.string.routes_disable_named else R.string.routes_enable_named,
+                    route.name,
+                )
                 Switch(
                     checked = route.enabled,
                     onCheckedChange = { onToggle(route) },
@@ -161,13 +169,7 @@ fun RouteDetailPane(
                     } else {
                         null
                     },
-                    modifier = Modifier.semantics {
-                        contentDescription = if (route.enabled) {
-                            "Disable ${route.name}"
-                        } else {
-                            "Enable ${route.name}"
-                        }
-                    },
+                    modifier = Modifier.semantics { contentDescription = toggleLabel },
                 )
             }
         }
@@ -181,21 +183,21 @@ fun RouteDetailPane(
                     horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    SectionLabel("Reachability", modifier = Modifier.weight(1f))
+                    SectionLabel(stringResource(R.string.routes_reachability), modifier = Modifier.weight(1f))
                     when {
                         ping?.running == true -> Text(
-                            text = "Checking",
+                            text = stringResource(R.string.routes_ping_checking),
                             style = MaterialTheme.typography.labelMedium,
                             color = palette.muted,
                         )
-                        ping?.degraded == true -> HealthLabel(TmStatus.Warn,ping.detail.ifEmpty { "degraded" })
-                        ping?.ok == true -> HealthLabel(TmStatus.Ok, ping.detail.ifEmpty { "reachable" })
-                        ping?.ok == false -> HealthLabel(TmStatus.Error, ping.detail.ifEmpty { "unreachable" })
-                        else -> TextButton(onClick = { onPing(route) }) { Text("Ping") }
+                        ping?.degraded == true -> HealthLabel(TmStatus.Warn, ping.detail?.asString() ?: stringResource(R.string.routes_ping_degraded))
+                        ping?.ok == true -> HealthLabel(TmStatus.Ok, ping.detail?.asString() ?: stringResource(R.string.routes_ping_reachable))
+                        ping?.ok == false -> HealthLabel(TmStatus.Error, ping.detail?.asString() ?: stringResource(R.string.routes_ping_unreachable))
+                        else -> TextButton(onClick = { onPing(route) }) { Text(stringResource(R.string.routes_ping)) }
                     }
                     if (ping != null && ping.running.not()) {
                         IconButton(onClick = { onPing(route) }) {
-                            Icon(Icons.Outlined.Refresh, contentDescription = "Ping again")
+                            Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.routes_ping_again))
                         }
                     }
                 }
@@ -203,9 +205,9 @@ fun RouteDetailPane(
         }
 
         if (health != null && (health.known || health.note != null)) {
-            DetailSection("Reachability", Icons.Outlined.MonitorHeart, palette.teal) {
+            DetailSection(stringResource(R.string.routes_reachability), Icons.Outlined.MonitorHeart, palette.teal) {
                 DetailRow(
-                    label = "Checked",
+                    label = stringResource(R.string.routes_health_checked),
                     value = health.summary,
                     status = when (health.state) {
                         RouteHealth.STATE_UP -> TmStatus.Ok
@@ -215,53 +217,67 @@ fun RouteDetailPane(
                     },
                 )
                 if (health.downServers.isNotEmpty()) {
-                    DetailRow("Not answering", health.downServers.joinToString(", "), mono = true)
+                    DetailRow(stringResource(R.string.routes_health_down_servers), health.downServers.joinToString(", "), mono = true)
                 }
                 health.error?.takeIf { it.isNotBlank() && health.state == RouteHealth.STATE_DOWN }
-                    ?.let { DetailRow("Error", it) }
+                    ?.let { DetailRow(stringResource(R.string.common_label_error), it) }
                 if (health.unverified) {
-                    DetailRow("Note", "Behind forward auth, so the check could not confirm the app itself")
+                    DetailRow(
+                        stringResource(R.string.routes_health_note),
+                        stringResource(R.string.routes_health_unverified),
+                    )
                 }
                 DetailRow(
-                    label = "Source",
+                    label = stringResource(R.string.routes_health_source),
                     value = when (health.source) {
-                        "traefik" -> "Traefik health check"
-                        "servers" -> "Each backend server"
-                        "ping" -> "Request to the route"
-                        "self" -> "This app"
-                        else -> health.source.ifEmpty { "unknown" }
+                        "traefik" -> stringResource(R.string.routes_health_source_traefik)
+                        "servers" -> stringResource(R.string.routes_health_source_servers)
+                        "ping" -> stringResource(R.string.routes_health_source_ping)
+                        "self" -> stringResource(R.string.routes_health_source_self)
+                        else -> health.source.ifEmpty { stringResource(R.string.common_unknown) }
                     },
                     last = true,
                 )
             }
         }
 
-        DetailSection("Router Details", Icons.Outlined.Info, palette.blue) {
-            DetailRow("Status", if (route.enabled) "Enabled" else "Disabled", status = if (route.enabled) TmStatus.Ok else TmStatus.Disabled)
-            DetailRow("Provider", route.provider)
-            if (route.rule.isNotEmpty()) DetailRow("Rule", route.rule, mono = true)
-            DetailRow("Name", route.name, mono = true)
-            DetailRow("Entry points", route.entryPointNames.joinToString(", ").ifEmpty { "none" })
-            DetailRow("Service", route.serviceName.ifEmpty { "none" }, mono = true)
-            route.priority?.let { DetailRow("Priority", it.toString()) }
-            if (route.configFile.isNotEmpty()) DetailRow("Config file", route.configFile, mono = true, last = true)
+        DetailSection(stringResource(R.string.routes_details_title), Icons.Outlined.Info, palette.blue) {
+            DetailRow(
+                stringResource(R.string.common_label_status),
+                stringResource(if (route.enabled) R.string.common_enabled else R.string.common_disabled),
+                status = if (route.enabled) TmStatus.Ok else TmStatus.Disabled,
+            )
+            DetailRow(stringResource(R.string.common_label_provider), route.provider)
+            if (route.rule.isNotEmpty()) DetailRow(stringResource(R.string.common_label_rule), route.rule, mono = true)
+            DetailRow(stringResource(R.string.common_label_name), route.name, mono = true)
+            DetailRow(stringResource(R.string.common_label_entry_points), route.entryPointNames.joinToString(", ").ifEmpty { none })
+            DetailRow(stringResource(R.string.common_label_service), route.serviceName.ifEmpty { none }, mono = true)
+            route.priority?.let { DetailRow(stringResource(R.string.common_label_priority), it.toString()) }
+            if (route.configFile.isNotEmpty()) DetailRow(stringResource(R.string.common_label_config_file), route.configFile, mono = true, last = true)
         }
 
         if (route.protocol != "udp") {
             DetailSection("TLS", Icons.Outlined.Shield, palette.green) {
-                DetailRow("TLS", if (route.tlsEnabled) "Enabled" else "Disabled")
-                DetailRow("Certificate resolver", route.certResolver.ifEmpty { "none" })
-                DetailRow("Options", route.tlsOptionsProfile.ifEmpty { "default" })
-                DetailRow("Skip verify", if (route.insecureSkipVerify) "Yes" else "No", last = true)
+                DetailRow("TLS", stringResource(if (route.tlsEnabled) R.string.common_enabled else R.string.common_disabled))
+                DetailRow(stringResource(R.string.common_label_cert_resolver), route.certResolver.ifEmpty { none })
+                DetailRow(
+                    stringResource(R.string.routes_tls_options),
+                    route.tlsOptionsProfile.ifEmpty { stringResource(R.string.common_default) },
+                )
+                DetailRow(
+                    stringResource(R.string.routes_skip_verify),
+                    stringResource(if (route.insecureSkipVerify) R.string.common_yes else R.string.common_no),
+                    last = true,
+                )
             }
         }
 
-        DetailSection("Middlewares", Icons.Outlined.Extension, palette.purple) {
+        DetailSection(stringResource(R.string.common_label_middlewares), Icons.Outlined.Extension, palette.purple) {
             val middlewares = route.middlewareNames +
-                route.entrypointMiddlewares.map { "${it.substringBefore('@')} (entry point)" }
+                route.entrypointMiddlewares.map { stringResource(R.string.routes_middleware_entry_point, it.substringBefore('@')) }
             if (middlewares.isEmpty()) {
                 Text(
-                    text = "No middlewares configured",
+                    text = stringResource(R.string.routes_no_middlewares),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.muted,
                     textAlign = TextAlign.Center,
@@ -276,11 +292,14 @@ fun RouteDetailPane(
             }
         }
 
-        DetailSection("Service", Icons.Outlined.Bolt, palette.yellow) {
-            DetailRow("Type", if (route.serviceType == "loadBalancer") "Load Balancer" else route.serviceType)
+        DetailSection(stringResource(R.string.common_label_service), Icons.Outlined.Bolt, palette.yellow) {
+            DetailRow(
+                stringResource(R.string.common_label_type),
+                if (route.serviceType == "loadBalancer") stringResource(R.string.routes_load_balancer) else route.serviceType,
+            )
             dev.chr0nzz.traefikmanager.data.model.BackendHealth.summary(service)?.let { summary ->
                 DetailRow(
-                    label = "Health",
+                    label = stringResource(R.string.common_label_health),
                     value = summary,
                     status = when {
                         service?.backendsUp == service?.backendsTotal -> TmStatus.Ok
@@ -289,11 +308,15 @@ fun RouteDetailPane(
                     },
                 )
             }
-            route.passHostHeader?.let { DetailRow("Pass host header", it.toString()) }
+            route.passHostHeader?.let { DetailRow(stringResource(R.string.common_label_pass_host_header), it.toString()) }
             val servers = route.servers.ifEmpty { listOf(route.target) }
             servers.forEachIndexed { index, server ->
                 DetailRow(
-                    label = if (servers.size == 1) "Server" else "Server ${index + 1}",
+                    label = if (servers.size == 1) {
+                        stringResource(R.string.routes_server)
+                    } else {
+                        stringResource(R.string.routes_server_numbered, index + 1)
+                    },
                     value = server,
                     mono = true,
                     status = when (service?.servers?.firstOrNull { it.target == server }?.health) {
@@ -318,17 +341,17 @@ fun RouteDetailPane(
         ) {
             if (route.provider == "file") {
                 TooltipIconButton(
-                    label = "Edit route",
+                    label = stringResource(R.string.routes_edit),
                     icon = Icons.Outlined.Edit,
                     onClick = { onEdit(route) },
                 )
                 TooltipIconButton(
-                    label = "Delete route",
+                    label = stringResource(R.string.routes_delete),
                     icon = Icons.Outlined.Delete,
                     onClick = { onDelete(route) },
                 )
                 TooltipIconButton(
-                    label = "Edit raw YAML",
+                    label = stringResource(R.string.routes_edit_raw),
                     icon = Icons.Outlined.Code,
                     onClick = { onEditYaml(route) },
                 )
@@ -336,13 +359,13 @@ fun RouteDetailPane(
             val host = route.hosts.firstOrNull()
             if (host != null) {
                 TooltipIconButton(
-                    label = "Open $host",
+                    label = stringResource(R.string.common_open_named, host),
                     icon = Icons.Outlined.OpenInNew,
                     onClick = { uriHandler.openUri("https://$host") },
                 )
             }
             TooltipIconButton(
-                label = "Copy target",
+                label = stringResource(R.string.routes_copy_target),
                 icon = Icons.Outlined.ContentCopy,
                 onClick = { clipboard.setText(AnnotatedString(route.target.ifEmpty { route.name })) },
             )
@@ -353,8 +376,9 @@ fun RouteDetailPane(
 @Composable
 private fun TrafficFlow(route: Route) {
     val palette = LocalTmPalette.current
+    val none = stringResource(R.string.common_none)
     Column(modifier = Modifier.fillMaxWidth()) {
-        SectionLabel("Traffic flow")
+        SectionLabel(stringResource(R.string.routes_flow_title))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -362,10 +386,10 @@ private fun TrafficFlow(route: Route) {
                 .padding(top = TmSpacing.sm),
         ) {
             FlowBox(
-                label = "Entry point",
-                title = (route.entryPointNames.firstOrNull() ?: "none").uppercase(),
+                label = stringResource(R.string.common_label_entry_point),
+                title = (route.entryPointNames.firstOrNull() ?: none).uppercase(),
                 lines = listOfNotNull(
-                    route.entryPointNames.getOrNull(1)?.let { "+${route.entryPointNames.size - 1} more" },
+                    route.entryPointNames.getOrNull(1)?.let { stringResource(R.string.common_more_count, route.entryPointNames.size - 1) },
                     if (route.tlsEnabled) "TLS" else null,
                 ),
                 lineColor = palette.green,
@@ -373,11 +397,11 @@ private fun TrafficFlow(route: Route) {
             )
             FlowArrow()
             FlowBox(
-                label = "Router",
+                label = stringResource(R.string.common_label_router),
                 title = route.name,
                 lines = listOfNotNull(
                     if (route.tlsEnabled) "TLS" else null,
-                    if (route.enabled) "Enabled" else "Disabled",
+                    stringResource(if (route.enabled) R.string.common_enabled else R.string.common_disabled),
                 ),
                 lineColor = if (route.enabled) palette.green else palette.muted,
                 highlighted = true,
@@ -385,8 +409,8 @@ private fun TrafficFlow(route: Route) {
             )
             FlowArrow()
             FlowBox(
-                label = "Service",
-                title = route.serviceName.ifEmpty { "none" },
+                label = stringResource(R.string.common_label_service),
+                title = route.serviceName.ifEmpty { none },
                 mono = route.target.takeIf { it.isNotEmpty() && it != "N/A" },
                 modifier = Modifier.weight(1f),
             )

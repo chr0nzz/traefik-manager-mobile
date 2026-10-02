@@ -24,13 +24,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class ProtocolFilter(val label: String) {
-    All("All"), Http("HTTP"), Tcp("TCP"), Udp("UDP")
+enum class ProtocolFilter(val label: UiText) {
+    All(UiText.of(R.string.common_all)), Http(UiText.Raw("HTTP")), Tcp(UiText.Raw("TCP")), Udp(UiText.Raw("UDP"))
 }
 
-enum class StatusFilter(val label: String) {
-    All("All"), Active("Active"), Inactive("Inactive")
+enum class StatusFilter(val label: UiText) {
+    All(UiText.of(R.string.common_all)),
+    Active(UiText.of(R.string.routes_filter_active)),
+    Inactive(UiText.of(R.string.routes_filter_inactive)),
 }
 
 data class PingState(
@@ -38,7 +42,7 @@ data class PingState(
     val ok: Boolean? = null,
     val degraded: Boolean = false,
     val latencyMs: Int? = null,
-    val detail: String = "",
+    val detail: UiText? = null,
 )
 
 data class CertOffer(
@@ -61,8 +65,8 @@ data class RoutesUiState(
     val protocol: ProtocolFilter = ProtocolFilter.All,
     val status: StatusFilter = StatusFilter.All,
     val togglingId: String? = null,
-    val error: String? = null,
-    val message: String? = null,
+    val error: UiText? = null,
+    val message: UiText? = null,
 ) {
     val visible: List<Route>
         get() = routes.filter { route ->
@@ -163,20 +167,20 @@ class RoutesViewModel @Inject constructor(
                         degraded = ping.degraded,
                         latencyMs = ping.latencyMs,
                         detail = when {
-                            ping.self -> "this server"
+                            ping.self -> UiText.of(R.string.routes_ping_self)
                             ping.degraded -> ping.servers
-                                ?.let { tally -> "${tally.up} of ${tally.total} servers up" }
-                                ?: "some servers down"
+                                ?.let { tally -> UiText.plural(R.plurals.routes_ping_servers_up, tally.total, tally.up, tally.total) }
+                                ?: UiText.of(R.string.routes_ping_some_down)
                             ping.ok -> listOfNotNull(
                                 ping.statusCode?.let { code -> "HTTP $code" },
                                 ping.latencyMs?.let { ms -> "${ms}ms" },
-                            ).joinToString(" · ")
-                            else -> ping.error ?: "No response"
+                            ).takeIf { it.isNotEmpty() }?.let { UiText.Raw(it.joinToString(UiText.SEPARATOR)) }
+                            else -> UiText.messageOr(ping.error, R.string.routes_ping_no_response)
                         },
                     )
                 },
                 onFailure = { throwable ->
-                    PingState(running = false, ok = false, detail = throwable.message ?: "Ping failed")
+                    PingState(running = false, ok = false, detail = UiText.messageOr(throwable.message, R.string.routes_ping_failed))
                 },
             )
             _state.update { it.copy(pingResults = it.pingResults + (route.id to next)) }
@@ -201,14 +205,17 @@ class RoutesViewModel @Inject constructor(
                             routes = current.routes.map {
                                 if (it.id == route.id) it.copy(enabled = !route.enabled) else it
                             },
-                            message = if (route.enabled) "${route.name} disabled" else "${route.name} enabled",
+                            message = UiText.of(
+                                if (route.enabled) R.string.routes_disabled_named else R.string.routes_enabled_named,
+                                route.name,
+                            ),
                         )
                     }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(togglingId = null, message = throwable.message ?: "Could not toggle the route")
+                        it.copy(togglingId = null, message = UiText.messageOr(throwable.message, R.string.routes_error_toggle))
                     }
                 },
             )
@@ -224,7 +231,7 @@ class RoutesViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             togglingId = null,
-                            message = "${route.name} deleted",
+                            message = UiText.of(R.string.routes_deleted_named, route.name),
                             certOffer = freed.takeIf { certs -> certs.isNotEmpty() }?.let { certs -> CertOffer(route.name, certs) },
                         )
                     }
@@ -232,7 +239,7 @@ class RoutesViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(togglingId = null, message = throwable.message ?: "Could not delete the route")
+                        it.copy(togglingId = null, message = UiText.messageOr(throwable.message, R.string.routes_error_delete))
                     }
                 },
             )
@@ -255,18 +262,17 @@ class RoutesViewModel @Inject constructor(
             val message = runCatching {
                 certificates.remove(offer.certs.map { CertRef(it.resolver, it.main) })
             }.fold(
-                onSuccess = { response -> CertCleanup.outcome(response, offer.certs.size) },
-                onFailure = { throwable -> throwable.message ?: "Could not remove the certificate" },
+                onSuccess = { response -> UiText.Raw(CertCleanup.outcome(response, offer.certs.size)) },
+                onFailure = { throwable -> UiText.messageOr(throwable.message, R.string.certs_error_remove) },
             )
             _state.update { it.copy(message = message) }
         }
     }
 
-    private fun describeLoadFailure(throwable: Throwable): String {
-        val detail = throwable.message ?: throwable::class.simpleName ?: "unknown error"
+    private fun describeLoadFailure(throwable: Throwable): UiText {
+        val detail = UiText.messageOr(throwable.message ?: throwable::class.simpleName, R.string.common_error_unknown)
         return when (throwable) {
-            is kotlinx.serialization.SerializationException ->
-                "The server sent a route the app could not read: $detail"
+            is kotlinx.serialization.SerializationException -> UiText.of(R.string.routes_error_unreadable, detail)
             else -> detail
         }
     }

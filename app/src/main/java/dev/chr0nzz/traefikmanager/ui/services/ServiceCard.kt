@@ -29,6 +29,8 @@ import dev.chr0nzz.traefikmanager.ui.components.ValueRow
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 fun ServiceHealth.asTmStatus(): TmStatus = when (this) {
     ServiceHealth.Ok -> TmStatus.Ok
@@ -116,7 +118,7 @@ fun ServiceCard(
         }
         if (targets.size > 2) {
             Text(
-                text = "+${targets.size - 2} more",
+                text = stringResource(R.string.common_more_count, targets.size - 2),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 modifier = Modifier.padding(top = TmSpacing.xs),

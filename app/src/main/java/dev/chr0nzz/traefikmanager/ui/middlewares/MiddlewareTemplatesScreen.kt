@@ -59,6 +59,10 @@ import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,12 +72,13 @@ fun MiddlewareTemplatesScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     var pendingDelete by remember { mutableStateOf<MiddlewareTemplate?>(null) }
 
     LaunchedEffect(state.message) {
         val message = state.message
         if (message != null) {
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(message.resolve(resources))
             viewModel.consumeMessage()
         }
     }
@@ -82,8 +87,8 @@ fun MiddlewareTemplatesScreen(
     if (target != null) {
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete template") },
-            text = { Text("Delete this template? Middlewares already created from it are not affected.") },
+            title = { Text(stringResource(R.string.middlewares_templates_delete)) },
+            text = { Text(stringResource(R.string.middlewares_templates_delete_body)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -91,11 +96,11 @@ fun MiddlewareTemplatesScreen(
                         pendingDelete = null
                     },
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.common_delete))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -113,21 +118,21 @@ fun MiddlewareTemplatesScreen(
                 title = {
                     Text(
                         when {
-                            !state.editorOpen -> "Middleware templates"
-                            state.editing == null -> "Add template"
-                            else -> "Edit template"
+                            !state.editorOpen -> stringResource(R.string.middlewares_templates_title)
+                            state.editing == null -> stringResource(R.string.middlewares_templates_add)
+                            else -> stringResource(R.string.middlewares_templates_edit)
                         },
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { if (state.editorOpen) viewModel.closeEditor() else onClose() }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 actions = {
                     if (state.editorOpen) {
                         TextButton(onClick = viewModel::save, enabled = !state.saving) {
-                            Text("Save")
+                            Text(stringResource(R.string.common_save))
                         }
                     }
                 },
@@ -138,7 +143,7 @@ fun MiddlewareTemplatesScreen(
                 ExtendedFloatingActionButton(
                     onClick = { viewModel.openEditor(null) },
                     icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
-                    text = { Text("Add template") },
+                    text = { Text(stringResource(R.string.middlewares_templates_add)) },
                 )
             }
         },
@@ -193,8 +198,7 @@ private fun TemplateList(
                     .padding(TmSpacing.md),
             ) {
                 Text(
-                    text = "Reusable YAML you can start a middleware from. Pick one under Template in the " +
-                        "middleware form. Templates are shared across every server, not just this one.",
+                    text = stringResource(R.string.middlewares_templates_help),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.muted,
                 )
@@ -204,8 +208,8 @@ private fun TemplateList(
         if (state.templates.isEmpty()) {
             item {
                 EmptyState(
-                    headline = "No custom templates yet",
-                    body = "Tap Add template to create one.",
+                    headline = stringResource(R.string.middlewares_templates_empty),
+                    body = stringResource(R.string.middlewares_templates_empty_body),
                     modifier = Modifier.padding(top = TmSpacing.xl),
                 )
             }
@@ -234,14 +238,14 @@ private fun TemplateList(
                         IconButton(onClick = { onEdit(template) }) {
                             Icon(
                                 Icons.Outlined.Edit,
-                                contentDescription = "Edit ${template.name}",
+                                contentDescription = stringResource(R.string.common_edit_named, template.name),
                                 modifier = Modifier.size(18.dp),
                             )
                         }
                         IconButton(onClick = { onDelete(template) }) {
                             Icon(
                                 Icons.Outlined.Delete,
-                                contentDescription = "Delete ${template.name}",
+                                contentDescription = stringResource(R.string.common_delete_named, template.name),
                                 tint = palette.red,
                                 modifier = Modifier.size(18.dp),
                             )
@@ -278,15 +282,15 @@ private fun TemplateEditor(
         OutlinedTextField(
             value = state.name,
             onValueChange = viewModel::setName,
-            label = { Text("Name") },
-            placeholder = { Text("e.g. Secure Headers") },
+            label = { Text(stringResource(R.string.common_label_name)) },
+            placeholder = { Text(stringResource(R.string.middlewares_templates_name_placeholder)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
 
         if (state.error != null) {
             Text(
-                text = state.error.orEmpty(),
+                text = state.error?.asString().orEmpty(),
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                 color = palette.red,
             )
@@ -302,7 +306,7 @@ private fun TemplateEditor(
             YamlEditor(state = viewModel.content, modifier = Modifier.fillMaxSize())
         }
         Text(
-            text = "The middleware body only, without the name above it.",
+            text = stringResource(R.string.middlewares_form_yaml_help),
             style = MaterialTheme.typography.bodySmall,
             color = palette.muted,
         )

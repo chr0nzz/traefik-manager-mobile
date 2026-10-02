@@ -65,6 +65,11 @@ import dev.chr0nzz.traefikmanager.ui.components.only
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -102,6 +107,7 @@ fun RoutesScreen(
     val searchScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val queryState = viewModel.queryState
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     LaunchedEffect(queryState) {
         snapshotFlow { queryState.text.toString() }.collect(viewModel::onQueryChange)
@@ -109,7 +115,7 @@ fun RoutesScreen(
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -122,11 +128,14 @@ fun RoutesScreen(
 
     state.certOffer?.let { offer ->
         dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog(
-            title = if (offer.certs.size == 1) "Remove its certificate too?" else "Remove its ${offer.certs.size} certificates too?",
-            consequence = "Nothing else uses ${offer.certs.joinToString(", ") { it.main }} now that " +
-                "${offer.routeName} is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.",
-            actionLabel = "Remove",
-            word = "DELETE",
+            title = pluralStringResource(R.plurals.routes_cert_offer_title, offer.certs.size, offer.certs.size),
+            consequence = stringResource(
+                R.string.routes_cert_offer_body,
+                offer.certs.joinToString(", ") { it.main },
+                offer.routeName,
+            ),
+            actionLabel = stringResource(R.string.common_remove),
+            word = stringResource(R.string.common_delete).uppercase(),
             onDismiss = viewModel::dismissCertOffer,
             onConfirm = viewModel::removeOfferedCerts,
         )
@@ -202,7 +211,7 @@ fun RoutesScreen(
                                 )
                                 .padding(TmSpacing.lg),
                         ) {
-                            Icon(Icons.Outlined.Add, contentDescription = "New route")
+                            Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.routes_new))
                         }
                     }
                 }
@@ -276,8 +285,8 @@ private fun RoutesListPane(
             when {
                 state.loading -> LoadingState()
                 state.error != null -> ErrorState(
-                    headline = "Could not load routes",
-                    body = state.error,
+                    headline = stringResource(R.string.routes_error_load),
+                    body = state.error?.asString(),
                     onRetry = onRefresh,
                 )
                 else -> LazyColumn(
@@ -293,11 +302,11 @@ private fun RoutesListPane(
                     if (state.visible.isEmpty()) {
                         item(key = "empty") {
                             EmptyState(
-                                headline = if (state.routes.isEmpty()) "No routes yet" else "No routes match",
+                                headline = stringResource(if (state.routes.isEmpty()) R.string.routemap_empty else R.string.providers_no_match),
                                 body = if (state.routes.isEmpty()) {
-                                    "Routes you create in Traefik Manager appear here."
+                                    stringResource(R.string.routes_empty_body)
                                 } else {
-                                    "Try a different search or filter."
+                                    stringResource(R.string.common_no_match_body)
                                 },
                             )
                         }

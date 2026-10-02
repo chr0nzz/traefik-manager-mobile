@@ -66,6 +66,10 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,15 +98,15 @@ fun RouteFormScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(if (routeId == null) "Add route" else "Edit route") },
+                title = { Text(stringResource(if (routeId == null) R.string.routes_add else R.string.routes_edit)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close))
                     }
                 },
                 actions = {
                     TextButton(onClick = viewModel::save, enabled = !state.saving) {
-                        Text(if (state.form.isEdit) "Save" else "Create")
+                        Text(stringResource(if (state.form.isEdit) R.string.common_save else R.string.common_create))
                     }
                 },
             )
@@ -152,7 +156,7 @@ fun RouteFormBody(
     ) {
         if (state.configFiles.isNotEmpty() || state.canCreateConfigFile) {
             TmCard(onClick = { configSheetOpen = true }) {
-                SectionLabel("Config file")
+                SectionLabel(stringResource(R.string.common_label_config_file))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -160,13 +164,17 @@ fun RouteFormBody(
                         .padding(top = TmSpacing.xs),
                 ) {
                     Text(
-                        text = form.configFile.ifEmpty { "Select a file" },
+                        text = form.configFile.ifEmpty { stringResource(R.string.routes_form_select_file) },
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (form.configFile.isEmpty()) palette.muted else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = if (state.configFiles.size > 1) "${state.configFiles.size} files" else "Change",
+                        text = if (state.configFiles.size > 1) {
+                            pluralStringResource(R.plurals.routes_form_files, state.configFiles.size, state.configFiles.size)
+                        } else {
+                            stringResource(R.string.routes_form_change_file)
+                        },
                         style = MaterialTheme.typography.labelMedium,
                         color = palette.muted,
                     )
@@ -175,7 +183,7 @@ fun RouteFormBody(
         }
 
         TmCard {
-            SectionLabel("Protocol")
+            SectionLabel(stringResource(R.string.common_label_protocol))
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -196,10 +204,10 @@ fun RouteFormBody(
             OutlinedTextField(
                 value = form.name,
                 onValueChange = { value -> viewModel.update { it.copy(name = value) } },
-                label = { Text("Route / service name") },
+                label = { Text(stringResource(R.string.routes_form_name)) },
                 placeholder = { Text("my-app") },
                 supportingText = if (form.isEdit && form.name != form.originalName) {
-                    { Text("Renaming moves the router, its service and any owned middleware") }
+                    { Text(stringResource(R.string.routes_form_rename_help)) }
                 } else {
                     null
                 },
@@ -219,7 +227,7 @@ fun RouteFormBody(
                             onClick = { viewModel.setAdvancedRule(advanced) },
                             shape = SegmentedButtonDefaults.itemShape(index, 2),
                         ) {
-                            Text(if (advanced) "Advanced rule" else "Simple")
+                            Text(stringResource(if (advanced) R.string.routes_form_rule_advanced else R.string.routes_form_rule_simple))
                         }
                     }
                 }
@@ -228,7 +236,7 @@ fun RouteFormBody(
                     OutlinedTextField(
                         value = form.httpRule,
                         onValueChange = { value -> viewModel.update { it.copy(httpRule = value) } },
-                        label = { Text("Rule") },
+                        label = { Text(stringResource(R.string.common_label_rule)) },
                         placeholder = { Text("Host(`app.example.com`)") },
                         singleLine = true,
                         modifier = Modifier
@@ -239,7 +247,7 @@ fun RouteFormBody(
                     OutlinedTextField(
                         value = form.subdomain,
                         onValueChange = { value -> viewModel.update { it.copy(subdomain = value) } },
-                        label = { Text("Subdomain") },
+                        label = { Text(stringResource(R.string.routes_form_subdomain)) },
                         supportingText = {
                             val sub = form.subdomain.trim()
                             val domain = form.domains.firstOrNull().orEmpty()
@@ -248,7 +256,7 @@ fun RouteFormBody(
                                     sub.contains('.') -> sub
                                     sub.isNotEmpty() && domain.isNotEmpty() -> "$sub.$domain"
                                     domain.isNotEmpty() -> domain
-                                    else -> "Leave empty to use the domain itself"
+                                    else -> stringResource(R.string.routes_form_subdomain_help)
                                 },
                             )
                         },
@@ -258,7 +266,7 @@ fun RouteFormBody(
                             .padding(top = TmSpacing.sm),
                     )
 
-                    SectionLabel("Domains", modifier = Modifier.padding(top = TmSpacing.md))
+                    SectionLabel(stringResource(R.string.common_label_domains), modifier = Modifier.padding(top = TmSpacing.md))
                     FilterChipRow(modifier = Modifier.padding(top = TmSpacing.xs)) {
                         state.domainOptions.forEach { domain ->
                             val selected = domain in form.domains
@@ -283,7 +291,7 @@ fun RouteFormBody(
                         OutlinedTextField(
                             value = newDomain,
                             onValueChange = { newDomain = it },
-                            label = { Text("Add a domain") },
+                            label = { Text(stringResource(R.string.routes_form_add_domain)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             modifier = Modifier.weight(1f),
@@ -307,12 +315,12 @@ fun RouteFormBody(
 
         if (form.protocol == RouteProtocol.Tcp) {
             TmCard {
-                SectionLabel("SNI rule")
+                SectionLabel(stringResource(R.string.routes_form_sni_rule))
                 OutlinedTextField(
                     value = form.tcpRule,
                     onValueChange = { value -> viewModel.update { it.copy(tcpRule = value) } },
                     placeholder = { Text("HostSNI(`*`)") },
-                    supportingText = { Text("Defaults to HostSNI(`*`) - matches any SNI") },
+                    supportingText = { Text(stringResource(R.string.routes_form_sni_help)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -324,7 +332,7 @@ fun RouteFormBody(
         if (form.protocol == RouteProtocol.Udp) {
             TmCard {
                 Text(
-                    text = "UDP routers have no rule - traffic is matched by entry point only.",
+                    text = stringResource(R.string.routes_form_udp_help),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.muted,
                 )
@@ -351,7 +359,7 @@ fun RouteFormBody(
 
         if (state.error != null) {
             Text(
-                text = state.error.orEmpty(),
+                text = state.error?.asString().orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = palette.red,
             )
@@ -360,6 +368,8 @@ fun RouteFormBody(
         Spacer(modifier = Modifier.padding(bottom = 72.dp))
     }
 }
+
+private const val ADDRESS_KIND = "IP:Port"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -371,6 +381,7 @@ private fun BackendSection(
 ) {
     val palette = LocalTmPalette.current
     val form = state.form
+    val serviceKind = stringResource(R.string.common_label_service)
 
     TmCard {
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -380,17 +391,17 @@ private fun BackendSection(
                     onClick = { viewModel.setBackendMode(mode) },
                     shape = SegmentedButtonDefaults.itemShape(index, BackendMode.entries.size),
                 ) {
-                    Text(if (mode == BackendMode.Manual) "Build backends" else "Use a service")
+                    Text(stringResource(if (mode == BackendMode.Manual) R.string.routes_form_backends_build else R.string.routes_form_backends_service))
                 }
             }
         }
 
         if (form.backendMode == BackendMode.ExistingService) {
             DropdownField(
-                label = "Service",
+                label = stringResource(R.string.common_label_service),
                 value = form.serviceRef,
                 options = state.serviceOptions,
-                placeholder = "Select a service",
+                placeholder = stringResource(R.string.routes_form_select_service),
                 onSelect = { value -> viewModel.update { it.copy(serviceRef = value) } },
                 modifier = Modifier.padding(top = TmSpacing.sm),
             )
@@ -400,10 +411,9 @@ private fun BackendSection(
         if (!form.isManagedService) {
             Text(
                 text = if (form.serviceOwned) {
-                    "This route uses a ${form.serviceType} service that Traefik Manager manages. " +
-                        "Edit its backends from the Services tab."
+                    stringResource(R.string.routes_form_service_owned, form.serviceType)
                 } else {
-                    "This route uses a ${form.serviceType} service. Backends are managed in the config file."
+                    stringResource(R.string.routes_form_service_external, form.serviceType)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.yellow,
@@ -412,7 +422,7 @@ private fun BackendSection(
             return@TmCard
         }
 
-        SectionLabel("Backends", modifier = Modifier.padding(top = TmSpacing.sm))
+        SectionLabel(stringResource(R.string.routes_form_backends), modifier = Modifier.padding(top = TmSpacing.sm))
         val composite = form.protocol == RouteProtocol.Http
         form.backends.forEachIndexed { index, backend ->
             Column(
@@ -428,13 +438,13 @@ private fun BackendSection(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         DropdownField(
-                            label = "Kind",
-                            value = if (backend.isService) "Service" else "IP:Port",
-                            options = listOf("IP:Port", "Service"),
+                            label = stringResource(R.string.routes_form_backend_kind),
+                            value = if (backend.isService) serviceKind else ADDRESS_KIND,
+                            options = listOf(ADDRESS_KIND, serviceKind),
                             onSelect = { value ->
                                 viewModel.updateBackend(index) {
                                     it.copy(
-                                        kind = if (value == "Service") {
+                                        kind = if (value == serviceKind) {
                                             BackendKind.SERVICE
                                         } else {
                                             BackendKind.ADDRESS
@@ -451,7 +461,7 @@ private fun BackendSection(
                                     viewModel.updateBackend(index) { it.copy(share = value) }
                                 },
                                 label = {
-                                    Text(if (form.compositeType == "mirroring") "Percent" else "Weight")
+                                    Text(stringResource(if (form.compositeType == "mirroring") R.string.routes_form_percent else R.string.routes_form_weight))
                                 },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -460,7 +470,7 @@ private fun BackendSection(
                         }
                         if (form.backends.size > 1) {
                             IconButton(onClick = { viewModel.removeBackend(index) }) {
-                                Icon(Icons.Outlined.Close, contentDescription = "Remove backend")
+                                Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.routes_form_remove_backend))
                             }
                         }
                     }
@@ -468,10 +478,10 @@ private fun BackendSection(
 
                 if (backend.isService) {
                     DropdownField(
-                        label = "Service",
+                        label = stringResource(R.string.common_label_service),
                         value = backend.serviceName,
                         options = state.serviceOptions,
-                        placeholder = "Select a service",
+                        placeholder = stringResource(R.string.routes_form_select_service),
                         onSelect = { value ->
                             viewModel.updateBackend(index) { it.copy(serviceName = value) }
                         },
@@ -485,7 +495,7 @@ private fun BackendSection(
                     ) {
                         if (form.protocol == RouteProtocol.Http) {
                             DropdownField(
-                                label = "Scheme",
+                                label = stringResource(R.string.common_label_scheme),
                                 value = backend.scheme,
                                 options = listOf("http", "https", "h2c"),
                                 onSelect = { value ->
@@ -499,7 +509,7 @@ private fun BackendSection(
                             onValueChange = { value ->
                                 viewModel.updateBackend(index) { it.copy(host = value) }
                             },
-                            label = { Text("Host") },
+                            label = { Text(stringResource(R.string.common_label_host)) },
                             placeholder = { Text("10.0.0.10") },
                             singleLine = true,
                             modifier = Modifier.weight(1f),
@@ -509,14 +519,14 @@ private fun BackendSection(
                             onValueChange = { value ->
                                 viewModel.updateBackend(index) { it.copy(port = value) }
                             },
-                            label = { Text("Port") },
+                            label = { Text(stringResource(R.string.common_label_port)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.width(96.dp),
                         )
                         if (!composite && form.backends.size > 1) {
                             IconButton(onClick = { viewModel.removeBackend(index) }) {
-                                Icon(Icons.Outlined.Close, contentDescription = "Remove backend")
+                                Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.routes_form_remove_backend))
                             }
                         }
                     }
@@ -525,7 +535,7 @@ private fun BackendSection(
         }
         if (form.backendsAtCap) {
             Text(
-                text = "Failover takes two backends: the one that serves and the one that takes over.",
+                text = stringResource(R.string.routes_form_failover_help),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 modifier = Modifier.padding(top = TmSpacing.xs),
@@ -537,7 +547,7 @@ private fun BackendSection(
             modifier = Modifier.padding(top = TmSpacing.xs),
         ) {
             Icon(Icons.Outlined.Add, contentDescription = null)
-            Text("Add backend", modifier = Modifier.padding(start = TmSpacing.xs))
+            Text(stringResource(R.string.routes_form_add_backend), modifier = Modifier.padding(start = TmSpacing.xs))
         }
 
         if (composite && form.backends.size > 1) {
@@ -549,7 +559,7 @@ private fun BackendSection(
                     .padding(top = TmSpacing.sm),
             ) {
                 DropdownField(
-                    label = "Combine backends as",
+                    label = stringResource(R.string.routes_form_combine),
                     value = RouteForm.compositeTypes.firstOrNull { it.first == form.compositeType }?.second
                         ?: form.compositeType,
                     options = RouteForm.compositeTypes.map { it.second },
@@ -567,7 +577,7 @@ private fun BackendSection(
             )
             if (form.wasComposite && form.compositeType == RouteForm.LOAD_BALANCER) {
                 Text(
-                    text = "Saving replaces the composite service with a plain load balancer.",
+                    text = stringResource(R.string.routes_form_composite_warning),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.yellow,
                 )
@@ -580,11 +590,11 @@ private fun BackendSection(
                 .fillMaxWidth()
                 .padding(top = TmSpacing.sm),
         ) {
-            SectionLabel("Load balancing", modifier = Modifier.weight(1f))
+            SectionLabel(stringResource(R.string.routes_form_load_balancing), modifier = Modifier.weight(1f))
             IconButton(onClick = onToggleLb) {
                 Icon(
                     imageVector = if (lbExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                    contentDescription = if (lbExpanded) "Collapse" else "Expand",
+                    contentDescription = stringResource(if (lbExpanded) R.string.common_collapse else R.string.common_expand),
                 )
             }
         }
@@ -592,7 +602,7 @@ private fun BackendSection(
         if (lbExpanded) {
             if (form.protocol == RouteProtocol.Http) {
                 CheckboxRow(
-                    label = "Sticky sessions",
+                    label = stringResource(R.string.routes_form_sticky),
                     checked = form.sticky.enabled,
                     onCheckedChange = { checked -> viewModel.updateSticky { it.copy(enabled = checked) } },
                 )
@@ -600,24 +610,24 @@ private fun BackendSection(
                     OutlinedTextField(
                         value = form.sticky.cookieName,
                         onValueChange = { value -> viewModel.updateSticky { it.copy(cookieName = value) } },
-                        label = { Text("Cookie name") },
+                        label = { Text(stringResource(R.string.routes_form_cookie_name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     CheckboxRow(
-                        label = "Secure cookie",
+                        label = stringResource(R.string.routes_form_cookie_secure),
                         checked = form.sticky.secure,
                         onCheckedChange = { checked -> viewModel.updateSticky { it.copy(secure = checked) } },
                     )
                     CheckboxRow(
-                        label = "HttpOnly cookie",
+                        label = stringResource(R.string.routes_form_cookie_http_only),
                         checked = form.sticky.httpOnly,
                         onCheckedChange = { checked -> viewModel.updateSticky { it.copy(httpOnly = checked) } },
                     )
                 }
 
                 CheckboxRow(
-                    label = "Health check",
+                    label = stringResource(R.string.routes_form_health_check),
                     checked = form.healthCheck.enabled,
                     onCheckedChange = { checked -> viewModel.updateHealthCheck { it.copy(enabled = checked) } },
                 )
@@ -625,7 +635,7 @@ private fun BackendSection(
                     OutlinedTextField(
                         value = form.healthCheck.path,
                         onValueChange = { value -> viewModel.updateHealthCheck { it.copy(path = value) } },
-                        label = { Text("Path") },
+                        label = { Text(stringResource(R.string.common_label_path)) },
                         placeholder = { Text("/health") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -634,7 +644,7 @@ private fun BackendSection(
                         OutlinedTextField(
                             value = form.healthCheck.interval,
                             onValueChange = { value -> viewModel.updateHealthCheck { it.copy(interval = value) } },
-                            label = { Text("Interval") },
+                            label = { Text(stringResource(R.string.common_label_interval)) },
                             placeholder = { Text("30s") },
                             singleLine = true,
                             modifier = Modifier.weight(1f),
@@ -642,7 +652,7 @@ private fun BackendSection(
                         OutlinedTextField(
                             value = form.healthCheck.timeout,
                             onValueChange = { value -> viewModel.updateHealthCheck { it.copy(timeout = value) } },
-                            label = { Text("Timeout") },
+                            label = { Text(stringResource(R.string.common_label_timeout)) },
                             placeholder = { Text("5s") },
                             singleLine = true,
                             modifier = Modifier.weight(1f),
@@ -657,8 +667,8 @@ private fun BackendSection(
                     onValueChange = { value ->
                         viewModel.update { it.copy(priority = value.toIntOrNull()) }
                     },
-                    label = { Text("Router priority") },
-                    supportingText = { Text("Leave empty for Traefik's default") },
+                    label = { Text(stringResource(R.string.routes_form_priority)) },
+                    supportingText = { Text(stringResource(R.string.routes_form_priority_help)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier
@@ -674,7 +684,7 @@ private fun BackendSection(
 private fun EntryPointSection(state: RouteFormUiState, viewModel: RouteFormViewModel) {
     val form = state.form
     TmCard {
-        SectionLabel("Entry points")
+        SectionLabel(stringResource(R.string.common_label_entry_points))
         if (state.entryPointsUnavailable) {
             OutlinedTextField(
                 value = form.entryPoints.joinToString(","),
@@ -683,8 +693,8 @@ private fun EntryPointSection(state: RouteFormUiState, viewModel: RouteFormViewM
                         it.copy(entryPoints = value.split(',').map(String::trim).filter(String::isNotEmpty))
                     }
                 },
-                label = { Text("Entry points") },
-                supportingText = { Text("Traefik API unavailable - enter names separated by commas") },
+                label = { Text(stringResource(R.string.common_label_entry_points)) },
+                supportingText = { Text(stringResource(R.string.routes_form_entry_points_help)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -725,7 +735,7 @@ private fun MiddlewareSection(state: RouteFormUiState, viewModel: RouteFormViewM
     if (options.isEmpty() && form.middlewares.isEmpty()) return
 
     TmCard {
-        SectionLabel("Middlewares")
+        SectionLabel(stringResource(R.string.common_label_middlewares))
         FilterChipRow(modifier = Modifier.padding(top = TmSpacing.xs)) {
             options.forEach { middleware ->
                 val selected = form.middlewares.any { it.substringBefore('@') == middleware.name }
@@ -763,7 +773,7 @@ private fun TlsSection(
     val palette = LocalTmPalette.current
 
     TmCard {
-        SectionLabel("TLS and options")
+        SectionLabel(stringResource(R.string.routes_form_tls_title))
 
         if (form.protocol == RouteProtocol.Tcp) {
             SingleChoiceSegmentedButtonRow(
@@ -779,9 +789,9 @@ private fun TlsSection(
                     ) {
                         Text(
                             when (mode) {
-                                TcpTlsMode.None -> "No TLS"
+                                TcpTlsMode.None -> stringResource(R.string.routes_form_tls_none)
                                 TcpTlsMode.Terminate -> "TLS"
-                                TcpTlsMode.Passthrough -> "Passthrough"
+                                TcpTlsMode.Passthrough -> stringResource(R.string.routes_form_tls_passthrough)
                             },
                         )
                     }
@@ -791,7 +801,7 @@ private fun TlsSection(
 
         if (form.protocol == RouteProtocol.Http) {
             CheckboxRow(
-                label = "Enable TLS",
+                label = stringResource(R.string.routes_form_tls_enable),
                 checked = form.tlsEnabled,
                 onCheckedChange = { checked -> viewModel.update { it.copy(tlsEnabled = checked) } },
             )
@@ -805,10 +815,10 @@ private fun TlsSection(
 
         if (tlsActive) {
             DropdownField(
-                label = "Certificate resolver",
+                label = stringResource(R.string.common_label_cert_resolver),
                 value = form.certResolver,
                 options = state.certResolverOptions,
-                placeholder = "None (external certificate)",
+                placeholder = stringResource(R.string.routes_form_resolver_none),
                 allowEmpty = true,
                 onSelect = { value -> viewModel.update { it.copy(certResolver = value) } },
                 modifier = Modifier.padding(top = TmSpacing.sm),
@@ -817,35 +827,35 @@ private fun TlsSection(
 
         if (form.protocol == RouteProtocol.Http) {
             DropdownField(
-                label = "TLS options profile",
+                label = stringResource(R.string.routes_form_tls_options),
                 value = form.tlsOptionsProfile,
                 options = state.tlsProfiles.map { it.name },
-                placeholder = "None (default)",
+                placeholder = stringResource(R.string.routes_form_tls_options_none),
                 allowEmpty = true,
                 onSelect = { value -> viewModel.update { it.copy(tlsOptionsProfile = value) } },
                 modifier = Modifier.padding(top = TmSpacing.sm),
             )
 
             CheckboxRow(
-                label = "Pass host header",
+                label = stringResource(R.string.common_label_pass_host_header),
                 checked = form.effectivePassHostHeader,
                 enabled = !form.streamingEnabled,
                 onCheckedChange = { checked -> viewModel.update { it.copy(passHostHeader = checked) } },
             )
             CheckboxRow(
-                label = "Skip TLS verification",
+                label = stringResource(R.string.routes_form_skip_verify),
                 checked = form.insecureSkipVerify,
                 onCheckedChange = { checked -> viewModel.update { it.copy(insecureSkipVerify = checked) } },
             )
             CheckboxRow(
-                label = "Optimize for streaming (Jellyfin / Emby / Plex)",
+                label = stringResource(R.string.routes_form_streaming),
                 checked = form.streamingEnabled,
                 onCheckedChange = { checked ->
                     viewModel.update { it.copy(streamingPresent = true, streamingEnabled = checked) }
                 },
             )
             CheckboxRow(
-                label = "Request wildcard certificate",
+                label = stringResource(R.string.routes_form_wildcard),
                 checked = form.wildcardEnabled,
                 onCheckedChange = { checked ->
                     viewModel.update { current ->
@@ -869,8 +879,8 @@ private fun TlsSection(
                 OutlinedTextField(
                     value = form.tlsMainDomain,
                     onValueChange = { value -> viewModel.update { it.copy(tlsMainDomain = value) } },
-                    label = { Text("Certificate domain") },
-                    supportingText = { Text("Traefik asks your resolver for a certificate covering this name") },
+                    label = { Text(stringResource(R.string.routes_form_cert_domain)) },
+                    supportingText = { Text(stringResource(R.string.routes_form_cert_domain_help)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -881,8 +891,8 @@ private fun TlsSection(
                             it.copy(tlsSans = value.split('\n').map(String::trim).filter(String::isNotEmpty))
                         }
                     },
-                    label = { Text("Extra domains") },
-                    supportingText = { Text("One per line. A wildcard needs a DNS challenge resolver") },
+                    label = { Text(stringResource(R.string.routes_form_extra_domains)) },
+                    supportingText = { Text(stringResource(R.string.routes_form_extra_domains_help)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -896,7 +906,7 @@ private fun TlsSection(
                     onCheckedChange = viewModel::setPresetEnabled,
                 )
                 Text(
-                    text = "Security headers preset",
+                    text = stringResource(R.string.routes_form_preset),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
@@ -905,7 +915,9 @@ private fun TlsSection(
                     IconButton(onClick = onTogglePreset) {
                         Icon(
                             imageVector = if (presetExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                            contentDescription = if (presetExpanded) "Collapse preset" else "Expand preset",
+                            contentDescription = stringResource(
+                                if (presetExpanded) R.string.routes_form_preset_collapse else R.string.routes_form_preset_expand,
+                            ),
                         )
                     }
                 }
@@ -913,7 +925,7 @@ private fun TlsSection(
 
             if (form.headersPreset.custom) {
                 Text(
-                    text = "This middleware was hand-edited. It is kept as-is unless you change a toggle below.",
+                    text = stringResource(R.string.routes_form_preset_custom),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.yellow,
                 )
@@ -926,23 +938,23 @@ private fun TlsSection(
                     onCheckedChange = { checked -> viewModel.updatePreset { it.copy(hsts = checked) } },
                 )
                 CheckboxRow(
-                    label = "Content-Type nosniff",
+                    label = stringResource(R.string.routes_form_preset_nosniff),
                     checked = form.headersPreset.nosniff,
                     onCheckedChange = { checked -> viewModel.updatePreset { it.copy(nosniff = checked) } },
                 )
                 CheckboxRow(
-                    label = "Frame deny",
+                    label = stringResource(R.string.routes_form_preset_frame_deny),
                     checked = form.headersPreset.frameDeny,
                     onCheckedChange = { checked -> viewModel.updatePreset { it.copy(frameDeny = checked) } },
                 )
                 DropdownField(
-                    label = "Referrer policy",
+                    label = stringResource(R.string.routes_form_preset_referrer),
                     value = form.headersPreset.referrer,
                     options = HeadersPresetDefaults.REFERRER_VALUES,
                     onSelect = { value -> viewModel.updatePreset { it.copy(referrer = value) } },
                     modifier = Modifier.padding(top = TmSpacing.xs),
                 )
-                SectionLabel("Permissions policy", modifier = Modifier.padding(top = TmSpacing.sm))
+                SectionLabel(stringResource(R.string.routes_form_preset_permissions), modifier = Modifier.padding(top = TmSpacing.sm))
                 HeadersPresetDefaults.FEATURES.forEach { feature ->
                     DropdownField(
                         label = feature,
@@ -1011,7 +1023,7 @@ private fun DropdownField(
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             if (allowEmpty) {
                 DropdownMenuItem(
-                    text = { Text(placeholder.ifEmpty { "None" }) },
+                    text = { Text(placeholder.ifEmpty { stringResource(R.string.common_none_option) }) },
                     onClick = {
                         onSelect("")
                         expanded = false
@@ -1042,9 +1054,9 @@ fun RouteFormActions(
         horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm, Alignment.End),
         modifier = modifier.fillMaxWidth(),
     ) {
-        OutlinedButton(onClick = onCancel, enabled = !state.saving) { Text("Cancel") }
+        OutlinedButton(onClick = onCancel, enabled = !state.saving) { Text(stringResource(R.string.common_cancel)) }
         Button(onClick = onSave, enabled = !state.saving) {
-            Text(if (state.form.isEdit) "Save route" else "Create route")
+            Text(stringResource(if (state.form.isEdit) R.string.routes_form_save else R.string.routes_form_create))
         }
     }
 }

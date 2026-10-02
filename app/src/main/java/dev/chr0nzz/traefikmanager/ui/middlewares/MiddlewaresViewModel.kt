@@ -16,9 +16,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class MiddlewareFilter(val label: String) {
-    All("All"), Http("HTTP"), Tcp("TCP")
+enum class MiddlewareFilter(val label: UiText) {
+    All(UiText.of(R.string.common_all)), Http(UiText.Raw("HTTP")), Tcp(UiText.Raw("TCP"))
 }
 
 data class BlockedMiddlewareDelete(
@@ -36,8 +38,8 @@ data class MiddlewaresUiState(
     val blockedDelete: BlockedMiddlewareDelete? = null,
     val filter: MiddlewareFilter = MiddlewareFilter.All,
     val deletingName: String? = null,
-    val error: String? = null,
-    val message: String? = null,
+    val error: UiText? = null,
+    val message: UiText? = null,
 ) {
     val visible: List<MiddlewareDef>
         get() = middlewares.filter { middleware ->
@@ -90,7 +92,7 @@ class MiddlewaresViewModel @Inject constructor(
             }.fold(
                 onSuccess = {
                     _state.update {
-                        it.copy(deletingName = null, message = "${middleware.name} deleted")
+                        it.copy(deletingName = null, message = UiText.of(R.string.routes_deleted_named, middleware.name))
                     }
                 },
                 onFailure = { throwable ->
@@ -110,7 +112,7 @@ class MiddlewaresViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             deletingName = null,
-                            message = throwable.message ?: "Could not delete the middleware",
+                            message = UiText.messageOr(throwable.message, R.string.middlewares_error_delete),
                         )
                     }
                 },
@@ -140,7 +142,7 @@ class MiddlewaresViewModel @Inject constructor(
                         it.copy(
                             loading = false,
                             refreshing = false,
-                            error = throwable.message ?: "Could not load middlewares",
+                            error = UiText.messageOr(throwable.message, R.string.middlewares_error_load),
                         )
                     }
                 },

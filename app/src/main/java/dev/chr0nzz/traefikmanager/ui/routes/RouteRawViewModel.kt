@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class RouteRawUiState(
     val loading: Boolean = true,
@@ -19,8 +21,8 @@ data class RouteRawUiState(
     val saved: Boolean = false,
     val configFile: String = "",
     val proto: String = "",
-    val loadError: String? = null,
-    val error: String? = null,
+    val loadError: UiText? = null,
+    val error: UiText? = null,
 )
 
 @HiltViewModel
@@ -51,7 +53,7 @@ class RouteRawViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, loadError = throwable.message ?: "Could not load the YAML")
+                        it.copy(loading = false, loadError = UiText.messageOr(throwable.message, R.string.routes_raw_error_load))
                     }
                 },
             )
@@ -61,7 +63,7 @@ class RouteRawViewModel @Inject constructor(
     fun save() {
         val text = content.text.toString()
         if (text.isBlank()) {
-            _state.update { it.copy(error = "The YAML is empty") }
+            _state.update { it.copy(error = UiText.of(R.string.routes_raw_error_empty)) }
             return
         }
         _state.update { it.copy(saving = true, error = null) }
@@ -70,7 +72,7 @@ class RouteRawViewModel @Inject constructor(
                 onSuccess = { _state.update { it.copy(saving = false, saved = true) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = throwable.message ?: "Could not save the YAML")
+                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.routes_raw_error_save))
                     }
                 },
             )

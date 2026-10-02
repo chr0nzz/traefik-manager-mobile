@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.services
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,12 +21,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
-enum class ServiceStatusFilter(val label: String) {
-    All("All"),
-    Success("Success"),
-    Warnings("Warnings"),
-    Errors("Errors"),
+enum class ServiceStatusFilter(@StringRes val label: Int) {
+    All(R.string.common_all),
+    Success(R.string.services_health_ok),
+    Warnings(R.string.services_filter_warnings),
+    Errors(R.string.services_errors_title),
 }
 
 data class BlockedDelete(
@@ -45,15 +48,15 @@ data class ServicesUiState(
     val status: ServiceStatusFilter = ServiceStatusFilter.All,
     val protocol: ServiceProtocol? = null,
     val provider: String? = null,
-    val error: String? = null,
+    val error: UiText? = null,
     val authorable: Boolean = false,
     val raw: Map<String, TraefikService> = emptyMap(),
     val editing: ServiceDraft? = null,
-    val editError: String? = null,
+    val editError: UiText? = null,
     val busy: Boolean = false,
     val pendingDelete: ServiceRow? = null,
     val blockedDelete: BlockedDelete? = null,
-    val message: String? = null,
+    val message: UiText? = null,
 ) {
     val protocols: List<ServiceProtocol>
         get() = ServiceProtocol.entries.filter { proto -> services.any { it.proto == proto } }
@@ -147,12 +150,12 @@ class ServicesViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.save(draft.payload()) }.fold(
                 onSuccess = { name ->
-                    _state.update { it.copy(busy = false, editing = null, message = "Service $name saved") }
+                    _state.update { it.copy(busy = false, editing = null, message = UiText.of(R.string.services_saved, name)) }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(busy = false, editError = throwable.message ?: "Could not save the service")
+                        it.copy(busy = false, editError = UiText.messageOr(throwable.message, R.string.services_error_save))
                     }
                 },
             )
@@ -164,7 +167,7 @@ class ServicesViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.delete(row.shortName, force) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(busy = false, message = "Service ${row.shortName} deleted") }
+                    _state.update { it.copy(busy = false, message = UiText.of(R.string.services_deleted, row.shortName)) }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
@@ -183,7 +186,7 @@ class ServicesViewModel @Inject constructor(
                         }
                     } else {
                         _state.update {
-                            it.copy(busy = false, message = throwable.message ?: "Could not delete the service")
+                            it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.services_error_delete))
                         }
                     }
                 },
@@ -201,18 +204,17 @@ class ServicesViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             busy = false,
-                            message = if (owned) {
-                                "Traefik Manager now manages ${row.shortName}"
-                            } else {
-                                "${row.shortName} is no longer managed here"
-                            },
+                            message = UiText.of(
+                                if (owned) R.string.services_now_managed else R.string.services_no_longer_managed,
+                                row.shortName,
+                            ),
                         )
                     }
                     load(initial = false)
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(busy = false, message = throwable.message ?: "Could not change the ownership")
+                        it.copy(busy = false, message = UiText.messageOr(throwable.message, R.string.services_error_ownership))
                     }
                 },
             )
@@ -278,11 +280,10 @@ class ServicesViewModel @Inject constructor(
         }
     }
 
-    private fun describeFailure(throwable: Throwable): String {
-        val detail = throwable.message ?: throwable::class.simpleName ?: "unknown error"
+    private fun describeFailure(throwable: Throwable): UiText {
+        val detail = UiText.messageOr(throwable.message ?: throwable::class.simpleName, R.string.common_error_unknown)
         return when (throwable) {
-            is kotlinx.serialization.SerializationException ->
-                "The server sent a service the app could not read: $detail"
+            is kotlinx.serialization.SerializationException -> UiText.of(R.string.services_error_unreadable, detail)
             else -> detail
         }
     }

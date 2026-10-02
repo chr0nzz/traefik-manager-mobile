@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class RouteFormUiState(
     val form: RouteForm = RouteForm(),
@@ -43,7 +45,7 @@ data class RouteFormUiState(
     val middlewareOptions: List<MiddlewareDef> = emptyList(),
     val saving: Boolean = false,
     val saved: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
 ) {
     val protocolMiddlewares: List<MiddlewareDef>
         get() = middlewareOptions.filter { it.type.ifEmpty { "http" } == form.protocol.wire }
@@ -362,7 +364,7 @@ class RouteFormViewModel @Inject constructor(
         val form = _state.value.form
         val problem = form.validationError
         if (problem != null) {
-            _state.update { it.copy(error = problem) }
+            _state.update { it.copy(error = UiText.Raw(problem)) }
             return
         }
         _state.update { it.copy(saving = true, error = null) }
@@ -371,7 +373,7 @@ class RouteFormViewModel @Inject constructor(
                 onSuccess = { _state.update { it.copy(saving = false, saved = true) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = throwable.message ?: "Could not save the route")
+                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.routes_error_save))
                     }
                 },
             )

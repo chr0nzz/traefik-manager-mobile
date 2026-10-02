@@ -3,9 +3,6 @@ data/repo 80
 data/store 3
 push 8
 ui/crowdsec 1
-ui/middlewares 103
 ui/nav 1
-ui/routes 193
-ui/services 114
 ui/settings 588
 widget 96

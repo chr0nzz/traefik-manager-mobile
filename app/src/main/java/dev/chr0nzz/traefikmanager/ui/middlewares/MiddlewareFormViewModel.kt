@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 enum class MiddlewareMode { Wizard, Yaml }
 
@@ -37,10 +39,10 @@ data class MiddlewareFormUiState(
     val configFiles: List<ConfigFile> = emptyList(),
     val canCreateConfigFile: Boolean = false,
     val generating: Boolean = false,
-    val generatorError: String? = null,
+    val generatorError: UiText? = null,
     val saving: Boolean = false,
     val saved: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
 ) {
     val wizard: MiddlewareWizard? get() = MiddlewareTemplates.byId(templateId)
 
@@ -88,7 +90,7 @@ class MiddlewareFormViewModel @Inject constructor(
                 ?.middlewares
                 ?.firstOrNull { it.name == name }
             if (existing == null) {
-                _state.update { it.copy(loading = false, error = "Could not load $name") }
+                _state.update { it.copy(loading = false, error = UiText.of(R.string.middlewares_error_load_named, name)) }
                 return@launch
             }
             val protocol = MiddlewareProtocol.from(existing.type.ifEmpty { "http" })
@@ -217,7 +219,7 @@ class MiddlewareFormViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             generating = false,
-                            generatorError = throwable.message ?: "Could not generate the entry",
+                            generatorError = UiText.messageOr(throwable.message, R.string.middlewares_error_generate),
                         )
                     }
                 },
@@ -247,30 +249,30 @@ class MiddlewareFormViewModel @Inject constructor(
                 onSuccess = { _state.update { it.copy(saving = false, saved = true) } },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, error = throwable.message ?: "Could not save the middleware")
+                        it.copy(saving = false, error = UiText.messageOr(throwable.message, R.string.middlewares_error_save))
                     }
                 },
             )
         }
     }
 
-    private fun validate(form: MiddlewareForm): String? {
+    private fun validate(form: MiddlewareForm): UiText? {
         val current = _state.value
         if (current.showConfigFile && form.configFile.isBlank()) {
-            return "Select a config file for this middleware"
+            return UiText.of(R.string.middlewares_error_no_file)
         }
         if (current.mode == MiddlewareMode.Wizard) {
             val wizardProblem = when (current.templateId) {
                 "basicAuth", "digestAuth" ->
-                    "Add at least one user before saving".takeIf { current.wizardText["users"].isNullOrBlank() }
+                    UiText.of(R.string.middlewares_error_no_user).takeIf { current.wizardText["users"].isNullOrBlank() }
                 "forwardAuth", "forwardAuthAuthentik", "forwardAuthAuthelia" ->
-                    "Forward auth address is required".takeIf { current.wizardText["address"].isNullOrBlank() }
+                    UiText.of(R.string.middlewares_error_no_address).takeIf { current.wizardText["address"].isNullOrBlank() }
                 "forwardAuthGatekeeper" ->
-                    "Gatekeeper URL is required".takeIf { current.wizardText["url"].isNullOrBlank() }
+                    UiText.of(R.string.middlewares_error_no_gatekeeper).takeIf { current.wizardText["url"].isNullOrBlank() }
                 else -> null
             }
             if (wizardProblem != null) return wizardProblem
         }
-        return form.validationError
+        return form.validationError?.let(UiText::Raw)
     }
 }

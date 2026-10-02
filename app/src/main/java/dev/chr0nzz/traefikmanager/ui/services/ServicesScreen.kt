@@ -64,6 +64,11 @@ import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.components.only
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -97,10 +102,11 @@ fun ServicesScreen(
 
     val detailOnly = navigator.canNavigateBack()
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -109,7 +115,7 @@ fun ServicesScreen(
             draft = draft,
             services = state.services.map { it.shortName }.filterNot { it == draft.originalName },
             busy = state.busy,
-            error = state.editError,
+            error = state.editError?.asString(),
             onChange = viewModel::onDraftChange,
             onSave = viewModel::save,
             onDismiss = viewModel::cancelEdit,
@@ -119,40 +125,44 @@ fun ServicesScreen(
     state.pendingDelete?.let { row ->
         AlertDialog(
             onDismissRequest = { viewModel.askDelete(null) },
-            title = { Text("Delete service") },
-            text = { Text("Delete \"${row.shortName}\"?") },
+            title = { Text(stringResource(R.string.services_delete)) },
+            text = { Text(stringResource(R.string.services_delete_body, row.shortName)) },
             confirmButton = {
-                TextButton(onClick = { viewModel.delete(row) }) { Text("Delete") }
+                TextButton(onClick = { viewModel.delete(row) }) { Text(stringResource(R.string.common_delete)) }
             },
-            dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { viewModel.askDelete(null) }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     state.blockedDelete?.let { blocked ->
         AlertDialog(
             onDismissRequest = viewModel::dismissBlockedDelete,
-            title = { Text("Still in use") },
+            title = { Text(stringResource(R.string.services_blocked_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                     Text(blocked.reason)
                     if (blocked.routers.isNotEmpty()) {
-                        Text("Deleting it also deletes ${blocked.routers.size} route" +
-                            (if (blocked.routers.size == 1) "" else "s") +
-                            ": ${blocked.routers.joinToString(", ")}.")
+                        Text(
+                            pluralStringResource(
+                                R.plurals.services_blocked_routes,
+                                blocked.routers.size,
+                                blocked.routers.size,
+                                blocked.routers.joinToString(", "),
+                            ),
+                        )
                     }
                     if (blocked.parents.isNotEmpty()) {
-                        Text("It is removed from ${blocked.parents.joinToString(", ")}, " +
-                            "and any left with no backends goes too.")
+                        Text(stringResource(R.string.services_blocked_parents, blocked.parents.joinToString(", ")))
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.delete(blocked.row, force = true) }) {
-                    Text("Delete anyway")
+                    Text(stringResource(R.string.services_delete_anyway))
                 }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::dismissBlockedDelete) { Text("Keep it") }
+                TextButton(onClick = viewModel::dismissBlockedDelete) { Text(stringResource(R.string.services_keep)) }
             },
         )
     }
@@ -167,7 +177,7 @@ fun ServicesScreen(
         floatingActionButton = {
             if (state.authorable && !detailOnly) {
                 FloatingActionButton(onClick = viewModel::startCreate) {
-                    Icon(Icons.Outlined.Add, contentDescription = "Add a service")
+                    Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.services_add))
                 }
             }
         },
@@ -256,7 +266,7 @@ private fun ServicesListPane(
                         bottom = TmSpacing.xs,
                     ),
             ) {
-                SectionLabel("Providers")
+                SectionLabel(stringResource(R.string.nav_section_providers))
                 ProviderRow(
                     providers = state.providers.map { provider ->
                         ProviderCount(
@@ -289,26 +299,26 @@ private fun ServicesListPane(
                 state.loading -> LoadingState()
 
                 state.error != null -> ErrorState(
-                    headline = "Traefik API not reachable",
-                    body = state.error,
+                    headline = stringResource(R.string.common_error_traefik_unreachable),
+                    body = state.error?.asString(),
                     onRetry = onRefresh,
                 )
 
                 !state.reachable -> ErrorState(
-                    headline = "Traefik API not reachable",
-                    body = "Set TRAEFIK_API_URL and enable api: {} in the Traefik static config.",
+                    headline = stringResource(R.string.common_error_traefik_unreachable),
+                    body = stringResource(R.string.services_unreachable_body),
                     onRetry = onRefresh,
                 )
 
                 state.services.isEmpty() -> EmptyState(
-                    headline = "No services registered",
-                    body = "Traefik answered, but it has no services yet.",
+                    headline = stringResource(R.string.services_empty),
+                    body = stringResource(R.string.services_empty_body),
                 )
 
                 state.visible.isEmpty() -> EmptyState(
-                    headline = "No services match",
-                    body = "Clear the filters to see everything.",
-                    actionLabel = "Clear filters",
+                    headline = stringResource(R.string.services_no_match),
+                    body = stringResource(R.string.services_no_match_body),
+                    actionLabel = stringResource(R.string.common_clear_filters),
                     onAction = onClearFilters,
                 )
 

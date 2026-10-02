@@ -36,6 +36,8 @@ import dev.chr0nzz.traefikmanager.ui.settings.FormSelect
 import dev.chr0nzz.traefikmanager.ui.settings.FormToggle
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,29 +68,28 @@ fun ServiceEditorSheet(
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
             Text(
-                text = if (draft.adding) "New service" else "Edit service",
+                text = stringResource(if (draft.adding) R.string.services_new else R.string.services_edit),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
             if (readOnly) {
                 Text(
-                    text = "Highest random weight is not authorable in Traefik Manager. " +
-                        "It is read here and edited in the config file.",
+                    text = stringResource(R.string.services_hrw_read_only),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.yellow,
                 )
             }
 
             FormField(
-                label = "Name",
+                label = stringResource(R.string.common_label_name),
                 value = draft.name,
                 onChange = { onChange(draft.copy(name = it)) },
                 placeholder = "api-pool",
             )
 
             FormSelect(
-                label = "Type",
+                label = stringResource(R.string.common_label_type),
                 value = draft.type,
                 options = ServiceTypes.authorable,
                 onChange = { onChange(draft.copy(type = it)) },
@@ -96,21 +97,21 @@ fun ServiceEditorSheet(
 
             if (draft.adding) {
                 FormField(
-                    label = "Config file",
+                    label = stringResource(R.string.common_label_config_file),
                     value = draft.configFile,
                     onChange = { onChange(draft.copy(configFile = it)) },
                     placeholder = "dynamic.yml",
-                    help = "Leave empty for the default file.",
+                    help = stringResource(R.string.services_form_file_help),
                 )
             }
 
-            SectionLabel("Backends", modifier = Modifier.padding(top = TmSpacing.sm))
+            SectionLabel(stringResource(R.string.routes_form_backends), modifier = Modifier.padding(top = TmSpacing.sm))
             Text(
                 text = when (draft.type) {
-                    "mirroring" -> "The first row serves traffic. The rest mirror it by percent."
-                    "failover" -> "The first row is primary, the second is the fallback."
-                    "loadBalancer" -> "Addresses to balance across."
-                    else -> "Weights decide the share each backend takes."
+                    "mirroring" -> stringResource(R.string.services_form_help_mirroring)
+                    "failover" -> stringResource(R.string.services_form_help_failover)
+                    "loadBalancer" -> stringResource(R.string.services_form_help_load_balancer)
+                    else -> stringResource(R.string.services_form_help_weighted)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
@@ -144,7 +145,7 @@ fun ServiceEditorSheet(
                 OutlinedButton(
                     onClick = { onChange(draft.copy(children = draft.children + ServiceChildDraft())) },
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Add backend") }
+                ) { Text(stringResource(R.string.routes_form_add_backend)) }
             }
 
             if (draft.type == "loadBalancer") {
@@ -166,8 +167,8 @@ fun ServiceEditorSheet(
                     onClick = onSave,
                     enabled = !busy && !readOnly,
                     modifier = Modifier.weight(1f),
-                ) { Text("Save") }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                ) { Text(stringResource(R.string.common_save)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         }
     }
@@ -177,26 +178,26 @@ fun ServiceEditorSheet(
 private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHealthDraft) -> Unit) {
     val palette = LocalTmPalette.current
     Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
-        SectionLabel("Health check", modifier = Modifier.padding(top = TmSpacing.sm))
+        SectionLabel(stringResource(R.string.routes_form_health_check), modifier = Modifier.padding(top = TmSpacing.sm))
         FormToggle(
-            title = "Poll the servers",
-            subtitle = "Traefik stops sending traffic to servers that fail",
+            title = stringResource(R.string.services_form_health_enable),
+            subtitle = stringResource(R.string.services_form_health_enable_help),
             checked = health.enabled,
             onChange = { onChange(health.copy(enabled = it)) },
         )
         if (!health.enabled) return@Column
 
         FormField(
-            label = "Path",
+            label = stringResource(R.string.common_label_path),
             value = health.path,
             onChange = { onChange(health.copy(path = it)) },
-            placeholder = "/ (server root)",
+            placeholder = stringResource(R.string.services_form_path_placeholder),
             mono = true,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
             Column(modifier = Modifier.weight(1f)) {
                 FormField(
-                    label = "Interval",
+                    label = stringResource(R.string.common_label_interval),
                     value = health.interval,
                     onChange = { onChange(health.copy(interval = it)) },
                     placeholder = "30s",
@@ -204,7 +205,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
             }
             Column(modifier = Modifier.weight(1f)) {
                 FormField(
-                    label = "Timeout",
+                    label = stringResource(R.string.common_label_timeout),
                     value = health.timeout,
                     onChange = { onChange(health.copy(timeout = it)) },
                     placeholder = "5s",
@@ -214,7 +215,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
         Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
             Column(modifier = Modifier.weight(1f)) {
                 FormField(
-                    label = "Method",
+                    label = stringResource(R.string.services_form_method),
                     value = health.method,
                     onChange = { onChange(health.copy(method = it)) },
                     placeholder = "GET",
@@ -222,35 +223,35 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
             }
             Column(modifier = Modifier.weight(1f)) {
                 FormField(
-                    label = "Expected status",
+                    label = stringResource(R.string.services_form_status),
                     value = health.status,
                     onChange = { onChange(health.copy(status = it)) },
-                    placeholder = "any 2xx or 3xx",
+                    placeholder = stringResource(R.string.services_form_status_placeholder),
                     numeric = true,
                 )
             }
         }
         FormField(
-            label = "Interval when down",
+            label = stringResource(R.string.services_form_unhealthy_interval),
             value = health.unhealthyInterval,
             onChange = { onChange(health.copy(unhealthyInterval = it)) },
-            placeholder = "same as interval",
+            placeholder = stringResource(R.string.services_form_unhealthy_interval_placeholder),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
             Column(modifier = Modifier.weight(1f)) {
                 FormSelect(
-                    label = "Scheme",
+                    label = stringResource(R.string.common_label_scheme),
                     value = health.scheme,
-                    options = listOf("" to "same as server", "http" to "http", "https" to "https"),
+                    options = listOf("" to stringResource(R.string.services_form_port_placeholder), "http" to "http", "https" to "https"),
                     onChange = { onChange(health.copy(scheme = it)) },
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
                 FormField(
-                    label = "Port",
+                    label = stringResource(R.string.common_label_port),
                     value = health.port,
                     onChange = { onChange(health.copy(port = it)) },
-                    placeholder = "same as server",
+                    placeholder = stringResource(R.string.services_form_port_placeholder),
                     numeric = true,
                 )
             }
@@ -258,7 +259,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
         Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
             Column(modifier = Modifier.weight(1f)) {
                 FormField(
-                    label = "Host header",
+                    label = stringResource(R.string.services_form_host_header),
                     value = health.hostname,
                     onChange = { onChange(health.copy(hostname = it)) },
                     placeholder = "optional",
@@ -266,7 +267,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
             }
             Column(modifier = Modifier.weight(1f)) {
                 FormSelect(
-                    label = "Mode",
+                    label = stringResource(R.string.services_form_mode),
                     value = health.mode,
                     options = listOf("" to "http", "grpc" to "grpc"),
                     onChange = { onChange(health.copy(mode = it)) },
@@ -274,7 +275,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
             }
         }
         FormToggle(
-            title = "Follow redirects",
+            title = stringResource(R.string.services_form_follow_redirects),
             checked = health.followRedirects,
             onChange = { onChange(health.copy(followRedirects = it)) },
         )
@@ -286,7 +287,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     FormField(
-                        label = "Header",
+                        label = stringResource(R.string.services_form_header),
                         value = key,
                         onChange = { typed ->
                             onChange(health.copy(headers = health.headers.toMutableList().apply { this[index] = typed to value }))
@@ -296,7 +297,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     FormField(
-                        label = "Value",
+                        label = stringResource(R.string.services_form_header_value),
                         value = value,
                         onChange = { typed ->
                             onChange(health.copy(headers = health.headers.toMutableList().apply { this[index] = key to typed }))
@@ -308,7 +309,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
                 ) {
                     Icon(
                         Icons.Outlined.Close,
-                        contentDescription = "Remove this header",
+                        contentDescription = stringResource(R.string.services_form_remove_header),
                         tint = palette.red,
                         modifier = Modifier.size(18.dp),
                     )
@@ -318,7 +319,7 @@ private fun HealthCheckSection(health: ServiceHealthDraft, onChange: (ServiceHea
         OutlinedButton(
             onClick = { onChange(health.copy(headers = health.headers + ("" to ""))) },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Add header") }
+        ) { Text(stringResource(R.string.services_form_add_header)) }
     }
 }
 
@@ -345,18 +346,18 @@ private fun ChildRow(
             FilterChip(
                 selected = child.kind == ServiceChildDraft.MANUAL,
                 onClick = { onChange(child.copy(kind = ServiceChildDraft.MANUAL)) },
-                label = { Text("Address") },
+                label = { Text(stringResource(R.string.services_form_address)) },
             )
             FilterChip(
                 selected = child.kind == ServiceChildDraft.SERVICE,
                 onClick = { onChange(child.copy(kind = ServiceChildDraft.SERVICE)) },
-                label = { Text("Service") },
+                label = { Text(stringResource(R.string.common_label_service)) },
             )
             if (removable) {
                 IconButton(onClick = onRemove) {
                     Icon(
                         Icons.Outlined.Close,
-                        contentDescription = "Remove this backend",
+                        contentDescription = stringResource(R.string.services_form_remove_backend),
                         tint = palette.red,
                         modifier = Modifier.size(18.dp),
                     )
@@ -366,20 +367,20 @@ private fun ChildRow(
 
         if (child.kind == ServiceChildDraft.SERVICE) {
             FormSelect(
-                label = "Service",
+                label = stringResource(R.string.common_label_service),
                 value = child.name,
                 options = services.map { it to it },
                 onChange = { onChange(child.copy(name = it)) },
             )
         } else {
             FormSelect(
-                label = "Scheme",
+                label = stringResource(R.string.common_label_scheme),
                 value = child.scheme,
                 options = listOf("http" to "http", "https" to "https", "h2c" to "h2c"),
                 onChange = { onChange(child.copy(scheme = it)) },
             )
             FormField(
-                label = "Address",
+                label = stringResource(R.string.services_form_address),
                 value = child.address,
                 onChange = { onChange(child.copy(address = it)) },
                 placeholder = "10.0.0.10:80",

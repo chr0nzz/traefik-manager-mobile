@@ -87,6 +87,10 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
+import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -108,6 +112,7 @@ fun MiddlewaresScreen(
     val searchBarState = rememberSearchBarState()
     val queryState = remember { TextFieldState() }
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     LaunchedEffect(queryState) {
@@ -115,7 +120,7 @@ fun MiddlewaresScreen(
     }
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -124,7 +129,7 @@ fun MiddlewaresScreen(
     pendingDelete?.let { middleware ->
         ConfirmDeleteDialog(
             routeName = middleware.name,
-            consequence = "Any route still referencing it will stop working.",
+            consequence = stringResource(R.string.middlewares_delete_consequence),
             onDismiss = { pendingDelete = null },
             onConfirm = {
                 viewModel.delete(middleware)
@@ -137,25 +142,22 @@ fun MiddlewaresScreen(
     state.blockedDelete?.let { blocked ->
         AlertDialog(
             onDismissRequest = viewModel::dismissBlockedDelete,
-            title = { Text("Still in use") },
+            title = { Text(stringResource(R.string.services_blocked_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                     Text(blocked.reason)
                     if (blocked.routers.isNotEmpty()) {
-                        Text(
-                            "Deleting it removes it from " +
-                                blocked.routers.joinToString(", ") + ".",
-                        )
+                        Text(stringResource(R.string.middlewares_blocked_routes, blocked.routers.joinToString(", ")))
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.delete(blocked.middleware, force = true) }) {
-                    Text("Delete anyway")
+                    Text(stringResource(R.string.services_delete_anyway))
                 }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::dismissBlockedDelete) { Text("Keep it") }
+                TextButton(onClick = viewModel::dismissBlockedDelete) { Text(stringResource(R.string.services_keep)) }
             },
         )
     }
@@ -223,7 +225,7 @@ fun MiddlewaresScreen(
                                 )
                                 .padding(TmSpacing.lg),
                         ) {
-                            Icon(Icons.Outlined.Add, contentDescription = "Add middleware")
+                            Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.middlewares_add))
                         }
                     }
                 }
@@ -278,20 +280,20 @@ private fun MiddlewareListPane(
             when {
                 state.loading -> LoadingState()
                 state.error != null -> ErrorState(
-                    headline = "Could not load middlewares",
-                    body = state.error,
+                    headline = stringResource(R.string.middlewares_error_load),
+                    body = state.error?.asString(),
                     onRetry = onRefresh,
                 )
                 state.visible.isEmpty() -> EmptyState(
                     headline = if (state.middlewares.isEmpty()) {
-                        "No middlewares configured"
+                        stringResource(R.string.routes_no_middlewares)
                     } else {
-                        "No middlewares match"
+                        stringResource(R.string.middlewares_no_match)
                     },
                     body = if (state.middlewares.isEmpty()) {
-                        "Middlewares you create appear here."
+                        stringResource(R.string.middlewares_empty_body)
                     } else {
-                        "Try a different search or filter."
+                        stringResource(R.string.common_no_match_body)
                     },
                 )
                 else -> LazyColumn(
@@ -343,17 +345,17 @@ private fun MiddlewaresTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text("Middleware") },
+        title = { Text(stringResource(R.string.nav_middlewares)) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search middleware")
+                Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.middlewares_search))
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
-                    Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                    Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.common_filters))
                 }
                 if (filtersActive) {
                     Box(
@@ -371,7 +373,7 @@ private fun MiddlewaresTopBar(
                     modifier = Modifier.padding(horizontal = 0.dp),
                 ) {
                     Text(
-                        text = "PROTOCOL",
+                        text = stringResource(R.string.common_label_protocol).uppercase(),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(
@@ -383,13 +385,13 @@ private fun MiddlewaresTopBar(
                     )
                     MiddlewareFilter.entries.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option.label) },
+                            text = { Text(option.label.asString()) },
                             onClick = {
                                 onFilterChange(option)
                                 filterMenuOpen = false
                             },
                             trailingIcon = if (option == filter) {
-                                { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                                { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                             } else {
                                 null
                             },
@@ -399,7 +401,7 @@ private fun MiddlewaresTopBar(
                     if (filtersActive) {
                         HorizontalDivider()
                         DropdownMenuItem(
-                            text = { Text("Clear filter") },
+                            text = { Text(stringResource(R.string.middlewares_clear_filter)) },
                             leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
                             contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
                             onClick = {
@@ -411,10 +413,10 @@ private fun MiddlewaresTopBar(
                 }
             }
             IconButton(onClick = onOpenTemplates) {
-                Icon(Icons.Outlined.Style, contentDescription = "Middleware templates")
+                Icon(Icons.Outlined.Style, contentDescription = stringResource(R.string.middlewares_templates_title))
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh middlewares")
+                Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.middlewares_refresh))
             }
         },
         scrollBehavior = scrollBehavior,
@@ -427,16 +429,16 @@ private fun MiddlewaresTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search middleware") },
+                placeholder = { Text(stringResource(R.string.middlewares_search)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -445,7 +447,7 @@ private fun MiddlewaresTopBar(
     ) {
         if (results.isEmpty()) {
             Text(
-                text = "No middleware matches",
+                text = stringResource(R.string.middlewares_no_search_match),
                 style = MaterialTheme.typography.bodyMedium,
                 color = palette.muted,
                 modifier = Modifier.padding(TmSpacing.lg),

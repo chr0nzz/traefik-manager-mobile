@@ -71,6 +71,10 @@ import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,15 +104,15 @@ fun MiddlewareFormScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(if (middlewareName == null) "Add middleware" else "Edit middleware") },
+                title = { Text(stringResource(if (middlewareName == null) R.string.middlewares_add else R.string.middlewares_edit)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close))
                     }
                 },
                 actions = {
                     TextButton(onClick = viewModel::save, enabled = !state.saving && !waiting) {
-                        Text(if (state.form.isEdit) "Save" else "Create")
+                        Text(stringResource(if (state.form.isEdit) R.string.common_save else R.string.common_create))
                     }
                 },
             )
@@ -169,7 +173,7 @@ private fun MiddlewareFormBody(
     ) {
         if (state.showConfigFile) {
             TmCard(onClick = { configSheetOpen = true }) {
-                SectionLabel("Config file")
+                SectionLabel(stringResource(R.string.common_label_config_file))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -177,13 +181,17 @@ private fun MiddlewareFormBody(
                         .padding(top = TmSpacing.xs),
                 ) {
                     Text(
-                        text = form.configFile.ifEmpty { "Select a file" },
+                        text = form.configFile.ifEmpty { stringResource(R.string.routes_form_select_file) },
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (form.configFile.isEmpty()) palette.muted else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = if (state.configFiles.size > 1) "${state.configFiles.size} files" else "Change",
+                        text = if (state.configFiles.size > 1) {
+                            pluralStringResource(R.plurals.routes_form_files, state.configFiles.size, state.configFiles.size)
+                        } else {
+                            stringResource(R.string.routes_form_change_file)
+                        },
                         style = MaterialTheme.typography.labelMedium,
                         color = palette.muted,
                     )
@@ -192,7 +200,7 @@ private fun MiddlewareFormBody(
         }
 
         TmCard {
-            SectionLabel("Protocol")
+            SectionLabel(stringResource(R.string.common_label_protocol))
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -210,7 +218,7 @@ private fun MiddlewareFormBody(
             }
             if (state.isTcp) {
                 Text(
-                    text = "TCP middlewares support only ipAllowList and inFlightConn, written as YAML.",
+                    text = stringResource(R.string.middlewares_form_tcp_help),
                     style = MaterialTheme.typography.bodySmall,
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.xs),
@@ -220,10 +228,10 @@ private fun MiddlewareFormBody(
             OutlinedTextField(
                 value = form.name,
                 onValueChange = { value -> viewModel.update { it.copy(name = value) } },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.common_label_name)) },
                 placeholder = { Text("my-auth") },
                 supportingText = if (form.isEdit && form.name != form.originalName) {
-                    { Text("Renaming updates every route that references it") }
+                    { Text(stringResource(R.string.middlewares_form_rename_help)) }
                 } else {
                     null
                 },
@@ -236,7 +244,7 @@ private fun MiddlewareFormBody(
 
         if (!state.isTcp) {
             TmCard(onClick = { templateSheetOpen = true }) {
-                SectionLabel("Template")
+                SectionLabel(stringResource(R.string.middlewares_template))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
@@ -251,13 +259,13 @@ private fun MiddlewareFormBody(
                         modifier = Modifier.size(18.dp),
                     )
                     Text(
-                        text = state.templateLabel.ifEmpty { "Custom" },
+                        text = state.templateLabel.ifEmpty { stringResource(R.string.middlewares_template_custom) },
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (state.templateLabel.isEmpty()) palette.muted else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = "Change",
+                        text = stringResource(R.string.middlewares_template_change),
                         style = MaterialTheme.typography.labelMedium,
                         color = palette.muted,
                     )
@@ -272,7 +280,7 @@ private fun MiddlewareFormBody(
                         shape = SegmentedButtonDefaults.itemShape(index, MiddlewareMode.entries.size),
                         enabled = mode == MiddlewareMode.Yaml || state.wizard != null,
                     ) {
-                        Text(if (mode == MiddlewareMode.Wizard) "Wizard" else "YAML")
+                        Text(if (mode == MiddlewareMode.Wizard) stringResource(R.string.middlewares_form_wizard) else "YAML")
                     }
                 }
             }
@@ -280,7 +288,7 @@ private fun MiddlewareFormBody(
 
         if (state.error != null) {
             Text(
-                text = state.error.orEmpty(),
+                text = state.error?.asString().orEmpty(),
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                 color = palette.red,
             )
@@ -291,7 +299,7 @@ private fun MiddlewareFormBody(
             if (wizard == null) {
                 TmCard {
                     Text(
-                        text = "Select a template above to use the wizard.",
+                        text = stringResource(R.string.middlewares_form_wizard_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = palette.muted,
                         modifier = Modifier
@@ -324,7 +332,7 @@ private fun MiddlewareFormBody(
                 }
             }
         } else {
-            SectionLabel("Configuration (YAML)")
+            SectionLabel(stringResource(R.string.middlewares_form_yaml_title))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -334,7 +342,7 @@ private fun MiddlewareFormBody(
                 YamlEditor(state = viewModel.content, modifier = Modifier.fillMaxSize())
             }
             Text(
-                text = "The middleware body only, without the name above it.",
+                text = stringResource(R.string.middlewares_form_yaml_help),
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.muted,
             )
@@ -381,7 +389,7 @@ private fun WizardFieldEditor(
             } else {
                 null
             },
-            supportingText = { Text(field.help.ifEmpty { "One per line" }) },
+            supportingText = { Text(field.help.ifEmpty { stringResource(R.string.middlewares_form_one_per_line) }) },
             minLines = 3,
             maxLines = 8,
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = MonoFamily),
@@ -471,12 +479,12 @@ private fun HashGeneratorCard(
     var realm by remember { mutableStateOf("traefik") }
 
     TmCard {
-        SectionLabel("Generate entry")
+        SectionLabel(stringResource(R.string.middlewares_generate))
         Text(
             text = if (digest) {
-                "The server hashes the password and appends the user:realm:md5 line above."
+                stringResource(R.string.middlewares_generate_help_digest)
             } else {
-                "The server hashes the password and appends the user:hash line above."
+                stringResource(R.string.middlewares_generate_help_basic)
             },
             style = MaterialTheme.typography.bodySmall,
             color = palette.muted,
@@ -485,7 +493,7 @@ private fun HashGeneratorCard(
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Username") },
+            label = { Text(stringResource(R.string.middlewares_generate_username)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(showKeyboardOnFocus = false),
             modifier = Modifier.fillMaxWidth(),
@@ -493,7 +501,7 @@ private fun HashGeneratorCard(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.middlewares_generate_password)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -507,7 +515,7 @@ private fun HashGeneratorCard(
             OutlinedTextField(
                 value = realm,
                 onValueChange = { realm = it },
-                label = { Text("Realm") },
+                label = { Text(stringResource(R.string.middlewares_generate_realm)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(showKeyboardOnFocus = false),
                 modifier = Modifier
@@ -517,7 +525,7 @@ private fun HashGeneratorCard(
         }
         if (state.generatorError != null) {
             Text(
-                text = state.generatorError.orEmpty(),
+                text = state.generatorError?.asString().orEmpty(),
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.red,
                 modifier = Modifier.padding(top = TmSpacing.xs),
@@ -535,7 +543,7 @@ private fun HashGeneratorCard(
             enabled = !state.generating && username.isNotBlank() && password.isNotBlank(),
             modifier = Modifier.padding(top = TmSpacing.sm),
         ) {
-            Text(if (state.generating) "Generating" else "Generate entry")
+            Text(stringResource(if (state.generating) R.string.middlewares_generating else R.string.middlewares_generate))
         }
     }
 }
@@ -556,7 +564,7 @@ private fun TemplatePickerSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
     ) {
         Text(
-            text = "Template",
+            text = stringResource(R.string.middlewares_template),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, bottom = TmSpacing.sm),
@@ -564,10 +572,10 @@ private fun TemplatePickerSheet(
         LazyColumn(modifier = Modifier.heightIn(max = 520.dp)) {
             item {
                 ListItem(
-                    headlineContent = { Text("Custom") },
-                    supportingContent = { Text("Write the YAML yourself") },
+                    headlineContent = { Text(stringResource(R.string.middlewares_template_custom)) },
+                    supportingContent = { Text(stringResource(R.string.middlewares_template_custom_body)) },
                     trailingContent = if (state.templateId.isEmpty()) {
-                        { Icon(Icons.Outlined.Check, contentDescription = "Selected") }
+                        { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected)) }
                     } else {
                         null
                     },
@@ -594,7 +602,7 @@ private fun TemplatePickerSheet(
                     ListItem(
                         headlineContent = { Text(wizard.label) },
                         trailingContent = if (state.templateId == wizard.id) {
-                            { Icon(Icons.Outlined.Check, contentDescription = "Selected") }
+                            { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected)) }
                         } else {
                             null
                         },
@@ -605,7 +613,7 @@ private fun TemplatePickerSheet(
             if (state.customTemplates.isNotEmpty()) {
                 item(key = "cat-custom") {
                     SectionLabel(
-                        text = "My templates",
+                        text = stringResource(R.string.middlewares_my_templates),
                         modifier = Modifier.padding(
                             start = TmSpacing.lg,
                             end = TmSpacing.lg,
@@ -626,7 +634,7 @@ private fun TemplatePickerSheet(
                             )
                         },
                         trailingContent = if (state.templateId == "custom:${template.id}") {
-                            { Icon(Icons.Outlined.Check, contentDescription = "Selected") }
+                            { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected)) }
                         } else {
                             null
                         },

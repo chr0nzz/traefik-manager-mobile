@@ -39,6 +39,9 @@ import dev.chr0nzz.traefikmanager.ui.components.YamlPreview
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 fun middlewareIcon(kind: String): ImageVector = when (kind) {
     "basicAuth", "digestAuth", "forwardAuth" -> Icons.Outlined.Lock
@@ -127,10 +130,10 @@ fun MiddlewareCard(
                 .padding(top = TmSpacing.xs),
         ) {
             Text(
-                text = when (usageCount) {
-                    0 -> "unused"
-                    1 -> "used by 1 route"
-                    else -> "used by $usageCount routes"
+                text = if (usageCount == 0) {
+                    stringResource(R.string.middlewares_unused)
+                } else {
+                    pluralStringResource(R.plurals.middlewares_used_by, usageCount, usageCount)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = if (usageCount == 0) palette.yellow else palette.muted,

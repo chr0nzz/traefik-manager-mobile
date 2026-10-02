@@ -1094,4 +1094,412 @@
     <!-- %1$s is an IP address or a range -->
     <string name="crowdsec_unbanned">%1$s unbanned</string>
     <string name="crowdsec_error_delete">Could not delete the decision</string>
+
+    <!-- State of a route or an option -->
+    <string name="common_enabled">Enabled</string>
+    <!-- State of a route or an option -->
+    <string name="common_disabled">Disabled</string>
+    <string name="common_yes">Yes</string>
+    <string name="common_no">No</string>
+    <!-- Filter: show everything -->
+    <string name="common_all">All</string>
+    <!-- How many more items there are than shown -->
+    <string name="common_more_count">+%1$d more</string>
+    <!-- %1$s is a host name -->
+    <string name="common_open_named">Open %1$s</string>
+    <!-- Lowercase value: the default setting is used -->
+    <string name="common_default">default</string>
+    <!-- Read aloud for the button that folds a section -->
+    <string name="common_collapse">Collapse</string>
+    <!-- Read aloud for the button that unfolds a section -->
+    <string name="common_expand">Expand</string>
+    <!-- First choice in a dropdown: nothing picked -->
+    <string name="common_none_option">None</string>
+    <!-- Button -->
+    <string name="common_create">Create</string>
+    <string name="common_label_config_file">Config file</string>
+    <string name="common_label_domains">Domains</string>
+    <!-- Label for the priority of a Traefik router -->
+    <string name="common_label_priority">Priority</string>
+    <string name="common_label_type">Type</string>
+    <!-- Label for the health of backend servers -->
+    <string name="common_label_health">Health</string>
+    <!-- A Traefik certificate resolver -->
+    <string name="common_label_cert_resolver">Certificate resolver</string>
+    <!-- A Traefik option, passHostHeader -->
+    <string name="common_label_pass_host_header">Pass host header</string>
+    <string name="common_label_port">Port</string>
+    <!-- Label for the URL scheme, http or https -->
+    <string name="common_label_scheme">Scheme</string>
+    <string name="common_label_error">Error</string>
+    <string name="common_label_timeout">Timeout</string>
+    <!-- Label for how often something is checked -->
+    <string name="common_label_interval">Interval</string>
+
+    <string name="routes_select">Select a route</string>
+    <string name="routes_select_body">Pick a route from the list to see its configuration.</string>
+    <string name="routes_back">Back to routes</string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_disable_named">Disable %1$s</string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_enable_named">Enable %1$s</string>
+    <!-- Heading: whether the route answers -->
+    <string name="routes_reachability">Reachability</string>
+    <!-- Shown while a route is being pinged -->
+    <string name="routes_ping_checking">Checking</string>
+    <!-- Lowercase result of a ping: some backend servers are down -->
+    <string name="routes_ping_degraded">degraded</string>
+    <!-- Lowercase result of a ping -->
+    <string name="routes_ping_reachable">reachable</string>
+    <!-- Lowercase result of a ping -->
+    <string name="routes_ping_unreachable">unreachable</string>
+    <!-- Button that checks whether the route answers -->
+    <string name="routes_ping">Ping</string>
+    <string name="routes_ping_again">Ping again</string>
+    <!-- Label, followed by the result of the last health check -->
+    <string name="routes_health_checked">Checked</string>
+    <!-- Label, followed by the servers that do not answer -->
+    <string name="routes_health_down_servers">Not answering</string>
+    <!-- Label for an extra remark -->
+    <string name="routes_health_note">Note</string>
+    <string name="routes_health_unverified">Behind forward auth, so the check could not confirm the app itself</string>
+    <!-- Label: where the health result comes from -->
+    <string name="routes_health_source">Source</string>
+    <string name="routes_health_source_traefik">Traefik health check</string>
+    <string name="routes_health_source_servers">Each backend server</string>
+    <string name="routes_health_source_ping">Request to the route</string>
+    <string name="routes_health_source_self">This app</string>
+    <string name="routes_details_title">Router Details</string>
+    <!-- Label for the TLS options profile of a route -->
+    <string name="routes_tls_options">Options</string>
+    <!-- Label: skip checking the TLS certificate of the backend -->
+    <string name="routes_skip_verify">Skip verify</string>
+    <!-- %1$s is a middleware name. The note says it comes from the entry point, not the route -->
+    <string name="routes_middleware_entry_point">%1$s (entry point)</string>
+    <string name="routes_no_middlewares">No middlewares configured</string>
+    <!-- A Traefik service type -->
+    <string name="routes_load_balancer">Load Balancer</string>
+    <!-- Label for a backend server -->
+    <string name="routes_server">Server</string>
+    <!-- Label for one of several backend servers -->
+    <string name="routes_server_numbered">Server %1$d</string>
+    <string name="routes_edit">Edit route</string>
+    <string name="routes_delete">Delete route</string>
+    <string name="routes_edit_raw">Edit raw YAML</string>
+    <string name="routes_copy_target">Copy target</string>
+    <string name="routes_flow_title">Traffic flow</string>
+    <string name="routes_add">Add route</string>
+    <string name="routes_form_select_file">Select a file</string>
+    <plurals name="routes_form_files">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
+    <!-- Link that lets the user pick another config file -->
+    <string name="routes_form_change_file">Change</string>
+    <string name="routes_form_name">Route / service name</string>
+    <string name="routes_form_rename_help">Renaming moves the router, its service and any owned middleware</string>
+    <string name="routes_form_rule_advanced">Advanced rule</string>
+    <!-- Choice: build the routing rule from a subdomain and domains instead of writing it by hand -->
+    <string name="routes_form_rule_simple">Simple</string>
+    <string name="routes_form_subdomain">Subdomain</string>
+    <string name="routes_form_subdomain_help">Leave empty to use the domain itself</string>
+    <string name="routes_form_add_domain">Add a domain</string>
+    <string name="routes_form_sni_rule">SNI rule</string>
+    <!-- Keep HostSNI(`*`) exactly as it is -->
+    <string name="routes_form_sni_help">Defaults to HostSNI(`*`) - matches any SNI</string>
+    <string name="routes_form_udp_help">UDP routers have no rule - traffic is matched by entry point only.</string>
+    <!-- Choice: list the backend servers here -->
+    <string name="routes_form_backends_build">Build backends</string>
+    <!-- Choice: point the route at an existing Traefik service -->
+    <string name="routes_form_backends_service">Use a service</string>
+    <string name="routes_form_select_service">Select a service</string>
+    <!-- %1$s is a Traefik service type such as weighted or mirroring -->
+    <string name="routes_form_service_owned">This route uses a %1$s service that Traefik Manager manages. Edit its backends from the Services tab.</string>
+    <!-- %1$s is a Traefik service type such as weighted or mirroring -->
+    <string name="routes_form_service_external">This route uses a %1$s service. Backends are managed in the config file.</string>
+    <string name="routes_form_backends">Backends</string>
+    <!-- Label: whether a backend is an address or a Traefik service -->
+    <string name="routes_form_backend_kind">Kind</string>
+    <!-- Label: the share of traffic that is mirrored -->
+    <string name="routes_form_percent">Percent</string>
+    <!-- Label: the weight of a backend in load balancing -->
+    <string name="routes_form_weight">Weight</string>
+    <string name="routes_form_remove_backend">Remove backend</string>
+    <string name="routes_form_failover_help">Failover takes two backends: the one that serves and the one that takes over.</string>
+    <string name="routes_form_add_backend">Add backend</string>
+    <string name="routes_form_combine">Combine backends as</string>
+    <string name="routes_form_composite_warning">Saving replaces the composite service with a plain load balancer.</string>
+    <string name="routes_form_load_balancing">Load balancing</string>
+    <string name="routes_form_sticky">Sticky sessions</string>
+    <string name="routes_form_cookie_name">Cookie name</string>
+    <string name="routes_form_cookie_secure">Secure cookie</string>
+    <string name="routes_form_cookie_http_only">HttpOnly cookie</string>
+    <string name="routes_form_health_check">Health check</string>
+    <string name="routes_form_priority">Router priority</string>
+    <string name="routes_form_priority_help">Leave empty for Traefik\'s default</string>
+    <string name="routes_form_entry_points_help">Traefik API unavailable - enter names separated by commas</string>
+    <string name="routes_form_tls_title">TLS and options</string>
+    <string name="routes_form_tls_none">No TLS</string>
+    <!-- TLS passthrough: Traefik forwards the encrypted traffic without opening it -->
+    <string name="routes_form_tls_passthrough">Passthrough</string>
+    <string name="routes_form_tls_enable">Enable TLS</string>
+    <string name="routes_form_resolver_none">None (external certificate)</string>
+    <string name="routes_form_tls_options">TLS options profile</string>
+    <string name="routes_form_tls_options_none">None (default)</string>
+    <string name="routes_form_skip_verify">Skip TLS verification</string>
+    <string name="routes_form_streaming">Optimize for streaming (Jellyfin / Emby / Plex)</string>
+    <string name="routes_form_wildcard">Request wildcard certificate</string>
+    <string name="routes_form_cert_domain">Certificate domain</string>
+    <string name="routes_form_cert_domain_help">Traefik asks your resolver for a certificate covering this name</string>
+    <string name="routes_form_extra_domains">Extra domains</string>
+    <string name="routes_form_extra_domains_help">One per line. A wildcard needs a DNS challenge resolver</string>
+    <string name="routes_form_preset">Security headers preset</string>
+    <string name="routes_form_preset_collapse">Collapse preset</string>
+    <string name="routes_form_preset_expand">Expand preset</string>
+    <string name="routes_form_preset_custom">This middleware was hand-edited. It is kept as-is unless you change a toggle below.</string>
+    <!-- A security header setting. Keep Content-Type and nosniff as they are -->
+    <string name="routes_form_preset_nosniff">Content-Type nosniff</string>
+    <!-- A security header setting: forbid showing the site in a frame -->
+    <string name="routes_form_preset_frame_deny">Frame deny</string>
+    <string name="routes_form_preset_referrer">Referrer policy</string>
+    <string name="routes_form_preset_permissions">Permissions policy</string>
+    <string name="routes_form_save">Save route</string>
+    <string name="routes_form_create">Create route</string>
+    <string name="routes_error_save">Could not save the route</string>
+    <string name="routes_raw_title">Raw YAML</string>
+    <string name="routes_raw_error_load">Could not load the YAML</string>
+    <string name="routes_raw_error_empty">The YAML is empty</string>
+    <string name="routes_raw_error_save">Could not save the YAML</string>
+    <!-- Asked after a route is deleted -->
+    <plurals name="routes_cert_offer_title">
+        <item quantity="one">Remove its certificate too?</item>
+        <item quantity="other">Remove its %d certificates too?</item>
+    </plurals>
+    <!-- %1$s is one domain or a list of domains, %2$s is the name of the deleted route -->
+    <string name="routes_cert_offer_body">Nothing else uses %1$s now that %2$s is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.</string>
+    <string name="routes_new">New route</string>
+    <string name="routes_error_load">Could not load routes</string>
+    <string name="routes_empty_body">Routes you create in Traefik Manager appear here.</string>
+    <string name="routes_search">Search routes</string>
+    <string name="routes_refresh">Refresh routes</string>
+    <!-- Filter: routes that are serving traffic -->
+    <string name="routes_filter_active">Active</string>
+    <!-- Filter: routes that are not serving traffic -->
+    <string name="routes_filter_inactive">Inactive</string>
+    <!-- Lowercase result of a ping: the route points at the server Traefik Manager runs on -->
+    <string name="routes_ping_self">this server</string>
+    <!-- Lowercase -->
+    <plurals name="routes_ping_servers_up">
+        <item quantity="one">%1$d of %2$d server up</item>
+        <item quantity="other">%1$d of %2$d servers up</item>
+    </plurals>
+    <!-- Lowercase -->
+    <string name="routes_ping_some_down">some servers down</string>
+    <string name="routes_ping_no_response">No response</string>
+    <string name="routes_ping_failed">Ping failed</string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_disabled_named">%1$s disabled</string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_enabled_named">%1$s enabled</string>
+    <string name="routes_error_toggle">Could not toggle the route</string>
+    <!-- %1$s is the name of the route or middleware that was deleted -->
+    <string name="routes_deleted_named">%1$s deleted</string>
+    <string name="routes_error_delete">Could not delete the route</string>
+    <!-- Lowercase -->
+    <string name="common_error_unknown">unknown error</string>
+    <!-- %1$s is a technical error message -->
+    <string name="routes_error_unreadable">The server sent a route the app could not read: %1$s</string>
+
+    <string name="services_select">Select a service</string>
+    <string name="services_select_body">Pick one from the list to see its backends.</string>
+    <string name="services_back">Back to services</string>
+    <string name="services_details_title">Service details</string>
+    <!-- Label, followed by who manages the service -->
+    <string name="services_managed">Managed</string>
+    <!-- Lowercase value for the label Managed -->
+    <string name="services_managed_here">by Traefik Manager</string>
+    <!-- Lowercase value for the label Managed -->
+    <string name="services_managed_file">in the config file</string>
+    <!-- Status of a service: everything works -->
+    <string name="services_health_ok">Success</string>
+    <!-- Status of a service -->
+    <string name="services_health_warning">Warning</string>
+    <string name="services_errors_title">Errors</string>
+    <string name="services_servers_title">Servers</string>
+    <string name="services_servers_none">No servers configured</string>
+    <!-- State of a backend server: it answers -->
+    <string name="services_server_up">Up</string>
+    <!-- State of a backend server: it does not answer -->
+    <string name="services_server_down">Down</string>
+    <!-- State of a backend server: no health check runs on it -->
+    <string name="services_server_unchecked">Unchecked</string>
+    <!-- Heading: the backends a composite service sends traffic to -->
+    <string name="services_targets_title">Targets</string>
+    <string name="services_used_by_title">Used by routers</string>
+    <string name="services_used_by_none">No router references this service</string>
+    <string name="services_copy_urls">Copy backend URLs</string>
+    <string name="services_stop_managing">Stop managing</string>
+    <string name="services_start_managing">Manage this service</string>
+    <string name="services_edit">Edit service</string>
+    <string name="services_delete">Delete service</string>
+    <string name="services_error_no_name">Give the service a name</string>
+    <string name="services_error_no_backend">Add at least one backend</string>
+    <string name="services_error_no_address">A load balancer needs at least one address</string>
+    <string name="services_new">New service</string>
+    <!-- Highest random weight is a Traefik service type -->
+    <string name="services_hrw_read_only">Highest random weight is not authorable in Traefik Manager. It is read here and edited in the config file.</string>
+    <string name="services_form_file_help">Leave empty for the default file.</string>
+    <string name="services_form_help_mirroring">The first row serves traffic. The rest mirror it by percent.</string>
+    <string name="services_form_help_failover">The first row is primary, the second is the fallback.</string>
+    <string name="services_form_help_load_balancer">Addresses to balance across.</string>
+    <string name="services_form_help_weighted">Weights decide the share each backend takes.</string>
+    <string name="services_form_health_enable">Poll the servers</string>
+    <string name="services_form_health_enable_help">Traefik stops sending traffic to servers that fail</string>
+    <string name="services_form_path_placeholder">/ (server root)</string>
+    <!-- Label for the HTTP method of the health check -->
+    <string name="services_form_method">Method</string>
+    <string name="services_form_status">Expected status</string>
+    <!-- Lowercase -->
+    <string name="services_form_status_placeholder">any 2xx or 3xx</string>
+    <string name="services_form_unhealthy_interval">Interval when down</string>
+    <!-- Lowercase -->
+    <string name="services_form_unhealthy_interval_placeholder">same as interval</string>
+    <!-- Lowercase -->
+    <string name="services_form_port_placeholder">same as server</string>
+    <string name="services_form_host_header">Host header</string>
+    <!-- Label for the health check mode, http or grpc -->
+    <string name="services_form_mode">Mode</string>
+    <string name="services_form_follow_redirects">Follow redirects</string>
+    <!-- Label for the name of an HTTP header -->
+    <string name="services_form_header">Header</string>
+    <!-- Label for the value of an HTTP header -->
+    <string name="services_form_header_value">Value</string>
+    <string name="services_form_remove_header">Remove this header</string>
+    <string name="services_form_add_header">Add header</string>
+    <!-- Label for the address of a backend server -->
+    <string name="services_form_address">Address</string>
+    <string name="services_form_remove_backend">Remove this backend</string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_delete_body">Delete \"%1$s\"?</string>
+    <string name="services_blocked_title">Still in use</string>
+    <!-- %2$s is a list of route names -->
+    <plurals name="services_blocked_routes">
+        <item quantity="one">Deleting it also deletes %1$d route: %2$s.</item>
+        <item quantity="other">Deleting it also deletes %1$d routes: %2$s.</item>
+    </plurals>
+    <!-- %1$s is a list of service names -->
+    <string name="services_blocked_parents">It is removed from %1$s, and any left with no backends goes too.</string>
+    <string name="services_delete_anyway">Delete anyway</string>
+    <string name="services_keep">Keep it</string>
+    <string name="services_add">Add a service</string>
+    <!-- Keep TRAEFIK_API_URL and api: {} exactly as they are -->
+    <string name="services_unreachable_body">Set TRAEFIK_API_URL and enable api: {} in the Traefik static config.</string>
+    <string name="services_empty">No services registered</string>
+    <string name="services_empty_body">Traefik answered, but it has no services yet.</string>
+    <string name="services_no_match">No services match</string>
+    <string name="services_no_match_body">Clear the filters to see everything.</string>
+    <string name="services_search">Search services</string>
+    <string name="services_refresh">Refresh services</string>
+    <!-- Filter: services with warnings -->
+    <string name="services_filter_warnings">Warnings</string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_saved">Service %1$s saved</string>
+    <string name="services_error_save">Could not save the service</string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_deleted">Service %1$s deleted</string>
+    <string name="services_error_delete">Could not delete the service</string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_now_managed">Traefik Manager now manages %1$s</string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_no_longer_managed">%1$s is no longer managed here</string>
+    <string name="services_error_ownership">Could not change the ownership</string>
+    <!-- %1$s is a technical error message -->
+    <string name="services_error_unreadable">The server sent a service the app could not read: %1$s</string>
+
+    <string name="middlewares_select">Select a middleware</string>
+    <string name="middlewares_select_body">Pick one from the list to see its configuration.</string>
+    <string name="middlewares_back">Back to middlewares</string>
+    <!-- Label for the type of a middleware, such as basicAuth -->
+    <string name="middlewares_kind">Kind</string>
+    <!-- Label, followed by how many routes use the middleware -->
+    <string name="middlewares_usage">Usage</string>
+    <!-- Lowercase: no route uses this middleware -->
+    <string name="middlewares_unused">unused</string>
+    <!-- Lowercase -->
+    <plurals name="middlewares_used_by">
+        <item quantity="one">used by %d route</item>
+        <item quantity="other">used by %d routes</item>
+    </plurals>
+    <string name="middlewares_configuration">Configuration</string>
+    <string name="middlewares_edit">Edit middleware</string>
+    <string name="middlewares_delete">Delete middleware</string>
+    <string name="middlewares_copy_yaml">Copy YAML</string>
+    <string name="middlewares_add">Add middleware</string>
+    <!-- Keep ipAllowList and inFlightConn exactly as they are -->
+    <string name="middlewares_form_tcp_help">TCP middlewares support only ipAllowList and inFlightConn, written as YAML.</string>
+    <string name="middlewares_form_rename_help">Renaming updates every route that references it</string>
+    <!-- A ready-made starting point for a middleware -->
+    <string name="middlewares_template">Template</string>
+    <!-- Template choice: write the middleware by hand -->
+    <string name="middlewares_template_custom">Custom</string>
+    <!-- Link that lets the user pick another template -->
+    <string name="middlewares_template_change">Change</string>
+    <!-- Choice: fill in a guided form instead of writing YAML -->
+    <string name="middlewares_form_wizard">Wizard</string>
+    <string name="middlewares_form_wizard_empty">Select a template above to use the wizard.</string>
+    <string name="middlewares_form_yaml_title">Configuration (YAML)</string>
+    <string name="middlewares_form_yaml_help">The middleware body only, without the name above it.</string>
+    <string name="middlewares_form_one_per_line">One per line</string>
+    <!-- Heading and button: make a password entry for basic or digest auth -->
+    <string name="middlewares_generate">Generate entry</string>
+    <!-- Keep user:realm:md5 exactly as it is -->
+    <string name="middlewares_generate_help_digest">The server hashes the password and appends the user:realm:md5 line above.</string>
+    <!-- Keep user:hash exactly as it is -->
+    <string name="middlewares_generate_help_basic">The server hashes the password and appends the user:hash line above.</string>
+    <string name="middlewares_generate_username">Username</string>
+    <string name="middlewares_generate_password">Password</string>
+    <!-- The realm of HTTP digest authentication -->
+    <string name="middlewares_generate_realm">Realm</string>
+    <!-- Button label while an entry is being made -->
+    <string name="middlewares_generating">Generating</string>
+    <string name="middlewares_template_custom_body">Write the YAML yourself</string>
+    <string name="middlewares_my_templates">My templates</string>
+    <!-- %1$s is the name of a middleware -->
+    <string name="middlewares_error_load_named">Could not load %1$s</string>
+    <string name="middlewares_error_generate">Could not generate the entry</string>
+    <string name="middlewares_error_save">Could not save the middleware</string>
+    <string name="middlewares_error_no_file">Select a config file for this middleware</string>
+    <string name="middlewares_error_no_user">Add at least one user before saving</string>
+    <string name="middlewares_error_no_address">Forward auth address is required</string>
+    <string name="middlewares_error_no_gatekeeper">Gatekeeper URL is required</string>
+    <string name="middlewares_templates_delete">Delete template</string>
+    <string name="middlewares_templates_delete_body">Delete this template? Middlewares already created from it are not affected.</string>
+    <string name="middlewares_templates_title">Middleware templates</string>
+    <string name="middlewares_templates_add">Add template</string>
+    <string name="middlewares_templates_edit">Edit template</string>
+    <!-- Read aloud for the back arrow -->
+    <string name="common_back">Back</string>
+    <string name="middlewares_templates_help">Reusable YAML you can start a middleware from. Pick one under Template in the middleware form. Templates are shared across every server, not just this one.</string>
+    <string name="middlewares_templates_empty">No custom templates yet</string>
+    <string name="middlewares_templates_empty_body">Tap Add template to create one.</string>
+    <!-- %1$s is the name of the thing being deleted -->
+    <string name="common_delete_named">Delete %1$s</string>
+    <string name="middlewares_templates_name_placeholder">e.g. Secure Headers</string>
+    <string name="middlewares_templates_error_no_name">Name is required</string>
+    <string name="middlewares_templates_created">Template created</string>
+    <string name="middlewares_templates_updated">Template updated</string>
+    <string name="middlewares_templates_error_save">Could not save the template</string>
+    <string name="middlewares_templates_deleted">Template deleted</string>
+    <string name="middlewares_templates_error_delete">Could not delete the template</string>
+    <string name="middlewares_delete_consequence">Any route still referencing it will stop working.</string>
+    <!-- %1$s is a list of route names -->
+    <string name="middlewares_blocked_routes">Deleting it removes it from %1$s.</string>
+    <string name="middlewares_error_load">Could not load middlewares</string>
+    <string name="middlewares_no_match">No middlewares match</string>
+    <string name="middlewares_empty_body">Middlewares you create appear here.</string>
+    <string name="middlewares_search">Search middleware</string>
+    <string name="middlewares_clear_filter">Clear filter</string>
+    <string name="middlewares_refresh">Refresh middlewares</string>
+    <string name="middlewares_no_search_match">No middleware matches</string>
+    <string name="middlewares_error_delete">Could not delete the middleware</string>
 </resources>

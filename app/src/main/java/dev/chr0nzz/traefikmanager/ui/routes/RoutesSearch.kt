@@ -55,6 +55,9 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,17 +86,17 @@ fun RoutesTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text("Routes") },
+        title = { Text(stringResource(R.string.nav_routes)) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },
         actions = {
             IconButton(onClick = { scope.launch { searchBarState.animateToExpanded() } }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search routes")
+                Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.routes_search))
             }
             Box {
                 IconButton(onClick = { filterMenuOpen = true }) {
-                    Icon(Icons.Outlined.FilterList, contentDescription = "Filters")
+                    Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.common_filters))
                 }
                 if (filtersActive) {
                     Box(
@@ -116,7 +119,7 @@ fun RoutesTopBar(
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Refresh routes")
+                Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.routes_refresh))
             }
         },
         scrollBehavior = scrollBehavior,
@@ -129,16 +132,16 @@ fun RoutesTopBar(
                 textFieldState = queryState,
                 searchBarState = searchBarState,
                 onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = { Text("Search routes") },
+                placeholder = { Text(stringResource(R.string.routes_search)) },
                 leadingIcon = {
                     IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Close search")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_close_search))
                     }
                 },
                 trailingIcon = {
                     if (queryState.text.isNotEmpty()) {
                         IconButton(onClick = { queryState.clearText() }) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_clear_search))
                         }
                     }
                 },
@@ -148,7 +151,7 @@ fun RoutesTopBar(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (results.isEmpty()) {
                 Text(
-                    text = "No routes match",
+                    text = stringResource(R.string.providers_no_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.muted,
                     modifier = Modifier.padding(TmSpacing.lg),
@@ -199,20 +202,20 @@ fun FilterMenu(
         modifier = Modifier.widthIn(min = 240.dp),
     ) {
         Text(
-            text = "PROTOCOL",
+            text = stringResource(R.string.common_label_protocol).uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = palette.muted,
             modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
         )
         ProtocolFilter.entries.forEach { option ->
             DropdownMenuItem(
-                text = { Text(option.label) },
+                text = { Text(option.label.asString()) },
                 onClick = {
                     onProtocolChange(option)
                     onDismiss()
                 },
                 trailingIcon = if (option == protocol) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                    { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                 } else {
                     null
                 },
@@ -221,20 +224,20 @@ fun FilterMenu(
         }
         HorizontalDivider()
         Text(
-            text = "STATUS",
+            text = stringResource(R.string.common_label_status).uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = palette.muted,
             modifier = Modifier.padding(start = TmSpacing.lg, end = TmSpacing.lg, top = TmSpacing.sm, bottom = TmSpacing.xs),
         )
         StatusFilter.entries.forEach { option ->
             DropdownMenuItem(
-                text = { Text(option.label) },
+                text = { Text(option.label.asString()) },
                 onClick = {
                     onStatusChange(option)
                     onDismiss()
                 },
                 trailingIcon = if (option == status) {
-                    { Icon(Icons.Outlined.Check, contentDescription = "Selected", tint = palette.blue) }
+                    { Icon(Icons.Outlined.Check, contentDescription = stringResource(R.string.common_selected), tint = palette.blue) }
                 } else {
                     null
                 },
@@ -244,7 +247,7 @@ fun FilterMenu(
         if (filtersActive) {
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Clear filters") },
+                text = { Text(stringResource(R.string.common_clear_filters)) },
                 leadingIcon = { Icon(Icons.Outlined.Close, contentDescription = null) },
                 contentPadding = PaddingValues(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
                 onClick = {

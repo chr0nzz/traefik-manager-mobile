@@ -48,6 +48,9 @@ import dev.chr0nzz.traefikmanager.ui.components.YamlPreview
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -64,8 +67,8 @@ fun MiddlewareDetailPane(
     if (middleware == null) {
         MessageState(
             icon = Icons.Outlined.TouchApp,
-            headline = "Select a middleware",
-            body = "Pick one from the list to see its configuration.",
+            headline = stringResource(R.string.middlewares_select),
+            body = stringResource(R.string.middlewares_select_body),
             modifier = modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -95,7 +98,7 @@ fun MiddlewareDetailPane(
             ) {
                 if (showBack) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to middlewares")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.middlewares_back))
                     }
                 }
                 Text(
@@ -130,30 +133,30 @@ fun MiddlewareDetailPane(
                         modifier = Modifier.size(15.dp),
                     )
                     Text(
-                        text = "Middleware",
+                        text = stringResource(R.string.common_label_middleware),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.semantics { heading() },
                     )
                 }
-                DetailRow("Name", middleware.name, mono = true)
-                DetailRow("Protocol", if (isTcp) "TCP" else "HTTP")
-                DetailRow("Kind", kind, mono = true)
+                DetailRow(stringResource(R.string.common_label_name), middleware.name, mono = true)
+                DetailRow(stringResource(R.string.common_label_protocol), if (isTcp) "TCP" else "HTTP")
+                DetailRow(stringResource(R.string.middlewares_kind), kind, mono = true)
                 if (middleware.configFile.isNotEmpty()) {
-                    DetailRow("Config file", middleware.configFile, mono = true)
+                    DetailRow(stringResource(R.string.common_label_config_file), middleware.configFile, mono = true)
                 }
                 DetailRow(
-                    label = "Usage",
-                    value = when (usageCount) {
-                        0 -> "unused"
-                        1 -> "used by 1 route"
-                        else -> "used by $usageCount routes"
+                    label = stringResource(R.string.middlewares_usage),
+                    value = if (usageCount == 0) {
+                        stringResource(R.string.middlewares_unused)
+                    } else {
+                        pluralStringResource(R.plurals.middlewares_used_by, usageCount, usageCount)
                     },
                     last = true,
                 )
             }
 
-            SectionLabel("Configuration")
+            SectionLabel(stringResource(R.string.middlewares_configuration))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,17 +176,17 @@ fun MiddlewareDetailPane(
                 .padding(bottom = TmSpacing.lg),
         ) {
             TooltipIconButton(
-                label = "Edit middleware",
+                label = stringResource(R.string.middlewares_edit),
                 icon = Icons.Outlined.Edit,
                 onClick = { onEdit(middleware) },
             )
             TooltipIconButton(
-                label = "Delete middleware",
+                label = stringResource(R.string.middlewares_delete),
                 icon = Icons.Outlined.Delete,
                 onClick = { onDelete(middleware) },
             )
             TooltipIconButton(
-                label = "Copy YAML",
+                label = stringResource(R.string.middlewares_copy_yaml),
                 icon = Icons.Outlined.ContentCopy,
                 onClick = { clipboard.setText(AnnotatedString(middleware.yaml)) },
             )

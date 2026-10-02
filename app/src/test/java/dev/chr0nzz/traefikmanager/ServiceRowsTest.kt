@@ -12,6 +12,7 @@ import dev.chr0nzz.traefikmanager.data.model.ServiceProtocol
 import dev.chr0nzz.traefikmanager.data.model.ServiceRows
 import dev.chr0nzz.traefikmanager.data.model.ServiceTypes
 import dev.chr0nzz.traefikmanager.ui.services.ServiceChildDraft
+import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.services.ServiceDraft
 import dev.chr0nzz.traefikmanager.data.model.ServiceServer
 import dev.chr0nzz.traefikmanager.data.model.TraefikService
@@ -409,9 +410,9 @@ class ServiceDraftTest {
 
     @Test
     fun `an empty draft is refused before it reaches the server`() {
-        assertEquals("Give the service a name", ServiceDraft().problem())
+        assertEquals(UiText.of(R.string.services_error_no_name), ServiceDraft().problem())
         assertEquals(
-            "Add at least one backend",
+            UiText.of(R.string.services_error_no_backend),
             ServiceDraft(name = "pool", children = listOf(ServiceChildDraft())).problem(),
         )
     }
@@ -419,7 +420,7 @@ class ServiceDraftTest {
     @Test
     fun `a name the server would reject is refused here first`() {
         assertEquals(
-            "A name cannot contain @ / , : { or }",
+            UiText.Raw("A name cannot contain @ / , : { or }"),
             ServiceDraft(name = "bad@file").problem(),
         )
     }
@@ -431,7 +432,7 @@ class ServiceDraftTest {
             type = "loadBalancer",
             children = listOf(ServiceChildDraft(kind = ServiceChildDraft.SERVICE, name = "other")),
         )
-        assertEquals("A load balancer needs at least one address", draft.problem())
+        assertEquals(UiText.of(R.string.services_error_no_address), draft.problem())
     }
 
     @Test
