@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -47,19 +48,23 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 private val RESTART_METHODS = listOf(
-    "" to "None",
-    "proxy" to "Socket proxy",
-    "poison-pill" to "Poison pill",
-    "socket" to "Direct socket",
+    "" to R.string.agent_restart_none,
+    "proxy" to R.string.agent_restart_proxy,
+    "poison-pill" to R.string.agent_restart_poison,
+    "socket" to R.string.agent_restart_socket,
 )
 
 private val AGENT_TABS = listOf(
-    "logs" to "Logs",
-    "crowdsec" to "CrowdSec",
-    "certs" to "Certificates",
-    "plugins" to "Plugins",
+    "logs" to UiText.of(R.string.nav_logs),
+    "crowdsec" to UiText.Raw("CrowdSec"),
+    "certs" to UiText.of(R.string.nav_certificates),
+    "plugins" to UiText.of(R.string.nav_plugins),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,10 +77,11 @@ fun AgentConfigScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -90,15 +96,15 @@ fun AgentConfigScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(state.agentName.ifEmpty { "Agent" }) },
+                title = { Text(state.agentName.ifEmpty { stringResource(R.string.agent_agent) }) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back to servers")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.agent_back))
                     }
                 },
                 actions = {
                     TextButton(onClick = viewModel::save, enabled = state.dirty && !state.saving) {
-                        Text("Save")
+                        Text(stringResource(R.string.common_save))
                     }
                 },
             )
@@ -110,8 +116,8 @@ fun AgentConfigScreen(
         }
         state.error?.let { message ->
             ErrorState(
-                headline = "Could not read the agent",
-                body = message,
+                headline = stringResource(R.string.agent_error_load),
+                body = message.asString(),
                 onRetry = viewModel::load,
                 modifier = Modifier.padding(insets),
             )
@@ -133,29 +139,29 @@ fun AgentConfigScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("Agent") }
+            item { SectionLabel(stringResource(R.string.agent_agent)) }
             item {
                 TmCard {
-                    Field("Name", form.name, { v -> viewModel.edit { it.copy(name = v) } })
+                    Field(stringResource(R.string.common_label_name), form.name, { v -> viewModel.edit { it.copy(name = v) } })
                     Field(
-                        label = "Agent URL",
+                        label = stringResource(R.string.agent_agent_url),
                         value = form.url,
                         onChange = { v -> viewModel.edit { it.copy(url = v) } },
-                        support = "Where the manager reaches this agent, for example http://host:8090",
+                        support = stringResource(R.string.agent_where_the_manager_reaches_this_agent),
                         keyboard = KeyboardType.Uri,
                     )
                     Field(
-                        label = "Listen port",
+                        label = stringResource(R.string.agent_listen_port),
                         value = form.tmaPort,
                         onChange = { v -> viewModel.edit { it.copy(tmaPort = v) } },
-                        support = "TMA_PORT on the agent. Blank keeps its default.",
+                        support = stringResource(R.string.agent_tma_port_on_the_agent_blank),
                         keyboard = KeyboardType.Number,
                     )
                     Field(
-                        label = "Rate limit",
+                        label = stringResource(R.string.agent_rate_limit),
                         value = form.tmaRateLimit,
                         onChange = { v -> viewModel.edit { it.copy(tmaRateLimit = v) } },
-                        support = "Requests a minute the agent accepts. Blank keeps its default.",
+                        support = stringResource(R.string.agent_requests_a_minute_the_agent_accepts),
                         keyboard = KeyboardType.Number,
                         last = true,
                     )
@@ -166,52 +172,52 @@ fun AgentConfigScreen(
             item {
                 TmCard {
                     Field(
-                        label = "Traefik API URL",
+                        label = stringResource(R.string.agent_traefik_api_url),
                         value = form.traefikApiUrl,
                         onChange = { v -> viewModel.edit { it.copy(traefikApiUrl = v) } },
-                        support = "Where the agent reaches Traefik, not where you do.",
+                        support = stringResource(R.string.agent_where_the_agent_reaches_traefik_not),
                         keyboard = KeyboardType.Uri,
                     )
                     Field(
-                        "Certificate resolver",
+                        stringResource(R.string.common_label_cert_resolver),
                         form.certResolver,
                         { v -> viewModel.edit { it.copy(certResolver = v) } },
                     )
                     Field(
-                        label = "Domains",
+                        label = stringResource(R.string.common_label_domains),
                         value = form.domains,
                         onChange = { v -> viewModel.edit { it.copy(domains = v) } },
-                        support = "Comma separated. Offered when you create a route on this server.",
+                        support = stringResource(R.string.agent_comma_separated_offered_when_you_create),
                     )
                     ToggleRow(
-                        title = "Skip TLS verification",
-                        subtitle = "Only for a Traefik API behind a self-signed certificate.",
+                        title = stringResource(R.string.agent_skip_tls_verification),
+                        subtitle = stringResource(R.string.agent_only_for_a_traefik_api_behind),
                         checked = form.insecureSkipVerify,
                         onChange = { v -> viewModel.edit { it.copy(insecureSkipVerify = v) } },
                     )
                 }
             }
 
-            item { SectionLabel("Paths on the agent", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.agent_paths_on_the_agent), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
-                    Field("Dynamic config directory", form.configPath, { v -> viewModel.edit { it.copy(configPath = v) } })
+                    Field(stringResource(R.string.agent_dynamic_config_directory), form.configPath, { v -> viewModel.edit { it.copy(configPath = v) } })
                     Field(
-                        "Static config file",
+                        stringResource(R.string.agent_static_config_file),
                         form.staticConfigPath,
                         { v -> viewModel.edit { it.copy(staticConfigPath = v) } },
                     )
-                    Field("Backup directory", form.backupDir, { v -> viewModel.edit { it.copy(backupDir = v) } })
+                    Field(stringResource(R.string.agent_backup_directory), form.backupDir, { v -> viewModel.edit { it.copy(backupDir = v) } })
                     Field(
-                        label = "Backups to keep",
+                        label = stringResource(R.string.agent_backups_to_keep),
                         value = form.backupKeepCount,
                         onChange = { v -> viewModel.edit { it.copy(backupKeepCount = v) } },
                         keyboard = KeyboardType.Number,
                     )
                     Field("acme.json", form.acmeJsonPath, { v -> viewModel.edit { it.copy(acmeJsonPath = v) } })
-                    Field("Access log", form.accessLogPath, { v -> viewModel.edit { it.copy(accessLogPath = v) } })
+                    Field(stringResource(R.string.static_access_log), form.accessLogPath, { v -> viewModel.edit { it.copy(accessLogPath = v) } })
                     Field(
-                        "Plugins directory",
+                        stringResource(R.string.agent_plugins_directory),
                         form.pluginsDir,
                         { v -> viewModel.edit { it.copy(pluginsDir = v) } },
                         last = true,
@@ -219,11 +225,11 @@ fun AgentConfigScreen(
                 }
             }
 
-            item { SectionLabel("Restart", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.agent_restart), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     Text(
-                        text = "How the agent restarts Traefik after a config change.",
+                        text = stringResource(R.string.agent_restart_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                     )
@@ -235,37 +241,37 @@ fun AgentConfigScreen(
                             FilterChip(
                                 selected = form.restartMethod == value,
                                 onClick = { viewModel.edit { it.copy(restartMethod = value) } },
-                                label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                                label = { Text(stringResource(label), style = MaterialTheme.typography.labelSmall) },
                             )
                         }
                     }
                     when (form.restartMethod) {
                         "proxy" -> {
                             Field(
-                                label = "Docker host",
+                                label = stringResource(R.string.agent_docker_host),
                                 value = form.dockerHost,
                                 onChange = { v -> viewModel.edit { it.copy(dockerHost = v) } },
-                                support = "The socket proxy, for example tcp://socket-proxy:2375",
+                                support = stringResource(R.string.agent_the_socket_proxy_for_example_tcp),
                             )
                             Field(
-                                "Traefik container",
+                                stringResource(R.string.agent_traefik_container),
                                 form.traefikContainer,
                                 { v -> viewModel.edit { it.copy(traefikContainer = v) } },
                                 last = true,
                             )
                         }
                         "socket" -> Field(
-                            label = "Traefik container",
+                            label = stringResource(R.string.agent_traefik_container),
                             value = form.traefikContainer,
                             onChange = { v -> viewModel.edit { it.copy(traefikContainer = v) } },
-                            support = "The agent needs /var/run/docker.sock mounted.",
+                            support = stringResource(R.string.agent_the_agent_needs_var_run_docker),
                             last = true,
                         )
                         "poison-pill" -> Field(
-                            label = "Signal file",
+                            label = stringResource(R.string.agent_signal_file),
                             value = form.signalFilePath,
                             onChange = { v -> viewModel.edit { it.copy(signalFilePath = v) } },
-                            support = "A watcher container restarts Traefik when this file changes.",
+                            support = stringResource(R.string.agent_a_watcher_container_restarts_traefik_when),
                             last = true,
                         )
                     }
@@ -276,51 +282,51 @@ fun AgentConfigScreen(
             item {
                 TmCard {
                     Field(
-                        label = "LAPI URL",
+                        label = stringResource(R.string.agent_lapi_url),
                         value = form.crowdsecLapiUrl,
                         onChange = { v -> viewModel.edit { it.copy(crowdsecLapiUrl = v) } },
-                        support = "Used when generating this agent's compose file.",
+                        support = stringResource(R.string.agent_used_when_generating_this_agent_s),
                         keyboard = KeyboardType.Uri,
                     )
                     Field(
-                        label = "Bouncer API key",
+                        label = stringResource(R.string.agent_bouncer_api_key),
                         value = form.crowdsecApiKey,
                         onChange = { v -> viewModel.edit { it.copy(crowdsecApiKey = v) } },
                         support = if (state.crowdsecKeySet) {
-                            "A key is stored. Leave this empty to keep it."
+                            stringResource(R.string.agent_key_stored)
                         } else {
-                            "Reads /v1/decisions."
+                            stringResource(R.string.agent_key_help)
                         },
                         secret = true,
                     )
                     Field(
-                        "Machine id",
+                        stringResource(R.string.agent_machine_id),
                         form.crowdsecMachineId,
                         { v -> viewModel.edit { it.copy(crowdsecMachineId = v) } },
                     )
                     Field(
-                        label = "Machine password",
+                        label = stringResource(R.string.agent_machine_password),
                         value = form.crowdsecMachinePassword,
                         onChange = { v -> viewModel.edit { it.copy(crowdsecMachinePassword = v) } },
                         support = if (state.crowdsecPasswordSet) {
-                            "A password is stored. Leave this empty to keep it."
+                            stringResource(R.string.agent_password_stored)
                         } else {
-                            "Needed for alerts, which the bouncer key cannot read."
+                            stringResource(R.string.agent_password_help)
                         },
                         secret = true,
                     )
                     Field(
-                        "Client certificate",
+                        stringResource(R.string.agent_client_certificate),
                         form.crowdsecClientCert,
                         { v -> viewModel.edit { it.copy(crowdsecClientCert = v) } },
                     )
                     Field(
-                        "Client key",
+                        stringResource(R.string.agent_client_key),
                         form.crowdsecClientKey,
                         { v -> viewModel.edit { it.copy(crowdsecClientKey = v) } },
                     )
                     Field(
-                        "CA certificate",
+                        stringResource(R.string.agent_ca_certificate),
                         form.crowdsecCaCert,
                         { v -> viewModel.edit { it.copy(crowdsecCaCert = v) } },
                         last = true,
@@ -328,12 +334,12 @@ fun AgentConfigScreen(
                 }
             }
 
-            item { SectionLabel("Tabs on this server", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.agent_tabs_on_this_server), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     AGENT_TABS.forEachIndexed { index, (tab, label) ->
                         ToggleRow(
-                            title = label,
+                            title = label.asString(),
                             subtitle = null,
                             checked = form.visibleTabs[tab] ?: true,
                             onChange = { visible -> viewModel.toggleTab(tab, visible) },
@@ -341,7 +347,7 @@ fun AgentConfigScreen(
                         if (index < AGENT_TABS.lastIndex) CardDivider()
                     }
                     Text(
-                        text = "Hiding a tab here hides it in the app and the web UI for this server.",
+                        text = stringResource(R.string.agent_tabs_help),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.sm),
@@ -351,7 +357,7 @@ fun AgentConfigScreen(
 
             item {
                 Text(
-                    text = "Git backup for this agent is configured in the web UI.",
+                    text = stringResource(R.string.agent_git_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                     modifier = Modifier.padding(top = TmSpacing.sm),

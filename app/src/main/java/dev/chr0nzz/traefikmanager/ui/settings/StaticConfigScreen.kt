@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.ui.settings
 
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -60,6 +61,10 @@ import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 private sealed interface StaticEditing {
     data class Entrypoint(val form: EntrypointForm, val adding: Boolean) : StaticEditing
@@ -84,15 +89,16 @@ fun StaticConfigScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
     var rawOpen by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<StaticEditing?>(null) }
     var removing by remember { mutableStateOf<PendingRemoval?>(null) }
-    var formError by remember { mutableStateOf<String?>(null) }
+    var formError by remember { mutableStateOf<UiText?>(null) }
     var confirmDiscard by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
+        snackbarHostState.showSnackbar(message.resolve(resources))
         viewModel.consumeMessage()
     }
 
@@ -109,7 +115,7 @@ fun StaticConfigScreen(
             initial = open.form,
             adding = open.adding,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form ->
                 stage(
                     StaticSections.ENTRYPOINTS,
@@ -125,7 +131,7 @@ fun StaticConfigScreen(
             initial = open.form,
             adding = open.adding,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form ->
                 stage(
                     StaticSections.RESOLVERS,
@@ -141,7 +147,7 @@ fun StaticConfigScreen(
             initial = open.form,
             adding = open.adding,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form ->
                 stage(
                     StaticSections.PLUGINS,
@@ -156,35 +162,35 @@ fun StaticConfigScreen(
         StaticEditing.Providers -> ProvidersSheet(
             initial = state.providers,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form -> stage(StaticSections.PROVIDERS, "set", "", "", form.data()) },
             onDismiss = { editing = null; formError = null },
         )
         StaticEditing.Api -> ApiSheet(
             initial = state.api,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form -> stage(StaticSections.API, "set", "", "", form.data()) },
             onDismiss = { editing = null; formError = null },
         )
         StaticEditing.Log -> LogSheet(
             initial = state.log,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form -> stage(StaticSections.LOG, "set", "", "", form.data()) },
             onDismiss = { editing = null; formError = null },
         )
         StaticEditing.Observability -> ObservabilitySheet(
             initial = state.observability,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form -> stage(StaticSections.OBSERVABILITY, "set", "", "", form.data()) },
             onDismiss = { editing = null; formError = null },
         )
         StaticEditing.System -> SystemSheet(
             initial = state.system,
             busy = state.busy,
-            error = formError,
+            error = formError?.asString(),
             onSave = { form -> stage(StaticSections.SYSTEM, "set", "", "", form.data()) },
             onDismiss = { editing = null; formError = null },
         )
@@ -194,34 +200,34 @@ fun StaticConfigScreen(
     removing?.let { target ->
         AlertDialog(
             onDismissRequest = { removing = null },
-            title = { Text("Remove item") },
-            text = { Text("Remove \"${target.name}\"? It goes when you save.") },
+            title = { Text(stringResource(R.string.static_remove_title)) },
+            text = { Text(stringResource(R.string.static_remove_body, target.name)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         stage(target.section, "remove", target.name, "", kotlinx.serialization.json.JsonObject(emptyMap()))
                         removing = null
                     },
-                ) { Text("Remove") }
+                ) { Text(stringResource(R.string.common_remove)) }
             },
-            dismissButton = { TextButton(onClick = { removing = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
-            title = { Text("Discard changes") },
-            text = { Text("Reload the file from the server and lose what you have staged?") },
+            title = { Text(stringResource(R.string.static_discard_title)) },
+            text = { Text(stringResource(R.string.static_discard_body)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         confirmDiscard = false
                         viewModel.discard()
                     },
-                ) { Text("Discard") }
+                ) { Text(stringResource(R.string.static_discard)) }
             },
-            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text("Keep editing") } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.static_keep_editing)) } },
         )
     }
 
@@ -236,28 +242,28 @@ fun StaticConfigScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(if (rawOpen) "Raw YAML" else "Static config") },
+                title = { Text(stringResource(if (rawOpen) R.string.routes_raw_title else R.string.settings_static_title)) },
                 navigationIcon = {
                     IconButton(onClick = { if (rawOpen) rawOpen = false else onClose() }) {
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = if (rawOpen) "Back to sections" else "Back to settings",
+                            contentDescription = stringResource(if (rawOpen) R.string.static_back_sections else R.string.settings_back),
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { rawOpen = !rawOpen }) {
-                        Icon(Icons.Outlined.Code, contentDescription = "Raw YAML editor")
+                        Icon(Icons.Outlined.Code, contentDescription = stringResource(R.string.static_raw_editor))
                     }
                     IconButton(
                         onClick = { if (state.pending || viewModel.dirty) confirmDiscard = true else viewModel.load() },
                     ) {
-                        Icon(Icons.Outlined.Refresh, contentDescription = "Reload from the server")
+                        Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.static_reload))
                     }
                     TextButton(
                         onClick = viewModel::save,
                         enabled = !state.saving && (state.pending || viewModel.dirty),
-                    ) { Text("Save") }
+                    ) { Text(stringResource(R.string.common_save)) }
                 },
             )
         },
@@ -265,8 +271,8 @@ fun StaticConfigScreen(
         when {
             state.loading -> LoadingState(modifier = Modifier.padding(insets))
             state.loadError != null -> ErrorState(
-                headline = "Could not read the static config",
-                body = state.loadError,
+                headline = stringResource(R.string.static_error_load),
+                body = state.loadError?.asString(),
                 onRetry = viewModel::load,
                 modifier = Modifier.padding(insets),
             )
@@ -286,7 +292,7 @@ fun StaticConfigScreen(
                 )
                 state.saveError?.let { error ->
                     Text(
-                        text = error,
+                        text = error.asString(),
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
                         color = palette.red,
                         modifier = Modifier.padding(horizontal = TmSpacing.lg, vertical = TmSpacing.xs),
@@ -331,7 +337,7 @@ private fun StateBar(
                 .height(IntrinsicSize.Min),
         ) {
             Text(
-                text = "Unsaved changes - nothing is written until you save.",
+                text = stringResource(R.string.static_unsaved),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -339,8 +345,8 @@ private fun StateBar(
                 horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 modifier = Modifier.padding(top = TmSpacing.xs),
             ) {
-                Button(onClick = onSave) { Text("Save") }
-                TextButton(onClick = onDiscard) { Text("Discard") }
+                Button(onClick = onSave) { Text(stringResource(R.string.common_save)) }
+                TextButton(onClick = onDiscard) { Text(stringResource(R.string.static_discard)) }
             }
         }
         saved -> TmCard(
@@ -350,14 +356,14 @@ private fun StateBar(
                 .height(IntrinsicSize.Min),
         ) {
             Text(
-                text = "Saved. Traefik is still running the previous config.",
+                text = stringResource(R.string.static_saved_pending),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Row(modifier = Modifier.padding(top = TmSpacing.xs)) {
                 Button(onClick = onRestart, enabled = !restarting) {
                     Icon(Icons.Outlined.RestartAlt, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Text("Restart Traefik", modifier = Modifier.padding(start = TmSpacing.xs))
+                    Text(stringResource(R.string.common_restart_traefik), modifier = Modifier.padding(start = TmSpacing.xs))
                 }
             }
         }
@@ -382,19 +388,19 @@ private fun Sections(
         ),
         verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
     ) {
-        item { SectionLabel("Traffic in") }
+        item { SectionLabel(stringResource(R.string.static_traffic_in)) }
 
         item {
             ListSectionCard(
-                title = "Entrypoints",
+                title = stringResource(R.string.static_entrypoints),
                 count = state.entrypoints.size,
-                empty = "No entrypoints configured",
+                empty = stringResource(R.string.static_no_entrypoints_configured),
                 onAdd = { onEdit(StaticEditing.Entrypoint(EntrypointForm(), adding = true)) },
             ) {
                 state.entrypoints.forEachIndexed { index, (name, entry) ->
                     ItemRow(
                         title = name,
-                        subtitle = EntrypointForm.read(name, entry).address.ifBlank { "no address" },
+                        subtitle = EntrypointForm.read(name, entry).address.ifBlank { stringResource(R.string.static_no_address) },
                         onClick = { onEdit(StaticEditing.Entrypoint(EntrypointForm.read(name, entry), false)) },
                         onRemove = { onRemove(StaticSections.ENTRYPOINTS, name) },
                     )
@@ -405,30 +411,30 @@ private fun Sections(
 
         item {
             SettingsSectionCard(
-                title = "Providers",
+                title = stringResource(R.string.nav_section_providers),
                 summary = buildList {
-                    if (state.providers.docker) add("docker") else add("docker off")
-                    if (state.providers.file) add("file") else add("file off")
+                    add(if (state.providers.docker) "docker" else stringResource(R.string.static_chip_off, "docker"))
+                    add(if (state.providers.file) "file" else stringResource(R.string.static_chip_off, "file"))
                     state.otherProviders.forEach { add(it) }
                 }.joinToString(" · "),
                 onClick = { onEdit(StaticEditing.Providers) },
             )
         }
 
-        item { SectionLabel("Certificates", modifier = Modifier.padding(top = TmSpacing.sm)) }
+        item { SectionLabel(stringResource(R.string.nav_certificates), modifier = Modifier.padding(top = TmSpacing.sm)) }
 
         item {
             ListSectionCard(
-                title = "Certificate resolvers",
+                title = stringResource(R.string.static_certificate_resolvers),
                 count = state.resolvers.size,
-                empty = "No certificate resolvers configured",
+                empty = stringResource(R.string.static_no_certificate_resolvers_configured),
                 onAdd = { onEdit(StaticEditing.Resolver(ResolverForm(), adding = true)) },
             ) {
                 state.resolvers.forEachIndexed { index, (name, entry) ->
                     val form = ResolverForm.read(name, entry)
                     ItemRow(
                         title = name,
-                        subtitle = form.email.ifBlank { "no email set" },
+                        subtitle = form.email.ifBlank { stringResource(R.string.static_no_email) },
                         warn = form.email.isBlank(),
                         onClick = { onEdit(StaticEditing.Resolver(form, false)) },
                         onRemove = { onRemove(StaticSections.RESOLVERS, name) },
@@ -438,15 +444,15 @@ private fun Sections(
             }
         }
 
-        item { SectionLabel("Operations", modifier = Modifier.padding(top = TmSpacing.sm)) }
+        item { SectionLabel(stringResource(R.string.static_operations), modifier = Modifier.padding(top = TmSpacing.sm)) }
 
         item {
             SettingsSectionCard(
-                title = "API and dashboard",
+                title = stringResource(R.string.static_api_and_dashboard),
                 summary = buildList {
-                    add(if (state.api.enabled) "enabled" else "disabled")
-                    add(if (state.api.dashboard) "dashboard on" else "dashboard off")
-                    if (state.api.insecure) add("insecure on")
+                    add(stringResource(if (state.api.enabled) R.string.static_chip_enabled else R.string.static_chip_disabled))
+                    add(stringResource(if (state.api.dashboard) R.string.static_chip_dashboard_on else R.string.static_chip_dashboard_off))
+                    if (state.api.insecure) add(stringResource(R.string.static_chip_insecure_on))
                 }.joinToString(" · "),
                 warn = state.api.insecure || !state.api.enabled,
                 onClick = { onEdit(StaticEditing.Api) },
@@ -455,12 +461,12 @@ private fun Sections(
 
         item {
             SettingsSectionCard(
-                title = "Logging",
+                title = stringResource(R.string.static_logging),
                 summary = buildList {
                     add(state.log.level)
                     add(state.log.logFormat.ifBlank { "text" })
                     add(state.log.logFile.ifBlank { "stdout" })
-                    add(if (state.log.accessLog) "access log on" else "access log off")
+                    add(stringResource(if (state.log.accessLog) R.string.dashboard_runtime_access_log_on else R.string.dashboard_runtime_access_log_off))
                 }.joinToString(" · "),
                 warn = !state.log.accessLog,
                 onClick = { onEdit(StaticEditing.Log) },
@@ -469,11 +475,11 @@ private fun Sections(
 
         item {
             SettingsSectionCard(
-                title = "Observability",
+                title = stringResource(R.string.nav_section_observability),
                 summary = buildList {
-                    add(if (state.observability.ping) "ping on" else "ping off")
-                    add(if (state.observability.prometheus) "metrics on" else "metrics off")
-                    add(if (state.observability.tracing) "tracing on" else "tracing off")
+                    add(stringResource(if (state.observability.ping) R.string.static_chip_ping_on else R.string.static_chip_ping_off))
+                    add(stringResource(if (state.observability.prometheus) R.string.static_chip_metrics_on else R.string.dashboard_runtime_metrics_off))
+                    add(stringResource(if (state.observability.tracing) R.string.static_chip_tracing_on else R.string.dashboard_runtime_tracing_off))
                 }.joinToString(" · "),
                 onClick = { onEdit(StaticEditing.Observability) },
             )
@@ -481,11 +487,11 @@ private fun Sections(
 
         item {
             SettingsSectionCard(
-                title = "System",
+                title = stringResource(R.string.nav_section_system),
                 summary = buildList {
-                    add(if (state.system.checkNewVersion) "version check on" else "version check off")
-                    add(if (state.system.sendUsage) "usage stats on" else "usage stats off")
-                    add(if (state.system.ruleSyntax == "v2") "rule syntax v2" else "rule syntax v3")
+                    add(stringResource(if (state.system.checkNewVersion) R.string.static_chip_version_on else R.string.static_chip_version_off))
+                    add(stringResource(if (state.system.sendUsage) R.string.static_chip_usage_on else R.string.static_chip_usage_off))
+                    add(stringResource(R.string.static_chip_rule_syntax, if (state.system.ruleSyntax == "v2") "v2" else "v3"))
                 }.joinToString(" · "),
                 onClick = { onEdit(StaticEditing.System) },
             )
@@ -493,15 +499,15 @@ private fun Sections(
 
         item {
             ListSectionCard(
-                title = "Plugins",
+                title = stringResource(R.string.nav_plugins),
                 count = state.plugins.size,
-                empty = "No plugins installed",
+                empty = stringResource(R.string.static_no_plugins_installed),
                 onAdd = { onEdit(StaticEditing.Plugin(StaticPluginForm(), adding = true)) },
             ) {
                 state.plugins.forEachIndexed { index, (name, module, local) ->
                     ItemRow(
                         title = name,
-                        subtitle = if (local) "local plugin" else module,
+                        subtitle = if (local) stringResource(R.string.static_plugin_is_local) else module,
                         onClick = {
                             onEdit(
                                 StaticEditing.Plugin(
@@ -519,7 +525,7 @@ private fun Sections(
 
         item {
             Text(
-                text = "Anything these forms do not cover is in the raw YAML, top right.",
+                text = stringResource(R.string.static_raw_note),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.muted,
                 modifier = Modifier.padding(top = TmSpacing.sm),
@@ -551,7 +557,7 @@ private fun ListSectionCard(
                 color = palette.muted,
             )
             IconButton(onClick = onAdd) {
-                Icon(Icons.Outlined.Add, contentDescription = "Add to $title", modifier = Modifier.size(18.dp))
+                Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.static_add_to, title), modifier = Modifier.size(18.dp))
             }
         }
         if (count == 0) {
@@ -593,11 +599,11 @@ private fun ItemRow(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        TextButton(onClick = onClick) { Text("Edit") }
+        TextButton(onClick = onClick) { Text(stringResource(R.string.common_edit)) }
         IconButton(onClick = onRemove) {
             Icon(
                 Icons.Outlined.Delete,
-                contentDescription = "Remove $title",
+                contentDescription = stringResource(R.string.common_remove_named, title),
                 tint = palette.red,
                 modifier = Modifier.size(18.dp),
             )

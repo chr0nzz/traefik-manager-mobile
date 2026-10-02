@@ -35,6 +35,8 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +46,7 @@ fun StaticFormSheet(
     error: String?,
     onSave: () -> Unit,
     onDismiss: () -> Unit,
-    saveLabel: String = "Save",
+    saveLabel: String = stringResource(R.string.common_save),
     extraAction: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -86,7 +88,7 @@ fun StaticFormSheet(
                     Text(saveLabel)
                 }
                 extraAction?.invoke()
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         }
     }

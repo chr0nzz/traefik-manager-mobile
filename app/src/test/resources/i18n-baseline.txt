@@ -3,5 +3,4 @@ data/repo 79
 data/store 3
 push 8
 ui/crowdsec 1
-ui/settings 255
 widget 96

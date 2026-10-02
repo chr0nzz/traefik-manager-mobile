@@ -18,6 +18,8 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.put
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class AgentForm(
     val name: String = "",
@@ -58,8 +60,8 @@ data class AgentConfigUiState(
     val crowdsecPasswordSet: Boolean = false,
     val dirty: Boolean = false,
     val saved: Boolean = false,
-    val message: String? = null,
-    val error: String? = null,
+    val message: UiText? = null,
+    val error: UiText? = null,
 )
 
 @HiltViewModel
@@ -85,7 +87,7 @@ class AgentConfigViewModel @Inject constructor(
             runCatching { serversRepository.config(agentId) }.fold(
                 onSuccess = { config ->
                     if (config == null) {
-                        _state.update { it.copy(loading = false, error = "That agent is no longer registered") }
+                        _state.update { it.copy(loading = false, error = UiText.of(R.string.agent_error_gone)) }
                         return@fold
                     }
                     original = config.toForm()
@@ -102,7 +104,7 @@ class AgentConfigViewModel @Inject constructor(
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(loading = false, error = throwable.message ?: "Could not read the agent")
+                        it.copy(loading = false, error = UiText.messageOr(throwable.message, R.string.agent_error_load))
                     }
                 },
             )
@@ -125,7 +127,7 @@ class AgentConfigViewModel @Inject constructor(
     fun save() {
         val form = _state.value.form
         if (form.name.isBlank() || form.url.isBlank()) {
-            _state.update { it.copy(message = "Name and URL are required") }
+            _state.update { it.copy(message = UiText.of(R.string.agent_error_required)) }
             return
         }
         val changes = buildMap<String, JsonElement> {
@@ -179,7 +181,7 @@ class AgentConfigViewModel @Inject constructor(
         }
 
         if (changes.isEmpty()) {
-            _state.update { it.copy(message = "Nothing to save") }
+            _state.update { it.copy(message = UiText.of(R.string.agent_nothing_to_save)) }
             return
         }
 
@@ -187,12 +189,12 @@ class AgentConfigViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { serversRepository.update(agentId, changes) }.fold(
                 onSuccess = {
-                    _state.update { it.copy(saving = false, saved = true, message = "Agent saved") }
+                    _state.update { it.copy(saving = false, saved = true, message = UiText.of(R.string.agent_saved)) }
                     load()
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, message = throwable.message ?: "Could not save the agent")
+                        it.copy(saving = false, message = UiText.messageOr(throwable.message, R.string.agent_error_save))
                     }
                 },
             )

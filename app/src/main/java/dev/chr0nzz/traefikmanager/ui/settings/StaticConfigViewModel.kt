@@ -19,15 +19,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 data class StaticConfigUiState(
     val loading: Boolean = true,
     val saving: Boolean = false,
     val restarting: Boolean = false,
     val path: String = "",
-    val loadError: String? = null,
-    val saveError: String? = null,
-    val message: String? = null,
+    val loadError: UiText? = null,
+    val saveError: UiText? = null,
+    val message: UiText? = null,
     val restartPending: Boolean = false,
     val staged: String = "",
     val parsed: JsonObject? = null,
@@ -85,7 +87,7 @@ class StaticConfigViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             loading = false,
-                            loadError = throwable.message ?: "Could not read the static config",
+                            loadError = UiText.messageOr(throwable.message, R.string.static_error_load),
                         )
                     }
                 },
@@ -105,7 +107,7 @@ class StaticConfigViewModel @Inject constructor(
         name: String = "",
         oldName: String = "",
         data: JsonObject = JsonObject(emptyMap()),
-        onDone: (String?) -> Unit = {},
+        onDone: (UiText?) -> Unit = {},
     ) {
         val currentRaw = content.text.toString().ifBlank { _state.value.staged }
         _state.update { it.copy(busy = true, saveError = null) }
@@ -126,7 +128,7 @@ class StaticConfigViewModel @Inject constructor(
                     onDone(null)
                 },
                 onFailure = { throwable ->
-                    val message = throwable.message ?: "Could not apply the change"
+                    val message = UiText.messageOr(throwable.message, R.string.static_error_apply)
                     _state.update { it.copy(busy = false) }
                     onDone(message)
                 },
@@ -147,14 +149,14 @@ class StaticConfigViewModel @Inject constructor(
                             restartPending = true,
                             pending = false,
                             staged = body,
-                            message = "Static config saved",
+                            message = UiText.of(R.string.static_saved),
                         )
                     }
                     load()
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(saving = false, saveError = throwable.message ?: "Save failed")
+                        it.copy(saving = false, saveError = UiText.messageOr(throwable.message, R.string.static_error_save))
                     }
                 },
             )
@@ -167,12 +169,12 @@ class StaticConfigViewModel @Inject constructor(
             runCatching { repository.restart() }.fold(
                 onSuccess = {
                     _state.update {
-                        it.copy(restarting = false, restartPending = false, message = "Traefik restarted")
+                        it.copy(restarting = false, restartPending = false, message = UiText.of(R.string.common_traefik_restarted))
                     }
                 },
                 onFailure = { throwable ->
                     _state.update {
-                        it.copy(restarting = false, message = throwable.message ?: "Restart failed")
+                        it.copy(restarting = false, message = UiText.messageOr(throwable.message, R.string.common_error_restart))
                     }
                 },
             )

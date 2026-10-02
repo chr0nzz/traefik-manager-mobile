@@ -1834,4 +1834,268 @@
     <string name="auth_error_revoke">Could not revoke the key</string>
     <string name="auth_sessions_revoked">Other browser sessions signed out</string>
     <string name="auth_error_sessions">Could not sign out other sessions</string>
+
+    <string name="static_http_to_https_redirect_optional">HTTP to HTTPS redirect (optional)</string>
+    <string name="static_the_https_entrypoint_to_redirect_to">The HTTPS entrypoint to redirect to.</string>
+    <string name="static_enable_http_3_quic">Enable HTTP/3 (QUIC)</string>
+    <string name="static_adds_http3_to_this_entrypoint">Adds http3 to this entrypoint.</string>
+    <!-- HTTP headers with an underscore in the name -->
+    <string name="static_underscore_headers">Underscore headers</string>
+    <!-- Keep forwardAuth as it is. Delete is the name of an option -->
+    <string name="static_stops_underscore_header_aliases_from_bypassing">Stops underscore header aliases from bypassing forwardAuth. Delete recommended.</string>
+    <string name="static_trusted_ips_forwarded_headers">Trusted IPs - forwarded headers</string>
+    <string name="static_ips_or_cidrs_allowed_to_set">IPs or CIDRs allowed to set X-Forwarded-*, one per line.</string>
+    <string name="static_trusted_ips_proxy_protocol">Trusted IPs - PROXY protocol</string>
+    <string name="static_enables_proxy_protocol_from_these_load">Enables PROXY protocol from these load balancers, one per line.</string>
+    <string name="static_trust_forwarded_headers_from_everyone">Trust forwarded headers from everyone</string>
+    <string name="static_insecure_lets_any_client_forge_its">Insecure: lets any client forge its IP.</string>
+    <string name="static_accept_proxy_protocol_from_everyone">Accept PROXY protocol from everyone</string>
+    <string name="static_insecure_testing_only">Insecure, testing only.</string>
+    <string name="static_middleware_chain_optional">Middleware chain (optional)</string>
+    <string name="static_prepended_to_every_router_here_comma">Prepended to every router here, comma separated, provider suffix included.</string>
+    <string name="static_tls_on_every_router">TLS on every router</string>
+    <string name="static_routers_on_this_entrypoint_get_tls">Routers on this entrypoint get TLS by default.</string>
+    <string name="static_default_cert_resolver_optional">Default cert resolver (optional)</string>
+    <string name="static_default_tls_options_optional">Default TLS options (optional)</string>
+    <string name="static_default_entrypoint">Default entrypoint</string>
+    <string name="static_used_by_routers_that_list_no">Used by routers that list no entrypoints.</string>
+    <!-- Label for the idle timeout -->
+    <string name="static_idle">Idle</string>
+    <string name="static_forms_like_30_30s_or_1m30s">Forms like 30, 30s or 1m30s. 0 is unlimited.</string>
+    <string name="static_challenge_type">Challenge type</string>
+    <string name="static_dns_provider">DNS provider</string>
+    <string name="static_http_entrypoint">HTTP entrypoint</string>
+    <string name="static_ca_server_optional">CA server (optional)</string>
+    <string name="static_key_type_optional">Key type (optional)</string>
+    <string name="static_eab_hmac_optional">EAB HMAC (optional)</string>
+    <string name="static_both_are_needed_together_or_neither">Both are needed together, or neither.</string>
+    <string name="static_dns_check_resolvers_optional">DNS check resolvers (optional)</string>
+    <string name="static_used_to_verify_the_record_before">Used to verify the record before asking for the certificate, one per line.</string>
+    <string name="static_propagation_delay_optional">Propagation delay (optional)</string>
+    <string name="static_disable_propagation_checks">Disable propagation checks</string>
+    <string name="static_module">Module</string>
+    <string name="static_local_plugin">Local plugin</string>
+    <string name="static_loaded_from_the_plugins_local_directory">Loaded from the plugins-local directory, no version needed.</string>
+    <string name="static_save_changes">Save changes</string>
+    <!-- Label for the address of the Docker socket or API -->
+    <string name="static_endpoint">Endpoint</string>
+    <string name="static_expose_by_default">Expose by default</string>
+    <string name="static_every_container_is_routable_unless_it">Every container is routable unless it opts out.</string>
+    <!-- Label for a folder path -->
+    <string name="static_directory">Directory</string>
+    <string name="static_providers_throttle_optional">Providers throttle (optional)</string>
+    <string name="static_minimum_time_between_config_reloads">Minimum time between config reloads.</string>
+    <string name="static_api_and_dashboard">API and dashboard</string>
+    <string name="static_api_enabled">API enabled</string>
+    <string name="static_insecure_mode">Insecure mode</string>
+    <string name="static_exposes_the_api_without_authentication">Exposes the API without authentication.</string>
+    <string name="static_logging">Logging</string>
+    <string name="static_log_level">Log level</string>
+    <string name="static_log_format">Log format</string>
+    <string name="static_traefik_log_file">Traefik log file</string>
+    <string name="static_leave_empty_for_stdout">Leave empty for stdout.</string>
+    <string name="static_access_log">Access log</string>
+    <string name="static_without_it_the_logs_tab_has">Without it the Logs tab has nothing to read.</string>
+    <string name="static_access_log_file">Access log file</string>
+    <string name="static_empty_for_stdout">Empty for stdout.</string>
+    <!-- Label for the log format -->
+    <string name="static_format">Format</string>
+    <string name="static_status_code_filter_optional">Status code filter (optional)</string>
+    <string name="static_only_log_these_responses_comma_separated">Only log these responses, comma separated codes or ranges.</string>
+    <string name="static_min_duration_filter_optional">Min duration filter (optional)</string>
+    <string name="static_only_log_requests_slower_than_this">Only log requests slower than this.</string>
+    <string name="static_buffering_lines_optional">Buffering (lines, optional)</string>
+    <string name="static_headers">Headers</string>
+    <string name="static_ping_endpoint">Ping endpoint</string>
+    <string name="static_prometheus_metrics">Prometheus metrics</string>
+    <!-- Request tracing, a Traefik feature -->
+    <string name="static_tracing">Tracing</string>
+    <!-- The Traefik dashboard, a web page Traefik serves -->
+    <string name="static_dashboard">Dashboard</string>
+    <!-- Keep /ping as it is -->
+    <string name="static_ping_help">/ping health check.</string>
+    <string name="static_service_name_optional">Service name (optional)</string>
+    <string name="static_sample_rate_optional">Sample rate (optional)</string>
+    <string name="static_between_0_and_1">Between 0 and 1.</string>
+    <string name="static_otlp_http_endpoint_optional">OTLP HTTP endpoint (optional)</string>
+    <string name="static_defaults_to_localhost_4318">Defaults to localhost:4318.</string>
+    <string name="static_check_for_new_traefik_versions">Check for new Traefik versions</string>
+    <string name="static_send_anonymous_usage_statistics">Send anonymous usage statistics</string>
+    <string name="static_default_rule_syntax">Default rule syntax</string>
+    <string name="static_only_change_this_while_migrating_rules">Only change this while migrating rules written for Traefik v2.</string>
+    <string name="static_skip_backend_tls_verification">Skip backend TLS verification</string>
+    <string name="static_insecure">Insecure.</string>
+    <string name="static_root_cas_optional">Root CAs (optional)</string>
+    <string name="static_one_path_per_line">One path per line.</string>
+    <string name="static_max_idle_conns_per_host_optional">Max idle conns per host (optional)</string>
+    <string name="static_address">Address</string>
+    <string name="static_trusted_sources">Trusted sources</string>
+    <!-- Section heading -->
+    <string name="static_routing">Routing</string>
+    <string name="static_responding_timeouts">Responding timeouts</string>
+    <!-- Label for the read timeout -->
+    <string name="static_read">Read</string>
+    <!-- Label for the write timeout -->
+    <string name="static_write">Write</string>
+    <string name="static_email">Email</string>
+    <string name="static_storage_path">Storage path</string>
+    <string name="static_external_account_binding">External account binding</string>
+    <string name="static_eab_key_id_optional">EAB key ID (optional)</string>
+    <string name="static_dns_checks">DNS checks</string>
+    <!-- Toggle: watch for changes -->
+    <string name="static_watch">Watch</string>
+    <string name="static_reloads">Reloads</string>
+    <string name="static_debug_mode">Debug mode</string>
+    <!-- Section heading: log file rotation -->
+    <string name="static_rotation">Rotation</string>
+    <string name="static_max_size_mb">Max size (MB)</string>
+    <string name="static_max_backups">Max backups</string>
+    <string name="static_max_age_days">Max age (days)</string>
+    <string name="static_compress_rotated_files">Compress rotated files</string>
+    <string name="static_only_log_retry_attempts">Only log retry attempts</string>
+    <string name="static_entrypoint_labels">Entrypoint labels</string>
+    <string name="static_router_labels">Router labels</string>
+    <string name="static_service_labels">Service labels</string>
+    <string name="static_servers_transport_defaults">Servers transport defaults</string>
+    <string name="static_forwarding_timeouts">Forwarding timeouts</string>
+    <!-- Label for the timeout when connecting to a backend -->
+    <string name="static_dial">Dial</string>
+    <string name="static_response_header">Response header</string>
+    <string name="static_idle_connection">Idle connection</string>
+    <string name="static_entrypoint_new">New entrypoint</string>
+    <string name="static_entrypoint_edit">Edit entrypoint</string>
+    <string name="static_entrypoint_add">Add entrypoint</string>
+    <string name="static_resolver_new">New resolver</string>
+    <string name="static_resolver_edit">Edit resolver</string>
+    <string name="static_resolver_add">Add resolver</string>
+    <string name="static_plugin_new">New plugin</string>
+    <!-- Keep Let's Encrypt as it is -->
+    <string name="static_ca_placeholder">Let\'s Encrypt production</string>
+    <string name="static_api_enabled_body">Traefik Manager reads routes, services and middlewares from this API. With it off those tabs are empty.</string>
+    <string name="agent_agent_url">Agent URL</string>
+    <string name="agent_where_the_manager_reaches_this_agent">Where the manager reaches this agent, for example http://host:8090</string>
+    <string name="agent_listen_port">Listen port</string>
+    <string name="agent_tma_port_on_the_agent_blank">TMA_PORT on the agent. Blank keeps its default.</string>
+    <string name="agent_rate_limit">Rate limit</string>
+    <string name="agent_requests_a_minute_the_agent_accepts">Requests a minute the agent accepts. Blank keeps its default.</string>
+    <string name="agent_traefik_api_url">Traefik API URL</string>
+    <string name="agent_where_the_agent_reaches_traefik_not">Where the agent reaches Traefik, not where you do.</string>
+    <string name="agent_comma_separated_offered_when_you_create">Comma separated. Offered when you create a route on this server.</string>
+    <string name="agent_skip_tls_verification">Skip TLS verification</string>
+    <string name="agent_only_for_a_traefik_api_behind">Only for a Traefik API behind a self-signed certificate.</string>
+    <string name="agent_backups_to_keep">Backups to keep</string>
+    <string name="agent_docker_host">Docker host</string>
+    <string name="agent_the_socket_proxy_for_example_tcp">The socket proxy, for example tcp://socket-proxy:2375</string>
+    <string name="agent_traefik_container">Traefik container</string>
+    <string name="agent_the_agent_needs_var_run_docker">The agent needs /var/run/docker.sock mounted.</string>
+    <!-- A file whose change tells a watcher to restart Traefik -->
+    <string name="agent_signal_file">Signal file</string>
+    <string name="agent_a_watcher_container_restarts_traefik_when">A watcher container restarts Traefik when this file changes.</string>
+    <string name="agent_lapi_url">LAPI URL</string>
+    <string name="agent_used_when_generating_this_agent_s">Used when generating this agent\'s compose file.</string>
+    <string name="agent_bouncer_api_key">Bouncer API key</string>
+    <string name="agent_machine_password">Machine password</string>
+    <string name="agent_agent">Agent</string>
+    <string name="agent_paths_on_the_agent">Paths on the agent</string>
+    <string name="agent_dynamic_config_directory">Dynamic config directory</string>
+    <string name="agent_backup_directory">Backup directory</string>
+    <!-- Section heading: how Traefik is restarted -->
+    <string name="agent_restart">Restart</string>
+    <string name="agent_tabs_on_this_server">Tabs on this server</string>
+    <string name="agent_static_config_file">Static config file</string>
+    <string name="agent_plugins_directory">Plugins directory</string>
+    <string name="agent_machine_id">Machine id</string>
+    <string name="agent_client_certificate">Client certificate</string>
+    <string name="agent_client_key">Client key</string>
+    <string name="agent_ca_certificate">CA certificate</string>
+    <!-- Restart method: Traefik is not restarted -->
+    <string name="agent_restart_none">None</string>
+    <!-- Restart method: through a Docker socket proxy -->
+    <string name="agent_restart_proxy">Socket proxy</string>
+    <!-- Restart method: a signal file that a watcher container reacts to -->
+    <string name="agent_restart_poison">Poison pill</string>
+    <!-- Restart method: through the Docker socket -->
+    <string name="agent_restart_socket">Direct socket</string>
+    <string name="agent_back">Back to servers</string>
+    <string name="agent_error_load">Could not read the agent</string>
+    <string name="agent_key_stored">A key is stored. Leave this empty to keep it.</string>
+    <!-- Keep /v1/decisions as it is -->
+    <string name="agent_key_help">Reads /v1/decisions.</string>
+    <string name="agent_password_stored">A password is stored. Leave this empty to keep it.</string>
+    <string name="agent_password_help">Needed for alerts, which the bouncer key cannot read.</string>
+    <string name="agent_restart_help">How the agent restarts Traefik after a config change.</string>
+    <string name="agent_tabs_help">Hiding a tab here hides it in the app and the web UI for this server.</string>
+    <string name="agent_git_note">Git backup for this agent is configured in the web UI.</string>
+    <string name="agent_error_gone">That agent is no longer registered</string>
+    <string name="agent_error_required">Name and URL are required</string>
+    <string name="agent_nothing_to_save">Nothing to save</string>
+    <string name="agent_saved">Agent saved</string>
+    <string name="agent_error_save">Could not save the agent</string>
+    <!-- Traefik entrypoints -->
+    <string name="static_entrypoints">Entrypoints</string>
+    <string name="static_no_entrypoints_configured">No entrypoints configured</string>
+    <string name="static_certificate_resolvers">Certificate resolvers</string>
+    <string name="static_no_certificate_resolvers_configured">No certificate resolvers configured</string>
+    <string name="static_no_plugins_installed">No plugins installed</string>
+    <string name="static_traffic_in">Traffic in</string>
+    <!-- Section heading: settings for running Traefik -->
+    <string name="static_operations">Operations</string>
+    <string name="static_remove_title">Remove item</string>
+    <!-- %1$s is the name of an entrypoint, resolver or plugin -->
+    <string name="static_remove_body">Remove \"%1$s\"? It goes when you save.</string>
+    <string name="static_discard_title">Discard changes</string>
+    <string name="static_discard_body">Reload the file from the server and lose what you have staged?</string>
+    <!-- Button that throws away unsaved changes -->
+    <string name="static_discard">Discard</string>
+    <string name="static_keep_editing">Keep editing</string>
+    <string name="static_back_sections">Back to sections</string>
+    <string name="static_raw_editor">Raw YAML editor</string>
+    <string name="static_reload">Reload from the server</string>
+    <string name="static_error_load">Could not read the static config</string>
+    <string name="static_unsaved">Unsaved changes - nothing is written until you save.</string>
+    <string name="static_saved_pending">Saved. Traefik is still running the previous config.</string>
+    <!-- Lowercase -->
+    <string name="static_no_address">no address</string>
+    <!-- Lowercase status chip. %1$s is a Traefik provider name such as docker -->
+    <string name="static_chip_off">%1$s off</string>
+    <!-- Lowercase -->
+    <string name="static_no_email">no email set</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_enabled">enabled</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_disabled">disabled</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_dashboard_on">dashboard on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_dashboard_off">dashboard off</string>
+    <!-- Lowercase status chip: the API is open without authentication -->
+    <string name="static_chip_insecure_on">insecure on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_ping_on">ping on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_ping_off">ping off</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_metrics_on">metrics on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_tracing_on">tracing on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_version_on">version check on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_version_off">version check off</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_usage_on">usage stats on</string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_usage_off">usage stats off</string>
+    <!-- Lowercase status chip. %1$s is v2 or v3 -->
+    <string name="static_chip_rule_syntax">rule syntax %1$s</string>
+    <!-- Lowercase -->
+    <string name="static_plugin_is_local">local plugin</string>
+    <string name="static_raw_note">Anything these forms do not cover is in the raw YAML, top right.</string>
+    <!-- %1$s is a section name such as Entrypoints -->
+    <string name="static_add_to">Add to %1$s</string>
+    <!-- Button -->
+    <string name="common_edit">Edit</string>
+    <string name="static_error_apply">Could not apply the change</string>
+    <string name="static_saved">Static config saved</string>
+    <string name="static_error_save">Save failed</string>
 </resources>

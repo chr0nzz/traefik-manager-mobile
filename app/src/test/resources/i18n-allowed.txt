@@ -16,3 +16,8 @@ ui/routes/RouteFormViewModel.kt|Unknown
 ui/routes/RoutesViewModel.kt|HTTP $code
 ui/settings/Licences.kt|*
 ui/settings/AboutScreen.kt|Traefik
+ui/settings/AgentConfigScreen.kt|Traefik
+ui/settings/StaticSectionSheets.kt|Docker
+ui/settings/StaticSectionSheets.kt|File
+ui/settings/ConnectionSettingsViewModel.kt|Target address not allowed
+ui/settings/ConnectionSettingsViewModel.kt|Invalid URL
