@@ -153,7 +153,9 @@ Rules for `strings.xml`:
 - **Not translated:** product names (Traefik Manager, CrowdSec), Traefik and YAML terms, example hostnames. Mark a resource `translatable="false"` or keep the name in code.
 - **English only:** add and edit text in `values/strings.xml`. The other languages are translated on Weblate.
 
-`HardcodedTextTest` counts the hardcoded text left in each folder against `app/src/test/resources/i18n-baseline.txt`. It fails when a count goes up. When a count goes down, lower the number in that file in the same change.
+`HardcodedTextTest` fails when code shows text that is not a resource. The count in `app/src/test/resources/i18n-baseline.txt` is zero for every folder. `UiText.Raw("...")` marks text that stays as it is on purpose, such as a product name.
+
+`StringFormatTest` checks that every string formats with the arguments its placeholders ask for, and that each translation keeps the placeholders of the English text.
 
 Text that must stay as it is, such as a key the server sends, is listed in `app/src/test/resources/i18n-allowed.txt` as `path|text`.
 
