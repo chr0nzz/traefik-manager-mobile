@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.push
 
+import dev.chr0nzz.traefikmanager.data.model.PushFailure
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -46,7 +47,7 @@ class PushSyncWorker(
             runCatching { deps.pushChannels().sync(endpoint) }.fold(
                 onSuccess = { channel ->
                     deps.preferencesStore().setPushError(
-                        if (channel == null) "This server is older than 1.12.0, so it has no channels to push through." else "",
+                        if (channel == null) PushFailure.code(PushFailure.OLD_SERVER) else "",
                     )
                     Result.success()
                 },

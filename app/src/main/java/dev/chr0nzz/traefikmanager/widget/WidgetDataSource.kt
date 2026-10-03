@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.widget
 
+import androidx.annotation.StringRes
+import androidx.annotation.PluralsRes
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 import dev.chr0nzz.traefikmanager.data.api.ApiProvider
@@ -20,6 +22,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 @Singleton
 class WidgetDataSource @Inject constructor(
@@ -58,7 +62,7 @@ class WidgetDataSource @Inject constructor(
         WidgetPayload(
             cards = cards,
             servers = rows,
-            note = if (cards.isEmpty() && rows.isEmpty()) "Unreachable" else "",
+            note = if (cards.isEmpty() && rows.isEmpty()) s(R.string.widget_unreachable) else "",
         )
     }
 
@@ -117,18 +121,18 @@ class WidgetDataSource @Inject constructor(
         val idle = rows.count { it.idle }
         return WidgetCard(
             key = WidgetCardType.Entrypoints.key,
-            title = "Entry points",
+            title = s(R.string.dashboard_entry_points),
             hero = LogParser.formatCount(rows.size),
-            unit = if (rows.size == 1) "entry point" else "entry points",
+            unit = q(R.plurals.widget_unit_entry_points, rows.size),
             health = when {
                 rows.any { it.health == TmStatus.Error } -> TmStatus.Error
                 idle > 0 -> TmStatus.Warn
                 else -> TmStatus.Ok
             }.wire(),
-            chips = if (idle > 0) listOf(chip("$idle idle", TmStatus.Warn)) else emptyList(),
+            chips = if (idle > 0) listOf(chip(s(R.string.widget_chip_idle, idle), TmStatus.Warn)) else emptyList(),
             sub = rows.firstOrNull { !it.idle }
-                ?.let { "busiest ${it.name} · ${it.address}" }
-                ?: "nothing bound",
+                ?.let { s(R.string.widget_busiest, it.name, it.address) }
+                ?: s(R.string.widget_nothing_bound),
             cells = rows.flatMap { row -> row.cells.map { it.wire() } }.take(CELLS),
             rows = rows.take(ROWS).map { row ->
                 WidgetRow(
@@ -137,7 +141,7 @@ class WidgetDataSource @Inject constructor(
                     health = row.health.wire(),
                 )
             },
-            listTitle = "ENTRY POINTS",
+            listTitle = s(R.string.dashboard_entry_points).uppercase(),
         )
     }
 
@@ -151,22 +155,23 @@ class WidgetDataSource @Inject constructor(
         val critical = certs.count { (it.daysLeft ?: 999) <= 7 }
         return WidgetCard(
             key = WidgetCardType.Certs.key,
-            title = "Certificates",
+            title = s(R.string.nav_certificates),
             hero = LogParser.formatCount(certs.size),
-            unit = if (certs.size == 1) "cert" else "certs",
+            unit = q(R.plurals.widget_unit_certs, certs.size),
             health = when {
                 critical > 0 -> TmStatus.Error
                 expiring > 0 -> TmStatus.Warn
                 else -> TmStatus.Ok
             }.wire(),
             chips = buildList {
-                if (critical > 0) add(chip("$critical critical", TmStatus.Error))
-                if (expiring > critical) add(chip("${expiring - critical} expiring", TmStatus.Warn))
-                if (expiring == 0) add(chip("all current", TmStatus.Ok))
+                if (critical > 0) add(chip(s(R.string.widget_chip_critical, critical), TmStatus.Error))
+                if (expiring > critical) add(chip(s(R.string.widget_chip_expiring, expiring - critical), TmStatus.Warn))
+                if (expiring == 0) add(chip(s(R.string.widget_chip_current), TmStatus.Ok))
             },
             sub = soonest.firstOrNull()?.let { first ->
-                first.daysLeft?.let { "soonest ${first.main} · ${it}d left" } ?: "soonest ${first.main}"
-            } ?: "no certificates",
+                first.daysLeft?.let { s(R.string.widget_soonest_days, first.main, it) }
+                    ?: s(R.string.widget_soonest, first.main)
+            } ?: s(R.string.widget_no_certs),
             cells = soonest.take(CELLS).map {
                 when {
                     (it.daysLeft ?: 999) <= 7 -> TmStatus.Error
@@ -177,7 +182,7 @@ class WidgetDataSource @Inject constructor(
             rows = soonest.take(ROWS).map { cert ->
                 WidgetRow(
                     name = cert.main,
-                    count = cert.daysLeft?.let { "${it}d" } ?: "-",
+                    count = cert.daysLeft?.let { s(R.string.widget_days_short, it) } ?: "-",
                     health = when {
                         (cert.daysLeft ?: 999) <= 7 -> TmStatus.Error
                         (cert.daysLeft ?: 999) <= 30 -> TmStatus.Warn
@@ -209,9 +214,9 @@ class WidgetDataSource @Inject constructor(
         val repeats = sources.count { it.count > 1 }
         return WidgetCard(
             key = WidgetCardType.Sources.key,
-            title = "Attacking sources",
+            title = s(R.string.crowdsec_card_sources),
             hero = LogParser.formatCount(sources.size),
-            unit = if (sources.size == 1) "source" else "sources",
+            unit = q(R.plurals.widget_unit_sources, sources.size),
             health = when {
                 severe -> TmStatus.Error
                 loose > 0 -> TmStatus.Warn
@@ -220,14 +225,19 @@ class WidgetDataSource @Inject constructor(
             chips = when {
                 sources.isEmpty() -> emptyList()
                 loose > 0 -> listOf(
-                    chip("${LogParser.formatCount(loose)} loose", if (severe) TmStatus.Error else TmStatus.Warn),
-                    chip("${LogParser.formatCount(sources.size - loose)} banned", TmStatus.Unknown),
+                    chip(s(R.string.crowdsec_chip_loose, LogParser.formatCount(loose)), if (severe) TmStatus.Error else TmStatus.Warn),
+                    chip(s(R.string.crowdsec_chip_banned, LogParser.formatCount(sources.size - loose)), TmStatus.Unknown),
                 )
-                else -> listOf(chip("every source banned", TmStatus.Unknown))
+                else -> listOf(chip(s(R.string.crowdsec_chip_all_banned), TmStatus.Unknown))
             },
             sub = sources.firstOrNull()
-                ?.let { "worst ${it.label} · ${LogParser.formatCount(it.weight)} events" }
-                ?: "nobody tripped a scenario",
+                ?.let {
+                    listOf(
+                        s(R.string.crowdsec_worst, it.label),
+                        q(R.plurals.crowdsec_events_count, it.weight, LogParser.formatCount(it.weight)),
+                    ).joinToString(UiText.SEPARATOR)
+                }
+                ?: s(R.string.widget_no_scenario),
             cells = sources.take(CELLS).map {
                 when {
                     it.open > 0 && it.count > 1 -> TmStatus.Error
@@ -236,8 +246,8 @@ class WidgetDataSource @Inject constructor(
                 }.wire()
             },
             footer = listOf(
-                chip("${LogParser.formatCount(repeats)} repeat", TmStatus.Unknown),
-                chip("${LogParser.formatCount(sources.size - repeats)} one-shot", TmStatus.Unknown),
+                chip(s(R.string.crowdsec_chip_repeat, LogParser.formatCount(repeats)), TmStatus.Unknown),
+                chip(s(R.string.crowdsec_chip_one_shot, LogParser.formatCount(sources.size - repeats)), TmStatus.Unknown),
             ),
         )
     }
@@ -248,15 +258,20 @@ class WidgetDataSource @Inject constructor(
         val rest = rows.drop(ROWS)
         return WidgetCard(
             key = WidgetCardType.Scenarios.key,
-            title = "Scenarios",
+            title = s(R.string.crowdsec_card_scenarios),
             hero = LogParser.formatCount(alerts.size),
-            unit = "alerts",
+            unit = s(R.string.crowdsec_unit_alerts),
             health = if (rows.any { it.open > 0 }) TmStatus.Warn.wire() else TmStatus.Ok.wire(),
             sub = rows.firstOrNull()
-                ?.let { "worst ${it.label} · ${LogParser.formatCount(events)} events rolled up" }
-                ?: "nothing to rank in the retained window",
+                ?.let {
+                    listOf(
+                        s(R.string.crowdsec_worst, it.label),
+                        q(R.plurals.crowdsec_events_rolled_up, events, LogParser.formatCount(events)),
+                    ).joinToString(UiText.SEPARATOR)
+                }
+                ?: s(R.string.crowdsec_scenarios_empty),
             rows = rows.take(ROWS).map(::rankRow),
-            footer = tail(rest, rest.sumOf { it.count }, "alerts", "scenarios"),
+            footer = tail(rest, rest.sumOf { it.count }, R.plurals.crowdsec_more_scenarios),
         )
     }
 
@@ -265,13 +280,13 @@ class WidgetDataSource @Inject constructor(
         val rest = rows.drop(ROWS)
         return WidgetCard(
             key = WidgetCardType.Paths.key,
-            title = "Targeted paths",
+            title = s(R.string.crowdsec_card_paths),
             hero = LogParser.formatCount(rows.size),
-            unit = "paths",
+            unit = s(R.string.crowdsec_unit_paths),
             health = if (rows.any { it.open > 0 }) TmStatus.Warn.wire() else TmStatus.Ok.wire(),
-            sub = rows.firstOrNull()?.let { "most wanted ${it.label}" } ?: "nothing was aimed at",
+            sub = rows.firstOrNull()?.let { s(R.string.crowdsec_most_wanted, it.label) } ?: s(R.string.crowdsec_routes_empty_none),
             rows = rows.take(ROWS).map(::rankRow),
-            footer = tail(rest, rest.sumOf { it.weight }, "hits", "paths"),
+            footer = tail(rest, rest.sumOf { it.weight }, R.plurals.crowdsec_more_paths),
         )
     }
 
@@ -282,15 +297,17 @@ class WidgetDataSource @Inject constructor(
         val ownCells = if (total == 0) 0 else ((own.toLong() * cells + total - 1) / total).toInt()
         return WidgetCard(
             key = WidgetCardType.Bans.key,
-            title = "Bans in force",
+            title = s(R.string.crowdsec_card_bans),
             hero = LogParser.formatCount(total),
-            unit = if (total == 1) "ban" else "bans",
+            unit = q(R.plurals.widget_unit_bans, total),
             health = if (total == 0) TmStatus.Disabled.wire() else TmStatus.Ok.wire(),
             chips = snapshot.typeCount("ban").takeIf { it > 0 }
                 ?.let { listOf(chip("${LogParser.formatCount(it)} ban", TmStatus.Unknown)) }
                 .orEmpty(),
-            sub = "${LogParser.formatCount(own)} from this host · " +
-                "${LogParser.formatCount(snapshot.subscribedBans)} subscribed",
+            sub = listOf(
+                s(R.string.crowdsec_bans_own, LogParser.formatCount(own)),
+                s(R.string.crowdsec_bans_subscribed, LogParser.formatCount(snapshot.subscribedBans)),
+            ).joinToString(UiText.SEPARATOR),
             cells = List(cells) { index ->
                 if (index < ownCells) TmStatus.Ok.wire() else TmStatus.Disabled.wire()
             },
@@ -311,17 +328,22 @@ class WidgetDataSource @Inject constructor(
         }.wire(),
     )
 
-    private fun tail(rest: List<CsRanked>, sum: Int, unit: String, noun: String): List<WidgetChip> =
+    private fun tail(rest: List<CsRanked>, sum: Int, @PluralsRes more: Int): List<WidgetChip> =
         if (rest.isEmpty()) {
             emptyList()
         } else {
             listOf(
                 chip(
-                    "+${LogParser.formatCount(sum)} $unit across ${LogParser.formatCount(rest.size)} more $noun",
+                    q(more, rest.size, LogParser.formatCount(sum), LogParser.formatCount(rest.size)),
                     TmStatus.Unknown,
                 ),
             )
         }
+
+    private fun s(@StringRes id: Int, vararg args: Any): String = context.getString(id, *args)
+
+    private fun q(@PluralsRes id: Int, count: Int, vararg args: Any): String =
+        context.resources.getQuantityString(id, count, *args.ifEmpty { arrayOf(count) })
 
     private fun chip(text: String, status: TmStatus): WidgetChip =
         WidgetChip(label = text, count = 0, health = status.wire())
@@ -330,11 +352,13 @@ class WidgetDataSource @Inject constructor(
         key = key,
         title = title.resolve(context.resources),
         hero = LogParser.formatCount(total ?: cells.size),
-        unit = when {
-            key == "services" -> "services"
-            key == "middlewares" -> "middlewares"
-            else -> "routers"
-        },
+        unit = s(
+            when (key) {
+                "services" -> R.string.widget_unit_services
+                "middlewares" -> R.string.widget_unit_middlewares
+                else -> R.string.crowdsec_unit_routers
+            },
+        ),
         health = health.wire(),
         healthLabel = healthLabel.resolve(context.resources),
         sub = sub.resolve(context.resources),
@@ -347,11 +371,11 @@ class WidgetDataSource @Inject constructor(
 
     private fun unavailable(type: WidgetCardType): WidgetCard = WidgetCard(
         key = type.key,
-        title = type.label,
+        title = s(type.label),
         hero = "-",
         health = TmStatus.Unknown.wire(),
-        healthLabel = "no answer",
-        sub = if (type.crowdsec) "CrowdSec did not answer" else "the server did not answer",
+        healthLabel = s(R.string.widget_no_answer),
+        sub = s(if (type.crowdsec) R.string.widget_crowdsec_silent else R.string.widget_server_silent),
     )
 
     private fun serviceWire(raw: String?): String = when {

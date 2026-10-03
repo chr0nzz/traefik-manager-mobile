@@ -23,6 +23,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import dev.chr0nzz.traefikmanager.R
 
 @Serializable
 data class LauncherEntry(
@@ -65,13 +66,13 @@ class LauncherWidgetSource @Inject constructor(
         val targets = serverIds.ifEmpty { listOf(null) }
         val perServer = targets.map { id ->
             async {
-                runCatching { appsFor(id, known.firstOrNull { it.id == id }?.name ?: "Host") }
+                runCatching { appsFor(id, known.firstOrNull { it.id == id }?.label?.resolve(context.resources) ?: context.getString(R.string.common_host)) }
                     .getOrDefault(emptyList())
             }
         }.flatMap { it.await() }
 
         if (perServer.isEmpty()) {
-            LauncherWidgetPayload(note = "Nothing to launch")
+            LauncherWidgetPayload(note = context.getString(R.string.widget_nothing_to_launch))
         } else {
             LauncherWidgetPayload(apps = perServer.map { entry -> entry.copy(icon = cache(entry.icon)) })
         }

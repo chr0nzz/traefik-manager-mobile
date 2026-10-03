@@ -5,7 +5,7 @@
     <string name="widget_config_title">Widget setup</string>
     <string name="widget_launcher_label">App launcher</string>
     <string name="widget_launcher_description">Your dashboard apps as a grid. Resize for more columns or rows, and pick which servers it lists.</string>
-    <string name="widget_small_label">Traefik Manager</string>
+    <string name="widget_small_label" translatable="false">Traefik Manager</string>
     <string name="widget_large_label">Traefik Manager · large</string>
     <string name="widget_large_description">The same cards, dropped in at a larger size. Resize it freely and it re-flows. Stack up to four and tap to cycle.</string>
     <string name="common_save">Save</string>
@@ -2290,12 +2290,12 @@
     <string name="mw_field_allowed_headers">Allowed headers</string>
     <string name="mw_field_max_age_seconds">Max age (seconds)</string>
     <string name="mw_field_add_vary_header">Add Vary header</string>
-    <string name="mw_field_allow_encoded_slash_2f">Allow encoded slash %2F</string>
-    <string name="mw_field_allow_encoded_backslash_5c">Allow encoded backslash %5C</string>
-    <string name="mw_field_allow_encoded_semicolon_3b">Allow encoded semicolon %3B</string>
-    <string name="mw_field_allow_encoded_percent_25">Allow encoded percent %25</string>
-    <string name="mw_field_allow_encoded_question_mark_3f">Allow encoded question mark %3F</string>
-    <string name="mw_field_allow_encoded_hash_23">Allow encoded hash %23</string>
+    <string name="mw_field_allow_encoded_slash_2f" formatted="false">Allow encoded slash %2F</string>
+    <string name="mw_field_allow_encoded_backslash_5c" formatted="false">Allow encoded backslash %5C</string>
+    <string name="mw_field_allow_encoded_semicolon_3b" formatted="false">Allow encoded semicolon %3B</string>
+    <string name="mw_field_allow_encoded_percent_25" formatted="false">Allow encoded percent %25</string>
+    <string name="mw_field_allow_encoded_question_mark_3f" formatted="false">Allow encoded question mark %3F</string>
+    <string name="mw_field_allow_encoded_hash_23" formatted="false">Allow encoded hash %23</string>
     <string name="mw_field_scheme">Scheme</string>
     <string name="mw_field_permanent_redirect_301">Permanent redirect (301)</string>
     <string name="mw_field_prefixes">Prefixes</string>
@@ -2694,4 +2694,148 @@
     <string name="logs_facet_provider">provider</string>
     <!-- Lowercase name of a filter, short for duration. Keep it short -->
     <string name="logs_facet_duration">dur</string>
+
+    <!-- Lowercase unit after a large number -->
+    <plurals name="widget_unit_entry_points">
+        <item quantity="one">entry point</item>
+        <item quantity="other">entry points</item>
+    </plurals>
+    <!-- Lowercase. The number counts entry points that nothing uses -->
+    <string name="widget_chip_idle">%1$d idle</string>
+    <!-- Lowercase. %1$s is an entry point name, %2$s its address -->
+    <string name="widget_busiest">busiest %1$s · %2$s</string>
+    <!-- Lowercase: no router uses any entry point -->
+    <string name="widget_nothing_bound">nothing bound</string>
+    <!-- Lowercase unit after a large number, short for certificate -->
+    <plurals name="widget_unit_certs">
+        <item quantity="one">cert</item>
+        <item quantity="other">certs</item>
+    </plurals>
+    <!-- Lowercase. Certificates with under a week left -->
+    <string name="widget_chip_critical">%1$d critical</string>
+    <!-- Lowercase. Certificates with under 30 days left -->
+    <string name="widget_chip_expiring">%1$d expiring</string>
+    <!-- Lowercase: no certificate expires soon -->
+    <string name="widget_chip_current">all current</string>
+    <!-- Lowercase. %1$s is a domain, %2$d a number of days and the d after it is short for days -->
+    <string name="widget_soonest_days">soonest %1$s · %2$dd left</string>
+    <!-- Lowercase. %1$s is the domain whose certificate expires first -->
+    <string name="widget_soonest">soonest %1$s</string>
+    <!-- Lowercase -->
+    <string name="widget_no_certs">no certificates</string>
+    <!-- A number of days, the d after it is short for days. Keep it short -->
+    <string name="widget_days_short">%1$dd</string>
+    <!-- Lowercase unit after a large number: attacking sources -->
+    <plurals name="widget_unit_sources">
+        <item quantity="one">source</item>
+        <item quantity="other">sources</item>
+    </plurals>
+    <!-- Lowercase. A scenario is a CrowdSec attack pattern -->
+    <string name="widget_no_scenario">nobody tripped a scenario</string>
+    <!-- Lowercase unit after a large number -->
+    <plurals name="widget_unit_bans">
+        <item quantity="one">ban</item>
+        <item quantity="other">bans</item>
+    </plurals>
+    <!-- Lowercase unit after a large number -->
+    <string name="widget_unit_services">services</string>
+    <!-- Lowercase unit after a large number -->
+    <string name="widget_unit_middlewares">middlewares</string>
+    <!-- Lowercase health label -->
+    <string name="widget_no_answer">no answer</string>
+    <string name="widget_crowdsec_silent">CrowdSec did not answer</string>
+    <!-- Lowercase -->
+    <string name="widget_server_silent">the server did not answer</string>
+
+    <string name="widget_card_all_servers">All servers</string>
+    <string name="widget_card_http">HTTP routers</string>
+    <string name="widget_card_stream">TCP / UDP routers</string>
+    <!-- Description of a widget card -->
+    <string name="widget_blurb_overview">Every server, with routers, warnings and bans.</string>
+    <string name="widget_blurb_http">How many are live, and what is not.</string>
+    <string name="widget_blurb_stream">Stream routers and how they split.</string>
+    <string name="widget_blurb_services">Backends up against backends configured.</string>
+    <string name="widget_blurb_middlewares">In use against defined but unused.</string>
+    <string name="widget_blurb_sources">Who is probing, and who is banned.</string>
+    <string name="widget_blurb_scenarios">Which buckets are firing.</string>
+    <string name="widget_blurb_paths">What they are reaching for.</string>
+    <string name="widget_blurb_bans">Decisions holding right now.</string>
+    <string name="widget_blurb_entrypoints">Every door in, and what binds to it.</string>
+    <string name="widget_blurb_certs">What expires soonest, and how soon.</string>
+    <!-- Widget layout: a grid of small squares -->
+    <string name="widget_layout_mosaic">Mosaic</string>
+    <string name="widget_layout_mosaic_blurb">Hero number over the signal strip.</string>
+    <!-- Widget layout -->
+    <string name="widget_layout_numbers">Numbers</string>
+    <string name="widget_layout_numbers_blurb">The headline figures, large.</string>
+    <string name="widget_layout_rows_blurb">What is worst, ranked.</string>
+    <string name="widget_preset_crowdsec">CrowdSec stats</string>
+    <string name="widget_preset_crowdsec_blurb">Sources, scenarios, paths and bans in one split card.</string>
+    <string name="widget_preset_traefik">Traefik stats</string>
+    <string name="widget_preset_traefik_blurb">Routers, services, middlewares and entry points together.</string>
+    <string name="widget_blurb_servers_preset">Every server, its health mosaic and what each runs.</string>
+    <!-- Title of a widget that mixes several kinds of card -->
+    <string name="widget_overview">Overview</string>
+    <string name="widget_unreachable">Unreachable</string>
+    <string name="widget_loading">Loading…</string>
+    <string name="widget_title">Widget</string>
+    <string name="widget_tap_to_set_up">Tap to set up</string>
+    <string name="widget_no_servers">No servers</string>
+    <!-- Lowercase unit after a large number -->
+    <plurals name="widget_unit_servers">
+        <item quantity="one">server</item>
+        <item quantity="other">servers</item>
+    </plurals>
+    <!-- Lowercase: every server answers -->
+    <string name="widget_all_up">all up</string>
+    <!-- Lowercase. The number counts servers that do not answer -->
+    <string name="widget_down_count">%1$d down</string>
+    <plurals name="widget_routers_count">
+        <item quantity="one">%d router</item>
+        <item quantity="other">%d routers</item>
+    </plurals>
+    <plurals name="widget_services_count">
+        <item quantity="one">%d service</item>
+        <item quantity="other">%d services</item>
+    </plurals>
+    <!-- %1$s is a number, possibly shortened such as 1.2k -->
+    <plurals name="widget_bans_count">
+        <item quantity="one">%1$s ban</item>
+        <item quantity="other">%1$s bans</item>
+    </plurals>
+    <plurals name="widget_warnings_count">
+        <item quantity="one">%d warning</item>
+        <item quantity="other">%d warnings</item>
+    </plurals>
+    <!-- Lowercase: the data shown is old -->
+    <string name="widget_stale">stale</string>
+    <string name="widget_open_app">Open in the app</string>
+    <!-- Lowercase: the server does not answer -->
+    <string name="widget_offline">offline</string>
+    <!-- Lowercase and short. The number counts warnings -->
+    <string name="widget_row_warn">%1$d warn</string>
+    <!-- Heading above a ranked list, shown in capitals -->
+    <string name="widget_worst_offenders">Worst offenders</string>
+    <string name="widget_nothing_to_launch">Nothing to launch</string>
+    <string name="widget_config_shows">What it shows</string>
+    <string name="widget_config_stack_help">Up to %1$d in a stack. Each one picks a card and a server, and tapping the widget moves to the next. Only the one on screen is fetched.</string>
+    <string name="widget_config_add_slot">Add to the stack</string>
+    <!-- Section heading: how often the widget refreshes -->
+    <string name="widget_config_interval">How often</string>
+    <!-- Short form of a number of minutes -->
+    <string name="widget_config_minutes">%1$d min</string>
+    <string name="widget_config_interval_help">Android will not run background work more often than every %1$d minutes. The refresh button on the widget updates it straight away.</string>
+    <string name="widget_config_add">Add widget</string>
+    <string name="widget_launcher_servers_help">Tick as many as you like. Their apps are merged into one grid.</string>
+    <!-- Section heading: whether app names are shown -->
+    <string name="widget_launcher_names">Names</string>
+    <string name="widget_launcher_hide_names">Hide names</string>
+    <string name="widget_launcher_hide_names_help">Icons only, which fits more in.</string>
+    <!-- Button -->
+    <string name="widget_launcher_done">Done</string>
+    <!-- Description of the Android notification channel -->
+    <string name="push_channel_description">Events pushed by your Traefik Manager</string>
+    <!-- Shown by the push app when Traefik Manager registers with it -->
+    <string name="push_distributor_message">Traefik Manager events</string>
+    <string name="push_error_old_server">This server is older than 1.12.0, so it has no channels to push through.</string>
 </resources>

@@ -17,7 +17,7 @@ data class WidgetCard(
     val chips: List<WidgetChip> = emptyList(),
     val rows: List<WidgetRow> = emptyList(),
     val footer: List<WidgetChip> = emptyList(),
-    val listTitle: String = "WORST OFFENDERS",
+    val listTitle: String = "",
 )
 
 @Serializable

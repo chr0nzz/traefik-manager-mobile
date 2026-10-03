@@ -62,3 +62,7 @@ data/model/MiddlewareTemplates.kt|NetworkErrorRatio() > 0.30
 data/model/RouteForm.kt|HostSNI(`*`)
 data/model/RouteModels.kt|Host(`$it`)
 data/repo/ServersRepository.kt|Host
+push/PushChannels.kt|Android device
+push/PushNotifier.kt|Traefik Manager
+widget/WidgetConfig.kt|Host
+widget/WidgetConfigActivity.kt|Host

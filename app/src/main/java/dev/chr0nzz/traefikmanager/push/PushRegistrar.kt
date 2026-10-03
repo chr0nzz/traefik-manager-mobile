@@ -5,6 +5,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import org.unifiedpush.android.connector.UnifiedPush
+import dev.chr0nzz.traefikmanager.R
 
 data class PushDistributor(val packageName: String, val label: String)
 
@@ -21,12 +22,12 @@ class PushRegistrar @Inject constructor(
 
     fun register(distributor: String) {
         UnifiedPush.saveDistributor(context, distributor)
-        UnifiedPush.register(context, messageForDistributor = "Traefik Manager events")
+        UnifiedPush.register(context, messageForDistributor = context.getString(R.string.push_distributor_message))
     }
 
     fun refresh() {
         if (current() == null) return
-        UnifiedPush.register(context, messageForDistributor = "Traefik Manager events")
+        UnifiedPush.register(context, messageForDistributor = context.getString(R.string.push_distributor_message))
     }
 
     fun unregister() {

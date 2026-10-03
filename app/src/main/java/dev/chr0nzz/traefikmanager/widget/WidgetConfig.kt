@@ -1,27 +1,30 @@
 package dev.chr0nzz.traefikmanager.widget
 
+import androidx.annotation.StringRes
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 enum class WidgetCardType(
     val key: String,
-    val label: String,
-    val blurb: String,
+    @StringRes val label: Int,
+    @StringRes val blurb: Int,
     val crowdsec: Boolean = false,
 ) {
-    Overview("overview", "All servers", "Every server, with routers, warnings and bans."),
-    Http("http", "HTTP routers", "How many are live, and what is not."),
-    Stream("stream", "TCP / UDP routers", "Stream routers and how they split."),
-    Services("services", "Services", "Backends up against backends configured."),
-    Middlewares("middlewares", "Middlewares", "In use against defined but unused."),
-    Sources("sources", "Attacking sources", "Who is probing, and who is banned.", crowdsec = true),
-    Scenarios("scenarios", "Scenarios", "Which buckets are firing.", crowdsec = true),
-    Paths("paths", "Targeted paths", "What they are reaching for.", crowdsec = true),
-    Bans("bans", "Bans in force", "Decisions holding right now.", crowdsec = true),
-    Entrypoints("entrypoints", "Entry points", "Every door in, and what binds to it."),
-    Certs("certs", "Certificates", "What expires soonest, and how soon."),
+    Overview("overview", R.string.widget_card_all_servers, R.string.widget_blurb_overview),
+    Http("http", R.string.widget_card_http, R.string.widget_blurb_http),
+    Stream("stream", R.string.widget_card_stream, R.string.widget_blurb_stream),
+    Services("services", R.string.common_label_services, R.string.widget_blurb_services),
+    Middlewares("middlewares", R.string.common_label_middlewares, R.string.widget_blurb_middlewares),
+    Sources("sources", R.string.crowdsec_card_sources, R.string.widget_blurb_sources, crowdsec = true),
+    Scenarios("scenarios", R.string.crowdsec_card_scenarios, R.string.widget_blurb_scenarios, crowdsec = true),
+    Paths("paths", R.string.crowdsec_card_paths, R.string.widget_blurb_paths, crowdsec = true),
+    Bans("bans", R.string.crowdsec_card_bans, R.string.widget_blurb_bans, crowdsec = true),
+    Entrypoints("entrypoints", R.string.dashboard_entry_points, R.string.widget_blurb_entrypoints),
+    Certs("certs", R.string.nav_certificates, R.string.widget_blurb_certs),
     ;
 
     companion object {
@@ -36,10 +39,10 @@ enum class WidgetCardType(
     }
 }
 
-enum class WidgetLayout(val label: String, val blurb: String) {
-    Mosaic("Mosaic", "Hero number over the signal strip."),
-    Numbers("Numbers", "The headline figures, large."),
-    Rows("Rows", "What is worst, ranked."),
+enum class WidgetLayout(@StringRes val label: Int, @StringRes val blurb: Int) {
+    Mosaic(R.string.widget_layout_mosaic, R.string.widget_layout_mosaic_blurb),
+    Numbers(R.string.widget_layout_numbers, R.string.widget_layout_numbers_blurb),
+    Rows(R.string.appearance_density_rows, R.string.widget_layout_rows_blurb),
     ;
 
     fun next(): WidgetLayout = entries[(ordinal + 1) % entries.size]
@@ -50,14 +53,14 @@ enum class WidgetLayout(val label: String, val blurb: String) {
 }
 
 enum class WidgetPreset(
-    val label: String,
-    val blurb: String,
+    @StringRes val label: Int,
+    @StringRes val blurb: Int,
     val cards: List<WidgetCardType>,
     val layout: WidgetLayout = WidgetLayout.Mosaic,
 ) {
     CrowdSecStats(
-        label = "CrowdSec stats",
-        blurb = "Sources, scenarios, paths and bans in one split card.",
+        label = R.string.widget_preset_crowdsec,
+        blurb = R.string.widget_preset_crowdsec_blurb,
         cards = listOf(
             WidgetCardType.Sources,
             WidgetCardType.Scenarios,
@@ -67,8 +70,8 @@ enum class WidgetPreset(
         layout = WidgetLayout.Rows,
     ),
     TraefikStats(
-        label = "Traefik stats",
-        blurb = "Routers, services, middlewares and entry points together.",
+        label = R.string.widget_preset_traefik,
+        blurb = R.string.widget_preset_traefik_blurb,
         cards = listOf(
             WidgetCardType.Http,
             WidgetCardType.Services,
@@ -77,17 +80,17 @@ enum class WidgetPreset(
         ),
         layout = WidgetLayout.Rows,
     ),
-    Servers("All servers", "Every server, its health mosaic and what each runs.", listOf(WidgetCardType.Overview)),
-    Sources("Attacking sources", "Who is probing, and who is banned.", listOf(WidgetCardType.Sources)),
-    Scenarios("Scenarios", "Which buckets are firing.", listOf(WidgetCardType.Scenarios)),
-    Paths("Targeted paths", "What they are reaching for.", listOf(WidgetCardType.Paths)),
-    Bans("Bans in force", "Decisions holding right now.", listOf(WidgetCardType.Bans)),
-    Routers("HTTP routers", "How many are live, and what is not.", listOf(WidgetCardType.Http)),
-    Stream("TCP / UDP routers", "Stream routers and how they split.", listOf(WidgetCardType.Stream)),
-    ServicesCard("Services", "Backends up against backends configured.", listOf(WidgetCardType.Services)),
-    Middlewares("Middlewares", "In use against defined but unused.", listOf(WidgetCardType.Middlewares)),
-    Entrypoints("Entry points", "Every door in, and what binds to it.", listOf(WidgetCardType.Entrypoints)),
-    Certificates("Certificates", "What expires soonest, and how soon.", listOf(WidgetCardType.Certs)),
+Servers(R.string.widget_card_all_servers, R.string.widget_blurb_servers_preset, listOf(WidgetCardType.Overview)),
+Sources(R.string.crowdsec_card_sources, R.string.widget_blurb_sources, listOf(WidgetCardType.Sources)),
+Scenarios(R.string.crowdsec_card_scenarios, R.string.widget_blurb_scenarios, listOf(WidgetCardType.Scenarios)),
+Paths(R.string.crowdsec_card_paths, R.string.widget_blurb_paths, listOf(WidgetCardType.Paths)),
+Bans(R.string.crowdsec_card_bans, R.string.widget_blurb_bans, listOf(WidgetCardType.Bans)),
+Routers(R.string.widget_card_http, R.string.widget_blurb_http, listOf(WidgetCardType.Http)),
+Stream(R.string.widget_card_stream, R.string.widget_blurb_stream, listOf(WidgetCardType.Stream)),
+ServicesCard(R.string.common_label_services, R.string.widget_blurb_services, listOf(WidgetCardType.Services)),
+Middlewares(R.string.common_label_middlewares, R.string.widget_blurb_middlewares, listOf(WidgetCardType.Middlewares)),
+Entrypoints(R.string.dashboard_entry_points, R.string.widget_blurb_entrypoints, listOf(WidgetCardType.Entrypoints)),
+Certificates(R.string.nav_certificates, R.string.widget_blurb_certs, listOf(WidgetCardType.Certs)),
     ;
 
     companion object {
@@ -130,12 +133,12 @@ data class WidgetConfig(
 
     val needsCrowdSec: Boolean get() = cards.any { it.crowdsec }
 
-    val familyTitle: String
+    val familyTitle: UiText
         get() = when {
-            cards.size <= 1 -> cards.firstOrNull()?.label.orEmpty()
-            cards.all { it.crowdsec } -> "CrowdSec"
-            cards.none { it.crowdsec || it == WidgetCardType.Overview } -> "Traefik"
-            else -> "Overview"
+            cards.size <= 1 -> cards.firstOrNull()?.let { UiText.of(it.label) } ?: UiText.Raw("")
+            cards.all { it.crowdsec } -> UiText.Raw("CrowdSec")
+            cards.none { it.crowdsec || it == WidgetCardType.Overview } -> UiText.Raw("Traefik")
+            else -> UiText.of(R.string.widget_overview)
         }
 
     val needsDashboard: Boolean get() = cards.any { !it.crowdsec && it != WidgetCardType.Overview }

@@ -84,7 +84,7 @@ class LauncherWidget : GlanceAppWidget() {
         ) {
             if (apps.isEmpty()) {
                 Text(
-                    text = payload?.note?.ifEmpty { null } ?: "Tap to set up",
+                    text = payload?.note?.ifEmpty { null } ?: LocalContext.current.getString(R.string.widget_tap_to_set_up),
                     style = TextStyle(color = P.muted, fontSize = 12.sp),
                 )
             } else {

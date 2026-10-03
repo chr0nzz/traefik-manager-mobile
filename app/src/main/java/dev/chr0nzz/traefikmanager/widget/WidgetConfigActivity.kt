@@ -60,6 +60,9 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import dev.chr0nzz.traefikmanager.ui.theme.TmTheme
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @AndroidEntryPoint
 class WidgetConfigActivity : ComponentActivity() {
@@ -163,9 +166,9 @@ private fun WidgetConfigScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("Widget") },
+                title = { Text(stringResource(R.string.widget_title)) },
                 actions = {
-                    TextButton(onClick = onCancel) { Text("Cancel") }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
                 },
             )
         },
@@ -182,12 +185,10 @@ private fun WidgetConfigScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("What it shows") }
+            item { SectionLabel(stringResource(R.string.widget_config_shows)) }
             item {
                 Text(
-                    text = "Up to ${WidgetSlot.MAX_SLOTS} in a stack. Each one picks a card and a " +
-                        "server, and tapping the widget moves to the next. Only the one on screen " +
-                        "is fetched.",
+                    text = stringResource(R.string.widget_config_stack_help, WidgetSlot.MAX_SLOTS),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -201,7 +202,7 @@ private fun WidgetConfigScreen(
                             color = palette.muted,
                         )
                         Text(
-                            text = slot.preset.label,
+                            text = stringResource(slot.preset.label),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
@@ -210,7 +211,7 @@ private fun WidgetConfigScreen(
                         )
                         if (slots.size > 1) {
                             IconButton(onClick = { slots.removeAt(index) }) {
-                                Icon(Icons.Outlined.Close, contentDescription = "Remove")
+                                Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.common_remove))
                             }
                         }
                     }
@@ -224,7 +225,7 @@ private fun WidgetConfigScreen(
                             FilterChip(
                                 selected = slot.preset == option,
                                 onClick = { slots[index] = slot.copy(preset = option) },
-                                label = { Text(option.label) },
+                                label = { Text(stringResource(option.label)) },
                             )
                         }
                     }
@@ -253,12 +254,12 @@ private fun WidgetConfigScreen(
                         modifier = Modifier.padding(top = TmSpacing.xs),
                     ) {
                         Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text("Add to the stack", modifier = Modifier.padding(start = TmSpacing.xs))
+                        Text(stringResource(R.string.widget_config_add_slot), modifier = Modifier.padding(start = TmSpacing.xs))
                     }
                 }
             }
 
-            item { SectionLabel("How often", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.widget_config_interval), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
@@ -266,14 +267,12 @@ private fun WidgetConfigScreen(
                             FilterChip(
                                 selected = interval == minutes,
                                 onClick = { interval = minutes },
-                                label = { Text("$minutes min") },
+                                label = { Text(stringResource(R.string.widget_config_minutes, minutes)) },
                             )
                         }
                     }
                     Text(
-                        text = "Android will not run background work more often than every " +
-                            "${WidgetConfig.MIN_INTERVAL_MINUTES} minutes. The refresh button on " +
-                            "the widget updates it straight away.",
+                        text = stringResource(R.string.widget_config_interval_help, WidgetConfig.MIN_INTERVAL_MINUTES),
                         style = MaterialTheme.typography.labelSmall,
                         color = palette.muted,
                         modifier = Modifier.padding(top = TmSpacing.xs),
@@ -301,7 +300,7 @@ private fun WidgetConfigScreen(
                         .fillMaxWidth()
                         .padding(top = TmSpacing.md),
                 ) {
-                    Text("Add widget")
+                    Text(stringResource(R.string.widget_config_add))
                 }
             }
         }

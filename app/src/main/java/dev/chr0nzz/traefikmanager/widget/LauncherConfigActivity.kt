@@ -50,6 +50,8 @@ import androidx.lifecycle.lifecycleScope
 import dev.chr0nzz.traefikmanager.ui.theme.TmTheme
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import dev.chr0nzz.traefikmanager.R
 
 @AndroidEntryPoint
 class LauncherConfigActivity : ComponentActivity() {
@@ -122,7 +124,7 @@ private fun LauncherSetup(
     Scaffold(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
-        topBar = { TopAppBar(title = { Text("App launcher") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.widget_launcher_label)) }) },
     ) { insets ->
         LazyColumn(
             modifier = Modifier
@@ -131,10 +133,10 @@ private fun LauncherSetup(
             contentPadding = PaddingValues(TmSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
         ) {
-            item { SectionLabel("Servers") }
+            item { SectionLabel(stringResource(R.string.settings_servers_title)) }
             item {
                 Text(
-                    text = "Tick as many as you like. Their apps are merged into one grid.",
+                    text = stringResource(R.string.widget_launcher_servers_help),
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )
@@ -168,14 +170,14 @@ private fun LauncherSetup(
                 }
             }
 
-            item { SectionLabel("Names", modifier = Modifier.padding(top = TmSpacing.sm)) }
+            item { SectionLabel(stringResource(R.string.widget_launcher_names), modifier = Modifier.padding(top = TmSpacing.sm)) }
             item {
                 TmCard {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Hide names", style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.widget_launcher_hide_names), style = MaterialTheme.typography.bodyMedium)
                             Text(
-                                text = "Icons only, which fits more in.",
+                                text = stringResource(R.string.widget_launcher_hide_names_help),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = palette.muted,
                             )
@@ -194,7 +196,7 @@ private fun LauncherSetup(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = TmSpacing.sm),
-                ) { Text("Done") }
+                ) { Text(stringResource(R.string.widget_launcher_done)) }
             }
         }
     }

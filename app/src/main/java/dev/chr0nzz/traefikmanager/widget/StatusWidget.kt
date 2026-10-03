@@ -1,5 +1,7 @@
 package dev.chr0nzz.traefikmanager.widget
 
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -47,6 +49,7 @@ import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.theme.TmDarkPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmLightPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmPalette
+import dev.chr0nzz.traefikmanager.data.model.UiText
 
 internal object P {
     val text = pick { it.text }
@@ -229,7 +232,7 @@ class StatusWidget : GlanceAppWidget() {
                     Panel.Loading -> {
                         val slot = config.pages.getOrNull(page)
                         Head(
-                            slot?.preset?.label ?: "Loading",
+                            slot?.preset?.label?.let { tr(it) } ?: tr(R.string.common_loading),
                             slot?.let { accentFor(it.preset.cards.first().key) } ?: P.muted,
                             slot?.let { glyphFor(it.preset.cards.first().key) }
                                 ?: R.drawable.ic_widget_servers,
@@ -239,11 +242,11 @@ class StatusWidget : GlanceAppWidget() {
                             pages,
                             page,
                         )
-                        Sub(payload?.note?.ifEmpty { null } ?: "Loading…")
+                        Sub(payload?.note?.ifEmpty { null } ?: tr(R.string.widget_loading))
                     }
                     Panel.Empty -> {
-                        Head("Widget", P.muted, R.drawable.ic_widget_servers, stale, true)
-                        Sub("Tap to set up")
+                        Head(tr(R.string.widget_title), P.muted, R.drawable.ic_widget_servers, stale, true)
+                        Sub(tr(R.string.widget_tap_to_set_up))
                     }
                 }
             }
@@ -327,7 +330,7 @@ class StatusWidget : GlanceAppWidget() {
     ) {
         val rows = payload?.servers.orEmpty()
         Head(
-            "Servers",
+            tr(R.string.settings_servers_title),
             accentFor("servers"),
             R.drawable.ic_widget_servers,
             stale,
@@ -337,7 +340,7 @@ class StatusWidget : GlanceAppWidget() {
             page,
         )
         if (rows.isEmpty()) {
-            Sub(payload?.note?.ifEmpty { null } ?: "No servers")
+            Sub(payload?.note?.ifEmpty { null } ?: tr(R.string.widget_no_servers))
             return
         }
         val down = rows.count { !it.reachable || it.err > 0 }
@@ -345,23 +348,23 @@ class StatusWidget : GlanceAppWidget() {
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
-            Hero(rows.size.toString(), if (rows.size == 1) "server" else "servers", fit.compact, fit)
+            Hero(rows.size.toString(), trq(R.plurals.widget_unit_servers, rows.size), fit.compact, fit)
             Spacer(modifier = GlanceModifier.defaultWeight())
             HealthPill(
-                if (down == 0) "all up" else "$down down",
+                if (down == 0) tr(R.string.widget_all_up) else tr(R.string.widget_down_count, down),
                 if (down == 0) P.green else P.red,
             )
         }
         Sub(
-            buildString {
-                append("${rows.sumOf { it.routers }} routers")
+            buildList {
+                add(trq(R.plurals.widget_routers_count, rows.sumOf { it.routers }))
                 val services = rows.sumOf { it.services }
-                if (services > 0) append(" · $services services")
+                if (services > 0) add(trq(R.plurals.widget_services_count, services))
                 val bans = rows.filter { it.hasBans }.sumOf { it.bans }
-                if (bans > 0) append(" · ${compactCount(bans)} bans")
+                if (bans > 0) add(trq(R.plurals.widget_bans_count, bans, compactCount(bans)))
                 val warns = rows.sumOf { it.warn }
-                if (warns > 0) append(" · $warns warning")
-            },
+                if (warns > 0) add(trq(R.plurals.widget_warnings_count, warns))
+            }.joinToString(UiText.SEPARATOR),
         )
         val cells = rows.flatMap { it.cells }
         if (cells.isNotEmpty()) {
@@ -381,7 +384,7 @@ class StatusWidget : GlanceAppWidget() {
         val hidden = rows.size - shown.size
         if (hidden > 0) {
             Text(
-                text = "+$hidden more",
+                text = tr(R.string.common_more_count, hidden),
                 style = TextStyle(color = P.muted, fontSize = 9.sp),
                 modifier = GlanceModifier.padding(top = 2.dp),
             )
@@ -461,7 +464,7 @@ class StatusWidget : GlanceAppWidget() {
     ) {
         val lead = cards.first()
         val rest = cards.drop(1)
-        Head(config.familyTitle, accentFor(lead.key), glyphFor(lead.key), stale, true, config, pages, page)
+        Head(config.familyTitle.resolve(LocalContext.current.resources), accentFor(lead.key), glyphFor(lead.key), stale, true, config, pages, page)
 
         if (fit.compact) {
             NumbersBody(lead.copy(footer = rest.map { WidgetChip("${it.hero} ${it.unit}", 0, "unknown") }), fit)
@@ -533,7 +536,7 @@ class StatusWidget : GlanceAppWidget() {
                 )
                 Column(modifier = GlanceModifier.defaultWeight().fillMaxHeight().padding(start = 9.dp)) {
                     Text(
-                        text = ranked.first().listTitle,
+                        text = ranked.first().listTitle.ifEmpty { tr(R.string.widget_worst_offenders).uppercase() },
                         style = TextStyle(color = P.muted, fontSize = (fit.labelSp - 1).sp, fontFamily = Mono),
                         maxLines = 1,
                     )
@@ -601,7 +604,7 @@ class StatusWidget : GlanceAppWidget() {
             }
             if (stale) {
                 Text(
-                    text = "stale",
+                    text = tr(R.string.widget_stale),
                     style = TextStyle(color = P.yellow, fontSize = 9.sp, fontFamily = Mono),
                     modifier = GlanceModifier.padding(end = 5.dp),
                 )
@@ -609,7 +612,7 @@ class StatusWidget : GlanceAppWidget() {
             if (showRefresh) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_widget_refresh),
-                    contentDescription = "Refresh",
+                    contentDescription = tr(R.string.common_refresh),
                     colorFilter = ColorFilter.tint(P.muted),
                     modifier = GlanceModifier
                         .size(12.dp)
@@ -619,7 +622,7 @@ class StatusWidget : GlanceAppWidget() {
             }
             Image(
                 provider = ImageProvider(glyph),
-                contentDescription = "Open in the app",
+                contentDescription = tr(R.string.widget_open_app),
                 colorFilter = ColorFilter.tint(accent),
                 modifier = GlanceModifier
                     .size(12.dp)
@@ -707,7 +710,7 @@ class StatusWidget : GlanceAppWidget() {
             }
             if (per > 1) {
                 Text(
-                    text = "1 cell = $per",
+                    text = tr(R.string.crowdsec_cell_scale, per.toString()),
                     style = TextStyle(color = P.muted, fontSize = 8.sp, fontFamily = Mono),
                     modifier = GlanceModifier.padding(top = 1.dp),
                 )
@@ -813,26 +816,26 @@ class StatusWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.defaultWeight().padding(start = 5.dp),
             )
             if (!row.reachable) {
-                Text(text = "offline", style = TextStyle(color = P.red, fontSize = 9.sp, fontFamily = Mono))
+                Text(text = tr(R.string.widget_offline), style = TextStyle(color = P.red, fontSize = 9.sp, fontFamily = Mono))
                 return@Row
             }
             if (row.warn > 0) {
                 Text(
-                    text = "${row.warn} warn",
+                    text = tr(R.string.widget_row_warn, row.warn),
                     style = TextStyle(color = P.yellow, fontSize = 9.sp, fontFamily = Mono),
                     modifier = GlanceModifier.padding(end = 5.dp),
                 )
             }
             if (row.err > 0) {
                 Text(
-                    text = "${row.err} down",
+                    text = tr(R.string.widget_down_count, row.err),
                     style = TextStyle(color = P.red, fontSize = 9.sp, fontFamily = Mono),
                     modifier = GlanceModifier.padding(end = 5.dp),
                 )
             }
             if (row.hasBans) {
                 Text(
-                    text = "${compactCount(row.bans)} bans",
+                    text = trq(R.plurals.widget_bans_count, row.bans, compactCount(row.bans)),
                     style = TextStyle(color = P.blue, fontSize = 9.sp, fontFamily = Mono),
                     modifier = GlanceModifier.padding(end = 5.dp),
                 )
@@ -922,3 +925,9 @@ class StatusWidgetReceiver : BaseStatusWidgetReceiver()
 
 class StatusWidgetLargeReceiver : BaseStatusWidgetReceiver()
 
+@Composable
+private fun tr(@StringRes id: Int, vararg args: Any): String = LocalContext.current.getString(id, *args)
+
+@Composable
+private fun trq(@PluralsRes id: Int, count: Int, vararg args: Any): String =
+    LocalContext.current.resources.getQuantityString(id, count, *args.ifEmpty { arrayOf(count) })
