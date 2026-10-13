@@ -26,7 +26,7 @@
     <string name="server_show_list">Changer de serveur</string>
     <string name="server_unreachable">injoignable</string>
     <string name="connect_key_label">Clé d’API</string>
-    <string name="connect_button">Connecter</string>
+    <string name="connect_button">Se connecter</string>
     <string name="connect_error_failed">Échec de la connexion</string>
     <string name="settings_language_section">Langue</string>
     <string name="settings_language_system">Suivre le système</string>
@@ -55,7 +55,7 @@
     <string name="dashboard_group_monitoring">Supervision</string>
     <string name="dashboard_group_infrastructure">Infrastructure</string>
     <string name="dashboard_group_security">Sécurité</string>
-    <string name="dashboard_group_home">Accueil</string>
+    <string name="dashboard_group_home">Maison</string>
     <string name="dashboard_group_files">Fichiers et données</string>
     <string name="dashboard_group_network">Réseau</string>
     <string name="dashboard_group_dev">Développement</string>
@@ -92,9 +92,9 @@
         <item quantity="other">%d domaines</item>
     </plurals>
     <string name="certs_filter_all">Tous</string>
-    <string name="certs_filter_unused">Inutilisé</string>
+    <string name="certs_filter_unused">Inutilisés</string>
     <string name="certs_filter_no_resolver">Aucun résolveur</string>
-    <string name="certs_filter_expiring">Expire bientôt</string>
+    <string name="certs_filter_expiring">Expirent bientôt</string>
     <plurals name="certs_verdict_expired">
         <item quantity="one">%d certificat a expiré</item>
         <item quantity="many">%d certificats ont expiré</item>
@@ -177,7 +177,7 @@
         <item quantity="many">utilisé par %d middlewares</item>
         <item quantity="other">utilisé par %d middlewares</item>
     </plurals>
-    <string name="plugins_update">Mettre à jour</string>
+    <string name="plugins_update">Mise à jour</string>
     <string name="plugins_update_available">%1$s disponible</string>
     <string name="plugins_used_by_none">Aucun middleware ne référence ce plugin</string>
     <string name="plugins_error_no_snippet">Coller l’extrait de configuration statique</string>
@@ -362,7 +362,7 @@
     <string name="crowdsec_card_bans_stale">Bannissements en vigueur (données périmées)</string>
     <string name="crowdsec_cell_scale">1 cellule = %1$s</string>
     <string name="crowdsec_alert_banned">banni</string>
-    <string name="crowdsec_alert_open">ouvrir</string>
+    <string name="crowdsec_alert_open">ouverte</string>
     <string name="crowdsec_verdict_probed">Activement sondé</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d source</item>
@@ -446,8 +446,8 @@
     <string name="routes_form_preset_nosniff">Content-Type nosniff</string>
     <string name="routes_raw_title">YAML brut</string>
     <string name="routes_error_load">Impossible de charger les routes</string>
-    <string name="routes_filter_active">Actif</string>
-    <string name="routes_filter_inactive">Inactif</string>
+    <string name="routes_filter_active">Actives</string>
+    <string name="routes_filter_inactive">Inactives</string>
     <string name="routes_ping_self">ce serveur</string>
     <plurals name="routes_ping_servers_up">
         <item quantity="one">%1$d sur %2$d serveur actif</item>
@@ -645,7 +645,7 @@
     <string name="agent_docker_host">Hôte Docker</string>
     <string name="agent_bouncer_api_key">Clé d’API de bouncer</string>
     <string name="agent_agent">Agent</string>
-    <string name="agent_restart">Redémarrer</string>
+    <string name="agent_restart">Redémarrage</string>
     <string name="agent_restart_none">Aucun</string>
     <string name="static_entrypoints">Points d’entrée</string>
     <string name="static_no_entrypoints_configured">Aucun point d’entrée configuré</string>
@@ -1670,7 +1670,7 @@
     <string name="appearance_hide_nav_body">Libère le bas de l’écran. Le tiroir de navigation donne toujours accès à tous les écrans.</string>
     <string name="appearance_nav_items">Choisir les éléments</string>
     <string name="appearance_nav_items_body">Les écrans affichés dans la barre ou le rail latéral, et leur ordre.</string>
-    <string name="appearance_density_body">Comment le lanceur de l’aperçu affiche vos applications. Ce réglage est partagé avec l’application Web, les deux affichent donc la même chose.</string>
+    <string name="appearance_density_body">Comment le lanceur du tableau de bord affiche vos applications. Ce réglage est partagé avec l’application Web, les deux affichent donc la même chose.</string>
     <string name="appearance_lock">Exiger le déverrouillage</string>
     <string name="appearance_lock_unavailable">Aucune donnée biométrique ni aucun identifiant d’appareil n’est enregistré sur cet appareil</string>
     <string name="appearance_lock_on">Demandé au lancement et chaque fois que l’application revient de l’arrière-plan</string>
@@ -1775,7 +1775,7 @@
     <string name="webhook_test">Envoyer un test</string>
     <string name="webhook_test_ok">Requête acceptée</string>
     <string name="webhook_test_ok_body">Le point de terminaison a reçu la requête. Vérifiez la destination pour confirmer qu’elle est arrivée.</string>
-    <string name="notifications_bell_note">La cloche de l’accueil affiche ce que Traefik Manager a signalé.</string>
+    <string name="notifications_bell_note">La cloche du tableau de bord affiche ce que Traefik Manager a signalé.</string>
     <string name="channels_this_device">cet appareil</string>
     <string name="channels_test_named">Envoyer un test à %1$s</string>
     <string name="route_checks_error_save">Impossible d’enregistrer les vérifications des routes</string>
@@ -2252,4 +2252,6 @@
     <string name="push_channel_description">Événements envoyés par votre Traefik Manager</string>
     <string name="push_distributor_message">Événements de Traefik Manager</string>
     <string name="push_error_old_server">Ce serveur est antérieur à la version 1.12.0, il n’a donc aucun canal pour envoyer des notifications push.</string>
+    <string name="auth_oidc_active">Actif</string>
+    <string name="backups_agent_static_included">Sur un agent, la sauvegarde ordinaire inclut déjà la configuration statique.</string>
 </resources>
