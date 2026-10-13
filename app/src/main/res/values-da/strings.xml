@@ -3,7 +3,7 @@
     <string name="common_save">Gem</string>
     <string name="common_cancel">Annuller</string>
     <string name="common_reset">Nulstil</string>
-    <string name="common_host">Host</string>
+    <string name="common_host">Vært</string>
     <string name="nav_section_traffic">Trafik</string>
     <string name="nav_section_observability">Observerbarhed</string>
     <string name="nav_section_infrastructure">Infrastruktur</string>
@@ -167,7 +167,7 @@
         <item quantity="one">bruges af %d middleware</item>
         <item quantity="other">bruges af %d middlewares</item>
     </plurals>
-    <string name="plugins_update">Opdater</string>
+    <string name="plugins_update">Opdatering</string>
     <string name="plugins_update_available">%1$s tilgængelig</string>
     <string name="plugins_used_by_none">Ingen middleware refererer til dette plugin</string>
     <string name="plugins_error_no_snippet">Indsæt uddraget fra den statiske konfiguration</string>
@@ -334,7 +334,7 @@
     <string name="crowdsec_card_bans_stale">Aktive blokeringer (forældet)</string>
     <string name="crowdsec_cell_scale">1 celle = %1$s</string>
     <string name="crowdsec_alert_banned">blokeret</string>
-    <string name="crowdsec_alert_open">åbn</string>
+    <string name="crowdsec_alert_open">åben</string>
     <string name="crowdsec_verdict_probed">Aktivt afsøgt</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d kilde</item>
@@ -381,7 +381,7 @@
     <string name="routes_ping_degraded">forringet</string>
     <string name="routes_ping_unreachable">utilgængelig</string>
     <string name="routes_details_title">Routerdetaljer</string>
-    <string name="routes_tls_options">Valgmuligheder</string>
+    <string name="routes_tls_options">Indstillinger</string>
     <string name="routes_no_middlewares">Ingen middlewares konfigureret</string>
     <string name="routes_load_balancer">Load Balancer</string>
     <string name="routes_server_numbered">Server %1$d</string>
@@ -515,7 +515,7 @@
     <string name="channels_remove_body">Fjern kanalen \"%1$s\"? Hændelser leveres ikke længere til den.</string>
     <string name="route_checks_section">Rutetjek</string>
     <string name="route_checks_title">Tjek, om ruter kan nås</string>
-    <string name="route_checks_every">Hver</string>
+    <string name="route_checks_every">Hvert</string>
     <string name="channels_help">Hver aktiveret kanal får sin egen kopi af en hændelse, filtreret efter de kategorier, den alvorlighed, den opsummering og de stille timer, der er angivet på den.</string>
     <string name="channels_empty">Ingen kanaler konfigureret</string>
     <string name="channels_empty_body">Tilføj en kanal for at få besked, når ruter ændres, backupper kører eller certifikater udløber.</string>
@@ -876,7 +876,7 @@
     </plurals>
     <string name="dashboard_sub_in_use">%1$d i brug</string>
     <string name="dashboard_flag_warnings">advarsler</string>
-    <string name="dashboard_flag_idle">inaktiv</string>
+    <string name="dashboard_flag_idle">inaktive</string>
     <string name="dashboard_unreachable">Traefik-API\'et kan ikke nås</string>
     <string name="dashboard_health_down">nede</string>
     <string name="dashboard_health_healthy">sund</string>
@@ -1575,7 +1575,7 @@
     <string name="appearance_hide_nav_body">Frigør bunden af skærmen. Sidemenuen giver stadig adgang til alle skærme.</string>
     <string name="appearance_nav_items">Vælg elementer</string>
     <string name="appearance_nav_items_body">Hvilke skærme der er i linjen eller sidebjælken, og deres rækkefølge.</string>
-    <string name="appearance_density_body">Hvordan launcheren på Oversigt viser dine apps. Delt med webappen, så begge viser det samme.</string>
+    <string name="appearance_density_body">Hvordan launcheren på Dashboard viser dine apps. Delt med webappen, så begge viser det samme.</string>
     <string name="appearance_lock">Kræv oplåsning</string>
     <string name="appearance_lock_unavailable">Ingen biometri eller skærmlås er registreret på denne enhed</string>
     <string name="appearance_lock_on">Kræves ved start og hver gang appen vender tilbage fra baggrunden</string>
@@ -1679,7 +1679,7 @@
     <string name="webhook_test">Send en test</string>
     <string name="webhook_test_ok">Forespørgsel accepteret</string>
     <string name="webhook_test_ok_body">Endpointet modtog forespørgslen. Tjek destinationen for at bekræfte, at den kom frem.</string>
-    <string name="notifications_bell_note">Klokken på Hjem viser, hvad manageren har rapporteret.</string>
+    <string name="notifications_bell_note">Klokken på Dashboard viser, hvad manageren har rapporteret.</string>
     <string name="channels_this_device">denne enhed</string>
     <string name="channels_test_named">Send en test til %1$s</string>
     <string name="route_checks_error_save">Kunne ikke gemme rutetjek</string>
@@ -2145,4 +2145,6 @@
     <string name="push_channel_description">Hændelser sendt af din Traefik Manager</string>
     <string name="push_distributor_message">Traefik Manager-hændelser</string>
     <string name="push_error_old_server">Denne server er ældre end 1.12.0, så den har ingen kanaler at pushe igennem.</string>
+    <string name="auth_oidc_active">Aktiv</string>
+    <string name="backups_agent_static_included">På en agent indeholder den almindelige backup allerede den statiske konfiguration.</string>
 </resources>
