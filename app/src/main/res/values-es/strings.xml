@@ -24,7 +24,7 @@
         <item quantity="other">%d alertas</item>
     </plurals>
     <string name="server_show_list">Cambiar de servidor</string>
-    <string name="server_unreachable">inaccesibles</string>
+    <string name="server_unreachable">inaccesible</string>
     <string name="connect_key_label">Clave de API</string>
     <string name="connect_button">Conectar</string>
     <string name="connect_error_failed">Conexión fallida</string>
@@ -176,7 +176,7 @@
         <item quantity="many">usado por %d middlewares</item>
         <item quantity="other">usado por %d middlewares</item>
     </plurals>
-    <string name="plugins_update">Actualizar</string>
+    <string name="plugins_update">Actualización</string>
     <string name="plugins_update_available">%1$s disponible</string>
     <string name="plugins_used_by_none">Ningún middleware hace referencia a este plugin</string>
     <string name="plugins_error_no_snippet">Pega el fragmento de configuración estática</string>
@@ -361,7 +361,7 @@
     <string name="crowdsec_card_bans_stale">Bloqueos en vigor (desactualizados)</string>
     <string name="crowdsec_cell_scale">1 celda = %1$s</string>
     <string name="crowdsec_alert_banned">bloqueado</string>
-    <string name="crowdsec_alert_open">abrir</string>
+    <string name="crowdsec_alert_open">abierta</string>
     <string name="crowdsec_verdict_probed">Sondeado activamente</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d fuente</item>
@@ -410,7 +410,7 @@
     <string name="common_label_interval">Intervalo</string>
     <string name="routes_ping_checking">Comprobando</string>
     <string name="routes_ping_degraded">degradado</string>
-    <string name="routes_ping_unreachable">inaccesibles</string>
+    <string name="routes_ping_unreachable">inaccesible</string>
     <string name="routes_details_title">Detalles del router</string>
     <string name="routes_tls_options">Opciones</string>
     <string name="routes_no_middlewares">No hay middlewares configurados</string>
@@ -594,7 +594,7 @@
     <string name="auth_key_new_title">Nueva clave de API</string>
     <string name="auth_revoke_title">¿Revocar esta clave de API?</string>
     <string name="auth_revoke">Revocar</string>
-    <string name="auth_state_off">Oculto</string>
+    <string name="auth_state_off">Desactivado</string>
     <string name="auth_otp">Doble factor</string>
     <string name="auth_sign_out">Cerrar las demás sesiones</string>
     <string name="auth_key_device">Nombre del dispositivo</string>
@@ -641,7 +641,7 @@
     <string name="agent_docker_host">Host de Docker</string>
     <string name="agent_bouncer_api_key">Clave de API de bouncer</string>
     <string name="agent_agent">Agente</string>
-    <string name="agent_restart">Reiniciar</string>
+    <string name="agent_restart">Reinicio</string>
     <string name="agent_restart_none">Ninguno</string>
     <string name="static_entrypoints">Entrypoints</string>
     <string name="static_no_entrypoints_configured">No hay entrypoints configurados</string>
@@ -923,7 +923,7 @@
     </plurals>
     <string name="dashboard_sub_in_use">%1$d en uso</string>
     <string name="dashboard_flag_warnings">advertencias</string>
-    <string name="dashboard_flag_idle">inactivo</string>
+    <string name="dashboard_flag_idle">sin tráfico</string>
     <string name="dashboard_unreachable">API de Traefik inaccesible</string>
     <string name="dashboard_health_down">caído</string>
     <string name="dashboard_health_healthy">en buen estado</string>
@@ -1670,7 +1670,7 @@
     <string name="appearance_hide_nav_body">Libera la parte inferior de la pantalla. El menú lateral sigue dando acceso a todas las pantallas.</string>
     <string name="appearance_nav_items">Elegir elementos</string>
     <string name="appearance_nav_items_body">Qué pantallas aparecen en la barra de navegación o en la barra lateral, y su orden.</string>
-    <string name="appearance_density_body">Cómo muestra tus apps el lanzador de Resumen. Se comparte con la web, así que ambas muestran lo mismo.</string>
+    <string name="appearance_density_body">Cómo muestra tus apps el lanzador del Panel. Se comparte con la web, así que ambas muestran lo mismo.</string>
     <string name="appearance_lock">Exigir desbloqueo</string>
     <string name="appearance_lock_unavailable">Este dispositivo no tiene registrada ninguna biometría ni credencial de bloqueo</string>
     <string name="appearance_lock_on">Se pide al abrir la app y cada vez que vuelve del segundo plano</string>
@@ -1775,7 +1775,7 @@
     <string name="webhook_test">Enviar prueba</string>
     <string name="webhook_test_ok">Solicitud aceptada</string>
     <string name="webhook_test_ok_body">El endpoint recibió la solicitud. Revisa el destino para confirmar que llegó.</string>
-    <string name="notifications_bell_note">La campana de Inicio muestra lo que ha notificado el servidor.</string>
+    <string name="notifications_bell_note">La campana del Panel muestra lo que ha notificado el servidor.</string>
     <string name="channels_this_device">este dispositivo</string>
     <string name="channels_test_named">Enviar prueba a %1$s</string>
     <string name="route_checks_error_save">No se pudieron guardar las comprobaciones de rutas</string>
@@ -2252,4 +2252,6 @@
     <string name="push_channel_description">Eventos enviados por tu Traefik Manager</string>
     <string name="push_distributor_message">Eventos de Traefik Manager</string>
     <string name="push_error_old_server">Este servidor es anterior a la 1.12.0, por lo que no tiene canales para enviar notificaciones push.</string>
+    <string name="auth_oidc_active">Activo</string>
+    <string name="backups_agent_static_included">En un agente, la copia de seguridad normal ya incluye la configuración estática.</string>
 </resources>
