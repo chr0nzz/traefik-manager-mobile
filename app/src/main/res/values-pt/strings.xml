@@ -177,7 +177,7 @@
         <item quantity="many">usado por %d middlewares</item>
         <item quantity="other">usado por %d middlewares</item>
     </plurals>
-    <string name="plugins_update">Atualizar</string>
+    <string name="plugins_update">Atualização</string>
     <string name="plugins_update_available">%1$s disponível</string>
     <string name="plugins_used_by_none">Nenhum middleware referencia este plugin</string>
     <string name="plugins_error_no_snippet">Colar o excerto da configuração estática</string>
@@ -275,7 +275,7 @@
         <item quantity="other">%d redirecionamentos</item>
     </plurals>
     <string name="logs_status_clean">limpo</string>
-    <string name="logs_counter_other">outro</string>
+    <string name="logs_counter_other">outros</string>
     <string name="logs_flag_over_2s">acima de 2 s</string>
     <string name="logs_flag_over_500ms">acima de 500 ms</string>
     <string name="logs_ok_all_fast">todos abaixo de 100 ms</string>
@@ -362,7 +362,7 @@
     <string name="crowdsec_card_bans_stale">Banimentos em vigor (desatualizados)</string>
     <string name="crowdsec_cell_scale">1 célula = %1$s</string>
     <string name="crowdsec_alert_banned">banido</string>
-    <string name="crowdsec_alert_open">abrir</string>
+    <string name="crowdsec_alert_open">aberto</string>
     <string name="crowdsec_verdict_probed">Sondado ativamente</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d origem</item>
@@ -446,7 +446,7 @@
     <string name="routes_form_preset_nosniff">Content-Type nosniff</string>
     <string name="routes_raw_title">YAML em bruto</string>
     <string name="routes_error_load">Não foi possível carregar as rotas</string>
-    <string name="routes_filter_active">Ativo</string>
+    <string name="routes_filter_active">Ativas</string>
     <string name="routes_ping_self">este servidor</string>
     <plurals name="routes_ping_servers_up">
         <item quantity="one">%1$d de %2$d servidor ativo</item>
@@ -644,7 +644,7 @@
     <string name="agent_docker_host">Host Docker</string>
     <string name="agent_bouncer_api_key">Chave de API de bouncer</string>
     <string name="agent_agent">Agente</string>
-    <string name="agent_restart">Reiniciar</string>
+    <string name="agent_restart">Reinício</string>
     <string name="agent_restart_none">Nenhum</string>
     <string name="static_entrypoints">Entrypoints</string>
     <string name="static_no_entrypoints_configured">Nenhum entrypoint configurado</string>
@@ -926,7 +926,7 @@
     </plurals>
     <string name="dashboard_sub_in_use">%1$d em uso</string>
     <string name="dashboard_flag_warnings">avisos</string>
-    <string name="dashboard_flag_idle">inativo</string>
+    <string name="dashboard_flag_idle">inativos</string>
     <string name="dashboard_unreachable">API do Traefik inacessível</string>
     <string name="dashboard_health_down">em baixo</string>
     <string name="dashboard_health_healthy">saudável</string>
@@ -1670,7 +1670,7 @@
     <string name="appearance_hide_nav_body">Liberta a parte inferior do ecrã. O menu lateral continua a dar acesso a todos os ecrãs.</string>
     <string name="appearance_nav_items">Escolher itens</string>
     <string name="appearance_nav_items_body">Os ecrãs que ficam na barra de navegação ou na barra lateral, e a respetiva ordem.</string>
-    <string name="appearance_density_body">Como o lançador na Visão geral lista as aplicações. Partilhado com a versão web, para que ambas mostrem o mesmo.</string>
+    <string name="appearance_density_body">Como o lançador no Painel lista as aplicações. Partilhado com a versão web, para que ambas mostrem o mesmo.</string>
     <string name="appearance_lock">Exigir desbloqueio</string>
     <string name="appearance_lock_unavailable">Não há biometria ou credencial do dispositivo registada neste dispositivo</string>
     <string name="appearance_lock_on">Pedido ao abrir e sempre que a aplicação regressa do segundo plano</string>
@@ -2252,4 +2252,6 @@
     <string name="push_channel_description">Eventos enviados pelo Traefik Manager</string>
     <string name="push_distributor_message">Eventos do Traefik Manager</string>
     <string name="push_error_old_server">Este servidor é anterior à versão 1.12.0, por isso não tem canais para enviar push.</string>
+    <string name="auth_oidc_active">Ativo</string>
+    <string name="backups_agent_static_included">Num agente, a cópia de segurança normal já inclui a configuração estática.</string>
 </resources>
