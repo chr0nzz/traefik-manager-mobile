@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.DoneAll
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Refresh
@@ -52,12 +53,14 @@ import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
+import dev.chr0nzz.traefikmanager.ui.components.TooltipIconButton
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import androidx.compose.ui.platform.LocalResources
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,7 +128,7 @@ fun NotificationHistoryScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(stringResource(R.string.settings_notifications_title)) },
+                title = { TopBarTitle(stringResource(R.string.settings_notifications_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.common_back))
@@ -133,7 +136,11 @@ fun NotificationHistoryScreen(
                 },
                 actions = {
                     if (state.unread > 0) {
-                        TextButton(onClick = viewModel::markAllRead) { Text(stringResource(R.string.notifications_mark_read)) }
+                        TooltipIconButton(
+                            label = stringResource(R.string.notifications_mark_read),
+                            icon = Icons.Outlined.DoneAll,
+                            onClick = viewModel::markAllRead,
+                        )
                     }
                     IconButton(onClick = viewModel::load) {
                         Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.notifications_refresh))

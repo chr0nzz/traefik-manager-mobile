@@ -47,6 +47,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +72,7 @@ fun RouteMapScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(stringResource(R.string.nav_route_map)) },
+                title = { TopBarTitle(stringResource(R.string.nav_route_map)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },

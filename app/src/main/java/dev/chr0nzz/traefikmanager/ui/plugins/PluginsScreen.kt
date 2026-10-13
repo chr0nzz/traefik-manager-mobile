@@ -83,6 +83,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.DetailRow
@@ -196,7 +197,7 @@ fun PluginsScreen(
                         containerColor = MaterialTheme.colorScheme.background,
                         scrolledContainerColor = MaterialTheme.colorScheme.background,
                     ),
-                    title = { Text(stringResource(R.string.nav_plugins)) },
+                    title = { TopBarTitle(stringResource(R.string.nav_plugins)) },
                     navigationIcon = {
                         DrawerButton(onOpenDrawer)
                     },

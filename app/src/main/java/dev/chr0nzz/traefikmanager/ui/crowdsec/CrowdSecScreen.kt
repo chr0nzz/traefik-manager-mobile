@@ -126,6 +126,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 import androidx.compose.ui.platform.LocalResources
 
@@ -217,7 +218,7 @@ fun CrowdSecScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text("CrowdSec") },
+                title = { TopBarTitle("CrowdSec") },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },

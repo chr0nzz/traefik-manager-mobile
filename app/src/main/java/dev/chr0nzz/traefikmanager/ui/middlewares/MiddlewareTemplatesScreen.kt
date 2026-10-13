@@ -54,6 +54,7 @@ import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -115,7 +116,7 @@ fun MiddlewareTemplatesScreen(
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
                 title = {
-                    Text(
+                    TopBarTitle(
                         when {
                             !state.editorOpen -> stringResource(R.string.middlewares_templates_title)
                             state.editing == null -> stringResource(R.string.middlewares_templates_add)

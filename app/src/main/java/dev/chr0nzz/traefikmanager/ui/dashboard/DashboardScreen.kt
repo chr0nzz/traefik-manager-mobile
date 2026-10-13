@@ -69,6 +69,7 @@ import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
 import dev.chr0nzz.traefikmanager.data.repo.RuntimeInfo
 import dev.chr0nzz.traefikmanager.data.repo.SignalCard
 import dev.chr0nzz.traefikmanager.data.repo.SignalFlag
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
@@ -163,7 +164,7 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(stringResource(R.string.nav_dashboard)) },
+                title = { TopBarTitle(stringResource(R.string.nav_dashboard)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },

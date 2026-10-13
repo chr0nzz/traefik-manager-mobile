@@ -54,6 +54,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +85,7 @@ fun ProviderTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text(page.label.asString()) },
+        title = { TopBarTitle(page.label.asString()) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },

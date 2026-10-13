@@ -59,6 +59,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 import androidx.compose.ui.platform.LocalResources
 
@@ -169,7 +170,7 @@ fun AuthSettingsScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(stringResource(R.string.settings_auth_title)) },
+                title = { TopBarTitle(stringResource(R.string.settings_auth_title)) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.settings_back))

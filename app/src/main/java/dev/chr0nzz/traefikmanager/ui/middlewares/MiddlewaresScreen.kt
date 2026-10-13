@@ -74,6 +74,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -344,7 +345,7 @@ private fun MiddlewaresTopBar(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        title = { Text(stringResource(R.string.nav_middlewares)) },
+        title = { TopBarTitle(stringResource(R.string.nav_middlewares)) },
         navigationIcon = {
             DrawerButton(onOpenDrawer)
         },

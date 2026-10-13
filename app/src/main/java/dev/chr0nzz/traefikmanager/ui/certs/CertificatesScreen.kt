@@ -74,6 +74,7 @@ import dev.chr0nzz.traefikmanager.data.model.CertHealth
 import dev.chr0nzz.traefikmanager.data.model.CertRow
 import dev.chr0nzz.traefikmanager.data.model.CertVerdict
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog
 import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
@@ -167,7 +168,7 @@ fun CertificatesScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(stringResource(R.string.nav_certificates)) },
+                title = { TopBarTitle(stringResource(R.string.nav_certificates)) },
                 navigationIcon = {
                     DrawerButton(onOpenDrawer)
                 },

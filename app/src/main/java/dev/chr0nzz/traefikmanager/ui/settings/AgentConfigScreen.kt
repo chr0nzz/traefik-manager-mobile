@@ -51,6 +51,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 
 private val RESTART_METHODS = listOf(
@@ -96,7 +97,7 @@ fun AgentConfigScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(state.agentName.ifEmpty { stringResource(R.string.agent_agent) }) },
+                title = { TopBarTitle(state.agentName.ifEmpty { stringResource(R.string.agent_agent) }) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.agent_back))

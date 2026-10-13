@@ -87,6 +87,7 @@ import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.ModalSideSheet
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.only
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -138,7 +139,7 @@ fun LogsScreen(
                         containerColor = MaterialTheme.colorScheme.background,
                         scrolledContainerColor = MaterialTheme.colorScheme.background,
                     ),
-                    title = { Text(stringResource(R.string.nav_logs)) },
+                    title = { TopBarTitle(stringResource(R.string.nav_logs)) },
                     navigationIcon = {
                         DrawerButton(onOpenDrawer)
                     },

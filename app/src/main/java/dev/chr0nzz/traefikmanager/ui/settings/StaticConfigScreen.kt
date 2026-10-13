@@ -57,6 +57,7 @@ import dev.chr0nzz.traefikmanager.ui.components.ErrorState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
+import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
@@ -242,7 +243,7 @@ fun StaticConfigScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                title = { Text(stringResource(if (rawOpen) R.string.routes_raw_title else R.string.settings_static_title)) },
+                title = { TopBarTitle(stringResource(if (rawOpen) R.string.routes_raw_title else R.string.settings_static_title)) },
                 navigationIcon = {
                     IconButton(onClick = { if (rawOpen) rawOpen = false else onClose() }) {
                         Icon(
