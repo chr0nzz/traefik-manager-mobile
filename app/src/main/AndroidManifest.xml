@@ -5,6 +5,8 @@
     <!-- WorkManager's NetworkType.CONNECTED constraint on the widget refresh needs this. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Android 17 blocks traffic to LAN addresses for apps targeting API 37 until this is granted. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <application
         android:name=".TmApplication"

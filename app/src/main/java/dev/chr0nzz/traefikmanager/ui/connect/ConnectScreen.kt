@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.rememberLocalNetworkRequest
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
@@ -52,6 +53,7 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
     val appName = stringResource(R.string.app_name)
+    val withLocalNetwork = rememberLocalNetworkRequest()
 
     Column(
         modifier = Modifier
@@ -142,7 +144,7 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel()) {
             }
 
             Button(
-                onClick = viewModel::connect,
+                onClick = { withLocalNetwork(viewModel::connect) },
                 enabled = !state.connecting,
                 modifier = Modifier.fillMaxWidth(),
             ) {

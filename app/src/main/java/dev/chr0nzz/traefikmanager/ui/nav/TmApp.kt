@@ -61,6 +61,8 @@ import androidx.navigation.navArgument
 import android.net.Uri
 import dev.chr0nzz.traefikmanager.data.api.ApiState
 import dev.chr0nzz.traefikmanager.ui.components.LoadingState
+import dev.chr0nzz.traefikmanager.ui.components.LocalNetworkAccess
+import dev.chr0nzz.traefikmanager.ui.components.rememberLocalNetworkRequest
 import dev.chr0nzz.traefikmanager.ui.components.asString
 import dev.chr0nzz.traefikmanager.ui.connect.ConnectScreen
 import dev.chr0nzz.traefikmanager.ui.certs.CertificatesScreen
@@ -92,6 +94,7 @@ import dev.chr0nzz.traefikmanager.ui.routemap.RouteMapScreen
 import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.text.style.TextOverflow
 
 private const val ROUTE_FORM = "route_form"
 private const val ROUTE_RAW = "route_raw"
@@ -163,6 +166,14 @@ private fun ConnectedApp(
     val biometricAvailable = remember(context) { AppLock.available(context) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val withLocalNetwork = rememberLocalNetworkRequest()
+
+    LaunchedEffect(Unit) {
+        if (!LocalNetworkAccess.askedOnLaunch) {
+            LocalNetworkAccess.askedOnLaunch = true
+            withLocalNetwork {}
+        }
+    }
 
     LaunchedEffect(drawerState.isOpen) {
         if (drawerState.isOpen) viewModel.loadServers()
@@ -283,7 +294,7 @@ private fun ConnectedApp(
                     selected = false,
                     onClick = { scope.launch { drawerState.open() } },
                     icon = { Icon(Icons.Outlined.Menu, contentDescription = null) },
-                    label = { Text(stringResource(R.string.nav_menu)) },
+                    label = { Text(stringResource(R.string.nav_menu), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     navigationSuiteType = suiteType,
                 )
             }
@@ -292,7 +303,7 @@ private fun ConnectedApp(
                     selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
                     onClick = { goTo(destination, null) },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(destination.label.asString()) },
+                    label = { Text(destination.label.asString(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     navigationSuiteType = suiteType,
                     badge = railBadge(badges.forRoute(destination.route), counted = !bar),
                 )
