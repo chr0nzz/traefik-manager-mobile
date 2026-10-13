@@ -5,6 +5,7 @@ import android.app.LocaleManager
 import android.content.Context
 import android.os.LocaleList
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,9 +24,13 @@ class AppLanguage @Inject constructor(
         if (locales == null) emptyList() else (0 until locales.size()).map { locales[it] }
     }
 
-    fun options(): List<LanguageOption> = shipped
-        .map { LanguageOption(it.toLanguageTag(), displayName(it)) }
-        .sortedBy { it.name.lowercase() }
+    fun options(): List<LanguageOption> {
+        val collator = Collator.getInstance()
+        return shipped
+            .filterNot { it.country in PSEUDO_REGIONS }
+            .map { LanguageOption(it.toLanguageTag(), displayName(it)) }
+            .sortedWith { a, b -> collator.compare(a.name, b.name) }
+    }
 
     fun selected(): String? = localeManager?.applicationLocales?.takeIf { !it.isEmpty }?.get(0)?.toLanguageTag()
 
@@ -41,6 +46,7 @@ class AppLanguage @Inject constructor(
 
     companion object {
         private const val SIMPLIFIED = "zh-Hans"
+        private val PSEUDO_REGIONS = setOf("XA", "XB")
         private val SIMPLIFIED_REGIONS = setOf("", "CN", "SG")
 
         fun displayName(locale: Locale): String =
