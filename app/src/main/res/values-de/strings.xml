@@ -334,7 +334,7 @@
     <string name="crowdsec_card_bans_stale">Aktive Sperren (veraltet)</string>
     <string name="crowdsec_cell_scale">1 Zelle = %1$s</string>
     <string name="crowdsec_alert_banned">gesperrt</string>
-    <string name="crowdsec_alert_open">öffnen</string>
+    <string name="crowdsec_alert_open">offen</string>
     <string name="crowdsec_verdict_probed">Aktiv geprüft</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d Quelle</item>
@@ -607,7 +607,7 @@
     <string name="agent_docker_host">Docker-Host</string>
     <string name="agent_bouncer_api_key">Bouncer-API-Schlüssel</string>
     <string name="agent_agent">Agent</string>
-    <string name="agent_restart">Neu starten</string>
+    <string name="agent_restart">Neustart</string>
     <string name="agent_restart_none">Keine</string>
     <string name="static_entrypoints">Entrypoints</string>
     <string name="static_no_entrypoints_configured">Keine Entrypoints konfiguriert</string>
@@ -1574,7 +1574,7 @@
     <string name="appearance_hide_nav_body">Gibt den unteren Bildschirmrand frei. Über das Navigationsmenü erreichst du weiterhin jeden Bildschirm.</string>
     <string name="appearance_nav_items">Einträge wählen</string>
     <string name="appearance_nav_items_body">Welche Bildschirme in der Leiste oder der Seitenleiste stehen, und in welcher Reihenfolge.</string>
-    <string name="appearance_density_body">Wie der Launcher in der Übersicht deine Apps auflistet. Wird mit der Web-App geteilt, damit beide gleich aussehen.</string>
+    <string name="appearance_density_body">Wie der Launcher auf dem Dashboard deine Apps auflistet. Wird mit der Web-App geteilt, damit beide gleich aussehen.</string>
     <string name="appearance_lock">Entsperren verlangen</string>
     <string name="appearance_lock_unavailable">Auf diesem Gerät ist keine Biometrie oder Displaysperre eingerichtet</string>
     <string name="appearance_lock_on">Wird beim Start abgefragt und immer dann, wenn die App aus dem Hintergrund zurückkehrt</string>
@@ -1678,7 +1678,7 @@
     <string name="webhook_test">Test senden</string>
     <string name="webhook_test_ok">Anfrage angenommen</string>
     <string name="webhook_test_ok_body">Der Endpunkt hat die Anfrage erhalten. Prüfe am Ziel, ob sie angekommen ist.</string>
-    <string name="notifications_bell_note">Die Glocke auf der Startseite zeigt, was der Manager gemeldet hat.</string>
+    <string name="notifications_bell_note">Die Glocke auf dem Dashboard zeigt, was der Manager gemeldet hat.</string>
     <string name="channels_this_device">dieses Gerät</string>
     <string name="channels_test_named">Test an %1$s senden</string>
     <string name="route_checks_error_save">Routenprüfungen konnten nicht gespeichert werden</string>
@@ -2145,4 +2145,6 @@
     <string name="push_channel_description">Von deinem Traefik Manager gesendete Ereignisse</string>
     <string name="push_distributor_message">Ereignisse von Traefik Manager</string>
     <string name="push_error_old_server">Dieser Server ist älter als 1.12.0 und hat daher keine Kanäle für Push.</string>
+    <string name="auth_oidc_active">Aktiv</string>
+    <string name="backups_agent_static_included">Auf einem Agent ist die statische Konfiguration bereits im normalen Backup enthalten.</string>
 </resources>
