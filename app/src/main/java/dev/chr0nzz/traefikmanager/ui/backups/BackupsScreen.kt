@@ -77,6 +77,7 @@ import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctKeys
 import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -428,7 +429,8 @@ private fun LocalPane(
             )
         }
 
-        items(rows.size, key = { rows[it].name }) { index ->
+        val rowKeys = distinctKeys(rows) { it.name }
+        items(rows.size, key = { rowKeys[it] }) { index ->
             val entry = rows[index]
             TmCard {
                 Text(

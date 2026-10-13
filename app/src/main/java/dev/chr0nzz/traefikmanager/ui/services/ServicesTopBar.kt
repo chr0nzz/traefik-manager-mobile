@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -58,6 +57,7 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,7 +156,7 @@ fun ServicesTopBar(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    itemsIndexed(results, key = { index, service -> service.key.ifEmpty { "svc-$index" } }) { _, service ->
+                    distinctItems(results, key = { it.key }) { service ->
                         ListItem(
                             headlineContent = { Text(service.shortName) },
                             supportingContent = {

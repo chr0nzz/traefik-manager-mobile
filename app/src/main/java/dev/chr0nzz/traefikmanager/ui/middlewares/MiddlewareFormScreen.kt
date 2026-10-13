@@ -78,6 +78,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctKeys
 import dev.chr0nzz.traefikmanager.data.model.UiText
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -629,7 +630,8 @@ private fun TemplatePickerSheet(
                         ),
                     )
                 }
-                items(state.customTemplates.size, key = { index -> state.customTemplates[index].id }) { index ->
+                val customKeys = distinctKeys(state.customTemplates) { it.id }
+                items(state.customTemplates.size, key = { index -> customKeys[index] }) { index ->
                     val template = state.customTemplates[index]
                     ListItem(
                         headlineContent = { Text(template.name) },

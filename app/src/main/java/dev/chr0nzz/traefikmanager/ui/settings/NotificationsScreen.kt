@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.DropdownMenu
@@ -79,6 +78,7 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -336,7 +336,7 @@ fun NotificationsScreen(
                         )
                     }
                 }
-                itemsIndexed(channels.channels, key = { index, channel -> channel.id.ifEmpty { "ch-$index" } }) { _, channel ->
+                distinctItems(channels.channels, key = { it.id }) { channel ->
                     ChannelRow(
                         channel = channel,
                         thisDevice = channel.id == channels.pushChannelId,

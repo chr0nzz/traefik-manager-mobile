@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -140,7 +139,7 @@ fun ConfigFileSheet(
                 )
             } else {
                 LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                    items(matches, key = { it.path.ifEmpty { it.label } }) { file ->
+                    distinctItems(matches, key = { it.path.ifEmpty { it.label } }) { file ->
                         ListItem(
                             headlineContent = {
                                 Text(file.label, style = MaterialTheme.typography.bodyLarge.copy(fontFamily = MonoFamily))

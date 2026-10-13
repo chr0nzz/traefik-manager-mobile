@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -62,6 +61,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -214,7 +214,7 @@ private fun TemplateList(
                 )
             }
         } else {
-            itemsIndexed(state.templates, key = { index, template -> template.id.ifEmpty { "tpl-$index" } }) { _, template ->
+            distinctItems(state.templates, key = { it.id }) { template ->
                 TmCard(onClick = { onEdit(template) }) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

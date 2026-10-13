@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material.icons.Icons
@@ -52,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.ServiceRow
 import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -330,7 +330,7 @@ private fun ServicesListPane(
                     ),
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                 ) {
-                    itemsIndexed(state.visible, key = { index, service -> service.key.ifEmpty { "svc-$index" } }) { _, service ->
+                    distinctItems(state.visible, key = { it.key }) { service ->
                         ServiceCard(
                             service = service,
                             selected = service.key == selectedKey,

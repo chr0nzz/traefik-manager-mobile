@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
@@ -65,6 +64,7 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 
 fun ProviderRoute.tmStatus(): TmStatus = when (status.lowercase()) {
     "enabled" -> TmStatus.Ok
@@ -170,7 +170,7 @@ fun ProviderScreen(
                             )
                         }
                     }
-                    items(state.visible, key = { "${it.protocol}:${it.name}" }) { route ->
+                    distinctItems(state.visible, key = { "${it.protocol}:${it.name}" }) { route ->
                         ProviderRouteCard(
                             route = route,
                             onClick = { viewModel.select(route) },
@@ -184,7 +184,7 @@ fun ProviderScreen(
                                 modifier = Modifier.padding(top = TmSpacing.sm),
                             )
                         }
-                        items(state.middlewares, key = { "mw:${it.name}" }) { middleware ->
+                        distinctItems(state.middlewares, key = { "mw:${it.name}" }) { middleware ->
                             ProviderMiddlewareCard(middleware = middleware)
                         }
                     }

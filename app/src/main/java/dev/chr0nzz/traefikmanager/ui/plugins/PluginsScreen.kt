@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -84,6 +83,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.DetailRow
@@ -330,7 +330,7 @@ private fun PluginsListPane(
                         )
                     }
                 }
-                items(state.visible, key = { it.name }) { plugin ->
+                distinctItems(state.visible, key = { it.name }) { plugin ->
                     PluginCard(
                         plugin = plugin,
                         usageCount = state.usageFor(plugin.name),
@@ -650,7 +650,7 @@ private fun PluginsSearchBar(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(results, key = { it.name }) { plugin ->
+                    distinctItems(results, key = { it.name }) { plugin ->
                         ListItem(
                             headlineContent = { Text(plugin.name) },
                             supportingContent = {

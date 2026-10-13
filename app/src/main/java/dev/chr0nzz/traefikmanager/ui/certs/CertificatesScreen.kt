@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
@@ -94,6 +93,7 @@ import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import androidx.compose.ui.platform.LocalResources
 
 fun CertHealth.asTmStatus(): TmStatus = when (this) {
@@ -273,7 +273,7 @@ fun CertificatesScreen(
                             )
                         }
                     }
-                    items(state.visible, key = { it.key }) { cert ->
+                    distinctItems(state.visible, key = { it.key }) { cert ->
                         CertificateCard(
                             cert = cert,
                             verdict = state.verdict(cert),

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -75,6 +74,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
+import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -306,7 +306,7 @@ private fun MiddlewareListPane(
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    items(state.visible, key = { it.name + it.configFile }) { middleware ->
+                    distinctItems(state.visible, key = { "${it.type}:${it.name}:${it.configFile}" }) { middleware ->
                         MiddlewareCard(
                             middleware = middleware,
                             usageCount = state.usageFor(middleware.name),
@@ -454,7 +454,7 @@ private fun MiddlewaresTopBar(
             )
         } else {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(results, key = { it.name + it.configFile }) { middleware ->
+                distinctItems(results, key = { "${it.type}:${it.name}:${it.configFile}" }) { middleware ->
                     ListItem(
                         headlineContent = { Text(middleware.name) },
                         supportingContent = {
