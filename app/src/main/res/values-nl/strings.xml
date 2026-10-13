@@ -180,7 +180,7 @@
     <string name="common_restore">Herstellen</string>
     <string name="common_restart_traefik">Traefik herstarten</string>
     <string name="backups_empty">Nog geen back-ups</string>
-    <string name="backups_git_push">Push</string>
+    <string name="backups_git_push">Pushen</string>
     <string name="backups_git_empty">Nog geen commits</string>
     <string name="logs_scheme">Schema</string>
     <string name="logs_size">Grootte</string>
@@ -334,7 +334,7 @@
     <string name="crowdsec_card_bans_stale">Actieve blokkades (verouderd)</string>
     <string name="crowdsec_cell_scale">1 cel = %1$s</string>
     <string name="crowdsec_alert_banned">geblokkeerd</string>
-    <string name="crowdsec_alert_open">openen</string>
+    <string name="crowdsec_alert_open">open</string>
     <string name="crowdsec_verdict_probed">Actief gescand</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d bron</item>
@@ -607,7 +607,7 @@
     <string name="agent_docker_host">Docker-host</string>
     <string name="agent_bouncer_api_key">Bouncer-API-sleutel</string>
     <string name="agent_agent">Agent</string>
-    <string name="agent_restart">Herstarten</string>
+    <string name="agent_restart">Herstart</string>
     <string name="agent_restart_none">Geen</string>
     <string name="static_entrypoints">Entrypoints</string>
     <string name="static_no_entrypoints_configured">Geen entrypoints geconfigureerd</string>
@@ -1575,7 +1575,7 @@
     <string name="appearance_hide_nav_body">Maakt de onderkant van het scherm vrij. Elk scherm blijft bereikbaar via het zijmenu.</string>
     <string name="appearance_nav_items">Items kiezen</string>
     <string name="appearance_nav_items_body">Welke schermen in de balk of de zijbalk staan, en in welke volgorde.</string>
-    <string name="appearance_density_body">Hoe de launcher op het Overzicht je apps toont. Gedeeld met de webversie, dus beide tonen hetzelfde.</string>
+    <string name="appearance_density_body">Hoe de launcher op het dashboard je apps toont. Gedeeld met de webversie, dus beide tonen hetzelfde.</string>
     <string name="appearance_lock">Ontgrendelen vereisen</string>
     <string name="appearance_lock_unavailable">Geen biometrie of schermvergrendeling ingesteld op dit apparaat</string>
     <string name="appearance_lock_on">Gevraagd bij het starten en telkens wanneer de app terugkomt uit de achtergrond</string>
@@ -2145,4 +2145,6 @@
     <string name="push_channel_description">Gebeurtenissen gepusht door je Traefik Manager</string>
     <string name="push_distributor_message">Traefik Manager-gebeurtenissen</string>
     <string name="push_error_old_server">Deze server is ouder dan 1.12.0 en heeft dus geen kanalen om via te pushen.</string>
+    <string name="auth_oidc_active">Actief</string>
+    <string name="backups_agent_static_included">Op een agent bevat de gewone back-up de statische configuratie al.</string>
 </resources>
