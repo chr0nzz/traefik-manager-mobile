@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -273,12 +275,17 @@ private fun MiddlewareFormBody(
                 }
             }
 
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+            ) {
                 MiddlewareMode.entries.forEachIndexed { index, mode ->
                     SegmentedButton(
                         selected = state.mode == mode,
                         onClick = { viewModel.setMode(mode) },
                         shape = SegmentedButtonDefaults.itemShape(index, MiddlewareMode.entries.size),
+                        modifier = Modifier.fillMaxHeight(),
                         enabled = mode == MiddlewareMode.Yaml || state.wizard != null,
                     ) {
                         Text(if (mode == MiddlewareMode.Wizard) stringResource(R.string.middlewares_form_wizard) else "YAML")

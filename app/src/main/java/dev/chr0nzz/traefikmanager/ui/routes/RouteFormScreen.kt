@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -219,12 +222,17 @@ fun RouteFormBody(
 
         if (form.protocol == RouteProtocol.Http) {
             TmCard {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                ) {
                     listOf(false, true).forEachIndexed { index, advanced ->
                         SegmentedButton(
                             selected = form.advancedRule == advanced,
                             onClick = { viewModel.setAdvancedRule(advanced) },
                             shape = SegmentedButtonDefaults.itemShape(index, 2),
+                            modifier = Modifier.fillMaxHeight(),
                         ) {
                             Text(stringResource(if (advanced) R.string.routes_form_rule_advanced else R.string.routes_form_rule_simple))
                         }
@@ -383,12 +391,17 @@ private fun BackendSection(
     val serviceKind = stringResource(R.string.common_label_service)
 
     TmCard {
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+        ) {
             BackendMode.entries.forEachIndexed { index, mode ->
                 SegmentedButton(
                     selected = form.backendMode == mode,
                     onClick = { viewModel.setBackendMode(mode) },
                     shape = SegmentedButtonDefaults.itemShape(index, BackendMode.entries.size),
+                    modifier = Modifier.fillMaxHeight(),
                 ) {
                     Text(stringResource(if (mode == BackendMode.Manual) R.string.routes_form_backends_build else R.string.routes_form_backends_service))
                 }
@@ -779,6 +792,7 @@ private fun TlsSection(
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
                     .padding(top = TmSpacing.xs),
             ) {
                 TcpTlsMode.entries.forEachIndexed { index, mode ->
@@ -786,6 +800,7 @@ private fun TlsSection(
                         selected = form.tcpTlsMode == mode,
                         onClick = { viewModel.update { it.copy(tcpTlsMode = mode) } },
                         shape = SegmentedButtonDefaults.itemShape(index, TcpTlsMode.entries.size),
+                        modifier = Modifier.fillMaxHeight(),
                     ) {
                         Text(
                             when (mode) {

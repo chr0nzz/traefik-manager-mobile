@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -121,12 +124,17 @@ fun AppearanceScreen(
             item { SectionLabel(stringResource(R.string.appearance_theme)) }
             item {
                 TmCard {
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
+                    ) {
                         ThemeMode.entries.forEachIndexed { index, mode ->
                             SegmentedButton(
                                 selected = preferences.themeMode == mode,
                                 onClick = { viewModel.setThemeMode(mode) },
                                 shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size),
+                                modifier = Modifier.fillMaxHeight(),
                             ) {
                                 Text(
                                     stringResource(

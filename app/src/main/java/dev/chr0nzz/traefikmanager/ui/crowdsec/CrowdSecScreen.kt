@@ -695,12 +695,17 @@ private fun CrowdSecBody(
         }
 
         item {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+            ) {
                 CrowdSecView.entries.forEachIndexed { index, view ->
                     SegmentedButton(
                         selected = state.view == view,
                         onClick = { onViewChange(view) },
                         shape = SegmentedButtonDefaults.itemShape(index, CrowdSecView.entries.size),
+                        modifier = Modifier.fillMaxHeight(),
                     ) {
                         Text(
                             text = when (view) {
