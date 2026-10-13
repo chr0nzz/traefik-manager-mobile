@@ -306,7 +306,7 @@
     <string name="crowdsec_card_bans_stale">生效中的封禁（数据已过时）</string>
     <string name="crowdsec_cell_scale">1 格 = %1$s</string>
     <string name="crowdsec_alert_banned">已封禁</string>
-    <string name="crowdsec_alert_open">打开</string>
+    <string name="crowdsec_alert_open">未封禁</string>
     <string name="crowdsec_verdict_probed">正被主动探测</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="other">%d 个来源</item>
@@ -1480,7 +1480,7 @@
     <string name="appearance_hide_nav_body">腾出屏幕底部空间。抽屉菜单仍可访问所有页面。</string>
     <string name="appearance_nav_items">选择项目</string>
     <string name="appearance_nav_items_body">哪些页面显示在导航栏或侧边栏中，以及它们的顺序。</string>
-    <string name="appearance_density_body">概览中的启动器如何列出应用。与网页版共享，两者显示一致。</string>
+    <string name="appearance_density_body">仪表盘中的启动器如何列出应用。与网页版共享，两者显示一致。</string>
     <string name="appearance_lock">需要解锁</string>
     <string name="appearance_lock_unavailable">此设备未录入生物识别信息或设备凭据</string>
     <string name="appearance_lock_on">启动时以及每次应用从后台返回时要求解锁</string>
@@ -2038,4 +2038,6 @@
     <string name="push_channel_description">Traefik Manager 推送的事件</string>
     <string name="push_distributor_message">Traefik Manager 事件</string>
     <string name="push_error_old_server">此服务器版本低于 1.12.0，没有可用于推送的渠道。</string>
+    <string name="auth_oidc_active">生效中</string>
+    <string name="backups_agent_static_included">在 Agent 上，普通备份已包含静态配置。</string>
 </resources>
