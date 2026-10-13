@@ -62,6 +62,7 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 - **Push** - events delivered to the phone over UnifiedPush
 - **Home screen widgets** - the same desk cards in three sizes, configured per widget
 - **App lock** - optional biometric unlock, with relock when the app goes to the background
+- **Languages** - follows the phone's language, or one picked in Settings: Chinese (Simplified), Czech, Danish, Dutch, French, French (Canada), German, Portuguese, Portuguese (Brazil), Russian and Spanish, plus British and American English spellings
 - **Opens on your last data** - every screen keeps its own snapshot per server and draws it immediately, then refreshes behind it
 
 ---
@@ -70,7 +71,7 @@ Native Android companion app for [Traefik Manager](https://github.com/chr0nzz/tr
 
 | Requirement              | Version                     |
 | ------------------------- | ---------------------------- |
-| Traefik Manager (server) | **v1.10.1 or higher**, v1.12.0 for notification channels and push, v1.13.0 for service authoring |
+| Traefik Manager (server) | **v1.10.1 or higher**, v1.12.0 for notification channels and push, v1.13.0 for service authoring, v1.15.0 for server messages in the app's language |
 | Android                  | 13+ (API 33)                |
 | Push (optional)          | A UnifiedPush distributor, such as the ntfy app |
 | JDK (to build)           | 17                          |
@@ -127,6 +128,18 @@ keyPassword=...
 - [Glance](https://developer.android.com/jetpack/androidx/releases/glance) and WorkManager for the widgets
 - [UnifiedPush](https://unifiedpush.org) for push
 - Robolectric and JUnit for tests, R8 with resource shrinking for release builds
+
+---
+
+## Translations
+
+The app is translated on [Weblate](https://hosted.weblate.org/projects/traefik-manager/mobile/), in the same project as the web UI, so both share one glossary and translation memory. An account is needed to write, not to read. Nothing goes live on its own: Weblate opens a pull request here.
+
+<a href="https://hosted.weblate.org/engage/traefik-manager/">
+<img src="https://hosted.weblate.org/widget/traefik-manager/mobile/multi-auto.svg" alt="Translation status per language" />
+</a>
+
+Style rules, the glossary and how to ask for a language are in [tm-locale](https://github.com/chr0nzz/tm-locale). A placeholder a translation drops or changes fails the build, so a translation cannot crash a screen.
 
 ---
 
