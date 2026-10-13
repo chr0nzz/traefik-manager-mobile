@@ -55,7 +55,7 @@
     <string name="dashboard_group_monitoring">Monitorování</string>
     <string name="dashboard_group_infrastructure">Infrastruktura</string>
     <string name="dashboard_group_security">Zabezpečení</string>
-    <string name="dashboard_group_home">Domů</string>
+    <string name="dashboard_group_home">Domácnost</string>
     <string name="dashboard_group_files">Soubory a data</string>
     <string name="dashboard_group_network">Síť</string>
     <string name="dashboard_group_dev">Vývoj</string>
@@ -362,7 +362,7 @@
     <string name="crowdsec_card_bans_stale">Platné blokace (zastaralé)</string>
     <string name="crowdsec_cell_scale">1 buňka = %1$s</string>
     <string name="crowdsec_alert_banned">zablokováno</string>
-    <string name="crowdsec_alert_open">otevřít</string>
+    <string name="crowdsec_alert_open">otevřeno</string>
     <string name="crowdsec_verdict_probed">Aktivně sondováno</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d zdroj</item>
@@ -419,7 +419,7 @@
     <string name="routes_server_numbered">Server %1$d</string>
     <string name="routes_edit">Upravit trasu</string>
     <string name="routes_form_rule_advanced">Pokročilé pravidlo</string>
-    <string name="routes_form_rule_simple">Jednoduchý</string>
+    <string name="routes_form_rule_simple">Jednoduché</string>
     <string name="routes_form_subdomain">Subdoména</string>
     <string name="routes_form_backends_build">Sestavit backendy</string>
     <string name="routes_form_backends_service">Použít službu</string>
@@ -526,7 +526,7 @@
     <string name="appearance_density_rows">Řádky</string>
     <string name="appearance_density_icons">Ikony</string>
     <string name="appearance_security">Zabezpečení</string>
-    <string name="common_refresh">Aktualizovat</string>
+    <string name="common_refresh">Obnovit</string>
     <string name="diagnostics_address">Adresa</string>
     <string name="diagnostics_socket_peer">Protější strana socketu</string>
     <string name="diagnostics_headers">Hlavičky</string>
@@ -554,7 +554,7 @@
     <string name="channels_remove_body">Odebrat kanál „%1$s“? Události do něj přestanou být doručovány.</string>
     <string name="route_checks_section">Kontroly tras</string>
     <string name="route_checks_title">Zkontrolovat dostupnost trasy</string>
-    <string name="route_checks_every">Každých</string>
+    <string name="route_checks_every">Interval kontroly</string>
     <string name="channels_help">Každý zapnutý kanál dostane vlastní kopii události, filtrovanou podle kategorií, závažnosti, souhrnu a doby klidu nastavených na něm.</string>
     <string name="channels_empty">Nejsou nastaveny žádné kanály</string>
     <string name="channels_empty_body">Přidejte kanál a dostávejte zprávu, když se změní trasy, proběhnou zálohy nebo vyprší certifikáty.</string>
@@ -621,7 +621,7 @@
     <string name="static_only_log_these_responses_comma_separated">Logovat pouze tyto odpovědi, kódy nebo rozsahy oddělené čárkou.</string>
     <string name="static_only_log_requests_slower_than_this">Logovat pouze požadavky pomalejší než tato hodnota.</string>
     <string name="static_headers">Hlavičky</string>
-    <string name="static_dashboard">Přehled</string>
+    <string name="static_dashboard">Dashboard</string>
     <string name="static_check_for_new_traefik_versions">Kontrolovat nové verze Traefiku</string>
     <string name="static_send_anonymous_usage_statistics">Odesílat anonymní statistiky používání</string>
     <string name="static_default_rule_syntax">Výchozí syntaxe pravidel</string>
@@ -643,7 +643,7 @@
     <string name="agent_docker_host">Docker hostitel</string>
     <string name="agent_bouncer_api_key">API klíč bounceru</string>
     <string name="agent_agent">Agent</string>
-    <string name="agent_restart">Restartovat</string>
+    <string name="agent_restart">Restart</string>
     <string name="static_entrypoints">Vstupní body</string>
     <string name="static_no_entrypoints_configured">Nejsou nastaveny žádné vstupní body</string>
     <string name="static_certificate_resolvers">Resolvery certifikátů</string>
@@ -1815,7 +1815,7 @@
     <string name="webhook_test">Odeslat test</string>
     <string name="webhook_test_ok">Požadavek přijat</string>
     <string name="webhook_test_ok_body">Endpoint požadavek přijal. Ověřte v cíli, že dorazil.</string>
-    <string name="notifications_bell_note">Zvonek na obrazovce Domů ukazuje, co Traefik Manager nahlásil.</string>
+    <string name="notifications_bell_note">Zvonek na obrazovce Přehled ukazuje, co Traefik Manager nahlásil.</string>
     <string name="channels_this_device">toto zařízení</string>
     <string name="channels_test_named">Odeslat test do kanálu %1$s</string>
     <string name="route_checks_error_save">Kontroly tras se nepodařilo uložit</string>
@@ -2305,4 +2305,6 @@
     <string name="push_channel_description">Události, které posílá váš Traefik Manager</string>
     <string name="push_distributor_message">Události Traefik Manager</string>
     <string name="push_error_old_server">Tento server je starší než 1.12.0, takže nemá žádné kanály pro push.</string>
+    <string name="auth_oidc_active">Aktivní</string>
+    <string name="backups_agent_static_included">U agenta už běžná záloha zahrnuje statickou konfiguraci.</string>
 </resources>
