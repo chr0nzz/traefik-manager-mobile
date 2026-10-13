@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_appearance_subtitle">Theme, dynamic color and the app lock</string>
+    <string name="settings_about_subtitle">Versions and open source licenses</string>
+    <string name="about_licence_line">GPL-3.0 license · xyzlab.dev</string>
+    <string name="about_licences">Open source licenses</string>
+    <string name="appearance_dynamic">Dynamic color</string>
+    <string name="route_checks_body">Colors the status dot on Routes, and alerts under the Traefik category when a backend stops answering.</string>
+</resources>

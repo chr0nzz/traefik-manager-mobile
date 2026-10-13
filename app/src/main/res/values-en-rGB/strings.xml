@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="routes_form_streaming">Optimise for streaming (Jellyfin / Emby / Plex)</string>
+    <string name="http_status_401">Unauthorised</string>
+</resources>
