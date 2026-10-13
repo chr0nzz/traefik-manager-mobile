@@ -24,9 +24,9 @@
         <item quantity="many">%d алертов</item>
     </plurals>
     <string name="server_show_list">Сменить сервер</string>
-    <string name="server_unreachable">недоступно</string>
+    <string name="server_unreachable">недоступен</string>
     <string name="connect_key_label">API-ключ</string>
-    <string name="connect_button">Подключение</string>
+    <string name="connect_button">Подключиться</string>
     <string name="connect_error_failed">Не удалось подключиться</string>
     <string name="settings_language_section">Язык</string>
     <string name="settings_language_system">Как в системе</string>
@@ -177,7 +177,7 @@
         <item quantity="few">используется в %d middleware</item>
         <item quantity="many">используется в %d middleware</item>
     </plurals>
-    <string name="plugins_update">Обновить</string>
+    <string name="plugins_update">Обновление</string>
     <string name="plugins_update_available">доступна %1$s</string>
     <string name="plugins_used_by_none">Ни один middleware не ссылается на этот плагин</string>
     <string name="plugins_error_no_snippet">Вставьте фрагмент статической конфигурации</string>
@@ -190,7 +190,7 @@
     <string name="common_restore">Восстановить</string>
     <string name="common_restart_traefik">Перезапустить Traefik</string>
     <string name="backups_empty">Резервных копий пока нет</string>
-    <string name="backups_git_push">Push</string>
+    <string name="backups_git_push">Отправить</string>
     <string name="backups_git_empty">Коммитов пока нет</string>
     <string name="logs_scheme">Схема</string>
     <string name="logs_size">Размер</string>
@@ -282,7 +282,7 @@
     <string name="logs_latency_none_completed">здесь нет ни одного завершённого ответа</string>
     <string name="logs_counter_fast">менее 100ms</string>
     <string name="logs_card_methods">Методы</string>
-    <string name="logs_flag_writes">запись</string>
+    <string name="logs_flag_writes">записи</string>
     <string name="logs_ok_reads_only">только чтение</string>
     <string name="logs_methods_none">метод не записан</string>
     <string name="logs_card_domains">Домены</string>
@@ -345,8 +345,8 @@
     <string name="crowdsec_card_paths">Атакуемые пути</string>
     <string name="crowdsec_card_accounts">Атакуемые учётные записи</string>
     <string name="crowdsec_targets_empty">meta не передана</string>
-    <string name="crowdsec_unit_paths">пути</string>
-    <string name="crowdsec_unit_accounts">учётные записи</string>
+    <string name="crowdsec_unit_paths">путей</string>
+    <string name="crowdsec_unit_accounts">учётных записей</string>
     <string name="crowdsec_most_wanted">главная цель %1$s</string>
     <string name="crowdsec_card_routes">Атакуемые маршруты</string>
     <string name="crowdsec_routes_empty_none">ни во что не целились</string>
@@ -362,7 +362,7 @@
     <string name="crowdsec_card_bans_stale">Действующие блокировки (данные устарели)</string>
     <string name="crowdsec_cell_scale">1 ячейка = %1$s</string>
     <string name="crowdsec_alert_banned">заблокирован</string>
-    <string name="crowdsec_alert_open">открыть</string>
+    <string name="crowdsec_alert_open">открыт</string>
     <string name="crowdsec_verdict_probed">Активно зондируется</string>
     <plurals name="crowdsec_sources_count">
         <item quantity="one">%d источник</item>
@@ -412,7 +412,7 @@
     <string name="common_label_interval">Интервал</string>
     <string name="routes_ping_checking">Проверка</string>
     <string name="routes_ping_degraded">с деградацией</string>
-    <string name="routes_ping_unreachable">недоступно</string>
+    <string name="routes_ping_unreachable">недоступен</string>
     <string name="routes_details_title">Сведения о роутере</string>
     <string name="routes_tls_options">Параметры</string>
     <string name="routes_no_middlewares">Middleware не настроены</string>
@@ -420,7 +420,7 @@
     <string name="routes_server_numbered">Сервер %1$d</string>
     <string name="routes_edit">Изменить маршрут</string>
     <string name="routes_form_rule_advanced">Расширенное правило</string>
-    <string name="routes_form_rule_simple">Простой</string>
+    <string name="routes_form_rule_simple">Простое</string>
     <string name="routes_form_subdomain">Поддомен</string>
     <string name="routes_form_backends_build">Задать бэкенды</string>
     <string name="routes_form_backends_service">Использовать сервис</string>
@@ -520,7 +520,7 @@
     <string name="settings_about_title">О программе</string>
     <string name="appearance_theme_light">Светлая</string>
     <string name="appearance_theme_dark">Тёмная</string>
-    <string name="appearance_theme_system">Система</string>
+    <string name="appearance_theme_system">Системная</string>
     <string name="appearance_navigation">Навигация</string>
     <string name="appearance_density_rows">Строки</string>
     <string name="appearance_density_icons">Значки</string>
@@ -643,7 +643,7 @@
     <string name="agent_docker_host">Docker-хост</string>
     <string name="agent_bouncer_api_key">API-ключ баунсера</string>
     <string name="agent_agent">Агент</string>
-    <string name="agent_restart">Перезапустить</string>
+    <string name="agent_restart">Перезапуск</string>
     <string name="agent_restart_none">Нет</string>
     <string name="static_entrypoints">Точки входа</string>
     <string name="static_no_entrypoints_configured">Точки входа не настроены</string>
@@ -836,7 +836,7 @@
     <string name="routes_combine_hint_weighted">Трафик распределяется по весу.</string>
     <string name="health_up">Доступен</string>
     <string name="certs_unknown">Неизвестно</string>
-    <string name="certs_expired">истекли</string>
+    <string name="certs_expired">истёк</string>
     <string name="certs_days_left">осталось %1$dd</string>
     <plurals name="certs_removed">
         <item quantity="one">Убран %d сертификат</item>
@@ -924,7 +924,7 @@
         <item quantity="many">доступно %1$d из %2$d бэкендов</item>
     </plurals>
     <string name="dashboard_sub_in_use">используется: %1$d</string>
-    <string name="dashboard_flag_warnings">предупреждения</string>
+    <string name="dashboard_flag_warnings">с предупреждениями</string>
     <string name="dashboard_flag_idle">простаивает</string>
     <string name="dashboard_unreachable">API Traefik недоступен</string>
     <string name="dashboard_health_down">недоступны</string>
@@ -951,7 +951,7 @@
     <string name="logs_facet_router">роутер</string>
     <string name="widget_chip_current">все актуальны</string>
     <string name="widget_no_scenario">никто не вызвал срабатывание сценария</string>
-    <string name="widget_unit_services">сервисы</string>
+    <string name="widget_unit_services">сервисов</string>
     <string name="widget_unit_middlewares">middleware</string>
     <string name="widget_card_http">HTTP-роутеры</string>
     <string name="widget_unreachable">Недоступен</string>
@@ -1817,7 +1817,7 @@
     <string name="webhook_test">Отправить тест</string>
     <string name="webhook_test_ok">Запрос принят</string>
     <string name="webhook_test_ok_body">Эндпоинт получил запрос. Проверьте получателя, чтобы убедиться, что запрос дошёл.</string>
-    <string name="notifications_bell_note">Колокольчик на главном экране показывает, о чём сообщил Traefik Manager.</string>
+    <string name="notifications_bell_note">Колокольчик на дашборде показывает, о чём сообщил Traefik Manager.</string>
     <string name="channels_this_device">это устройство</string>
     <string name="channels_test_named">Отправить тест в канал %1$s</string>
     <string name="route_checks_error_save">Не удалось сохранить проверки маршрутов</string>
@@ -2305,4 +2305,6 @@
     <string name="push_channel_description">События, отправляемые вашим Traefik Manager</string>
     <string name="push_distributor_message">События Traefik Manager</string>
     <string name="push_error_old_server">Версия этого сервера ниже 1.12.0, поэтому у него нет каналов для push-уведомлений.</string>
+    <string name="auth_oidc_active">Активно</string>
+    <string name="backups_agent_static_included">На агенте обычная резервная копия уже включает статическую конфигурацию.</string>
 </resources>
