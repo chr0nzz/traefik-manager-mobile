@@ -2112,7 +2112,6 @@
     <string name="services_row_fallback">reserva</string>
     <string name="common_error_http">%1$s (HTTP %2$d)</string>
     <string name="error_could_not_restart_traefik">Não foi possível reiniciar o Traefik</string>
-    <string name="error_an_agent_backs_up_its_static">Um agente inclui a configuração estática na cópia de segurança normal</string>
     <string name="error_could_not_save_the_dashboard">Não foi possível guardar o painel</string>
     <string name="error_could_not_create_the_template">Não foi possível criar o modelo</string>
     <string name="error_could_not_update_the_template">Não foi possível atualizar o modelo</string>

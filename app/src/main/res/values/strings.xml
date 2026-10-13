@@ -763,7 +763,7 @@
     <string name="logs_card_latency">Response time</string>
     <!-- Follows a number of requests -->
     <string name="logs_flag_over_2s">over 2s</string>
-    <!-- Follows a number of requests -->
+    <!-- Label shown before a count of requests -->
     <string name="logs_flag_over_500ms">over 500ms</string>
     <!-- Follows a number -->
     <plurals name="logs_flag_retries">
@@ -776,9 +776,9 @@
     <string name="logs_latency_none_completed">nothing here is a completed response</string>
     <!-- Lowercase: this log format does not record how long a request took -->
     <string name="logs_latency_no_duration">no duration in this format</string>
-    <!-- Follows a number of requests -->
+    <!-- Label shown before a count of requests -->
     <string name="logs_counter_fast">under 100ms</string>
-    <!-- Follows a number. An upgrade is a connection upgrade such as WebSocket -->
+    <!-- Label shown before its count. An upgrade is a connection upgrade such as WebSocket -->
     <plurals name="logs_counter_upgrades">
         <item quantity="one">upgrade</item>
         <item quantity="other">upgrades</item>
@@ -1545,7 +1545,7 @@
     <string name="appearance_hide_nav_body">Frees the bottom of the screen. The drawer still reaches every screen.</string>
     <string name="appearance_nav_items">Choose items</string>
     <string name="appearance_nav_items_body">Which screens sit in the bar or the side rail, and their order.</string>
-    <string name="appearance_density_body">How the launcher on the Overview lists your apps. Shared with the web, so both show the same.</string>
+    <string name="appearance_density_body">How the launcher on the Dashboard lists your apps. Shared with the web, so both show the same.</string>
     <!-- Layout choice: apps listed as rows -->
     <string name="appearance_density_rows">Rows</string>
     <!-- Layout choice: apps shown as a grid of icons -->
@@ -1720,7 +1720,7 @@
     <string name="webhook_test">Send a test</string>
     <string name="webhook_test_ok">Request accepted</string>
     <string name="webhook_test_ok_body">The endpoint received the request. Check the destination to confirm it arrived.</string>
-    <string name="notifications_bell_note">The bell on Home shows what the manager has reported.</string>
+    <string name="notifications_bell_note">The bell on the Dashboard shows what the manager has reported.</string>
     <!-- Lowercase tag on the channel that pushes to this phone -->
     <string name="channels_this_device">this device</string>
     <!-- %1$s is a list of the fields that are still empty -->
@@ -1808,6 +1808,8 @@
     <string name="auth_otp_note">Covers the browser login. This app authenticates with its API key.</string>
     <!-- State of single sign-on: set up but not in use -->
     <string name="auth_oidc_configured">Configured</string>
+    <!-- State of single sign-on: turned on and in use -->
+    <string name="auth_oidc_active">Active</string>
     <string name="auth_oidc_note_down">Switched on but not answering, so the password login still applies</string>
     <string name="auth_oidc_note">Single sign-on for the browser login</string>
     <string name="auth_read_only_note">Read-only here. Passwords, two-factor and OIDC are changed in the web UI.</string>
@@ -2536,7 +2538,8 @@
     <!-- %1$s is an error message, %2$d is the HTTP status code -->
     <string name="common_error_http">%1$s (HTTP %2$d)</string>
     <string name="error_could_not_restart_traefik">Could not restart Traefik</string>
-    <string name="error_an_agent_backs_up_its_static">An agent backs up its static config with the ordinary create</string>
+    <!-- Shown when a static config backup is asked for on an agent server -->
+    <string name="backups_agent_static_included">On an agent, the regular backup already includes the static config.</string>
     <string name="error_could_not_save_the_dashboard">Could not save the dashboard</string>
     <string name="error_could_not_create_the_template">Could not create the template</string>
     <string name="error_could_not_update_the_template">Could not update the template</string>

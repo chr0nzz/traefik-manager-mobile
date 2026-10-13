@@ -2112,7 +2112,6 @@
     <string name="services_row_fallback">secours</string>
     <string name="common_error_http">%1$s (HTTP %2$d)</string>
     <string name="error_could_not_restart_traefik">Impossible de redémarrer Traefik</string>
-    <string name="error_an_agent_backs_up_its_static">Un agent sauvegarde sa configuration statique via la création de sauvegarde habituelle</string>
     <string name="error_could_not_save_the_dashboard">Impossible d’enregistrer le tableau de bord</string>
     <string name="error_could_not_create_the_template">Impossible de créer le modèle</string>
     <string name="error_could_not_update_the_template">Impossible de mettre à jour le modèle</string>

@@ -2013,7 +2013,6 @@
     <string name="services_row_fallback">reserve</string>
     <string name="common_error_http">%1$s (HTTP %2$d)</string>
     <string name="error_could_not_restart_traefik">Traefik kon niet worden herstart</string>
-    <string name="error_an_agent_backs_up_its_static">Een agent maakt een back-up van zijn statische configuratie met de gewone back-up</string>
     <string name="error_could_not_save_the_dashboard">Het dashboard kon niet worden opgeslagen</string>
     <string name="error_could_not_create_the_template">Het sjabloon kon niet worden aangemaakt</string>
     <string name="error_could_not_update_the_template">Het sjabloon kon niet worden bijgewerkt</string>

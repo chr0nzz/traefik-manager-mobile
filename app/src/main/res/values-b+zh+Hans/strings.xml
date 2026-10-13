@@ -1914,7 +1914,6 @@
     <string name="services_row_fallback">备用</string>
     <string name="common_error_http">%1$s（HTTP %2$d）</string>
     <string name="error_could_not_restart_traefik">无法重启 Traefik</string>
-    <string name="error_an_agent_backs_up_its_static">Agent 通过普通的创建备份来备份其静态配置</string>
     <string name="error_could_not_save_the_dashboard">无法保存仪表盘</string>
     <string name="error_could_not_create_the_template">无法创建模板</string>
     <string name="error_could_not_update_the_template">无法更新模板</string>

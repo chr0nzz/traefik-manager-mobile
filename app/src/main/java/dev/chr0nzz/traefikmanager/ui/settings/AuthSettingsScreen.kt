@@ -229,7 +229,7 @@ fun AuthSettingsScreen(
                     AuthFact(
                         label = "OIDC",
                         value = when {
-                            status.oidcActive -> stringResource(R.string.routes_filter_active)
+                            status.oidcActive -> stringResource(R.string.auth_oidc_active)
                             status.oidcEnabled -> stringResource(R.string.auth_oidc_configured)
                             else -> stringResource(R.string.auth_state_off)
                         },

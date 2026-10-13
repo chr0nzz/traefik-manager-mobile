@@ -2013,7 +2013,6 @@
     <string name="services_row_fallback">Fallback</string>
     <string name="common_error_http">%1$s (HTTP %2$d)</string>
     <string name="error_could_not_restart_traefik">Traefik konnte nicht neu gestartet werden</string>
-    <string name="error_an_agent_backs_up_its_static">Ein Agent sichert seine statische Konfiguration mit dem normalen Backup</string>
     <string name="error_could_not_save_the_dashboard">Dashboard konnte nicht gespeichert werden</string>
     <string name="error_could_not_create_the_template">Vorlage konnte nicht erstellt werden</string>
     <string name="error_could_not_update_the_template">Vorlage konnte nicht aktualisiert werden</string>

@@ -52,7 +52,7 @@ class BackupsRepository @Inject constructor(
     suspend fun create(): CreateBackupResponse = apiProvider.api().createBackup()
 
     suspend fun createStatic(): CreateBackupResponse {
-        if (!(onHost)) fail(null, R.string.error_an_agent_backs_up_its_static)
+        if (!(onHost)) fail(null, R.string.backups_agent_static_included)
         return apiProvider.api().createStaticBackup()
     }
 
