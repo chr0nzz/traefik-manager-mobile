@@ -780,6 +780,28 @@
           }
         }
       }
+    },
+    "%lld routes": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld route"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld routes"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"

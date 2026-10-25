@@ -143,6 +143,7 @@ struct DestinationView: View {
         case .middlewares: MiddlewaresView()
         case .services: ServicesView()
         case .logs: LogsView()
+        case .routeMap: RouteMapView()
         case .settings: SettingsView()
         default: ComingSoonView(destination: destination)
         }
