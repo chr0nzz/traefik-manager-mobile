@@ -145,6 +145,8 @@ struct DestinationView: View {
         case .logs: LogsView()
         case .routeMap: RouteMapView()
         case .crowdsec: CrowdSecView()
+        case .certificates: CertificatesView()
+        case .plugins: PluginsView()
         case .settings: SettingsView()
         default:
             if destination.isProvider {

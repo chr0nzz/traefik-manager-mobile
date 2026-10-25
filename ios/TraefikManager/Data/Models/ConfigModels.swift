@@ -84,9 +84,10 @@ struct StaticConfigResponse: Decodable, Sendable {
 
     private enum CodingKeys: String, CodingKey { case parsed, path, raw, error }
 
-    init(raw: String, path: String) {
+    init(path: String, raw: String, parsed: [String: JSONValue]? = nil) {
         self.raw = raw
         self.path = path
+        self.parsed = parsed
     }
 
     init(from decoder: Decoder) throws {

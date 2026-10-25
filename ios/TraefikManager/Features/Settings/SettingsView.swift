@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @AppStorage(PreferenceKey.themeMode) private var themeMode: ThemeMode = .system
     @State private var confirmDisconnect = false
+    @State private var openStatic = DebugLaunch.form == "static"
 
     var body: some View {
         Form {
@@ -39,6 +40,14 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Traefik") {
+                NavigationLink {
+                    StaticConfigView()
+                } label: {
+                    Label("Static config", systemImage: "doc.text")
+                }
+            }
+
             Section("Connection") {
                 LabeledContent("Instance", value: app.isDemo ? String(localized: "Demo") : app.connection?.baseURL.absoluteString ?? "")
                 Button("Disconnect", role: .destructive) { confirmDisconnect = true }
@@ -49,6 +58,7 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .navigationDestination(isPresented: $openStatic) { StaticConfigView() }
         .confirmationDialog("Disconnect from this instance?", isPresented: $confirmDisconnect, titleVisibility: .visible) {
             Button("Disconnect", role: .destructive) { app.disconnect() }
         } message: {

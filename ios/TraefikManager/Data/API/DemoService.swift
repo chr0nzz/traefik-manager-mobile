@@ -188,9 +188,6 @@ struct DemoService: TMService {
         try JSONDecoder().decode(CertResolversResponse.self, from: Data(#"{"resolvers":["letsencrypt"]}"#.utf8))
     }
 
-    func staticConfig() async throws -> StaticConfigResponse {
-        StaticConfigResponse(raw: "", path: "/app/traefik.yml")
-    }
 
     func dashboardConfig() async throws -> DashboardConfig { DashboardConfig() }
 
@@ -397,6 +394,140 @@ struct DemoService: TMService {
         await settle()
         return OkResponse(ok: true)
     }
+
+    // MARK: - Certificates
+
+    func certs() async throws -> CertsResponse {
+        await settle()
+        let soon = { (days: Double) in ISO8601DateFormatter().string(from: Date().addingTimeInterval(days * 86_400)) }
+        return CertsResponse(certs: [
+            CertEntry(resolver: "letsencrypt", main: "example.com", sans: ["example.com", "www.example.com", "api.example.com", "blog.example.com"], notAfter: soon(64), source: "acme.json"),
+            CertEntry(resolver: "letsencrypt", main: "media.example.com", notAfter: soon(21), source: "acme.json"),
+            CertEntry(resolver: "cloudflare", main: "vpn.example.com", notAfter: soon(3), source: "cloudflare.json"),
+            CertEntry(resolver: "file", main: "chain.pem", certFile: "/etc/traefik/certs/chain.pem"),
+        ])
+    }
+
+    func certUsage(exclude: [String]) async throws -> CertUsage { CertUsage(unusedKnown: true) }
+
+    func certManage() async throws -> CertManageState { CertManageState(reason: "Demo mode does not change certificates") }
+
+    func deleteCerts(_ certs: [CertRef]) async throws -> CertDeleteResponse {
+        await settle()
+        return CertDeleteResponse(ok: true, removed: certs.count, restarted: true)
+    }
+
+    func plugins() async throws -> PluginsResponse {
+        await settle()
+        return PluginsResponse(plugins: [
+            PluginEntry(
+                name: "crowdsec-bouncer",
+                moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin",
+                version: "v1.3.5",
+                settings: .object(["enabled": .bool(true), "crowdsecMode": .string("stream"), "updateIntervalSeconds": .number(60)])
+            ),
+            PluginEntry(name: "geoblock", moduleName: "plugins-local/geoblock"),
+        ])
+    }
+
+    func pluginCatalog() async throws -> PluginCatalog {
+        PluginCatalog(plugins: ["github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin": "v1.4.6"])
+    }
+
+    func staticManageable() async -> Bool { true }
+
+    func staticConfig() async throws -> StaticConfigResponse {
+        await settle()
+        return StaticConfigResponse(path: agentId == nil ? "/app/traefik.yml" : "/etc/traefik/traefik.yml", raw: Self.demoStatic, parsed: Self.demoStaticParsed)
+    }
+
+    func saveStaticConfig(_ content: String) async throws { await settle() }
+
+    func staticSection(_ request: StaticSectionRequest) async throws -> StaticSectionResponse {
+        await settle()
+        return StaticSectionResponse(ok: true, raw: request.currentRaw ?? Self.demoStatic, parsed: Self.demoStaticParsed)
+    }
+
+    func installPlugin(staticYaml: String, middlewareYaml: String, middlewareFile: String) async -> PluginInstallResponse {
+        await settle()
+        return PluginInstallResponse(ok: true, plugins: ["demoPlugin"])
+    }
+
+    func restartTraefik() async throws { await settle() }
+
+    static let demoStatic = """
+    api:
+      dashboard: true
+
+    entryPoints:
+      web:
+        address: ":80"
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+      websecure:
+        address: ":443"
+        http:
+          tls:
+            certResolver: letsencrypt
+
+    certificatesResolvers:
+      letsencrypt:
+        acme:
+          email: admin@example.com
+          storage: /acme.json
+          dnsChallenge:
+            provider: cloudflare
+
+    providers:
+      file:
+        directory: /app/config/dynamic
+        watch: true
+
+    accessLog:
+      filePath: /var/log/traefik/access.log
+      format: json
+
+    experimental:
+      plugins:
+        crowdsec-bouncer:
+          moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+          version: v1.3.5
+      localPlugins:
+        geoblock:
+          moduleName: plugins-local/geoblock
+    """
+
+    static let demoStaticParsed: JSONObject = [
+        "api": .object(["dashboard": .bool(true)]),
+        "entryPoints": .object([
+            "web": .object([
+                "address": .string(":80"),
+                "http": .object(["redirections": .object(["entryPoint": .object(["to": .string("websecure")])])]),
+            ]),
+            "websecure": .object([
+                "address": .string(":443"),
+                "http": .object(["tls": .object(["certResolver": .string("letsencrypt")])]),
+            ]),
+        ]),
+        "certificatesResolvers": .object([
+            "letsencrypt": .object(["acme": .object([
+                "email": .string("admin@example.com"),
+                "storage": .string("/acme.json"),
+                "dnsChallenge": .object(["provider": .string("cloudflare")]),
+            ])]),
+        ]),
+        "providers": .object(["file": .object(["directory": .string("/app/config/dynamic"), "watch": .bool(true)])]),
+        "accessLog": .object(["filePath": .string("/var/log/traefik/access.log"), "format": .string("json")]),
+        "experimental": .object([
+            "plugins": .object(["crowdsec-bouncer": .object([
+                "moduleName": .string("github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"),
+                "version": .string("v1.3.5"),
+            ])]),
+            "localPlugins": .object(["geoblock": .object(["moduleName": .string("plugins-local/geoblock")])]),
+        ]),
+    ]
 
     // MARK: - Fixtures
 

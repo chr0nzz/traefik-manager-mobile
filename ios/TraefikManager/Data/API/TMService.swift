@@ -74,6 +74,21 @@ protocol TMService: Sendable {
     func crowdSecSearch(_ query: CsDecisionQuery, page: Int, per: Int) async throws -> CsDecisionPage
     func crowdSecAddDecision(_ request: AddDecisionRequest) async throws -> OkResponse
     func crowdSecDeleteDecision(_ id: Int64) async throws -> OkResponse
+
+    // Certificates
+    func certs() async throws -> CertsResponse
+    func certUsage(exclude: [String]) async throws -> CertUsage
+    func certManage() async throws -> CertManageState
+    func deleteCerts(_ certs: [CertRef]) async throws -> CertDeleteResponse
+
+    // Plugins and static config
+    func plugins() async throws -> PluginsResponse
+    func pluginCatalog() async throws -> PluginCatalog
+    func staticManageable() async -> Bool
+    func saveStaticConfig(_ content: String) async throws
+    func staticSection(_ request: StaticSectionRequest) async throws -> StaticSectionResponse
+    func installPlugin(staticYaml: String, middlewareYaml: String, middlewareFile: String) async -> PluginInstallResponse
+    func restartTraefik() async throws
 }
 
 struct LiveService: TMService {
@@ -155,7 +170,6 @@ struct LiveService: TMService {
         try await client.get("api/agents/\(APIClient.segment(agentId))/cert-resolvers")
     }
 
-    func staticConfig() async throws -> StaticConfigResponse { try await client.get("api/static/config") }
 
     private var serverQuery: [URLQueryItem] { agentId.map { [URLQueryItem(name: "server", value: $0)] } ?? [] }
 
@@ -269,5 +283,70 @@ struct LiveService: TMService {
 
     func crowdSecDeleteDecision(_ id: Int64) async throws -> OkResponse {
         try await client.delete("api/crowdsec/decisions/\(id)")
+    }
+
+    func certs() async throws -> CertsResponse { try await client.get("api/traefik/certs") }
+
+    func certUsage(exclude: [String]) async throws -> CertUsage {
+        try await client.get("api/certs/usage", query: serverQuery + exclude.map { URLQueryItem(name: "exclude", value: $0) })
+    }
+
+    func certManage() async throws -> CertManageState { try await client.get("api/certs/manage", query: serverQuery) }
+
+    /// 502/504 mean the connection dropped while Traefik restarted; a body with `ok:false` still decodes on error codes.
+    func deleteCerts(_ certs: [CertRef]) async throws -> CertDeleteResponse {
+        do {
+            return try await client.post("api/certs/delete", body: CertDeleteRequest(server: agentId ?? "", certs: certs))
+        } catch APIError.http(502, _), APIError.http(504, _), APIError.unreachable {
+            throw APIError.server(String(localized: "Lost the connection while Traefik restarted. Pull to refresh to check."))
+        }
+    }
+
+    // MARK: Plugins and static config
+
+    /// The hub itself, for endpoints that take `server` instead of going through the agent proxy.
+    private var hub: APIClient { client.scoped(to: nil) }
+
+    func plugins() async throws -> PluginsResponse { try await client.get("api/traefik/plugins") }
+
+    func pluginCatalog() async throws -> PluginCatalog { try await hub.get("api/plugins/catalog") }
+
+    func staticManageable() async -> Bool {
+        if agentId == nil {
+            let available: StaticAvailable? = try? await hub.get("api/static/available")
+            return available?.available ?? false
+        }
+        let status: AgentStaticStatus? = try? await client.get("api/static/status")
+        return status?.configured ?? false
+    }
+
+    func staticConfig() async throws -> StaticConfigResponse { try await hub.get("api/static/config", query: serverQuery) }
+
+    func saveStaticConfig(_ content: String) async throws {
+        let response: OkResponse = agentId == nil
+            ? try await hub.post("api/static/config", body: StaticSaveRequest(content: content))
+            : try await client.post("api/static", body: StaticSaveRequest(content: content))
+        if !response.worked, let error = response.error ?? response.message { throw APIError.server(error) }
+    }
+
+    func staticSection(_ request: StaticSectionRequest) async throws -> StaticSectionResponse {
+        try await hub.post("api/static/section", body: request)
+    }
+
+    func installPlugin(staticYaml: String, middlewareYaml: String, middlewareFile: String) async -> PluginInstallResponse {
+        let request = PluginInstallRequest(staticYaml: staticYaml, middlewareYaml: middlewareYaml, middlewareFile: middlewareFile, server: agentId ?? "")
+        do {
+            return try await hub.post("api/plugins/install", body: request)
+        } catch {
+            return PluginInstallResponse(ok: false, error: error.localizedDescription)
+        }
+    }
+
+    /// 502/504 are expected while Traefik goes down for the restart.
+    func restartTraefik() async throws {
+        do {
+            let _: OkResponse = try await client.post("api/static/restart")
+        } catch APIError.http(502, _), APIError.http(504, _) {
+        }
     }
 }

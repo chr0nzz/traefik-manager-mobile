@@ -1228,6 +1228,258 @@
           }
         }
       }
+    },
+    "%lld certificates": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld certificate"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld certificates"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld certificates have expired": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld certificate has expired"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld certificates have expired"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld domains": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld domain"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld domains"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld expiring within 7 days": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld expiring within 7 days"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld expiring within 7 days"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld resolvers": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld resolver"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld resolvers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld still serve routes, so Traefik requests new certificates for them.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld still serves routes, so Traefik requests a new certificate for it."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld still serve routes, so Traefik requests new certificates for them."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Remove %lld certificates?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld certificate?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove %lld certificates?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Removed %lld certificates": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Removed %lld certificate"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Removed %lld certificates"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Removed %lld certificates, but Traefik did not restart. The change is undone until it does.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Removed %lld certificate, but Traefik did not restart. The change is undone until it does."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Removed %lld certificates, but Traefik did not restart. The change is undone until it does."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Removed %lld certificates, but Traefik did not restart: %@. The change is undone until it does.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed %#@certs@, but Traefik did not restart: %2$@. The change is undone until it does."
+          },
+          "substitutions": {
+            "certs": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg certificate"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg certificates"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "used by %lld middlewares": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "used by %lld middleware"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "used by %lld middlewares"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"
