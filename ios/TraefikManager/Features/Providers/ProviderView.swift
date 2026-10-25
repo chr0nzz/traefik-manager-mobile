@@ -14,6 +14,8 @@ struct ProviderView: View {
     @State private var protocolFilter: ProtocolFilter = .all
     @State private var statusFilter: StatusFilter = .all
     @State private var selected: ProviderRoute?
+    @State private var serviceEnvelope: ServiceEnvelope?
+    @State private var message: String?
 
     private var visible: [ProviderRoute] {
         let needle = query.trimmed.lowercased()
@@ -47,9 +49,10 @@ struct ProviderView: View {
                         .accessibilityLabel("Refresh \(page.providerLabel) routes")
                 }
             }
-            .sheet(item: $selected) { route in
-                ProviderRouteSheet(route: route).presentationDetents([.medium, .large])
+            .navigationDestination(item: $selected) { route in
+                RouteDetailView(routeId: route.id, message: $message, fixedRoute: route.asRoute(services: serviceEnvelope))
             }
+            .toast($message)
             .task(id: "\(page.rawValue)-\(app.generation)") {
                 routes = []
                 loading = true
@@ -153,7 +156,10 @@ struct ProviderView: View {
             }
             let fetched = try await routers
             reachable = fetched.reachable && !fetched.all.isEmpty
-            routes = ProviderRows.routes(page: page, routers: fetched, services: await services, managed: managed)
+            let loadedServices = await services
+            serviceEnvelope = loadedServices
+            routes = ProviderRows.routes(page: page, routers: fetched, services: loadedServices, managed: managed)
+            if let wanted = DebugLaunch.route, selected == nil { selected = routes.first { $0.shortName == wanted || $0.name == wanted } }
             middlewares = ProviderRows.middlewares(page: page, envelope: await middlewareList)
         } catch {
             self.error = error.localizedDescription
@@ -208,38 +214,31 @@ private struct ProviderRouteCard: View {
     }
 }
 
-private struct ProviderRouteSheet: View {
-    @Environment(\.openURL) private var openURL
-    let route: ProviderRoute
 
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    Text(String(localized: "\(route.provider) · read-only")).font(.caption).foregroundStyle(Palette.muted)
-                    Card(spacing: 0) {
-                        DetailRow(label: String(localized: "Status"), value: route.status.ifEmpty(String(localized: "unknown")), status: route.serving ? .ok : .disabled)
-                        DetailRow(label: String(localized: "Protocol"), value: route.proto.rawValue)
-                        DetailRow(label: String(localized: "Router"), value: route.name, mono: true)
-                        if !route.rule.isEmpty { DetailRow(label: String(localized: "Rule"), value: route.rule, mono: true) }
-                        if !route.service.isEmpty { DetailRow(label: String(localized: "Service"), value: route.service, mono: true) }
-                        if let target = route.target { DetailRow(label: String(localized: "Target"), value: target, mono: true) }
-                        if !route.entryPoints.isEmpty { DetailRow(label: String(localized: "Entry points"), value: route.entryPoints.joined(separator: ", ")) }
-                        if !route.middlewares.isEmpty { DetailRow(label: String(localized: "Middlewares"), value: route.middlewares.joined(separator: ", "), mono: true) }
-                        DetailRow(label: "TLS", value: route.proto == .udp ? "-" : route.tls ? String(localized: "on") : String(localized: "off"), last: true)
-                    }
-                    if let host = route.hosts.first, let url = URL(string: "https://\(host)") {
-                        Button { openURL(url) } label: {
-                            Label("Open \(host)", systemImage: "arrow.up.right.square").frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                }
-                .padding(Spacing.lg)
-            }
-            .background(Palette.bg)
-            .navigationTitle(route.shortName)
-            .navigationBarTitleDisplayMode(.inline)
+extension ProviderRoute {
+    /// The router as a read-only `Route`, so it opens in the same detail screen as file routes.
+    func asRoute(services: ServiceEnvelope?) -> Route {
+        var route = Route(id: id, name: name)
+        route.protocol = proto.rawValue.lowercased()
+        route.rule = rule
+        route.serviceName = service
+        route.target = target ?? ""
+        route.entryPoints = .array(entryPoints.map(JSONValue.string))
+        route.middlewares = .array(middlewares.map(JSONValue.string))
+        route.tls = .bool(tls)
+        route.enabled = serving
+        route.provider = provider
+        let pool: [TraefikService] = switch proto {
+        case .tcp: services?.tcp ?? []
+        case .udp: services?.udp ?? []
+        default: services?.http ?? []
         }
+        if let match = pool.first(where: { $0.name == service || RouteDetailView.shortName($0.name) == RouteDetailView.shortName(service) }) {
+            let listed = (match.loadBalancer?.servers ?? []).compactMap { $0.url ?? $0.address }.filter { !$0.isEmpty }
+            route.servers = listed.isEmpty ? (match.serverStatus ?? [:]).keys.sorted() : listed
+            route.passHostHeader = match.loadBalancer?.passHostHeader
+            if let type = match.type, !type.isEmpty, type.lowercased() != "loadbalancer" { route.serviceType = type }
+        }
+        return route
     }
 }

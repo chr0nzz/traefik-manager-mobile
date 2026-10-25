@@ -67,6 +67,14 @@ T = {
  'loose': ['未封禁', 'volné', 'løse', 'frei', 'sueltos', 'libres', 'los', 'à solta', 'soltos', 'на свободе'],
 }
 
+# Added with the iPad bug fixes
+T.update({
+ 'Add a middleware': ['添加中间件', 'Přidat middleware', 'Tilføj en middleware', 'Middleware hinzufügen', 'Añadir un middleware', 'Ajouter un middleware', 'Middleware toevoegen', 'Adicionar um middleware', 'Adicionar um middleware', 'Добавить middleware'],
+ 'Close and reopen Traefik Manager to switch to %@.': ['关闭并重新打开 Traefik Manager 以切换到%@。', 'Zavřete a znovu otevřete Traefik Manager, aby se přepnul na %@.', 'Luk og åbn Traefik Manager igen for at skifte til %@.', 'Schließe Traefik Manager und öffne es erneut, um zu %@ zu wechseln.', 'Cierra y vuelve a abrir Traefik Manager para cambiar a %@.', 'Fermez puis rouvrez Traefik Manager pour passer en %@.', 'Sluit Traefik Manager en open het opnieuw om over te schakelen naar %@.', 'Feche e volte a abrir o Traefik Manager para mudar para %@.', 'Feche e abra o Traefik Manager novamente para mudar para %@.', 'Закройте и снова откройте Traefik Manager, чтобы переключиться на %@.'],
+ "Follows the phone's language unless you pick one here.": ['除非在此选择其他语言，否则跟随手机语言。', 'Řídí se jazykem telefonu, pokud zde nevyberete jiný.', 'Følger telefonens sprog, medmindre du vælger et her.', 'Folgt der Sprache des Geräts, solange du hier keine auswählst.', 'Sigue el idioma del teléfono salvo que elijas uno aquí.', 'Suit la langue du téléphone, sauf si vous en choisissez une ici.', 'Volgt de taal van de telefoon, tenzij je hier een kiest.', 'Segue o idioma do telemóvel, a menos que escolha um aqui.', 'Segue o idioma do celular, a menos que você escolha um aqui.', 'Следует языку телефона, если не выбрать другой здесь.'],
+ 'Traefik runs them top to bottom.': ['Traefik 按从上到下的顺序执行。', 'Traefik je spouští shora dolů.', 'Traefik kører dem fra top til bund.', 'Traefik führt sie von oben nach unten aus.', 'Traefik los ejecuta de arriba abajo.', 'Traefik les exécute de haut en bas.', 'Traefik voert ze van boven naar beneden uit.', 'O Traefik executa-os de cima para baixo.', 'O Traefik os executa de cima para baixo.', 'Traefik выполняет их сверху вниз.'],
+})
+
 LANGS = ['zh-Hans', 'cs', 'da', 'de', 'es', 'fr', 'nl', 'pt-PT', 'pt-BR', 'ru']
 out = {}
 for key, values in T.items():

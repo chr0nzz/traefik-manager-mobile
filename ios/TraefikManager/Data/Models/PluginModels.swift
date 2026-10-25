@@ -71,6 +71,18 @@ enum PluginUsage {
     }
 
     private static let pluginKey = try! NSRegularExpression(pattern: "(^|\\n)\\s*plugin\\s*:")
+
+    /// Middleware names using a plugin, from Traefik Manager's config files and from Traefik's runtime list,
+    /// which also covers middlewares defined by Docker labels or other providers.
+    static func userNames(_ plugin: String, config: [MiddlewareDef], runtime: [TraefikObject]) -> [String] {
+        var names = usersOf(plugin, config).map(\.name)
+        for object in runtime {
+            guard let keys = object.plugin?.objectValue?.keys, keys.contains(plugin) else { continue }
+            let short = object.shortName
+            if !names.contains(short) && !names.contains(object.name) { names.append(object.provider == "file" ? short : object.name) }
+        }
+        return names
+    }
 }
 
 /// Port of `PluginVersions`.

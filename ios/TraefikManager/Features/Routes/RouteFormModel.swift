@@ -34,13 +34,14 @@ final class RouteFormModel {
         async let profiles = (try? service.tlsOptions()) ?? []
         async let snapshot = try? RoutesStore.fetch(service: service)
         async let resolvers = Self.certResolvers(service: service)
-        async let entryPoints = ((try? service.entrypoints()) ?? []).map(\.name).filter { !$0.isEmpty }
+        async let entryPointList = (try? service.entrypoints()) ?? []
         async let provider = try? service.services()
 
         let loadedSettings = await settings
         let loadedSnapshot = await snapshot
         let loadedResolvers = await resolvers
-        let loadedEntryPoints = await entryPoints
+        let loadedEntryList = await entryPointList
+        let loadedEntryPoints = loadedEntryList.map(\.name).filter { !$0.isEmpty }
         configFiles = await configs.normalized(onAgent: service.agentId != nil).files
         canCreateConfigFile = await configs.normalized(onAgent: service.agentId != nil).configDirSet
         tlsProfiles = await profiles
@@ -55,7 +56,7 @@ final class RouteFormModel {
             form = RouteFormParsing.form(from: route, knownDomains: domainOptions)
         } else if !form.isEdit {
             if form.configFile.isEmpty, configFiles.count == 1 { form.configFile = configFiles[0].label }
-            if form.entryPoints.isEmpty, let entry = loadedEntryPoints.first(where: { $0.contains("sec") }) ?? loadedEntryPoints.first {
+            if form.entryPoints.isEmpty, let entry = Self.defaultEntryPoint(loadedEntryList) {
                 form.entryPoints = [entry]
             }
             if form.domains.isEmpty, let domain = loadedSettings.domains.first { form.domains = [domain] }
@@ -137,6 +138,21 @@ final class RouteFormModel {
         var seen = Set<String>()
         serviceOptions = (ownServices.forProtocol(form.protocol.rawValue) + providerServices.forProtocol(form.protocol.rawValue))
             .filter { seen.insert($0).inserted }
+    }
+
+    /// The entry point a new HTTP route starts on: the one marked `asDefault`, then the one on port 443,
+    /// then a websecure / https name, then anything with TLS, then the first TCP one.
+    nonisolated static func defaultEntryPoint(_ entryPoints: [Entrypoint]) -> String? {
+        let tcp = entryPoints.filter { !$0.isUDP && !$0.name.isEmpty }
+        func port(_ e: Entrypoint) -> String { e.address.components(separatedBy: ":").last?.components(separatedBy: "/").first ?? "" }
+        let secureNames = ["websecure", "https", "web-secure", "secure"]
+        return tcp.first(where: \.asDefault)?.name
+            ?? tcp.first(where: { port($0) == "443" })?.name
+            ?? tcp.first(where: { secureNames.contains($0.name.lowercased()) })?.name
+            ?? tcp.first(where: { $0.name.lowercased().contains("sec") || $0.name.lowercased().contains("https") })?.name
+            ?? tcp.first(where: \.hasTLS)?.name
+            ?? tcp.first?.name
+            ?? entryPoints.first?.name
     }
 
     private static func mergedDomains(_ configured: [String], routes: [Route]) -> [String] {

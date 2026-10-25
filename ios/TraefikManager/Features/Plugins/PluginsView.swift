@@ -5,6 +5,7 @@ struct PluginsView: View {
     @Environment(AppModel.self) private var app
     @State private var plugins: [PluginEntry] = []
     @State private var middlewares: [MiddlewareDef] = []
+    @State private var runtimeMiddlewares: [TraefikObject] = []
     @State private var updates: [String: String] = [:]
     @State private var canManage = false
     @State private var loading = true
@@ -26,7 +27,8 @@ struct PluginsView: View {
         return plugins.filter { $0.name.lowercased().contains(needle) || $0.moduleName.lowercased().contains(needle) }
     }
 
-    private func usage(_ name: String) -> Int { PluginUsage.usersOf(name, middlewares).count }
+    private func users(_ name: String) -> [String] { PluginUsage.userNames(name, config: middlewares, runtime: runtimeMiddlewares) }
+    private func usage(_ name: String) -> Int { users(name).count }
 
     var body: some View {
         content
@@ -44,11 +46,11 @@ struct PluginsView: View {
                 }
             }
             .navigationDestination(for: PluginEntry.self) { plugin in
-                PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: PluginUsage.usersOf(plugin.name, middlewares))
+                PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: users(plugin.name))
             }
             .navigationDestination(item: $debugDetail) { name in
                 if let plugin = plugins.first(where: { $0.name == name }) {
-                    PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: PluginUsage.usersOf(plugin.name, middlewares))
+                    PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: users(plugin.name))
                 }
             }
             .sheet(isPresented: $installing) {
@@ -154,12 +156,14 @@ struct PluginsView: View {
         loadError = nil
         async let manageable = service.staticManageable()
         async let fetched = service.plugins()
-        async let routes = try? service.routes()
+        async let routes = try? RoutesStore.fetch(service: service)
+        async let runtime = try? service.middlewares()
         do {
             let response = try await fetched
             plugins = response.plugins.sorted { $0.name.lowercased() < $1.name.lowercased() }
             serverError = response.error.flatMap { $0.isBlank ? nil : $0 }
             middlewares = await routes?.middlewares ?? middlewares
+            runtimeMiddlewares = await runtime?.all ?? runtimeMiddlewares
             let catalog = plugins.isEmpty ? [:] : ((try? await service.pluginCatalog())?.plugins ?? [:])
             updates = PluginVersions.updates(plugins, catalog: catalog)
         } catch {
@@ -305,7 +309,7 @@ struct RestartNotice: View {
 struct PluginDetailView: View {
     let plugin: PluginEntry
     let latest: String?
-    let users: [MiddlewareDef]
+    let users: [String]
 
     @Environment(\.openURL) private var openURL
     @State private var message: String?
@@ -330,7 +334,7 @@ struct PluginDetailView: View {
                         ForEach(Array(users.enumerated()), id: \.offset) { index, middleware in
                             HStack(spacing: Spacing.sm) {
                                 Image(systemName: "square.3.layers.3d").font(.system(size: 13)).foregroundStyle(Palette.purple)
-                                Text(middleware.name).font(.footnote.monospaced())
+                                Text(middleware).font(.footnote.monospaced())
                             }
                             .padding(.vertical, Spacing.sm)
                             if index < users.count - 1 { Divider().overlay(Palette.border) }

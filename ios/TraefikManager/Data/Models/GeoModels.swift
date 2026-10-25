@@ -119,7 +119,8 @@ actor GeoStore {
 
     func status(service: TMService) async -> GeoStatus {
         if let status { return status }
-        let fetched = (try? await service.geoStatus()) ?? GeoStatus(enabled: false, available: false)
+        // A failed request is not cached, so a blip at launch does not hide flags for the whole session.
+        guard let fetched = try? await service.geoStatus() else { return GeoStatus(enabled: false, available: false) }
         status = fetched
         return fetched
     }

@@ -1,9 +1,44 @@
 import Foundation
 
-/// Language tags shared with the server. iOS handles the per-app language itself
-/// (Settings > Apps > Traefik Manager > Language), so this only maps the active locale
-/// onto the tag the Traefik Manager API understands, like `AppLanguage.serverTag` on Android.
+/// The app language and the tag sent to the server, like `AppLanguage` on Android.
+/// iOS only lists a per-app Language in its Settings app once the device has more than one
+/// preferred language, so the app also offers its own picker through `AppleLanguages`.
 enum AppLanguage {
+    private static let overrideKey = "app_language_override"
+
+    /// The language picked in the app, or nil to follow the system.
+    static var selected: String? {
+        UserDefaults.standard.string(forKey: overrideKey)
+    }
+
+    /// Takes effect the next time the app starts, which is when iOS reads `AppleLanguages`.
+    static func select(_ tag: String?) {
+        let defaults = UserDefaults.standard
+        if let tag {
+            defaults.set(tag, forKey: overrideKey)
+            defaults.set([tag], forKey: "AppleLanguages")
+        } else {
+            defaults.removeObject(forKey: overrideKey)
+            defaults.removeObject(forKey: "AppleLanguages")
+        }
+    }
+
+    /// The language the app is running in right now.
+    static var running: String { Bundle.main.preferredLocalizations.first ?? "en" }
+
+    /// Each shipped language with its own name, sorted by that name.
+    static var options: [(tag: String, name: String)] {
+        shipped.filter { $0 != "en" }.map { tag in
+            let name = Locale(identifier: tag).localizedString(forIdentifier: tag) ?? tag
+            return (tag, name.capitalized(with: Locale(identifier: tag)))
+        }
+        .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    static func name(of tag: String) -> String {
+        (Locale(identifier: tag).localizedString(forIdentifier: tag) ?? tag).capitalized(with: Locale(identifier: tag))
+    }
+
     /// Languages the app ships translations for. Grows with the translation phase.
     static var shipped: [String] {
         Bundle.main.localizations.filter { $0 != "Base" }

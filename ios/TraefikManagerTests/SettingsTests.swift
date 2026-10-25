@@ -113,3 +113,27 @@ final class BackgroundAndWidgetTests: XCTestCase {
         XCTAssertNotNil(data.flatMap { try? JSONDecoder().decode(WidgetSnapshot.self, from: $0) })
     }
 }
+
+final class BugFixTests: XCTestCase {
+    func testDefaultEntryPointPrefersAsDefaultThenPort443ThenSecureName() {
+        let web = Entrypoint(name: "web", address: ":80")
+        let secure = Entrypoint(name: "https", address: ":8443")
+        let tls443 = Entrypoint(name: "edge", address: ":443")
+        let marked = Entrypoint(name: "public", address: ":8080", asDefault: true)
+        let udp = Entrypoint(name: "dns", address: ":53/udp")
+        XCTAssertEqual(RouteFormModel.defaultEntryPoint([web, secure, tls443, marked, udp]), "public")
+        XCTAssertEqual(RouteFormModel.defaultEntryPoint([web, secure, tls443, udp]), "edge")
+        XCTAssertEqual(RouteFormModel.defaultEntryPoint([web, secure, udp]), "https")
+        XCTAssertEqual(RouteFormModel.defaultEntryPoint([udp, web]), "web")
+        XCTAssertNil(RouteFormModel.defaultEntryPoint([]))
+    }
+
+    func testPluginUsersIncludeRuntimeMiddlewares() throws {
+        let runtime = try JSONDecoder().decode([TraefikObject].self, from: Data(#"""
+        [{"name":"bouncer@docker","provider":"docker","type":"plugin","plugin":{"crowdsec":{"enabled":true}}},
+         {"name":"headers@file","provider":"file","type":"headers"}]
+        """#.utf8))
+        XCTAssertEqual(PluginUsage.userNames("crowdsec", config: [], runtime: runtime), ["bouncer@docker"])
+        XCTAssertEqual(PluginUsage.userNames("other", config: [], runtime: runtime), [])
+    }
+}

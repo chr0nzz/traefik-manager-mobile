@@ -24,9 +24,11 @@ struct AppearanceView: View {
         }
     }
 
-    private var languageName: String {
-        let code = Bundle.main.preferredLocalizations.first ?? "en"
-        return Locale.current.localizedString(forIdentifier: code)?.capitalized(with: .current) ?? code
+    @State private var language = AppLanguage.selected
+
+    /// What the app would run in with no override: the first device language it ships.
+    private var systemLanguage: String {
+        Bundle.preferredLocalizations(from: AppLanguage.shipped, forPreferences: Locale.preferredLanguages).first ?? "en"
     }
 
     var body: some View {
@@ -44,16 +46,28 @@ struct AppearanceView: View {
             }
 
             Section {
-                Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-                } label: {
-                    LabeledContent("App language", value: languageName)
+                Picker("App language", selection: Binding(
+                    get: { language ?? "" },
+                    set: { value in
+                        language = value.isEmpty ? nil : value
+                        AppLanguage.select(language)
+                    }
+                )) {
+                    Text("Follow system").tag("")
+                    Text(verbatim: AppLanguage.name(of: "en")).tag("en")
+                    ForEach(AppLanguage.options, id: \.tag) { option in
+                        Text(verbatim: option.name).tag(option.tag)
+                    }
                 }
-                .foregroundStyle(Palette.text)
             } header: {
                 Text("Language")
             } footer: {
-                Text("Follows the system language. Pick another one for this app in iOS Settings.")
+                if (language ?? systemLanguage) != AppLanguage.running {
+                    Text("Close and reopen Traefik Manager to switch to \(AppLanguage.name(of: language ?? systemLanguage)).")
+                        .foregroundStyle(Palette.yellow)
+                } else {
+                    Text("Follows the phone's language unless you pick one here.")
+                }
             }
 
             Section {
@@ -205,11 +219,12 @@ struct AboutView: View {
             VStack(alignment: .leading, spacing: Spacing.md) {
                 Card {
                     HStack(spacing: Spacing.md) {
-                        Image(systemName: "arrow.triangle.branch")
-                            .font(.title2)
-                            .foregroundStyle(Palette.blue)
-                            .frame(width: 44, height: 44)
-                            .background(Palette.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: Radius.md))
+                        Image("AppLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 52, height: 52)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .accessibilityHidden(true)
                         Text("Traefik Manager").font(.title3.weight(.semibold))
                     }
                     Button("GPL-3.0 licence · xyzlab.dev") {

@@ -91,6 +91,8 @@ struct TraefikObject: Codable, Hashable, Sendable {
     var type: String?
     var middlewares: [String]?
     var tls: JSONValue?
+    /// A plugin middleware's config, keyed by the plugin's name.
+    var plugin: JSONValue?
 
     var shortName: String { name.split(separator: "@", maxSplits: 1).first.map(String.init) ?? name }
 
@@ -129,6 +131,7 @@ struct TraefikObject: Codable, Hashable, Sendable {
         type = c.optional(.type)
         middlewares = c.optional(.middlewares)
         tls = c.optional(.tls)
+        plugin = try? c.decodeIfPresent(JSONValue.self, forKey: .plugin)
     }
 }
 

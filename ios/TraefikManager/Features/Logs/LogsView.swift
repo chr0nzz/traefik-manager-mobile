@@ -76,11 +76,11 @@ struct LogsView: View {
                     ForEach(logLineSteps, id: \.self) { Text(verbatim: "\($0)").tag($0) }
                 }
                 .pickerStyle(.segmented)
+                if model.geoEnabled && !model.countries.isEmpty {
+                    GeographyCard(countries: model.countries, selected: model.country, limit: sizeClass == .regular ? 8 : 5) { model.toggleCountry($0) }
+                }
                 LogSignalCards(window: window, facets: model.facets, compact: sizeClass != .regular) { model.toggleFacet($0, $1) }
                 RuntimeChips(model: model)
-                if model.geoEnabled && !model.countries.isEmpty {
-                    CountryStrip(countries: model.countries, selected: model.country) { model.toggleCountry($0) }
-                }
                 HStack {
                     SectionLabel(text: String(localized: "Access log"))
                     Spacer()

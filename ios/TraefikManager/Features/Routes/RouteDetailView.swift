@@ -15,6 +15,8 @@ struct RouteDetailView: View {
 
     let routeId: String
     @Binding var message: String?
+    /// A route that is not in the file route list, such as a provider page's router. Shown read-only.
+    var fixedRoute: Route? = nil
 
     @State private var ping: PingState?
     @State private var confirmDelete = false
@@ -22,7 +24,7 @@ struct RouteDetailView: View {
     @State private var editing = false
     @State private var working = false
 
-    private var route: Route? { app.routes.routes.first { $0.id == routeId } }
+    private var route: Route? { fixedRoute ?? app.routes.routes.first { $0.id == routeId } }
 
     var body: some View {
         if let route {
@@ -216,7 +218,7 @@ struct RouteDetailView: View {
     }
 
     private func serviceSection(_ route: Route) -> some View {
-        let servers = route.servers.isEmpty ? [route.target] : route.servers
+        let servers = (route.servers.isEmpty ? [route.target] : route.servers).filter { !$0.isEmpty && $0 != "N/A" }
         let serviceRow = app.services.byBackendKey[BackendHealth.key(route.protocol, route.serviceName)]
         return DetailSection(title: String(localized: "Service"), systemImage: "bolt", tint: Palette.yellow) {
             DetailRow(

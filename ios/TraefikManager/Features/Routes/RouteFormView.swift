@@ -41,6 +41,7 @@ struct RouteFormView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
+        .defaultScrollAnchor(DebugLaunch.scrollToBottom ? .bottom : .top)
         .navigationTitle(routeId == nil ? String(localized: "New route") : String(localized: "Edit route"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -117,20 +118,20 @@ struct RouteFormView: View {
                     TextField("Subdomain", text: $model.form.subdomain)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    ForEach(model.form.domains, id: \.self) { domain in
-                        Text(domain).font(.body.monospaced())
-                    }
-                    .onDelete { model.form.domains.remove(atOffsets: $0) }
-                    let available = model.domainOptions.filter { !model.form.domains.contains($0) }
-                    if !available.isEmpty {
-                        Menu {
-                            ForEach(available, id: \.self) { domain in
-                                Button(domain) { model.form.domains.append(domain) }
+                    // Every known domain as a chip, like Android: tap to include or leave out.
+                    let custom = model.form.domains.filter { !model.domainOptions.contains($0) }
+                    FlowLayout(spacing: 6, lineSpacing: 6) {
+                        ForEach(model.domainOptions + custom, id: \.self) { domain in
+                            DomainChip(domain: domain, selected: model.form.domains.contains(domain)) {
+                                if model.form.domains.contains(domain) {
+                                    model.form.domains.removeAll { $0 == domain }
+                                } else {
+                                    model.form.domains.append(domain)
+                                }
                             }
-                        } label: {
-                            Label("Add a domain", systemImage: "plus.circle")
                         }
                     }
+                    .padding(.vertical, 4)
                     HStack {
                         TextField("Add a domain", text: $newDomain, prompt: Text(verbatim: "other.example.com"))
                             .textInputAutocapitalization(.never)
@@ -291,10 +292,45 @@ struct RouteFormView: View {
         let known = model.protocolMiddlewares.map(\.name)
         let extra = model.form.middlewares.filter { !known.contains($0) }
         if !(known + extra).isEmpty {
-            Section("Middlewares") {
-                ForEach(known + extra, id: \.self) { name in
-                    Toggle(name, isOn: membership(name, in: $model.form.middlewares))
-                        .font(.body.monospaced())
+            let chosen = model.form.middlewares
+            if !chosen.isEmpty {
+                Section {
+                    ForEach(Array(chosen.enumerated()), id: \.element) { index, name in
+                        HStack(spacing: Spacing.md) {
+                            Text("\(index + 1)").font(.caption.monospaced()).foregroundStyle(Palette.muted).frame(width: 18)
+                            Text(name).font(.body.monospaced()).lineLimit(1)
+                            Spacer()
+                            Button { moveMiddleware(index, by: -1) } label: { Image(systemName: "chevron.up") }
+                                .disabled(index == 0)
+                                .accessibilityLabel(String(localized: "Move \(name) up"))
+                            Button { moveMiddleware(index, by: 1) } label: { Image(systemName: "chevron.down") }
+                                .disabled(index == chosen.count - 1)
+                                .accessibilityLabel(String(localized: "Move \(name) down"))
+                            Button { model.form.middlewares.removeAll { $0 == name } } label: {
+                                Image(systemName: "minus.circle.fill").foregroundStyle(Palette.red)
+                            }
+                            .accessibilityLabel(String(localized: "Remove \(name)"))
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                } header: {
+                    Text("Middlewares")
+                } footer: {
+                    Text("Traefik runs them top to bottom.")
+                }
+            }
+            let available = (known + extra).filter { !chosen.contains($0) }
+            if !available.isEmpty {
+                Section(chosen.isEmpty ? String(localized: "Middlewares") : String(localized: "Add a middleware")) {
+                    ForEach(available, id: \.self) { name in
+                        Button { model.form.middlewares.append(name) } label: {
+                            HStack {
+                                Text(name).font(.body.monospaced()).foregroundStyle(Palette.text).lineLimit(1)
+                                Spacer()
+                                Image(systemName: "plus.circle").foregroundStyle(Palette.blue)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -426,6 +462,12 @@ struct RouteFormView: View {
                 model.form.headersPreset.custom = false
             }
         )
+    }
+
+    private func moveMiddleware(_ index: Int, by offset: Int) {
+        let target = index + offset
+        guard model.form.middlewares.indices.contains(index), model.form.middlewares.indices.contains(target) else { return }
+        withAnimation { model.form.middlewares.swapAt(index, target) }
     }
 
     private func membership(_ name: String, in list: Binding<[String]>) -> Binding<Bool> {
@@ -595,5 +637,28 @@ struct ConfigFilePicker: View {
     private func choose(_ name: String) {
         onSelect(name)
         dismiss()
+    }
+}
+
+/// A domain the route can answer on; filled when included.
+private struct DomainChip: View {
+    let domain: String
+    let selected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                if selected { Image(systemName: "checkmark").font(.caption2.weight(.bold)) }
+                Text(domain).font(.footnote.monospaced())
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .foregroundStyle(selected ? Palette.onSecondaryContainer : Palette.text)
+            .background(selected ? Palette.secondaryContainer : Color.clear, in: Capsule())
+            .overlay(Capsule().strokeBorder(selected ? Color.clear : Palette.border))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
