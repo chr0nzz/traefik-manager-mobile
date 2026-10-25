@@ -1,0 +1,1 @@
+Your Traefik setup in your pocket: routes, middlewares, services, logs, CrowdSec, certificates and backups, on the host and every agent. Now with widgets and Face ID.

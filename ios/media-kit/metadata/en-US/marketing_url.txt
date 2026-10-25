@@ -1,0 +1,1 @@
+https://traefik-manager.xyzlab.dev/mobile

@@ -72,7 +72,7 @@ struct HomeView: View {
     private func content(_ snapshot: DashboardSnapshot) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.md) {
-                if app.isDemo { DemoBanner() }
+                if app.isDemo && !DebugLaunch.cleanShots { DemoBanner() }
 
                 VerdictCard(verdict: snapshot.verdict)
 

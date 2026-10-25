@@ -1,0 +1,40 @@
+The mobile companion for Traefik Manager, the open source web UI for the Traefik reverse proxy. Connect it to your own Traefik Manager server and run your Traefik setup from your iPhone or iPad.
+
+DASHBOARD
+See at a glance what is up and what is not: routers, services and middlewares with their health, the providers in use, your entry points, and your routes as a tappable app launcher.
+
+ROUTES
+Every HTTP, TCP and UDP route with its status, domain, target and middlewares. Enable or disable a route, ping its backend, add or edit one with a guided form, or edit its raw YAML.
+
+MIDDLEWARES AND SERVICES
+30 middleware wizards, from Basic Auth and Forward Auth to rate limits, headers and redirects. Build load balancer, weighted, mirroring and failover services, with health checks.
+
+ROUTE MAP
+Follow every request from entry point through router and middlewares to the service and its servers.
+
+LOGS
+The access log as analytics: status codes, response times, methods, domains, paths, clients and services, each tappable to filter.
+
+CROWDSEC
+Attacking sources, networks, scenarios and targeted paths, bans in force, a world map, and adding or removing decisions.
+
+CERTIFICATES, PLUGINS AND STATIC CONFIG
+Certificate expiry and cleanup, Traefik plugins with install and update notices, and traefik.yml editing with a restart that applies it.
+
+BACKUPS
+Create, restore and delete config backups, and browse, diff, push and restore your Git backup history.
+
+MULTI-SERVER
+Switch between the host and every Traefik Manager agent. Each screen follows what that server actually runs.
+
+NOTIFICATIONS
+Notification channels for Discord, Slack, ntfy, Gotify, Pushover, Pushbullet and Telegram, with categories, severity, digests and quiet hours. The history lives behind the bell, and the app can show new notifications as iOS alerts.
+
+WIDGETS AND APP LOCK
+Home screen widgets for any dashboard, certificate or CrowdSec card, all your servers, or your app launcher. Lock the app with Face ID, Touch ID or your passcode.
+
+Available in English, Chinese (Simplified), Czech, Danish, Dutch, French, German, Portuguese, Russian and Spanish.
+
+Try Demo on the first screen to look around with sample data, no server needed.
+
+Requires your own Traefik Manager server, version 1.14.0 or newer. The app talks only to the server you connect it to and collects no data.

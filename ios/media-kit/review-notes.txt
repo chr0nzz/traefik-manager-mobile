@@ -1,0 +1,17 @@
+Traefik Manager is a client for a self-hosted Traefik Manager server (open source, https://github.com/chr0nzz/traefik-manager). Reviewers do not need a server or an account.
+
+To review the app:
+1. Launch the app.
+2. Tap "Try Demo" under the Connect button.
+3. The whole app now runs against built-in sample data. Nothing is sent anywhere and nothing you change is saved.
+
+Things worth trying in demo mode:
+- Dashboard, Routes and a route's detail, Middleware, Services and Route map from the tab bar (iPhone: More holds the rest) or the sidebar (iPad).
+- Logs, CrowdSec, Certificates, Plugins and Backups.
+- Settings > Appearance and security > Require unlock to try the Face ID lock.
+- Settings > Notifications > Alerts on this device to try local notifications.
+- Long-press the home screen to add the Traefik Manager widgets.
+
+To leave demo mode: Settings > Disconnect.
+
+Background refresh is used only to check the user's own server for new notifications and to refresh the widgets. The app does not collect any data.

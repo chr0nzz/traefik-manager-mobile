@@ -7,6 +7,8 @@ enum DebugLaunch {
     static var form: String? { value("tmForm") }
     static var template: String? { value("tmTemplate") }
     static var scrollToBottom: Bool { value("tmScroll") == "bottom" }
+    /// Store screenshots: hides the demo banner.
+    static var cleanShots: Bool { value("tmShots") == "clean" }
 
     private static func value(_ key: String) -> String? {
         #if DEBUG

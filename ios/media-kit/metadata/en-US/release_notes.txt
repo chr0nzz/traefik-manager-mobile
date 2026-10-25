@@ -1,0 +1,1 @@
+The first release on iPhone and iPad, with everything the Android app does: dashboard, routes, middlewares, services, route map, logs, CrowdSec, certificates, plugins, static config, backups, servers and agents, notifications, home screen widgets and Face ID app lock. In 11 languages.

@@ -39,7 +39,14 @@ private struct TabShell: View {
     private static let moreTag = "more"
 
     @Environment(AppModel.self) private var app
-    @State private var selection = DebugLaunch.tab ?? Destination.home.id
+    @State private var selection = TabShell.initialSelection
+
+    /// A debug `-tmTab` for a screen that lives under More opens More with that screen pushed.
+    private static var initialSelection: String {
+        guard let tab = DebugLaunch.tab else { return Destination.home.id }
+        if let destination = Destination(rawValue: tab), !destination.primary { return moreTag }
+        return tab
+    }
 
     var body: some View {
         let destinations = app.destinations
@@ -74,6 +81,7 @@ private struct TabShell: View {
 
 private struct MoreList: View {
     let destinations: [Destination]
+    @State private var debugDestination: Destination? = DebugLaunch.tab.flatMap(Destination.init(rawValue:)).flatMap { $0.primary ? nil : $0 }
 
     var body: some View {
         List {
@@ -92,6 +100,7 @@ private struct MoreList: View {
         }
         .navigationTitle("More")
         .navigationDestination(for: Destination.self) { DestinationView(destination: $0) }
+        .navigationDestination(item: $debugDestination) { DestinationView(destination: $0) }
     }
 }
 
