@@ -66,6 +66,14 @@ protocol TMService: Sendable {
     func logs(lines: Int) async throws -> LogsResponse
     func geoStatus() async throws -> GeoStatus
     func geoLookup(ips: [String]) async throws -> GeoLookupResponse
+
+    // CrowdSec (agent-proxied)
+    func crowdSecSummary(version: String?, full: Bool) async throws -> CsSummary
+    func crowdSecDecisions(full: Bool) async throws -> [CsDecision]
+    func crowdSecAlerts() async throws -> [CsAlert]
+    func crowdSecSearch(_ query: CsDecisionQuery, page: Int, per: Int) async throws -> CsDecisionPage
+    func crowdSecAddDecision(_ request: AddDecisionRequest) async throws -> OkResponse
+    func crowdSecDeleteDecision(_ id: Int64) async throws -> OkResponse
 }
 
 struct LiveService: TMService {
@@ -232,5 +240,34 @@ struct LiveService: TMService {
 
     func geoLookup(ips: [String]) async throws -> GeoLookupResponse {
         try await client.post("api/geoip/lookup", body: GeoLookupRequest(ips: ips, aggregate: true))
+    }
+
+    func crowdSecSummary(version: String?, full: Bool) async throws -> CsSummary {
+        var query: [URLQueryItem] = []
+        if let version { query.append(URLQueryItem(name: "version", value: version)) }
+        if full { query.append(URLQueryItem(name: "full", value: "1")) }
+        return try await client.get("api/crowdsec/summary", query: query)
+    }
+
+    func crowdSecDecisions(full: Bool) async throws -> [CsDecision] {
+        try await client.get("api/crowdsec/decisions", query: full ? [URLQueryItem(name: "full", value: "1")] : [])
+    }
+
+    func crowdSecAlerts() async throws -> [CsAlert] { try await client.get("api/crowdsec/alerts") }
+
+    func crowdSecSearch(_ query: CsDecisionQuery, page: Int, per: Int) async throws -> CsDecisionPage {
+        var items = [URLQueryItem(name: "page", value: String(page)), URLQueryItem(name: "per", value: String(per))]
+        for (name, value) in [("q", query.q), ("origin", query.origin), ("type", query.type), ("ip", query.ip), ("scenario", query.scenario)] {
+            if let value { items.append(URLQueryItem(name: name, value: value)) }
+        }
+        return try await client.get("api/crowdsec/decisions/search", query: items)
+    }
+
+    func crowdSecAddDecision(_ request: AddDecisionRequest) async throws -> OkResponse {
+        try await client.post("api/crowdsec/decisions", body: request)
+    }
+
+    func crowdSecDeleteDecision(_ id: Int64) async throws -> OkResponse {
+        try await client.delete("api/crowdsec/decisions/\(id)")
     }
 }

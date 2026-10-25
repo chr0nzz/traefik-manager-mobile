@@ -324,6 +324,80 @@ struct DemoService: TMService {
         }))
     }
 
+    // MARK: - CrowdSec
+
+    func crowdSecSummary(version: String?, full: Bool) async throws -> CsSummary {
+        await settle()
+        let current = "demo-crowdsec-1"
+        var summary = CsSummary()
+        summary.version = current
+        if version == current {
+            summary.unchanged = true
+            return summary
+        }
+        let decisions = DemoCrowdSec.decisions
+        let banned = Set(decisions.filter { $0.scope == "Ip" || $0.scope == "Range" }.map(\.value))
+        let own = decisions.filter(\.own)
+        var counts = CsDecisionsSummary()
+        counts.ok = true
+        counts.total = decisions.count
+        counts.own = own.count
+        counts.subscribed = decisions.count - own.count
+        counts.origins = Dictionary(grouping: decisions, by: \.originKey).mapValues(\.count)
+        counts.types = Dictionary(grouping: decisions) { $0.type.lowercased() }.mapValues(\.count)
+        counts.rows = own.filter { $0.originKey != "crowdsec" }.sorted { $0.id > $1.id }
+        var alerts = CsAlertsSummary()
+        alerts.ok = true
+        alerts.status = 200
+        alerts.limit = 500
+        alerts.rows = DemoCrowdSec.alerts().map { alert in
+            var copy = alert
+            copy.handled = banned.contains(alert.ip)
+            return copy
+        }
+        summary.decisions = counts
+        summary.alerts = alerts
+        return summary
+    }
+
+    func crowdSecDecisions(full: Bool) async throws -> [CsDecision] { DemoCrowdSec.decisions }
+
+    func crowdSecAlerts() async throws -> [CsAlert] { DemoCrowdSec.alerts() }
+
+    func crowdSecSearch(_ query: CsDecisionQuery, page: Int, per: Int) async throws -> CsDecisionPage {
+        await settle()
+        let needle = query.q ?? ""
+        let rows = DemoCrowdSec.decisions.filter { decision in
+            let originOK: Bool = switch query.origin ?? "" {
+            case "": true
+            case "subscribed": !decision.own
+            case "own": decision.own
+            case let origin: decision.originKey == origin
+            }
+            let hay = [decision.value, decision.scenario, decision.originKey, decision.scope, decision.type].joined(separator: " ").lowercased()
+            return originOK
+                && (query.type == nil || decision.type.lowercased() == query.type!.lowercased())
+                && (query.ip == nil || decision.value == query.ip)
+                && (query.scenario == nil || decision.scenario == query.scenario)
+                && (needle.isEmpty || hay.contains(needle))
+        }
+        .sorted { $0.own != $1.own ? $0.own : $0.id > $1.id }
+        let size = min(max(per, 1), 200)
+        let pages = max(1, (rows.count + size - 1) / size)
+        let current = min(max(page, 1), pages)
+        return CsDecisionPage(rows: Array(rows.dropFirst((current - 1) * size).prefix(size)), total: rows.count, page: current, pages: pages)
+    }
+
+    func crowdSecAddDecision(_ request: AddDecisionRequest) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func crowdSecDeleteDecision(_ id: Int64) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {

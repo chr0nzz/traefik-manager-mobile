@@ -299,7 +299,7 @@ struct LogSignalCards: View {
     }
 }
 
-private struct DeskCard<Flags: View, Content: View, Footer: View>: View {
+struct DeskCard<Flags: View, Content: View, Footer: View>: View {
     let title: String
     let glyph: String
     let accent: Color
@@ -348,7 +348,7 @@ extension DeskCard where Footer == EmptyView {
     }
 }
 
-private struct Flag: View {
+struct Flag: View {
     let icon: String
     let count: Int
     let label: String
@@ -370,7 +370,7 @@ private struct Flag: View {
     }
 }
 
-private struct OkPill: View {
+struct OkPill: View {
     let text: String
 
     var body: some View {
@@ -383,7 +383,7 @@ private struct OkPill: View {
     }
 }
 
-private struct Cells: View {
+struct Cells: View {
     let colors: [Color]
 
     var body: some View {
