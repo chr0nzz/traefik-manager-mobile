@@ -118,3 +118,39 @@ final class PluginStaticTests: XCTestCase {
         XCTAssertNil(object?["current_raw"])
     }
 }
+
+final class BackupTests: XCTestCase {
+    func testHubListDecodesArrayWithKinds() throws {
+        let list = try JSONDecoder().decode(BackupsList.self, from: Data(#"""
+        [{"name":"a.bak","size":2048,"modified":"2026-08-12 14:30:01","kind":"routes"},
+         {"name":"b.bak","size":"10","modified":"x","kind":"STATIC"},{"name":"c.bak","kind":"certs"}]
+        """#.utf8))
+        XCTAssertEqual(list.entries.map(\.kind), [.routes, .static, .certs])
+        XCTAssertEqual(list.entries[1].size, 10)
+        XCTAssertNil(list.staticConfigured)
+    }
+
+    func testAgentListReadsDateAndOldAgents() throws {
+        let list = try JSONDecoder().decode(BackupsList.self, from: Data(#"""
+        {"backups":[{"name":"a.bak","size":1,"date":"2026-08-12T14:30:01Z"}],"static_configured":false}
+        """#.utf8))
+        XCTAssertEqual(list.entries.first?.stamp, "2026-08-12T14:30:01Z")
+        XCTAssertEqual(list.staticConfigured, false)
+        XCTAssertFalse(list.kindKnown)
+    }
+
+    func testLineDiffMarksChangedLines() {
+        let lines = LineDiff.lines(old: "a\nb\nc", new: "a\nB\nc\nd")
+        XCTAssertEqual(lines.map(\.kind), [.same, .removed, .added, .same, .added])
+        XCTAssertEqual(lines.filter { $0.kind == .added }.map(\.text), ["B", "d"])
+        XCTAssertEqual(LineDiff.lines(old: "", new: "x").map(\.kind), [.added])
+    }
+
+    func testCreateResponseNames() throws {
+        let one = try JSONDecoder().decode(CreateBackupResponse.self, from: Data(#"{"success":true,"name":"x.bak"}"#.utf8))
+        XCTAssertTrue(one.worked)
+        XCTAssertEqual(one.created, ["x.bak"])
+        XCTAssertEqual(ByteSize.label(2048), "2 KB")
+        XCTAssertEqual(ByteSize.label(3_145_728), "3 MB")
+    }
+}

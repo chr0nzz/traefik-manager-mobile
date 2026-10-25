@@ -529,6 +529,74 @@ struct DemoService: TMService {
         ]),
     ]
 
+    func backups() async throws -> BackupsList {
+        await settle()
+        if agentId != nil {
+            return BackupsList(entries: [BackupEntry(name: "dynamic.yml.20260812_143001.bak", size: 2048, stamp: "2026-08-12T14:30:01Z", kind: .routes)], staticConfigured: true)
+        }
+        return BackupsList(entries: [
+            BackupEntry(name: "dynamic.yml.20260812_143001.bak", size: 2048, stamp: "2026-08-12 14:30:01", kind: .routes),
+            BackupEntry(name: "traefik.yml.20260812_090012.bak", size: 1104, stamp: "2026-08-12 09:00:12", kind: .static),
+            BackupEntry(name: "acme.json.20260812_080000.bak", size: 5120, stamp: "2026-08-12 08:00:00", kind: .certs),
+            BackupEntry(name: "dynamic.yml.20260811_221500.bak", size: 1990, stamp: "2026-08-11 22:15:00", kind: .routes),
+        ])
+    }
+
+    func createBackup() async throws -> CreateBackupResponse {
+        await settle()
+        return CreateBackupResponse(ok: true, names: ["dynamic.yml.20260812_150000.bak"])
+    }
+
+    func createStaticBackup() async throws -> CreateBackupResponse {
+        await settle()
+        return CreateBackupResponse(ok: true, names: ["traefik.yml.20260812_150000.bak"])
+    }
+
+    func deleteBackup(_ name: String) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func restoreBackup(_ name: String) async throws -> RestoreResponse {
+        await settle()
+        return RestoreResponse(ok: true, restarted: true)
+    }
+
+    func gitStatus(hostBacked: Bool) async throws -> GitStatus {
+        await settle()
+        return GitStatus(enabled: true, configured: true, lastSha: "a1b2c3d4", lastPush: "2026-08-12 05:15:00 +0000", branch: "main")
+    }
+
+    func gitCommits(hostBacked: Bool) async throws -> [GitCommit] {
+        [
+            GitCommit(sha: "a1b2c3d4e5f6", shaShort: "a1b2c3d4", timestamp: "2026-08-12 05:15:00 +0000", message: "Config backup 2026-08-12 05:15"),
+            GitCommit(sha: "99887766aabb", shaShort: "99887766", timestamp: "2026-08-11 05:15:00 +0000", message: "Config backup 2026-08-11 05:15"),
+        ]
+    }
+
+    func gitDiff(_ sha: String, hostBacked: Bool) async throws -> GitDiff {
+        await settle()
+        return GitDiff(
+            stat: " config/dynamic.yml | 4 ++--\n 1 file changed, 2 insertions(+), 2 deletions(-)",
+            files: [GitDiffFile(
+                filename: "config/dynamic.yml",
+                status: "M",
+                old: "http:\n  routers:\n    blog:\n      rule: Host(`blog.example.com`)\n      service: blog\n",
+                new: "http:\n  routers:\n    blog:\n      rule: Host(`blog.example.dev`)\n      service: blog\n"
+            )]
+        )
+    }
+
+    func gitPush(_ message: String, hostBacked: Bool) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func gitRestore(_ sha: String, hostBacked: Bool) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {

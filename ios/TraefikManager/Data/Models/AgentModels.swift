@@ -9,6 +9,7 @@ struct Agent: Decodable, Hashable, Identifiable, Sendable {
     var createdAt = ""
     var visibleTabs: [String: Bool] = [:]
     var crowdsecLapiUrl = ""
+    var gitHostBackup = false
 
     func tabVisible(_ tab: String) -> Bool { visibleTabs[tab] ?? true }
 
@@ -20,6 +21,7 @@ struct Agent: Decodable, Hashable, Identifiable, Sendable {
         case createdAt = "created_at"
         case visibleTabs = "visible_tabs"
         case crowdsecLapiUrl = "crowdsec_lapi_url"
+        case gitHostBackup = "git_host_backup"
     }
 
     init(id: String, name: String, url: String, visibleTabs: [String: Bool] = [:], crowdsecLapiUrl: String = "") {
@@ -40,6 +42,7 @@ struct Agent: Decodable, Hashable, Identifiable, Sendable {
         createdAt = c.value(.createdAt, default: "")
         visibleTabs = c.value(.visibleTabs, default: [:])
         crowdsecLapiUrl = c.value(.crowdsecLapiUrl, default: "")
+        gitHostBackup = c.value(.gitHostBackup, default: false)
     }
 }
 

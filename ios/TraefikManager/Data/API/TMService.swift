@@ -89,6 +89,18 @@ protocol TMService: Sendable {
     func staticSection(_ request: StaticSectionRequest) async throws -> StaticSectionResponse
     func installPlugin(staticYaml: String, middlewareYaml: String, middlewareFile: String) async -> PluginInstallResponse
     func restartTraefik() async throws
+
+    // Backups and Git (agent-proxied unless the hub backs the agent up to Git)
+    func backups() async throws -> BackupsList
+    func createBackup() async throws -> CreateBackupResponse
+    func createStaticBackup() async throws -> CreateBackupResponse
+    func deleteBackup(_ name: String) async throws -> OkResponse
+    func restoreBackup(_ name: String) async throws -> RestoreResponse
+    func gitStatus(hostBacked: Bool) async throws -> GitStatus
+    func gitCommits(hostBacked: Bool) async throws -> [GitCommit]
+    func gitDiff(_ sha: String, hostBacked: Bool) async throws -> GitDiff
+    func gitPush(_ message: String, hostBacked: Bool) async throws -> OkResponse
+    func gitRestore(_ sha: String, hostBacked: Bool) async throws -> OkResponse
 }
 
 struct LiveService: TMService {
@@ -348,5 +360,39 @@ struct LiveService: TMService {
             let _: OkResponse = try await client.post("api/static/restart")
         } catch APIError.http(502, _), APIError.http(504, _) {
         }
+    }
+
+    // MARK: Backups and Git
+
+    func backups() async throws -> BackupsList { try await client.get("api/backups") }
+
+    func createBackup() async throws -> CreateBackupResponse { try await client.post("api/backup/create") }
+
+    func createStaticBackup() async throws -> CreateBackupResponse { try await client.post("api/static/backup/create") }
+
+    func deleteBackup(_ name: String) async throws -> OkResponse { try await client.post("api/backup/delete/\(APIClient.segment(name))") }
+
+    func restoreBackup(_ name: String) async throws -> RestoreResponse { try await client.post("api/restore/\(APIClient.segment(name))") }
+
+    /// `agent_id` keeps the request on the hub, which holds the Git repo for host-backed agents.
+    private func gitQuery(_ hostBacked: Bool) -> [URLQueryItem] {
+        guard hostBacked, let agentId else { return [] }
+        return [URLQueryItem(name: "agent_id", value: agentId)]
+    }
+
+    func gitStatus(hostBacked: Bool) async throws -> GitStatus { try await client.get("api/backup/git/status", query: gitQuery(hostBacked)) }
+
+    func gitCommits(hostBacked: Bool) async throws -> [GitCommit] { try await client.get("api/backup/git/commits", query: gitQuery(hostBacked)) }
+
+    func gitDiff(_ sha: String, hostBacked: Bool) async throws -> GitDiff {
+        try await client.get("api/backup/git/commit/\(APIClient.segment(sha))/diff", query: gitQuery(hostBacked))
+    }
+
+    func gitPush(_ message: String, hostBacked: Bool) async throws -> OkResponse {
+        try await client.post("api/backup/git/push", query: gitQuery(hostBacked), body: GitPushRequest(message: message.trimmed))
+    }
+
+    func gitRestore(_ sha: String, hostBacked: Bool) async throws -> OkResponse {
+        try await client.post("api/backup/git/restore/\(APIClient.segment(sha))", query: gitQuery(hostBacked))
     }
 }
