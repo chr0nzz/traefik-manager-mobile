@@ -144,6 +144,7 @@ final class AppModel {
         connection = connectionStore.load()
         generation += 1
         await refresh()
+        await WidgetPublisher.publish(connection: connection, minimumGap: 0)
     }
 
     func enterDemo() async {
@@ -152,11 +153,13 @@ final class AppModel {
         connection = connectionStore.load()
         generation += 1
         await refresh()
+        await WidgetPublisher.publish(connection: connection, minimumGap: 0)
     }
 
     func disconnect() {
         connectionStore.clear()
         SnapshotStore.clear()
+        WidgetPublisher.clear()
         activeAgentId = nil
         connection = nil
         servers = []

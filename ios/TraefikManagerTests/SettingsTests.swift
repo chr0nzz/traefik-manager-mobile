@@ -85,3 +85,31 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(recent.since(), String(localized: "2 min ago"))
     }
 }
+
+final class BackgroundAndWidgetTests: XCTestCase {
+    func testFreshAlertsRespectMarkerAndSeverity() {
+        let items = [
+            TmNotification(ts: "", type: "error", msg: "a", category: "", id: 9, at: 0),
+            TmNotification(ts: "", type: "info", msg: "b", category: "", id: 8, at: 0),
+            TmNotification(ts: "", type: "warning", msg: "c", category: "", id: 5, at: 0),
+            TmNotification(ts: "x", type: "warning", msg: "d", category: "", id: 0, at: 200),
+            TmNotification(ts: "y", type: "error", msg: "e", category: "", id: 0, at: 50),
+        ]
+        XCTAssertEqual(NotificationAlerts.fresh(items, seenId: 6, seenAt: 100, minSeverity: "info").map(\.msg), ["a", "b", "d"])
+        XCTAssertEqual(NotificationAlerts.fresh(items, seenId: 6, seenAt: 100, minSeverity: "warning").map(\.msg), ["a", "d"])
+        XCTAssertEqual(NotificationAlerts.fresh(items, seenId: 6, seenAt: 100, minSeverity: "error").map(\.msg), ["a"])
+    }
+
+    func testDemoSnapshotHasEveryCardForTheHost() async {
+        let connection = Connection(baseURL: ConnectionStore.demoBaseURL, apiKey: nil, demo: true)
+        let snapshot = await WidgetPublisher.build(host: DemoService(), connection: connection)
+        XCTAssertEqual(snapshot.servers.first?.id, "")
+        for kind in WidgetCardKind.allCases {
+            XCTAssertNotNil(snapshot.card(kind, server: ""), kind.rawValue)
+        }
+        XCTAssertEqual(snapshot.card(.certs, server: "")?.hero, "4")
+        XCTAssertFalse(snapshot.launcher.isEmpty)
+        let data = try? JSONEncoder().encode(snapshot)
+        XCTAssertNotNil(data.flatMap { try? JSONDecoder().decode(WidgetSnapshot.self, from: $0) })
+    }
+}

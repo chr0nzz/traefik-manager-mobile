@@ -33,12 +33,14 @@ final class NotificationsStore {
             items = try await service.notifications()
             readUntil = await state?.readUntil
             error = nil
+            NotificationAlerts.markSeen(items ?? [], connection: ConnectionStore().load())
         } catch {
             self.error = error.localizedDescription
         }
     }
 
     func markRead(_ service: TMService) async {
+        NotificationAlerts.clearDelivered()
         let list = items ?? []
         let highest = list.map(\.id).max() ?? 0
         if readUntil != nil && highest > 0 {

@@ -1590,6 +1590,28 @@
           }
         }
       }
+    },
+    "%lld more notifications": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more notification"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld more notifications"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"

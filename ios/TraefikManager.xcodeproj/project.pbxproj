@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A10000000000000000000068 /* TraefikManagerWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A10000000000000000000061 /* TraefikManagerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A10000000000000000000020 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -14,10 +18,32 @@
 			remoteGlobalIDString = A10000000000000000000010;
 			remoteInfo = TraefikManager;
 		};
+		A10000000000000000000069 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000000000000000000060;
+			remoteInfo = TraefikManagerWidgets;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A10000000000000000000067 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A10000000000000000000068 /* TraefikManagerWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A10000000000000000000011 /* TraefikManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TraefikManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000061 /* TraefikManagerWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TraefikManagerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000021 /* TraefikManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TraefikManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -30,6 +56,16 @@
 		A10000000000000000000022 /* TraefikManagerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TraefikManagerTests;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000062 /* TraefikManagerWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TraefikManagerWidgets;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000070 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -49,6 +85,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000063 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -57,6 +100,8 @@
 			children = (
 				A10000000000000000000012 /* TraefikManager */,
 				A10000000000000000000022 /* TraefikManagerTests */,
+				A10000000000000000000062 /* TraefikManagerWidgets */,
+				A10000000000000000000070 /* Shared */,
 				A10000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -66,6 +111,7 @@
 			children = (
 				A10000000000000000000011 /* TraefikManager.app */,
 				A10000000000000000000021 /* TraefikManagerTests.xctest */,
+				A10000000000000000000061 /* TraefikManagerWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,13 +126,16 @@
 				A10000000000000000000014 /* Sources */,
 				A10000000000000000000013 /* Frameworks */,
 				A10000000000000000000015 /* Resources */,
+				A10000000000000000000067 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A1000000000000000000006A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A10000000000000000000012 /* TraefikManager */,
+				A10000000000000000000070 /* Shared */,
 			);
 			name = TraefikManager;
 			productName = TraefikManager;
@@ -114,6 +163,27 @@
 			productReference = A10000000000000000000021 /* TraefikManagerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		A10000000000000000000060 /* TraefikManagerWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000080 /* Build configuration list for PBXNativeTarget "TraefikManagerWidgets" */;
+			buildPhases = (
+				A10000000000000000000064 /* Sources */,
+				A10000000000000000000063 /* Frameworks */,
+				A10000000000000000000065 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000062 /* TraefikManagerWidgets */,
+				A10000000000000000000070 /* Shared */,
+			);
+			name = TraefikManagerWidgets;
+			productName = TraefikManagerWidgets;
+			productReference = A10000000000000000000061 /* TraefikManagerWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -130,6 +200,9 @@
 					A10000000000000000000024 = {
 						CreatedOnToolsVersion = 26.0;
 						TestTargetID = A10000000000000000000010;
+					};
+					A10000000000000000000060 = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -149,6 +222,7 @@
 			targets = (
 				A10000000000000000000010 /* TraefikManager */,
 				A10000000000000000000024 /* TraefikManagerTests */,
+				A10000000000000000000060 /* TraefikManagerWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -162,6 +236,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A10000000000000000000026 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000065 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -185,6 +266,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000064 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -192,6 +280,11 @@
 			isa = PBXTargetDependency;
 			target = A10000000000000000000010 /* TraefikManager */;
 			targetProxy = A10000000000000000000020 /* PBXContainerItemProxy */;
+		};
+		A1000000000000000000006A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000000000000000000060 /* TraefikManagerWidgets */;
+			targetProxy = A10000000000000000000069 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -255,6 +348,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TraefikManager.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8QCK35QCDX;
@@ -289,6 +383,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TraefikManager.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8QCK35QCDX;
@@ -354,6 +449,60 @@
 			};
 			name = Release;
 		};
+		A10000000000000000000081 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TraefikManagerWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8QCK35QCDX;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "TraefikManagerWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Traefik Manager";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.chr0nzz.traefikmanager.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A10000000000000000000082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TraefikManagerWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8QCK35QCDX;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "TraefikManagerWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Traefik Manager";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.chr0nzz.traefikmanager.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -380,6 +529,15 @@
 			buildConfigurations = (
 				A10000000000000000000051 /* Debug */,
 				A10000000000000000000052 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000080 /* Build configuration list for PBXNativeTarget "TraefikManagerWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000081 /* Debug */,
+				A10000000000000000000082 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

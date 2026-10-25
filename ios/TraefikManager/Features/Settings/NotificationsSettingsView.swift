@@ -24,6 +24,10 @@ struct NotificationsSettingsView: View {
     @State private var editing: NotificationChannel?
     @State private var pendingDelete: NotificationChannel?
     @State private var message: String?
+    @State private var alertsOn = NotificationAlerts.enabled
+    @State private var alertSeverity = NotificationAlerts.minSeverity
+    @State private var alertsDenied = false
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Group {
@@ -67,6 +71,33 @@ struct NotificationsSettingsView: View {
 
     private var form: some View {
         Form {
+            Section {
+                Toggle(isOn: Binding(get: { alertsOn }, set: { setAlerts($0) })) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Alerts on this device")
+                        Text("Shows new notifications from the history as iOS alerts.").font(.caption2).foregroundStyle(Palette.muted)
+                    }
+                }
+                if alertsOn {
+                    Picker("Minimum severity", selection: $alertSeverity) {
+                        Text("Info").tag("info")
+                        Text("Warning").tag("warning")
+                        Text("Error").tag("error")
+                    }
+                    .onChange(of: alertSeverity) { _, value in NotificationAlerts.minSeverity = value }
+                }
+                if alertsDenied {
+                    Button("Notifications are off for Traefik Manager. Open Settings") {
+                        if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
+                    }
+                    .font(.footnote)
+                }
+            } header: {
+                Text("This device")
+            } footer: {
+                Text("iOS decides when the app may check in the background, from every 15 minutes to a few hours. For instant alerts, add an ntfy, Pushover or Telegram channel below.")
+            }
+
             Section {
                 NavigationLink(value: SettingsPage.history) {
                     HStack {
@@ -206,8 +237,27 @@ struct NotificationsSettingsView: View {
 
     // MARK: Loading
 
+    private func setAlerts(_ on: Bool) {
+        guard on else {
+            alertsOn = false
+            NotificationAlerts.enabled = false
+            return
+        }
+        Task {
+            let granted = await NotificationAlerts.requestPermission()
+            alertsDenied = !granted
+            alertsOn = granted
+            NotificationAlerts.enabled = granted
+            if granted {
+                NotificationAlerts.markSeen(app.notifications.items ?? [], connection: app.connection)
+                BackgroundRefresh.schedule()
+            }
+        }
+    }
+
     private func load() async {
         guard let service = app.hostService else { return }
+        if alertsOn { alertsDenied = await NotificationAlerts.authorization() == .denied }
         async let health = loadRouteChecks()
         async let settings = try? service.settingsRaw()
         async let history: Void = app.notifications.refresh(service)

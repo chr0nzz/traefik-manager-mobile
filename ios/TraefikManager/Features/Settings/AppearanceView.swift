@@ -6,6 +6,23 @@ struct AppearanceView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.openURL) private var openURL
     @AppStorage(PreferenceKey.themeMode) private var themeMode: ThemeMode = .system
+    @AppStorage(AppLock.key) private var appLock = false
+    @State private var lockError: String?
+
+    private func setLock(_ on: Bool) {
+        lockError = nil
+        guard on else {
+            appLock = false
+            return
+        }
+        Task {
+            if let failure = await AppLock.authenticate() {
+                lockError = failure
+            } else {
+                appLock = true
+            }
+        }
+    }
 
     private var languageName: String {
         let code = Bundle.main.preferredLocalizations.first ?? "en"
@@ -57,8 +74,29 @@ struct AppearanceView: View {
             } footer: {
                 Text("How the launcher on the Dashboard lists your apps. Shared with the web, so both show the same.")
             }
+
+            Section {
+                Toggle(isOn: Binding(get: { appLock && AppLock.available }, set: { setLock($0) })) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Require unlock")
+                        Text(!AppLock.available ? String(localized: "No Face ID, Touch ID or passcode is set up on this device")
+                             : appLock ? String(localized: "Asked for on launch and whenever the app returns from the background")
+                             : String(localized: "Ask for \(AppLock.biometryName) before showing anything"))
+                            .font(.caption2)
+                            .foregroundStyle(Palette.muted)
+                    }
+                }
+                .disabled(!AppLock.available)
+                if let lockError {
+                    Text(lockError).font(.footnote).foregroundStyle(Palette.red)
+                }
+            } header: {
+                Text("Security")
+            } footer: {
+                Text("The lock lives on this device only. It is not sent to the server.")
+            }
         }
-        .navigationTitle("Appearance")
+        .navigationTitle("Appearance and security")
         .navigationBarTitleDisplayMode(.inline)
         .task { await app.refreshLauncher() }
     }

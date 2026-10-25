@@ -7,6 +7,10 @@ struct RootView: View {
         Group {
             if app.connection == nil {
                 ConnectView()
+            } else if DebugLaunch.form == "widgets" {
+                #if DEBUG
+                NavigationStack { WidgetGallery() }
+                #endif
             } else {
                 MainShell()
                     .task(id: app.connection) { await app.refresh() }

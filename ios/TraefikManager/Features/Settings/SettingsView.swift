@@ -13,7 +13,7 @@ enum SettingsPage: String, CaseIterable, Identifiable, Hashable {
         case .notifications: String(localized: "Notifications")
         case .history: String(localized: "Notifications")
         case .staticConfig: String(localized: "Static config")
-        case .appearance: String(localized: "Appearance")
+        case .appearance: String(localized: "Appearance and security")
         case .diagnostics: String(localized: "Diagnostics")
         case .about: String(localized: "About")
         }
@@ -24,10 +24,10 @@ enum SettingsPage: String, CaseIterable, Identifiable, Hashable {
         case .connection: String(localized: "API URL, credentials and a connection test")
         case .servers: String(localized: "Add, edit and remove agents")
         case .auth: String(localized: "Login status and API keys")
-        case .notifications: String(localized: "Channels, route checks and the history")
+        case .notifications: String(localized: "Alerts, channels, route checks and the history")
         case .history: ""
         case .staticConfig: String(localized: "Edit traefik.yml and restart Traefik")
-        case .appearance: String(localized: "Theme, language and the dashboard layout")
+        case .appearance: String(localized: "Theme, language, layout and the app lock")
         case .diagnostics: String(localized: "How this device reaches the server")
         case .about: String(localized: "Versions and open source licences")
         }

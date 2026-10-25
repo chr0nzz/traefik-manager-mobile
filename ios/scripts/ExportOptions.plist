@@ -18,6 +18,8 @@
 	<dict>
 		<key>dev.chr0nzz.traefikmanager</key>
 		<string>Traefik Manager App Store</string>
+		<key>dev.chr0nzz.traefikmanager.widgets</key>
+		<string>Traefik Manager Widgets App Store</string>
 	</dict>
 	<key>manageAppVersionAndBuildNumber</key>
 	<false/>
