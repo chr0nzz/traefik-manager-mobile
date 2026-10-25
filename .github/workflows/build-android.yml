@@ -39,8 +39,6 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4.4.0
-        with:
-          build-root-directory: android
 
       - name: Restore the signing key
         env:
