@@ -47,6 +47,18 @@ Regenerate them on the Mac with `~/dev/tm-sync/storeshots.sh "<simulator>" <pref
 
 `icon-1024.png` is the 1024 × 1024 marketing icon from the asset catalog. App Store Connect reads it from the build, so it is here for press and listings only.
 
+## Header and search results art
+
+Optional creative assets for **Product Page Information → Header and Search Results**. They also live outside git, in `~/code/traefik-manager/release-builds/ios-2.5.0/media-kit/product-page/`. All three are PNGs with no alpha channel, built from the dark store screenshots.
+
+| File | Use | Size |
+|---|---|---|
+| `universal-5244x2950.png` | One 16:9 image for both the header and search results | 5244 × 2950 |
+| `header-3840x1646.png` | Product page header only (21:9) | 3840 × 1646 |
+| `search-3840x2560.png` | Search results only (3:2) | 3840 × 2560 |
+
+Upload the universal image, or the header and search pair. The universal image keeps its headline and devices inside the middle 21:9 and 3:2 crops. The header has no text, since the product page already shows the name and icon. The headline is English only. To localise or change it, edit `work/art.html` and rerun `work/render.sh <universal|header|search> <width> <height> <out.png>`, which renders the page in headless Chrome.
+
 ## App Privacy
 
 Answer **Data Not Collected**. The app talks only to the Traefik Manager server the user enters. The API key is kept in the iOS Keychain and the server URL in the app's preferences, both on the device. There is no analytics, crash reporting, advertising or tracking SDK, and no account with the developer.
