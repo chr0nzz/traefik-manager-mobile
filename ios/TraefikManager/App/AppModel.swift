@@ -17,6 +17,7 @@ final class AppModel {
             routes.reset()
             launcher.reset()
             services.reset()
+            notifications.reset(for: activeAgentId)
             Task { [geo] in await geo.reset() }
         }
     }
@@ -26,6 +27,7 @@ final class AppModel {
     let launcher = LauncherStore()
     let services = ServicesStore()
     let geo = GeoStore()
+    let notifications = NotificationsStore()
 
     private(set) var activeAgentId: String? {
         didSet { UserDefaults.standard.set(activeAgentId, forKey: PreferenceKey.activeAgent) }

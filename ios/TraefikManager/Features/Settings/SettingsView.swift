@@ -1,68 +1,128 @@
 import SwiftUI
 
-/// App settings. Starts with appearance, connection and servers; the rest of `SettingsScreen` lands in phase 10.
+enum SettingsPage: String, CaseIterable, Identifiable, Hashable {
+    case connection, servers, auth, notifications, history, staticConfig = "static", appearance, diagnostics, about
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .connection: String(localized: "Traefik connection")
+        case .servers: String(localized: "Servers")
+        case .auth: String(localized: "Authentication")
+        case .notifications: String(localized: "Notifications")
+        case .history: String(localized: "Notifications")
+        case .staticConfig: String(localized: "Static config")
+        case .appearance: String(localized: "Appearance")
+        case .diagnostics: String(localized: "Diagnostics")
+        case .about: String(localized: "About")
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .connection: String(localized: "API URL, credentials and a connection test")
+        case .servers: String(localized: "Add, edit and remove agents")
+        case .auth: String(localized: "Login status and API keys")
+        case .notifications: String(localized: "Channels, route checks and the history")
+        case .history: ""
+        case .staticConfig: String(localized: "Edit traefik.yml and restart Traefik")
+        case .appearance: String(localized: "Theme, language and the dashboard layout")
+        case .diagnostics: String(localized: "How this device reaches the server")
+        case .about: String(localized: "Versions and open source licences")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .connection: "point.3.connected.trianglepath.dotted"
+        case .servers: "server.rack"
+        case .auth: "lock.shield"
+        case .notifications, .history: "bell"
+        case .staticConfig: "doc.text"
+        case .appearance: "paintpalette"
+        case .diagnostics: "stethoscope"
+        case .about: "info.circle"
+        }
+    }
+
+    @ViewBuilder
+    var destination: some View {
+        switch self {
+        case .connection: ConnectionSettingsView()
+        case .servers: ServersSettingsView()
+        case .auth: AuthSettingsView()
+        case .notifications: NotificationsSettingsView()
+        case .history: NotificationHistoryView()
+        case .staticConfig: StaticConfigView()
+        case .appearance: AppearanceView()
+        case .diagnostics: DiagnosticsView()
+        case .about: AboutView()
+        }
+    }
+}
+
+/// Settings home: the active server's pages, then the app's own. Port of `SettingsScreen`.
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
-    @AppStorage(PreferenceKey.themeMode) private var themeMode: ThemeMode = .system
     @State private var confirmDisconnect = false
-    @State private var openStatic = DebugLaunch.form == "static"
+    @State private var debugPage: SettingsPage? = DebugLaunch.form.flatMap(SettingsPage.init(rawValue:))
+
+    private var onHost: Bool { app.activeAgentId == nil }
+
+    private var serverPages: [SettingsPage] {
+        onHost ? [.connection, .servers, .auth, .notifications, .staticConfig] : [.servers, .staticConfig]
+    }
 
     var body: some View {
         Form {
-            Section("Appearance") {
-                Picker("Theme", selection: $themeMode) {
-                    ForEach(ThemeMode.allCases) { mode in
-                        Text(mode.label).tag(mode)
-                    }
+            Section {
+                ForEach(serverPages) { row($0) }
+            } header: {
+                Text("Server · \(app.activeServer.label)")
+            } footer: {
+                if !onHost {
+                    Text("Authentication, connection and notification settings belong to the host. Switch to the host to change them. Static config is this agent's own file.")
                 }
             }
 
-            Section("Servers") {
-                ForEach(app.servers) { server in
-                    HStack(spacing: Spacing.md) {
-                        Image(systemName: server.isHost ? "house" : "server.rack")
-                            .foregroundStyle(server.agentId == app.activeAgentId ? Palette.blue : Palette.muted)
-                            .frame(width: 24)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(server.label)
-                            Text(server.detail)
-                                .font(.caption.monospaced())
-                                .foregroundStyle(server.reachable ? Palette.muted : Palette.red)
-                        }
-                        Spacer()
-                        if !server.isHost { HealthDot(reachable: server.reachable) }
-                        if server.agentId == app.activeAgentId {
-                            Image(systemName: "checkmark").foregroundStyle(Palette.blue)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture { Task { await app.switchServer(to: server.agentId) } }
-                }
-            }
-
-            Section("Traefik") {
-                NavigationLink {
-                    StaticConfigView()
-                } label: {
-                    Label("Static config", systemImage: "doc.text")
-                }
-            }
-
-            Section("Connection") {
-                LabeledContent("Instance", value: app.isDemo ? String(localized: "Demo") : app.connection?.baseURL.absoluteString ?? "")
-                Button("Disconnect", role: .destructive) { confirmDisconnect = true }
+            Section("This app") {
+                ForEach([SettingsPage.appearance, .diagnostics, .about]) { row($0) }
             }
 
             Section {
-                LabeledContent("Version", value: Bundle.main.versionLabel)
+                Button(role: .destructive) { confirmDisconnect = true } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("Disconnect", systemImage: "rectangle.portrait.and.arrow.right")
+                        Text("Forget this server and its API key on this device")
+                            .font(.caption)
+                            .foregroundStyle(Palette.muted)
+                    }
+                }
+            } footer: {
+                Text(app.isDemo ? String(localized: "Demo") : app.connection?.baseURL.absoluteString ?? "")
             }
         }
         .navigationTitle("Settings")
-        .navigationDestination(isPresented: $openStatic) { StaticConfigView() }
+        .navigationDestination(for: SettingsPage.self) { $0.destination }
+        .navigationDestination(item: $debugPage) { $0.destination }
         .confirmationDialog("Disconnect from this instance?", isPresented: $confirmDisconnect, titleVisibility: .visible) {
             Button("Disconnect", role: .destructive) { app.disconnect() }
         } message: {
             Text("The saved URL and API key are removed from this device.")
+        }
+    }
+
+    private func row(_ page: SettingsPage) -> some View {
+        NavigationLink(value: page) {
+            Label {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(page.title)
+                    Text(page.subtitle).font(.caption).foregroundStyle(Palette.muted)
+                }
+            } icon: {
+                Image(systemName: page.systemImage).foregroundStyle(Palette.blue)
+            }
         }
     }
 }

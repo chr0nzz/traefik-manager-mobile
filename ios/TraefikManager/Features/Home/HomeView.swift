@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var editingApp: LauncherApp?
     @State private var infoRoute: String?
     @State private var showSettings = false
+    @State private var showNotifications = DebugLaunch.form == "history"
     @State private var message: String?
 
     private var store: DashboardStore { app.dashboard }
@@ -38,6 +39,13 @@ struct HomeView: View {
                     Button { showSettings = true } label: { Image(systemName: "slider.horizontal.3") }
                         .accessibilityLabel("Dashboard settings")
                 }
+                Button { showNotifications = true } label: {
+                    Image(systemName: app.notifications.unread > 0 ? "bell.badge" : "bell")
+                        .symbolRenderingMode(app.notifications.unread > 0 ? .multicolor : .monochrome)
+                }
+                .accessibilityLabel(app.notifications.unread > 0
+                    ? String(localized: "Notifications, \(app.notifications.unread) unread")
+                    : String(localized: "Notifications"))
                 Button {
                     Task { await refreshAll() }
                 } label: {
@@ -49,6 +57,7 @@ struct HomeView: View {
         .sheet(item: $editingApp) { item in
             CardSettingsSheet(item: item) { message = $0 }
         }
+        .navigationDestination(isPresented: $showNotifications) { NotificationHistoryView() }
         .sheet(isPresented: $showSettings) {
             DashboardSettingsSheet { message = $0 }
         }
@@ -107,7 +116,13 @@ struct HomeView: View {
     private func refreshAll() async {
         async let dashboard: Void = app.refreshDashboard()
         async let launcher: Void = app.refreshLauncher()
-        _ = await (dashboard, launcher)
+        async let bell: Void = refreshBell()
+        _ = await (dashboard, launcher, bell)
+    }
+
+    private func refreshBell() async {
+        guard let service = app.hostService else { return }
+        await app.notifications.refresh(service)
     }
 }
 

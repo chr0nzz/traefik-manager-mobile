@@ -597,6 +597,170 @@ struct DemoService: TMService {
         return OkResponse(ok: true)
     }
 
+    func settingsRaw() async throws -> JSONObject {
+        [
+            "domains": .array([.string("example.com"), .string("xyzlab.dev")]),
+            "cert_resolver": .string("letsencrypt,cloudflare"),
+            "traefik_api_url": .string("http://traefik:8080"),
+            "traefik_api_user": .string("admin"),
+            "traefik_api_password_set": .bool(true),
+            "acme_json_path": .string("/app/acme.json"),
+            "access_log_path": .string("/app/logs/access.log"),
+            "static_config_path": .string("/app/traefik.yml"),
+            "crowdsec_enabled": .bool(true),
+            "auth_enabled": .bool(true),
+            "has_password": .bool(true),
+            "otp_enabled": .bool(true),
+        ]
+    }
+
+    func saveSettings(_ body: JSONObject) async throws -> SaveSettingsResponse {
+        await settle()
+        return SaveSettingsResponse(success: true)
+    }
+
+    func testConnection(url: String, user: String, password: String) async throws -> TestConnectionResult {
+        await settle()
+        return TestConnectionResult(ok: true, version: "3.5.0")
+    }
+
+    func agentConfigs() async throws -> [AgentConfig] {
+        [AgentConfig(raw: [
+            "id": .string("demo-agent-1"), "name": .string("vps-frankfurt"), "url": .string("https://agent-fra.example.com:8090"),
+            "traefik_api_url": .string("http://traefik:8080"), "config_path": .string("/app/config"),
+            "restart_method": .string("proxy"), "traefik_container": .string("traefik"),
+            "docker_host": .string("tcp://socket-proxy:2375"), "crowdsec_lapi_url": .string("http://crowdsec:8080"),
+            "domains": .array([.string("edge.example.com")]),
+            "visible_tabs": .object(["plugins": .bool(false)]),
+        ]), AgentConfig(raw: [
+            "id": .string("demo-agent-2"), "name": .string("vps-nyc"), "url": .string("https://agent-nyc.example.com:8090"),
+            "config_path": .string("/app/config"), "restart_method": .string("socket"), "traefik_container": .string("traefik"),
+        ])]
+    }
+
+    func createAgent(name: String, url: String) async throws -> AgentMutationResponse {
+        await settle()
+        return AgentMutationResponse(ok: true, agent: AgentConfig(raw: [
+            "id": .string("demo-agent"), "name": .string(name), "url": .string(url),
+            "api_key_raw": .string("demo-key-not-a-real-secret-0000000000000"),
+        ]))
+    }
+
+    func updateAgent(_ id: String, changes: JSONObject) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func deleteAgent(_ id: String) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func rotateAgentKey(_ id: String) async throws -> AgentMutationResponse {
+        await settle()
+        return AgentMutationResponse(ok: true, agent: AgentConfig(raw: ["id": .string(id), "api_key_raw": .string("demo-rotated-key-0000000000000000000000")]))
+    }
+
+    func generateApiKey(deviceName: String) async throws -> GenerateKeyResponse {
+        await settle()
+        return GenerateKeyResponse(ok: true, key: "tm_demo_not_a_real_key_000000000000")
+    }
+
+    func revokeApiKey(preview: String) async throws -> OkResponse { OkResponse(ok: true) }
+
+    func revokeSessions() async throws -> OkResponse { OkResponse(ok: true) }
+
+    func notifications() async throws -> [TmNotification] {
+        await settle()
+        let now = Int64(Date().timeIntervalSince1970)
+        return [
+            TmNotification(ts: "", type: "warning", msg: "Ping all: 7/8 online - unreachable: bin", category: "traefik", id: 4, at: now - 240),
+            TmNotification(ts: "", type: "success", msg: "Route media saved", category: "config", id: 3, at: now - 4_000),
+            TmNotification(ts: "", type: "info", msg: "Traefik v3.7.10 is available - update now", category: "update", id: 2, at: now - 50_000),
+            TmNotification(ts: "2026-08-11 21:58:12", type: "error", msg: "CrowdSec LAPI unreachable", category: "crowdsec", id: 1, at: 0),
+        ]
+    }
+
+    func notificationState() async throws -> NotificationState { NotificationState(readUntil: 2, count: 4, unread: 2) }
+
+    func markNotificationsRead(upTo id: Int) async throws -> OkResponse { OkResponse(ok: true) }
+
+    func deleteNotification(_ notification: TmNotification) async throws -> OkResponse { OkResponse(ok: true) }
+
+    func clearNotifications() async throws -> OkResponse { OkResponse(ok: true) }
+
+    func testWebhook(_ request: WebhookTestRequest) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func notificationChannels() async throws -> [NotificationChannel] {
+        await settle()
+        var discord = NotificationChannel()
+        discord.id = "ch_1"
+        discord.name = "Ops Discord"
+        discord.kind = "discord"
+        discord.url = "https://discord.com/api/webhooks/demo"
+        var ntfy = NotificationChannel()
+        ntfy.id = "ch_2"
+        ntfy.name = "Phone"
+        ntfy.kind = "ntfy"
+        ntfy.url = "https://ntfy.sh/traefik-demo"
+        ntfy.categories = ["security", "certs", "crowdsec"]
+        ntfy.minSeverity = "warning"
+        ntfy.quietHours = "23:00-07:00"
+        ntfy.breakThrough = true
+        var telegram = NotificationChannel()
+        telegram.id = "ch_3"
+        telegram.name = "Telegram"
+        telegram.kind = "telegram"
+        telegram.enabled = false
+        telegram.digest = "daily"
+        return [discord, ntfy, telegram]
+    }
+
+    func createChannel(_ channel: NotificationChannel) async throws -> ChannelSaveResponse {
+        await settle()
+        var saved = channel
+        saved.id = "ch_demo_\(Int.random(in: 100...999))"
+        return ChannelSaveResponse(ok: true, channel: saved)
+    }
+
+    func updateChannel(_ id: String, _ channel: NotificationChannel) async throws -> ChannelSaveResponse {
+        await settle()
+        var saved = channel
+        saved.id = id
+        return ChannelSaveResponse(ok: true, channel: saved)
+    }
+
+    func deleteChannel(_ id: String) async throws -> OkResponse { OkResponse(ok: true) }
+
+    func testChannel(_ id: String) async throws -> ChannelTestResult {
+        await settle()
+        return ChannelTestResult(ok: true)
+    }
+
+    func saveRouteHealth(enabled: Bool, interval: Int) async throws -> RouteHealthSaveResponse {
+        await settle()
+        return RouteHealthSaveResponse(ok: true, enabled: enabled, interval: interval)
+    }
+
+    func clientIpDiagnostic() async throws -> ClientIpDiagnostic {
+        var d = ClientIpDiagnostic()
+        d.effectiveIp = "203.0.113.7"
+        d.effectiveClass = "public"
+        d.socketPeer = "172.18.0.1"
+        d.socketPeerClass = "private"
+        d.headers = ["X-Forwarded-For": "203.0.113.7, 172.18.0.1", "X-Real-IP": "203.0.113.7", "CF-Connecting-IP": "",
+                     "X-Forwarded-Proto": "https", "X-Forwarded-Host": "manager.example.com"]
+        d.forwardedForChain = ["203.0.113.7", "172.18.0.1"]
+        d.proxyHops = 1
+        d.proxyTrusted = true
+        d.trustedProxies = ["172.16.0.0/12"]
+        d.classes = ["203.0.113.7": "public", "172.18.0.1": "private"]
+        return d
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {

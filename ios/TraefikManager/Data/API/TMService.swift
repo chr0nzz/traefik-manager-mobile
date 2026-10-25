@@ -101,6 +101,48 @@ protocol TMService: Sendable {
     func gitDiff(_ sha: String, hostBacked: Bool) async throws -> GitDiff
     func gitPush(_ message: String, hostBacked: Bool) async throws -> OkResponse
     func gitRestore(_ sha: String, hostBacked: Bool) async throws -> OkResponse
+
+    // Host settings and agents
+    func settingsRaw() async throws -> JSONObject
+    func saveSettings(_ body: JSONObject) async throws -> SaveSettingsResponse
+    func testConnection(url: String, user: String, password: String) async throws -> TestConnectionResult
+    func agentConfigs() async throws -> [AgentConfig]
+    func createAgent(name: String, url: String) async throws -> AgentMutationResponse
+    func updateAgent(_ id: String, changes: JSONObject) async throws -> OkResponse
+    func deleteAgent(_ id: String) async throws -> OkResponse
+    func rotateAgentKey(_ id: String) async throws -> AgentMutationResponse
+
+    // Auth
+    func generateApiKey(deviceName: String) async throws -> GenerateKeyResponse
+    func revokeApiKey(preview: String) async throws -> OkResponse
+    func revokeSessions() async throws -> OkResponse
+
+    // Notifications
+    func notifications() async throws -> [TmNotification]
+    func notificationState() async throws -> NotificationState
+    func markNotificationsRead(upTo id: Int) async throws -> OkResponse
+    func deleteNotification(_ notification: TmNotification) async throws -> OkResponse
+    func clearNotifications() async throws -> OkResponse
+    func testWebhook(_ request: WebhookTestRequest) async throws -> OkResponse
+    func notificationChannels() async throws -> [NotificationChannel]
+    func createChannel(_ channel: NotificationChannel) async throws -> ChannelSaveResponse
+    func updateChannel(_ id: String, _ channel: NotificationChannel) async throws -> ChannelSaveResponse
+    func deleteChannel(_ id: String) async throws -> OkResponse
+    func testChannel(_ id: String) async throws -> ChannelTestResult
+    func saveRouteHealth(enabled: Bool, interval: Int) async throws -> RouteHealthSaveResponse
+    func clientIpDiagnostic() async throws -> ClientIpDiagnostic
+}
+
+extension TMService {
+    /// Reads the settings, merges `changes` over them and saves. Port of `ManagerSettingsRepository.patch`.
+    @discardableResult
+    func patchSettings(_ changes: JSONObject) async throws -> JSONObject {
+        var merged = try await settingsRaw()
+        merged.merge(changes) { _, new in new }
+        let response = try await saveSettings(merged)
+        if !response.success { throw APIError.server(response.error ?? String(localized: "Could not save the settings")) }
+        return merged
+    }
 }
 
 struct LiveService: TMService {
@@ -395,4 +437,82 @@ struct LiveService: TMService {
     func gitRestore(_ sha: String, hostBacked: Bool) async throws -> OkResponse {
         try await client.post("api/backup/git/restore/\(APIClient.segment(sha))", query: gitQuery(hostBacked))
     }
+
+    // MARK: Host settings and agents
+
+    func settingsRaw() async throws -> JSONObject { try await hub.get("api/settings") }
+
+    func saveSettings(_ body: JSONObject) async throws -> SaveSettingsResponse { try await hub.post("api/settings", body: body) }
+
+    func testConnection(url: String, user: String, password: String) async throws -> TestConnectionResult {
+        try await hub.post("api/settings/test-connection", body: TestConnectionRequest(url: url.trimmed, user: user.trimmed, password: password))
+    }
+
+    func agentConfigs() async throws -> [AgentConfig] {
+        let response: AgentConfigsResponse = try await hub.get("api/agents")
+        return response.agents
+    }
+
+    func createAgent(name: String, url: String) async throws -> AgentMutationResponse {
+        var trimmed = url.trimmed
+        while trimmed.hasSuffix("/") { trimmed.removeLast() }
+        return try await hub.post("api/agents", body: CreateAgentRequest(name: name.trimmed, url: trimmed))
+    }
+
+    func updateAgent(_ id: String, changes: JSONObject) async throws -> OkResponse {
+        try await hub.put("api/agents/\(APIClient.segment(id))", body: changes)
+    }
+
+    func deleteAgent(_ id: String) async throws -> OkResponse { try await hub.delete("api/agents/\(APIClient.segment(id))") }
+
+    func rotateAgentKey(_ id: String) async throws -> AgentMutationResponse { try await hub.post("api/agents/\(APIClient.segment(id))/rotate-key") }
+
+    // MARK: Auth
+
+    func generateApiKey(deviceName: String) async throws -> GenerateKeyResponse {
+        try await hub.post("api/auth/apikey/generate", body: GenerateKeyRequest(deviceName: String(deviceName.trimmed.prefix(50))))
+    }
+
+    func revokeApiKey(preview: String) async throws -> OkResponse { try await hub.post("api/auth/apikey/revoke", body: RevokeKeyRequest(preview: preview)) }
+
+    func revokeSessions() async throws -> OkResponse { try await hub.post("api/auth/sessions/revoke") }
+
+    // MARK: Notifications
+
+    func notifications() async throws -> [TmNotification] { try await hub.get("api/notifications") }
+
+    func notificationState() async throws -> NotificationState { try await hub.get("api/notifications/state") }
+
+    func markNotificationsRead(upTo id: Int) async throws -> OkResponse { try await hub.post("api/notifications/read", body: MarkReadRequest(id: id)) }
+
+    func deleteNotification(_ notification: TmNotification) async throws -> OkResponse {
+        try await hub.post("api/notifications/delete", body: DeleteNotificationRequest(ts: notification.ts, id: notification.id > 0 ? notification.id : nil))
+    }
+
+    func clearNotifications() async throws -> OkResponse { try await hub.post("api/notifications/clear") }
+
+    func testWebhook(_ request: WebhookTestRequest) async throws -> OkResponse { try await hub.post("api/settings/webhook-test", body: request) }
+
+    func notificationChannels() async throws -> [NotificationChannel] {
+        let response: ChannelListResponse = try await hub.get("api/notifications/channels")
+        return response.channels
+    }
+
+    func createChannel(_ channel: NotificationChannel) async throws -> ChannelSaveResponse {
+        try await hub.post("api/notifications/channels", body: channel.payload)
+    }
+
+    func updateChannel(_ id: String, _ channel: NotificationChannel) async throws -> ChannelSaveResponse {
+        try await hub.put("api/notifications/channels/\(APIClient.segment(id))", body: channel.payload)
+    }
+
+    func deleteChannel(_ id: String) async throws -> OkResponse { try await hub.delete("api/notifications/channels/\(APIClient.segment(id))") }
+
+    func testChannel(_ id: String) async throws -> ChannelTestResult { try await hub.post("api/notifications/channels/\(APIClient.segment(id))/test") }
+
+    func saveRouteHealth(enabled: Bool, interval: Int) async throws -> RouteHealthSaveResponse {
+        try await hub.post("api/settings/route-health", body: RouteHealthSettings(enabled: enabled, interval: interval))
+    }
+
+    func clientIpDiagnostic() async throws -> ClientIpDiagnostic { try await hub.get("api/diagnostics/client-ip") }
 }
