@@ -222,7 +222,7 @@ struct ServersWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("ALL SERVERS").font(.system(size: 10, weight: .semibold)).kerning(0.4).foregroundStyle(Palette.muted)
+                Text("All servers").textCase(.uppercase).font(.system(size: 10, weight: .semibold)).kerning(0.4).foregroundStyle(Palette.muted)
                 Spacer()
                 UpdatedLabel(date: entry.updatedAt)
             }

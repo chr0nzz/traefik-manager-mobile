@@ -40,10 +40,10 @@ enum WidgetCardOption: String, AppEnum {
         .middlewares: "Middlewares",
         .entrypoints: "Entry points",
         .certs: "Certificates",
-        .sources: "Attack sources",
+        .sources: "Attacking sources",
         .scenarios: "Scenarios",
         .paths: "Targeted paths",
-        .bans: "Active bans",
+        .bans: "Bans in force",
     ]
 
     var kind: WidgetCardKind { WidgetCardKind(rawValue: rawValue) ?? .http }

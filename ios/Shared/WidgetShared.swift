@@ -77,10 +77,10 @@ enum WidgetCardKind: String, CaseIterable, Codable, Sendable {
         case .middlewares: String(localized: "Middlewares")
         case .entrypoints: String(localized: "Entry points")
         case .certs: String(localized: "Certificates")
-        case .sources: String(localized: "Attack sources")
+        case .sources: String(localized: "Attacking sources")
         case .scenarios: String(localized: "Scenarios")
         case .paths: String(localized: "Targeted paths")
-        case .bans: String(localized: "Active bans")
+        case .bans: String(localized: "Bans in force")
         }
     }
 

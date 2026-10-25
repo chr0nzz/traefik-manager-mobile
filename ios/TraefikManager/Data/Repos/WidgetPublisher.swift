@@ -141,7 +141,7 @@ enum WidgetPublisher {
             hero: "\(rows.count)",
             unit: String(localized: "entry points"),
             health: rows.contains { $0.health == .error } ? .error : idle > 0 ? .warn : .ok,
-            sub: rows.first { !$0.idle }.map { String(localized: "busiest \($0.name) \($0.address)") } ?? String(localized: "nothing bound"),
+            sub: rows.first { !$0.idle }.map { String(localized: "busiest \($0.name) · \($0.address)") } ?? String(localized: "nothing bound"),
             cells: rows.flatMap { $0.cells.map(wire) }.prefix(cellLimit).map { $0 },
             chips: idle > 0 ? [WidgetChip(label: String(localized: "\(idle) idle"), health: .warn)] : [],
             rows: rows.prefix(rowLimit).map {
@@ -167,7 +167,7 @@ enum WidgetPublisher {
             hero: "\(certs.count)",
             unit: String(localized: "certificates"),
             health: critical > 0 ? .error : expiring > 0 ? .warn : .ok,
-            sub: first.map { cert in cert.daysLeft.map { String(localized: "soonest \(cert.main) in \($0)d") } ?? String(localized: "soonest \(cert.main)") }
+            sub: first.map { cert in cert.daysLeft.map { String(localized: "soonest \(cert.main) · \($0)d left") } ?? String(localized: "soonest \(cert.main)") }
                 ?? String(localized: "no certificates"),
             cells: certs.prefix(cellLimit).map { health($0.daysLeft) },
             chips: chips,
@@ -201,12 +201,12 @@ enum WidgetPublisher {
                 hero: "\(sources.count)",
                 unit: String(localized: "sources"),
                 health: severe ? .error : loose > 0 ? .warn : .ok,
-                sub: sources.first.map { String(localized: "worst \($0.label) · \($0.weight) events") } ?? String(localized: "no scenario fired"),
+                sub: sources.first.map { String(localized: "worst \($0.label)") + " · " + String(localized: "\($0.weight) events") } ?? String(localized: "nobody tripped a scenario"),
                 cells: sources.prefix(cellLimit).map { $0.open > 0 && $0.count > 1 ? .error : $0.open > 0 ? .warn : .idle },
                 chips: sources.isEmpty ? [] : loose > 0
                     ? [WidgetChip(label: String(localized: "\(loose) loose"), health: severe ? .error : .warn),
                        WidgetChip(label: String(localized: "\(sources.count - loose) banned"))]
-                    : [WidgetChip(label: String(localized: "all banned"))],
+                    : [WidgetChip(label: String(localized: "every source banned"))],
                 footer: [WidgetChip(label: String(localized: "\(repeats) repeat")), WidgetChip(label: String(localized: "\(sources.count - repeats) one-shot"))]
             ),
             WidgetCardKind.scenarios.rawValue: WidgetCard(
@@ -215,7 +215,7 @@ enum WidgetPublisher {
                 hero: "\(alerts.count)",
                 unit: String(localized: "alerts"),
                 health: scenarios.contains { $0.open > 0 } ? .warn : .ok,
-                sub: scenarios.first.map { String(localized: "worst \($0.label) · \(events) events") } ?? String(localized: "No scenarios fired"),
+                sub: scenarios.first.map { String(localized: "worst \($0.label)") + " · " + String(localized: "\(events) events rolled up") } ?? String(localized: "nothing to rank in the retained window"),
                 rows: scenarios.prefix(rowLimit).map(rankRow)
             ),
             WidgetCardKind.paths.rawValue: WidgetCard(
@@ -224,7 +224,7 @@ enum WidgetPublisher {
                 hero: "\(paths.count)",
                 unit: String(localized: "paths"),
                 health: paths.contains { $0.open > 0 } ? .warn : .ok,
-                sub: paths.first.map { String(localized: "most wanted \($0.label)") } ?? String(localized: "no paths targeted"),
+                sub: paths.first.map { String(localized: "most wanted \($0.label)") } ?? String(localized: "nothing was aimed at"),
                 rows: paths.prefix(rowLimit).map(rankRow)
             ),
             WidgetCardKind.bans.rawValue: WidgetCard(
@@ -233,7 +233,7 @@ enum WidgetPublisher {
                 hero: "\(total)",
                 unit: String(localized: "bans"),
                 health: total == 0 ? .idle : .ok,
-                sub: String(localized: "\(own) own · \(snapshot.subscribedBans) subscribed"),
+                sub: String(localized: "\(own) from this host") + " · " + String(localized: "\(snapshot.subscribedBans) subscribed"),
                 cells: (0..<banCells).map { $0 < ownCells ? .ok : .idle },
                 footer: snapshot.origins.prefix(3).map { WidgetChip(label: "\($0.0) \($0.1)") }
             ),
