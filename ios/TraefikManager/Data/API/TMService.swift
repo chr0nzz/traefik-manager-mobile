@@ -61,6 +61,11 @@ protocol TMService: Sendable {
     func saveService(_ draft: ServiceDraft) async throws -> ServiceSaveResponse
     func deleteService(_ name: String, force: Bool) async throws -> OkResponse
     func setServiceOwnership(_ name: String, adopt: Bool) async throws -> ServiceOwnershipResponse
+
+    // Logs and GeoIP
+    func logs(lines: Int) async throws -> LogsResponse
+    func geoStatus() async throws -> GeoStatus
+    func geoLookup(ips: [String]) async throws -> GeoLookupResponse
 }
 
 struct LiveService: TMService {
@@ -217,5 +222,15 @@ struct LiveService: TMService {
             query: agentQuery,
             body: ServiceOwnershipRequest(adopt: adopt)
         )
+    }
+
+    func logs(lines: Int) async throws -> LogsResponse {
+        try await client.get("api/traefik/logs", query: [URLQueryItem(name: "lines", value: String(lines))])
+    }
+
+    func geoStatus() async throws -> GeoStatus { try await client.get("api/geoip/status") }
+
+    func geoLookup(ips: [String]) async throws -> GeoLookupResponse {
+        try await client.post("api/geoip/lookup", body: GeoLookupRequest(ips: ips, aggregate: true))
     }
 }

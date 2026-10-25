@@ -292,6 +292,38 @@ struct DemoService: TMService {
         return ServiceOwnershipResponse(ok: true, owned: adopt)
     }
 
+    // MARK: - Logs
+
+    func logs(lines: Int) async throws -> LogsResponse {
+        await settle()
+        let sample: [(String, String, Int)] = [
+            ("GET", "/", 200), ("GET", "/api/routes", 200), ("POST", "/api/crowdsec/decisions", 201),
+            ("GET", "/.env", 404), ("GET", "/favicon.ico", 404), ("HEAD", "/", 403), ("GET", "/api/health", 200),
+            ("GET", "/media/stream/12345", 206), ("GET", "/wp-admin/setup-config.php", 404),
+            ("GET", "/api/agents/proxy/1/traefik/overview", 502),
+        ]
+        let ips = ["62.210.142.174", "18.218.118.203", "212.87.212.246", "100.87.28.37", "45.148.10.125"]
+        let services = ["tma@docker", "dash-service@file", "gk-auth-service@file"]
+        let durations: [Int64] = [421_000, 1_200_000, 2_400_000, 96_000_000, 3_570_000_000]
+        let formatter = ISO8601DateFormatter()
+        let now = Date()
+        let generated = (0..<min(lines, 120)).map { index -> String in
+            let (method, path, status) = sample[index % sample.count]
+            let stamp = formatter.string(from: now.addingTimeInterval(-Double(120 - index) * 37))
+            return #"{"ClientHost":"\#(ips[index % ips.count])","RequestMethod":"\#(method)","RequestPath":"\#(path)","DownstreamStatus":\#(status),"OriginStatus":\#(status == 404 ? 0 : status),"Duration":\#(durations[index % 5]),"DownstreamContentSize":\#(status * 7),"RequestHost":"kwa.xyzlab.app","RequestScheme":"https","entryPointName":"websecure","RouterName":"tma@docker","ServiceName":"\#(services[index % services.count])","ServiceURL":"http://172.18.0.3:8090","TLSVersion":"1.3","RetryAttempts":0,"StartUTC":"\#(stamp)"}"#
+        }
+        return LogsResponse(lines: generated)
+    }
+
+    func geoStatus() async throws -> GeoStatus { GeoStatus(enabled: true, available: true) }
+
+    func geoLookup(ips: [String]) async throws -> GeoLookupResponse {
+        let codes = ["US", "DE", "FR", "NL", "RO"]
+        return GeoLookupResponse(codes: Dictionary(uniqueKeysWithValues: ips.map { ip in
+            (ip, codes[(Int(ip.components(separatedBy: ".")[0]) ?? 0) % 5])
+        }))
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {
