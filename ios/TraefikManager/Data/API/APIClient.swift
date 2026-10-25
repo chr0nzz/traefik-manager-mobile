@@ -13,6 +13,8 @@ enum APIError: LocalizedError, Equatable {
     case unreachable(String)
     case decoding(String)
     case server(String)
+    /// 409 from a delete: the object is still referenced. `routers` / `parents` name the users.
+    case inUse(message: String?, routers: [String], parents: [String])
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +28,8 @@ enum APIError: LocalizedError, Equatable {
             String(localized: "Unexpected response from the server: \(detail)")
         case let .server(message):
             message
+        case let .inUse(message, _, _):
+            message ?? String(localized: "Still in use")
         }
     }
 }
@@ -141,6 +145,14 @@ struct APIClient: Sendable {
         }
         guard let http = response as? HTTPURLResponse else { return data }
         guard (200..<300).contains(http.statusCode) else {
+            if http.statusCode == 409 {
+                let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+                throw APIError.inUse(
+                    message: Self.errorMessage(in: data),
+                    routers: object?["inUseBy"] as? [String] ?? [],
+                    parents: object?["parents"] as? [String] ?? []
+                )
+            }
             throw APIError.http(status: http.statusCode, message: Self.errorMessage(in: data))
         }
         return data

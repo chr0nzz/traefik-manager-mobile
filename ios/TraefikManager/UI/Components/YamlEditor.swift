@@ -76,6 +76,11 @@ enum YamlHighlighter {
     private static let number = try! NSRegularExpression(pattern: #"^-?\d+(\.\d+)?$"#)
     private static let booleans: Set<String> = ["true", "false", "yes", "no", "null", "~", "on", "off"]
 
+    /// SwiftUI-friendly version for read-only previews.
+    static func attributed(_ source: String) -> AttributedString {
+        (try? AttributedString(highlight(source), including: \.uiKit)) ?? AttributedString(source)
+    }
+
     static func highlight(_ source: String) -> NSAttributedString {
         let font = UIFontMetrics(forTextStyle: .body).scaledFont(for: .monospacedSystemFont(ofSize: 14, weight: .regular))
         let result = NSMutableAttributedString(

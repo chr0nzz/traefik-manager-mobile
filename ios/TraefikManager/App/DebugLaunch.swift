@@ -5,6 +5,7 @@ enum DebugLaunch {
     static var tab: String? { value("tmTab") }
     static var route: String? { value("tmRoute") }
     static var form: String? { value("tmForm") }
+    static var template: String? { value("tmTemplate") }
     static var scrollToBottom: Bool { value("tmScroll") == "bottom" }
 
     private static func value(_ key: String) -> String? {

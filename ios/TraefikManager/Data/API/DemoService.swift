@@ -134,7 +134,7 @@ struct DemoService: TMService {
             route.enabled = !disabled.contains(route.id)
             return route
         }
-        return RoutesResponse(apps: apps)
+        return RoutesResponse(apps: apps, middlewares: Self.middlewares)
     }
 
     func agentRoutes(_ agentId: String) async throws -> RoutesResponse { try await routes() }
@@ -210,6 +210,38 @@ struct DemoService: TMService {
         return UIPrefsResponse(uiPrefs: prefs)
     }
 
+    // MARK: - Middlewares
+
+    func saveMiddleware(_ form: MiddlewareForm) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func deleteMiddleware(_ name: String, configFile: String, force: Bool) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func middlewareTemplates() async throws -> MiddlewareTemplatesResponse {
+        MiddlewareTemplatesResponse(templates: [
+            MiddlewareTemplate(id: "1", name: "Office only", yaml: "ipAllowList:\n  sourceRange:\n    - \"203.0.113.0/24\""),
+        ])
+    }
+
+    func createMiddlewareTemplate(name: String, yaml: String) async throws -> OkResponse { OkResponse(ok: true) }
+    func updateMiddlewareTemplate(id: String, name: String, yaml: String) async throws -> OkResponse { OkResponse(ok: true) }
+    func deleteMiddlewareTemplate(id: String) async throws -> OkResponse { OkResponse(ok: true) }
+
+    func htpasswd(username: String, password: String) async throws -> HtpasswdResponse {
+        await settle()
+        return HtpasswdResponse(ok: true, entry: "\(username):$apr1$demo$notarealhash000000000")
+    }
+
+    func digestAuth(username: String, password: String, realm: String) async throws -> HtpasswdResponse {
+        await settle()
+        return HtpasswdResponse(ok: true, entry: "\(username):\(realm):0000000000000000demo00000000000")
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {
@@ -235,6 +267,17 @@ struct DemoService: TMService {
             route.configFile = "routes.yml"
             return route
         }
+    }
+
+    static let middlewares: [MiddlewareDef] = [
+        demoMiddleware("crowdsec", "plugin:\n  crowdsec-bouncer:\n    enabled: true\n"),
+        demoMiddleware("secure-headers", "headers:\n  frameDeny: true\n  stsSeconds: 31536000\n"),
+        demoMiddleware("basic-auth", "basicAuth:\n  users:\n    - admin:$apr1$demo\n"),
+    ]
+
+    private static func demoMiddleware(_ name: String, _ yaml: String) -> MiddlewareDef {
+        let json = try! JSONSerialization.data(withJSONObject: ["name": name, "type": "http", "yaml": yaml, "configFile": "routes.yml"])
+        return try! JSONDecoder().decode(MiddlewareDef.self, from: json)
     }
 
     static let routes: [DemoRoute] = [

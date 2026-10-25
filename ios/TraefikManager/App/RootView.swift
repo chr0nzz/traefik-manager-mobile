@@ -140,6 +140,7 @@ struct DestinationView: View {
         switch destination {
         case .home: HomeView()
         case .routes: RoutesView()
+        case .middlewares: MiddlewaresView()
         case .settings: SettingsView()
         default: ComingSoonView(destination: destination)
         }

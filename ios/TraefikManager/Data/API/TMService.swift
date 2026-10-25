@@ -45,6 +45,16 @@ protocol TMService: Sendable {
     func saveDashboardConfig(_ config: DashboardConfig) async throws -> OkResponse
     func uiPrefs() async throws -> UIPrefsResponse
     func saveUIPrefs(_ prefs: UIPrefs) async throws -> UIPrefsResponse
+
+    // Middlewares
+    func saveMiddleware(_ form: MiddlewareForm) async throws -> OkResponse
+    func deleteMiddleware(_ name: String, configFile: String, force: Bool) async throws -> OkResponse
+    func middlewareTemplates() async throws -> MiddlewareTemplatesResponse
+    func createMiddlewareTemplate(name: String, yaml: String) async throws -> OkResponse
+    func updateMiddlewareTemplate(id: String, name: String, yaml: String) async throws -> OkResponse
+    func deleteMiddlewareTemplate(id: String) async throws -> OkResponse
+    func htpasswd(username: String, password: String) async throws -> HtpasswdResponse
+    func digestAuth(username: String, password: String, realm: String) async throws -> HtpasswdResponse
 }
 
 struct LiveService: TMService {
@@ -144,5 +154,37 @@ struct LiveService: TMService {
 
     func saveUIPrefs(_ prefs: UIPrefs) async throws -> UIPrefsResponse {
         try await client.post("api/settings/ui", body: UIPrefsRequest(uiPrefs: prefs))
+    }
+
+    func saveMiddleware(_ form: MiddlewareForm) async throws -> OkResponse {
+        try await client.postForm("save-middleware", fields: form.fields(agentId: agentId))
+    }
+
+    func deleteMiddleware(_ name: String, configFile: String, force: Bool) async throws -> OkResponse {
+        var fields = [("configFile", configFile), ("agent_id", agentId ?? "")]
+        if force { fields.append(("force", "true")) }
+        return try await client.postForm("delete-middleware/\(APIClient.segment(name))", fields: fields)
+    }
+
+    func middlewareTemplates() async throws -> MiddlewareTemplatesResponse { try await client.get("api/mw/templates") }
+
+    func createMiddlewareTemplate(name: String, yaml: String) async throws -> OkResponse {
+        try await client.post("api/mw/templates", body: TemplateBody(name: name, yaml: yaml))
+    }
+
+    func updateMiddlewareTemplate(id: String, name: String, yaml: String) async throws -> OkResponse {
+        try await client.put("api/mw/templates/\(APIClient.segment(id))", body: TemplateBody(name: name, yaml: yaml))
+    }
+
+    func deleteMiddlewareTemplate(id: String) async throws -> OkResponse {
+        try await client.delete("api/mw/templates/\(APIClient.segment(id))")
+    }
+
+    func htpasswd(username: String, password: String) async throws -> HtpasswdResponse {
+        try await client.post("api/tools/htpasswd", body: HtpasswdRequest(username: username, password: password))
+    }
+
+    func digestAuth(username: String, password: String, realm: String) async throws -> HtpasswdResponse {
+        try await client.post("api/tools/digestauth", body: DigestRequest(username: username, password: password, realm: realm))
     }
 }
