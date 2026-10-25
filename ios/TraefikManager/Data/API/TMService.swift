@@ -55,6 +55,12 @@ protocol TMService: Sendable {
     func deleteMiddlewareTemplate(id: String) async throws -> OkResponse
     func htpasswd(username: String, password: String) async throws -> HtpasswdResponse
     func digestAuth(username: String, password: String, realm: String) async throws -> HtpasswdResponse
+
+    // Services (hub endpoints that take agent_id)
+    func serviceEnvelope() async throws -> ServiceEnvelope
+    func saveService(_ draft: ServiceDraft) async throws -> ServiceSaveResponse
+    func deleteService(_ name: String, force: Bool) async throws -> OkResponse
+    func setServiceOwnership(_ name: String, adopt: Bool) async throws -> ServiceOwnershipResponse
 }
 
 struct LiveService: TMService {
@@ -186,5 +192,30 @@ struct LiveService: TMService {
 
     func digestAuth(username: String, password: String, realm: String) async throws -> HtpasswdResponse {
         try await client.post("api/tools/digestauth", body: DigestRequest(username: username, password: password, realm: realm))
+    }
+
+    private var agentQuery: [URLQueryItem] { agentId.map { [URLQueryItem(name: "agent_id", value: $0)] } ?? [] }
+
+    func serviceEnvelope() async throws -> ServiceEnvelope {
+        try await client.get("api/traefik/services", query: agentQuery)
+    }
+
+    func saveService(_ draft: ServiceDraft) async throws -> ServiceSaveResponse {
+        try await client.post("api/services", body: draft.payload(agentId: agentId))
+    }
+
+    func deleteService(_ name: String, force: Bool) async throws -> OkResponse {
+        try await client.delete(
+            "api/services/\(APIClient.segment(name))",
+            query: agentQuery + (force ? [URLQueryItem(name: "force", value: "1")] : [])
+        )
+    }
+
+    func setServiceOwnership(_ name: String, adopt: Bool) async throws -> ServiceOwnershipResponse {
+        try await client.post(
+            "api/services/\(APIClient.segment(name))/ownership",
+            query: agentQuery,
+            body: ServiceOwnershipRequest(adopt: adopt)
+        )
     }
 }

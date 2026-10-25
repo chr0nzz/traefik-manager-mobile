@@ -16,12 +16,14 @@ final class AppModel {
             dashboard.reset()
             routes.reset()
             launcher.reset()
+            services.reset()
         }
     }
 
     let dashboard = DashboardStore()
     let routes = RoutesStore()
     let launcher = LauncherStore()
+    let services = ServicesStore()
 
     private(set) var activeAgentId: String? {
         didSet { UserDefaults.standard.set(activeAgentId, forKey: PreferenceKey.activeAgent) }
@@ -63,6 +65,11 @@ final class AppModel {
     func refreshRoutes() async {
         guard let service else { return }
         await routes.load(service: service, cacheKey: cacheKey)
+    }
+
+    func refreshServices() async {
+        guard let service else { return }
+        await services.load(service: service)
     }
 
     /// Launcher groups come from the route list, so routes refresh first.

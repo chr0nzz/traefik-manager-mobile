@@ -60,6 +60,7 @@ struct RouteDetailView: View {
         .navigationTitle(route.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { actions(route) }
+        .task { if !app.services.loaded { await app.refreshServices() } }
         .sheet(isPresented: $showRaw) {
             NavigationStack {
                 RouteRawView(routeId: route.id) { saved in
@@ -216,19 +217,29 @@ struct RouteDetailView: View {
 
     private func serviceSection(_ route: Route) -> some View {
         let servers = route.servers.isEmpty ? [route.target] : route.servers
+        let serviceRow = app.services.byBackendKey[BackendHealth.key(route.protocol, route.serviceName)]
         return DetailSection(title: String(localized: "Service"), systemImage: "bolt", tint: Palette.yellow) {
             DetailRow(
                 label: String(localized: "Type"),
                 value: route.serviceType == "loadBalancer" ? String(localized: "Load Balancer") : route.serviceType
             )
+            if let summary = BackendHealth.summary(serviceRow), let serviceRow {
+                DetailRow(
+                    label: String(localized: "Health"),
+                    value: summary,
+                    status: serviceRow.backendsUp == serviceRow.backendsTotal ? .ok : serviceRow.backendsUp == 0 ? .error : .warn
+                )
+            }
             if let passHostHeader = route.passHostHeader {
                 DetailRow(label: String(localized: "Pass host header"), value: String(passHostHeader))
             }
             ForEach(Array(servers.enumerated()), id: \.offset) { index, server in
+                let health = serviceRow?.servers.first { $0.target == server }?.health
                 DetailRow(
                     label: servers.count == 1 ? String(localized: "Server") : String(localized: "Server \(index + 1)"),
                     value: server,
                     mono: true,
+                    status: health == .up ? .ok : health == .down ? .error : nil,
                     last: index == servers.count - 1
                 )
             }

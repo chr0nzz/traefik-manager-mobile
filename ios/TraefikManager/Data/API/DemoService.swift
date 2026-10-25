@@ -242,6 +242,56 @@ struct DemoService: TMService {
         return HtpasswdResponse(ok: true, entry: "\(username):\(realm):0000000000000000demo00000000000")
     }
 
+    // MARK: - Services
+
+    func serviceEnvelope() async throws -> ServiceEnvelope {
+        await settle()
+        func service(_ json: [String: Any]) -> TraefikService {
+            try! JSONDecoder().decode(TraefikService.self, from: JSONSerialization.data(withJSONObject: json))
+        }
+        var envelope = ServiceEnvelope()
+        envelope.http = Self.routes.filter { $0.proto == "http" }.map { route in
+            let servers = route.name == "media" ? ["http://10.0.0.9:8096", "http://10.0.0.10:8096"] : [route.target]
+            var json: [String: Any] = [
+                "name": "\(route.name)@file", "provider": "file", "type": "loadbalancer",
+                "status": route.name == "broken-app" ? "disabled" : "enabled",
+                "usedBy": ["\(route.name)@file"],
+                "serverStatus": route.name == "media"
+                    ? ["http://10.0.0.9:8096": "UP", "http://10.0.0.10:8096": "DOWN"]
+                    : [route.target: "UP"],
+                "loadBalancer": ["servers": servers.map { ["url": $0] }, "passHostHeader": true],
+            ]
+            if route.name == "media" { json["loadBalancer"] = ["servers": servers.map { ["url": $0] }, "passHostHeader": true, "healthCheck": ["path": "/health", "interval": "30s"]] }
+            return service(json)
+        } + [service([
+            "name": "media-pool@file", "provider": "file", "status": "enabled", "type": "weighted",
+            "usedBy": ["media@file"],
+            "weighted": ["services": [["name": "media@file", "weight": 3], ["name": "media-backup@file", "weight": 1]]],
+        ])]
+        envelope.tcp = [service([
+            "name": "postgres@file", "provider": "file", "status": "enabled", "type": "loadbalancer",
+            "usedBy": ["postgres@file"], "serverStatus": ["10.0.0.20:5432": "UP"],
+            "loadBalancer": ["servers": [["address": "10.0.0.20:5432"]]],
+        ])]
+        envelope.ownedServices = ["media-pool"]
+        return envelope
+    }
+
+    func saveService(_ draft: ServiceDraft) async throws -> ServiceSaveResponse {
+        await settle()
+        return ServiceSaveResponse(ok: true, name: draft.name)
+    }
+
+    func deleteService(_ name: String, force: Bool) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func setServiceOwnership(_ name: String, adopt: Bool) async throws -> ServiceOwnershipResponse {
+        await settle()
+        return ServiceOwnershipResponse(ok: true, owned: adopt)
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {

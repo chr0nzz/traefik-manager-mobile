@@ -292,6 +292,104 @@
           }
         }
       }
+    },
+    "%lld servers": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld server"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld servers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "all %lld servers down": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "all %lld server down"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "all %lld servers down"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld of %lld servers down": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %#@total@"
+          },
+          "substitutions": {
+            "total": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg server down"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg servers down"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Deleting it also deletes %lld routes: %@.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Deleting it also deletes %1$lld route: %2$@."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Deleting it also deletes %1$lld routes: %2$@."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"
