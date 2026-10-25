@@ -11,7 +11,11 @@ final class AppModel {
     private(set) var settings: ServerSettings?
     private(set) var switching = false
     /// Bumped whenever the target server changes so screens reload.
-    private(set) var generation = 0
+    private(set) var generation = 0 {
+        didSet { dashboard.reset() }
+    }
+
+    let dashboard = DashboardStore()
 
     private(set) var activeAgentId: String? {
         didSet { UserDefaults.standard.set(activeAgentId, forKey: PreferenceKey.activeAgent) }
@@ -43,6 +47,18 @@ final class AppModel {
     var service: TMService? { hostService?.scoped(to: activeAgentId) }
 
     var isDemo: Bool { connection?.demo ?? false }
+
+    /// Snapshot cache key for the active server; nil in demo mode so fixtures never hit the disk.
+    var cacheKey: String? {
+        guard let connection, !connection.demo else { return nil }
+        return SnapshotStore.key(baseURL: connection.baseURL, agentId: activeAgentId)
+    }
+
+    func refreshDashboard() async {
+        guard let service else { return }
+        dashboard.restore(cacheKey: cacheKey)
+        await dashboard.refresh(service: service, cacheKey: cacheKey)
+    }
 
     // MARK: - Servers
 
@@ -111,6 +127,7 @@ final class AppModel {
 
     func disconnect() {
         connectionStore.clear()
+        SnapshotStore.clear()
         activeAgentId = nil
         connection = nil
         servers = []

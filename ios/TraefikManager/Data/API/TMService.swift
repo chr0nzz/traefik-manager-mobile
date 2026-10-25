@@ -15,6 +15,13 @@ protocol TMService: Sendable {
     func settings() async throws -> ServerSettings
     func agents() async throws -> AgentsResponse
     func agentHealth(_ agentId: String) async throws -> AgentHealth
+
+    // Traefik runtime (agent-proxied)
+    func overview() async throws -> Overview
+    func entrypoints() async throws -> [Entrypoint]
+    func routers() async throws -> ProtoEnvelope
+    func services() async throws -> ProtoEnvelope
+    func middlewares() async throws -> ProtoEnvelope
 }
 
 struct LiveService: TMService {
@@ -36,4 +43,10 @@ struct LiveService: TMService {
     func agentHealth(_ agentId: String) async throws -> AgentHealth {
         try await client.get("api/agents/\(APIClient.segment(agentId))/health")
     }
+
+    func overview() async throws -> Overview { try await client.get("api/traefik/overview") }
+    func entrypoints() async throws -> [Entrypoint] { try await client.get("api/traefik/entrypoints") }
+    func routers() async throws -> ProtoEnvelope { try await client.get("api/traefik/routers") }
+    func services() async throws -> ProtoEnvelope { try await client.get("api/traefik/services") }
+    func middlewares() async throws -> ProtoEnvelope { try await client.get("api/traefik/middlewares") }
 }

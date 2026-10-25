@@ -71,7 +71,7 @@ struct ApiKeyStatus: Decodable, Sendable {
     }
 }
 
-struct TraefikVersion: Decodable, Sendable {
+struct TraefikVersion: Codable, Hashable, Sendable {
     var version: String?
     var codename: String?
 

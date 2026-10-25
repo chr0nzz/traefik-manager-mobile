@@ -12,19 +12,37 @@ struct HealthDot: View {
     }
 }
 
-/// Card surface used across the app, like `TmCard` on Android.
+/// Card surface used across the app, like `TmCard` on Android: optional status rail on the leading edge.
 struct Card<Content: View>: View {
+    var accent: Color?
+    var spacing: CGFloat = Spacing.sm
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) { content }
-            .padding(Spacing.lg)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: Radius.lg, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Radius.lg, style: .continuous)
-                    .strokeBorder(Palette.border, lineWidth: 1)
-            )
+        let shape = RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+        VStack(alignment: .leading, spacing: spacing) { content }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.leading, accent == nil ? 0 : 3)
+            .background(alignment: .leading) {
+                if let accent { Rectangle().fill(accent).frame(width: 3) }
+            }
+            .background(Palette.card)
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(Palette.border, lineWidth: 1))
+    }
+}
+
+/// Small uppercase caption above a card's content, like `SectionLabel`.
+struct SectionLabel: View {
+    var text: String
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.caption2.weight(.semibold))
+            .kerning(0.6)
+            .foregroundStyle(Palette.muted)
+            .lineLimit(1)
     }
 }
 
