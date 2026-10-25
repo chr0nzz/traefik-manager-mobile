@@ -32,7 +32,7 @@ struct DemoService: TMService {
         ServerSettings(
             domains: ["example.com", "xyzlab.dev"],
             certResolver: "letsencrypt,cloudflare",
-            visibleTabs: ["certs": true, "plugins": true, "logs": true, "crowdsec": true],
+            visibleTabs: ["certs": true, "plugins": true, "logs": true, "crowdsec": true, "docker": true, "internal": true],
             crowdsecEnabled: true
         )
     }
@@ -90,7 +90,7 @@ struct DemoService: TMService {
                 TraefikObject("redis@file", "file", "enabled", using: ["redis"]),
             ],
             udp: [TraefikObject("wireguard@file", "file", "enabled", using: ["wireguard"])]
-        )
+        ) .withExtra(http: Self.dockerRouters)
     }
 
     func services() async throws -> ProtoEnvelope {
@@ -349,6 +349,22 @@ struct DemoService: TMService {
             route.configFile = "routes.yml"
             return route
         }
+    }
+
+    /// Docker-label and internal routers so the provider pages have something to show.
+    static let dockerRouters: [TraefikObject] = [
+        ("tma@docker", "Host(`tm.example.com`)", "tma@docker", "enabled"),
+        ("whoami@docker", "Host(`whoami.example.com`)", "whoami@docker", "enabled"),
+        ("grafana@docker", "Host(`grafana.example.com`) && PathPrefix(`/`)", "grafana@docker", "disabled"),
+        ("api@internal", "PathPrefix(`/api`)", "api@internal", "enabled"),
+        ("dashboard@internal", "PathPrefix(`/dashboard`)", "dashboard@internal", "enabled"),
+    ].map { name, rule, service, status in
+        var router = TraefikObject(name, name.components(separatedBy: "@")[1], status, using: ["websecure"])
+        router.rule = rule
+        router.service = service
+        router.entryPoints = ["websecure"]
+        router.tls = .object([:])
+        return router
     }
 
     static let middlewares: [MiddlewareDef] = [

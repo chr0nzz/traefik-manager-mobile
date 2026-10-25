@@ -155,6 +155,10 @@ struct ProtoEnvelope: Codable, Hashable, Sendable {
         reachable = c.value(.reachable, default: true)
     }
 
+    func withExtra(http extra: [TraefikObject]) -> ProtoEnvelope {
+        ProtoEnvelope(http: http + extra, tcp: tcp, udp: udp, reachable: reachable)
+    }
+
     func filtered(provider: String?) -> ProtoEnvelope {
         guard let provider else { return self }
         return ProtoEnvelope(

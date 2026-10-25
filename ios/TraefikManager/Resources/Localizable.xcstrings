@@ -802,6 +802,72 @@
           }
         }
       }
+    },
+    "%lld routes not serving": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld route not serving"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld routes not serving"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld routes live": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld route live"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld routes live"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld middlewares": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld middleware"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld middlewares"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"

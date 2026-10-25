@@ -145,7 +145,12 @@ struct DestinationView: View {
         case .logs: LogsView()
         case .routeMap: RouteMapView()
         case .settings: SettingsView()
-        default: ComingSoonView(destination: destination)
+        default:
+            if destination.isProvider {
+                ProviderView(page: destination)
+            } else {
+                ComingSoonView(destination: destination)
+            }
         }
     }
 }
