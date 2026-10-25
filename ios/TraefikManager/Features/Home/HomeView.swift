@@ -5,6 +5,10 @@ struct HomeView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var providerFilter: String?
+    @State private var editingApp: LauncherApp?
+    @State private var infoRoute: String?
+    @State private var showSettings = false
+    @State private var message: String?
 
     private var store: DashboardStore { app.dashboard }
     private var compact: Bool { sizeClass != .regular }
@@ -29,16 +33,31 @@ struct HomeView: View {
         .background(Palette.bg)
         .navigationTitle("Dashboard")
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                if !app.launcher.groups.isEmpty {
+                    Button { showSettings = true } label: { Image(systemName: "slider.horizontal.3") }
+                        .accessibilityLabel("Dashboard settings")
+                }
                 Button {
-                    Task { await app.refreshDashboard() }
+                    Task { await refreshAll() }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
                 .accessibilityLabel("Refresh overview")
             }
         }
-        .task(id: app.generation) { await app.refreshDashboard() }
+        .sheet(item: $editingApp) { item in
+            CardSettingsSheet(item: item) { message = $0 }
+        }
+        .sheet(isPresented: $showSettings) {
+            DashboardSettingsSheet { message = $0 }
+        }
+        .navigationDestination(item: $infoRoute) { id in
+            RouteDetailView(routeId: id, message: $message)
+        }
+        .toast($message)
+        .task(id: app.generation) { await refreshAll() }
+        .onChange(of: app.routes.changes) { Task { await refreshAll() } }
     }
 
     private func content(_ snapshot: DashboardSnapshot) -> some View {
@@ -68,12 +87,27 @@ struct HomeView: View {
                 }
 
                 RuntimeFooter(runtime: snapshot.runtime)
+
+                if !app.launcher.groups.isEmpty {
+                    LauncherSection(
+                        columns: compact ? 1 : 2,
+                        onEdit: { editingApp = $0 },
+                        onInfo: { infoRoute = $0.id }
+                    )
+                }
             }
             .padding(Spacing.lg)
             .frame(maxWidth: 1100)
             .frame(maxWidth: .infinity)
         }
-        .refreshable { await app.refreshDashboard() }
+        .refreshable { await refreshAll() }
+        .defaultScrollAnchor(DebugLaunch.scrollToBottom ? .bottom : .top)
+    }
+
+    private func refreshAll() async {
+        async let dashboard: Void = app.refreshDashboard()
+        async let launcher: Void = app.refreshLauncher()
+        _ = await (dashboard, launcher)
     }
 }
 

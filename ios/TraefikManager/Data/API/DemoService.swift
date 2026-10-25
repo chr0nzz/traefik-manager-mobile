@@ -124,6 +124,92 @@ struct DemoService: TMService {
         ])
     }
 
+    // MARK: - Routes
+
+    func routes() async throws -> RoutesResponse {
+        await settle()
+        let disabled = DemoState.shared.disabledRoutes
+        let apps = Self.routes.map { demo in
+            var route = demo.route
+            route.enabled = !disabled.contains(route.id)
+            return route
+        }
+        return RoutesResponse(apps: apps)
+    }
+
+    func agentRoutes(_ agentId: String) async throws -> RoutesResponse { try await routes() }
+
+    func toggleRoute(_ routeId: String, enable: Bool) async throws -> OkResponse {
+        await settle()
+        DemoState.shared.setDisabled(routeId, !enable)
+        return OkResponse(ok: true)
+    }
+
+    func deleteRoute(_ route: Route) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func routeRaw(_ routeId: String) async throws -> RawRoute {
+        RawRoute(
+            raw: "http:\n  routers:\n    demo:\n      rule: Host(`demo.example.com`)\n      service: demo\n",
+            configFile: "routes.yml",
+            proto: "http"
+        )
+    }
+
+    func saveRouteRaw(_ routeId: String, content: String) async throws -> OkResponse { OkResponse(ok: true) }
+
+    func routeHealth() async throws -> RouteHealthSnapshot {
+        await settle()
+        var media = RouteHealth(state: RouteHealth.up)
+        media.source = "ping"
+        media.latencyMs = 42
+        return RouteHealthSnapshot(routes: ["routes.yml::media": media])
+    }
+
+    func ping(url: String, fallback: String?, servers: [String]) async throws -> PingResult {
+        await settle()
+        return PingResult(ok: true, latencyMs: 24, statusCode: 200)
+    }
+
+    func saveRoute(_ form: RouteForm) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func configs() async throws -> ConfigsResponse {
+        ConfigsResponse(files: [ConfigFile(label: "routes.yml", path: "routes.yml")], configDirSet: true)
+    }
+
+    func tlsOptions() async throws -> [TLSOptionProfile] { [] }
+
+    func agentCertResolvers(_ agentId: String) async throws -> CertResolversResponse {
+        try JSONDecoder().decode(CertResolversResponse.self, from: Data(#"{"resolvers":["letsencrypt"]}"#.utf8))
+    }
+
+    func staticConfig() async throws -> StaticConfigResponse {
+        StaticConfigResponse(raw: "", path: "/app/traefik.yml")
+    }
+
+    func dashboardConfig() async throws -> DashboardConfig { DashboardConfig() }
+
+    func saveDashboardConfig(_ config: DashboardConfig) async throws -> OkResponse {
+        await settle()
+        return OkResponse(ok: true)
+    }
+
+    func uiPrefs() async throws -> UIPrefsResponse {
+        var prefs = UIPrefs()
+        prefs.showRouteIcons = true
+        return UIPrefsResponse(uiPrefs: prefs)
+    }
+
+    func saveUIPrefs(_ prefs: UIPrefs) async throws -> UIPrefsResponse {
+        await settle()
+        return UIPrefsResponse(uiPrefs: prefs)
+    }
+
     // MARK: - Fixtures
 
     struct DemoRoute {
@@ -133,6 +219,22 @@ struct DemoService: TMService {
         var proto = "http"
         var entryPoint = "websecure"
         var middlewares: [String] = []
+
+        var route: Route {
+            var route = Route(id: "routes.yml::\(name)", name: name)
+            let tls = proto == "http"
+            route.rule = proto == "udp" ? "" : "Host(`\(host)`)"
+            route.serviceName = name
+            route.target = target
+            route.servers = name == "media" ? ["http://10.0.0.9:8096", "http://10.0.0.10:8096"] : [target]
+            route.middlewares = .array(middlewares.map(JSONValue.string))
+            route.entryPoints = .array([.string(entryPoint)])
+            route.protocol = proto
+            route.tls = .bool(tls)
+            route.certResolver = tls ? "letsencrypt" : ""
+            route.configFile = "routes.yml"
+            return route
+        }
     }
 
     static let routes: [DemoRoute] = [

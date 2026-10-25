@@ -36,13 +36,14 @@ struct Card<Content: View>: View {
 /// Small uppercase caption above a card's content, like `SectionLabel`.
 struct SectionLabel: View {
     var text: String
+    var lines = 1
 
     var body: some View {
         Text(text.uppercased())
             .font(.caption2.weight(.semibold))
             .kerning(0.6)
             .foregroundStyle(Palette.muted)
-            .lineLimit(1)
+            .lineLimit(lines)
     }
 }
 

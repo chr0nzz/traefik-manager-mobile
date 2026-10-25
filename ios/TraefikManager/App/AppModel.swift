@@ -12,10 +12,16 @@ final class AppModel {
     private(set) var switching = false
     /// Bumped whenever the target server changes so screens reload.
     private(set) var generation = 0 {
-        didSet { dashboard.reset() }
+        didSet {
+            dashboard.reset()
+            routes.reset()
+            launcher.reset()
+        }
     }
 
     let dashboard = DashboardStore()
+    let routes = RoutesStore()
+    let launcher = LauncherStore()
 
     private(set) var activeAgentId: String? {
         didSet { UserDefaults.standard.set(activeAgentId, forKey: PreferenceKey.activeAgent) }
@@ -52,6 +58,18 @@ final class AppModel {
     var cacheKey: String? {
         guard let connection, !connection.demo else { return nil }
         return SnapshotStore.key(baseURL: connection.baseURL, agentId: activeAgentId)
+    }
+
+    func refreshRoutes() async {
+        guard let service else { return }
+        await routes.load(service: service, cacheKey: cacheKey)
+    }
+
+    /// Launcher groups come from the route list, so routes refresh first.
+    func refreshLauncher() async {
+        guard let service else { return }
+        await refreshRoutes()
+        await launcher.load(service: service, routes: routes.routes)
     }
 
     func refreshDashboard() async {

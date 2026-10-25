@@ -35,7 +35,7 @@ private struct TabShell: View {
     private static let moreTag = "more"
 
     @Environment(AppModel.self) private var app
-    @State private var selection = Destination.home.id
+    @State private var selection = DebugLaunch.tab ?? Destination.home.id
 
     var body: some View {
         let destinations = app.destinations
@@ -95,7 +95,7 @@ private struct MoreList: View {
 
 private struct SidebarShell: View {
     @Environment(AppModel.self) private var app
-    @State private var selection: Destination? = .home
+    @State private var selection: Destination? = DebugLaunch.tab.flatMap(Destination.init(rawValue:)) ?? .home
 
     var body: some View {
         let destinations = app.destinations
@@ -139,6 +139,7 @@ struct DestinationView: View {
     var body: some View {
         switch destination {
         case .home: HomeView()
+        case .routes: RoutesView()
         case .settings: SettingsView()
         default: ComingSoonView(destination: destination)
         }

@@ -69,6 +69,22 @@ struct APIClient: Sendable {
         try await send(.delete, path, query: query, body: Optional<Empty>.none)
     }
 
+    /// POSTs `application/x-www-form-urlencoded` fields, used by the legacy `/save` and `/delete` endpoints.
+    func postForm<T: Decodable>(_ path: String, fields: [(String, String)]) async throws -> T {
+        var request = try makeRequest(.post, path, query: [])
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: "-._~")
+        let encode = { (text: String) in text.addingPercentEncoding(withAllowedCharacters: allowed) ?? text }
+        request.httpBody = Data(fields.map { "\(encode($0.0))=\(encode($0.1))" }.joined(separator: "&").utf8)
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        let data = try await perform(request)
+        do {
+            return try Self.decoder.decode(T.self, from: data)
+        } catch {
+            throw APIError.decoding(String(describing: error))
+        }
+    }
+
     func send<T: Decodable, B: Encodable>(
         _ method: HTTPMethod,
         _ path: String,

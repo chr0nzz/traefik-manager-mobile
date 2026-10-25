@@ -22,6 +22,29 @@ protocol TMService: Sendable {
     func routers() async throws -> ProtoEnvelope
     func services() async throws -> ProtoEnvelope
     func middlewares() async throws -> ProtoEnvelope
+
+    // Routes (hub endpoints; agent routes are fetched explicitly)
+    func routes() async throws -> RoutesResponse
+    func agentRoutes(_ agentId: String) async throws -> RoutesResponse
+    func toggleRoute(_ routeId: String, enable: Bool) async throws -> OkResponse
+    func deleteRoute(_ route: Route) async throws -> OkResponse
+    func routeRaw(_ routeId: String) async throws -> RawRoute
+    func saveRouteRaw(_ routeId: String, content: String) async throws -> OkResponse
+    func routeHealth() async throws -> RouteHealthSnapshot
+    func ping(url: String, fallback: String?, servers: [String]) async throws -> PingResult
+    func saveRoute(_ form: RouteForm) async throws -> OkResponse
+
+    // Form options
+    func configs() async throws -> ConfigsResponse
+    func tlsOptions() async throws -> [TLSOptionProfile]
+    func agentCertResolvers(_ agentId: String) async throws -> CertResolversResponse
+    func staticConfig() async throws -> StaticConfigResponse
+
+    // Dashboard launcher
+    func dashboardConfig() async throws -> DashboardConfig
+    func saveDashboardConfig(_ config: DashboardConfig) async throws -> OkResponse
+    func uiPrefs() async throws -> UIPrefsResponse
+    func saveUIPrefs(_ prefs: UIPrefs) async throws -> UIPrefsResponse
 }
 
 struct LiveService: TMService {
@@ -49,4 +72,77 @@ struct LiveService: TMService {
     func routers() async throws -> ProtoEnvelope { try await client.get("api/traefik/routers") }
     func services() async throws -> ProtoEnvelope { try await client.get("api/traefik/services") }
     func middlewares() async throws -> ProtoEnvelope { try await client.get("api/traefik/middlewares") }
+
+    func routes() async throws -> RoutesResponse { try await client.get("api/routes") }
+
+    func agentRoutes(_ agentId: String) async throws -> RoutesResponse {
+        try await client.get("api/agents/\(APIClient.segment(agentId))/routes")
+    }
+
+    func toggleRoute(_ routeId: String, enable: Bool) async throws -> OkResponse {
+        try await client.post(
+            "api/routes/\(APIClient.segment(routeId))/toggle",
+            body: ToggleRequest(enable: enable, agentId: agentId ?? "")
+        )
+    }
+
+    func deleteRoute(_ route: Route) async throws -> OkResponse {
+        try await client.postForm(
+            "delete/\(APIClient.segment(route.id))",
+            fields: [("configFile", route.configFile), ("agent_id", agentId ?? "")]
+        )
+    }
+
+    func routeRaw(_ routeId: String) async throws -> RawRoute {
+        try await client.get("api/routes/\(APIClient.segment(routeId))/raw")
+    }
+
+    func saveRouteRaw(_ routeId: String, content: String) async throws -> OkResponse {
+        try await client.post("api/routes/\(APIClient.segment(routeId))/raw", body: RawRouteSave(content: content))
+    }
+
+    func routeHealth() async throws -> RouteHealthSnapshot {
+        try await client.get("api/routes/health", query: agentId.map { [URLQueryItem(name: "agent_id", value: $0)] } ?? [])
+    }
+
+    func ping(url: String, fallback: String?, servers: [String]) async throws -> PingResult {
+        var query = [URLQueryItem(name: "url", value: url)]
+        if let fallback { query.append(URLQueryItem(name: "fallback", value: fallback)) }
+        query += servers.map { URLQueryItem(name: "servers", value: $0) }
+        return try await client.get("api/ping", query: query)
+    }
+
+    func saveRoute(_ form: RouteForm) async throws -> OkResponse {
+        try await client.postForm("save", fields: RouteFormEncoder.fields(form, agentId: agentId))
+    }
+
+    func configs() async throws -> ConfigsResponse { try await client.get("api/configs") }
+
+    func tlsOptions() async throws -> [TLSOptionProfile] {
+        try await client.get("api/tls-options", query: agentId.map { [URLQueryItem(name: "server", value: $0)] } ?? [])
+    }
+
+    func agentCertResolvers(_ agentId: String) async throws -> CertResolversResponse {
+        try await client.get("api/agents/\(APIClient.segment(agentId))/cert-resolvers")
+    }
+
+    func staticConfig() async throws -> StaticConfigResponse { try await client.get("api/static/config") }
+
+    private var serverQuery: [URLQueryItem] { agentId.map { [URLQueryItem(name: "server", value: $0)] } ?? [] }
+
+    func dashboardConfig() async throws -> DashboardConfig {
+        try await client.get("api/dashboard/config", query: serverQuery)
+    }
+
+    func saveDashboardConfig(_ config: DashboardConfig) async throws -> OkResponse {
+        var body = config
+        body.server = agentId ?? ""
+        return try await client.post("api/dashboard/config", query: serverQuery, body: body)
+    }
+
+    func uiPrefs() async throws -> UIPrefsResponse { try await client.get("api/settings/ui") }
+
+    func saveUIPrefs(_ prefs: UIPrefs) async throws -> UIPrefsResponse {
+        try await client.post("api/settings/ui", body: UIPrefsRequest(uiPrefs: prefs))
+    }
 }
