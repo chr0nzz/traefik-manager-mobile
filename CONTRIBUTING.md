@@ -71,7 +71,7 @@ cd traefik-manager-mobile
 git checkout main
 ```
 
-Create `local.properties` with your SDK location if Android Studio has not already:
+Create `android/local.properties` with your SDK location if Android Studio has not already:
 
 ```properties
 sdk.dir=/path/to/Android/Sdk
@@ -80,6 +80,8 @@ sdk.dir=/path/to/Android/Sdk
 `local.properties` and `keystore.properties` are gitignored. Never commit either.
 
 ### Build and run
+
+Run Gradle from the `android/` folder.
 
 ```bash
 ./gradlew :app:assembleDebug          # debug APK
@@ -97,6 +99,7 @@ On first launch the app asks for your server URL and API key. For a local server
 ## Tests
 
 ```bash
+cd android
 ./gradlew :app:testDebugUnitTest      # unit tests
 ./gradlew :app:lint                   # Android lint
 ```
@@ -108,15 +111,17 @@ Please run the unit tests before opening a pull request, and add a test when you
 ## Project structure
 
 ```
-app/src/main/java/dev/chr0nzz/traefikmanager/
+android/                      # Gradle project (run ./gradlew from here)
+android/app/src/main/java/dev/chr0nzz/traefikmanager/
     MainActivity.kt           # Single activity, Compose host
     TmApplication.kt          # Application class
     data/                     # API client, models, repositories, storage
     di/                       # Dependency injection wiring
     ui/                       # Compose screens, components, theme
     widget/                   # Home screen widgets
-app/src/test/                 # Unit tests
-gradle/libs.versions.toml     # Dependency versions - single source of truth
+android/app/src/test/         # Unit tests
+android/gradle/libs.versions.toml  # Dependency versions - single source of truth
+ios/                          # Native iOS app (SwiftUI, Xcode project)
 .github/workflows/
     build-android.yml         # Signed release build, runs on a v* tag
 ```
@@ -130,7 +135,7 @@ gradle/libs.versions.toml     # Dependency versions - single source of truth
 - **Dependencies:** add versions to `gradle/libs.versions.toml`, never inline in a build file.
 - **No comments:** don't add explanatory comments to code - use clear names instead. The existing codebase follows this convention.
 - **No dead code:** don't leave commented-out blocks or unused variables.
-- **No hardcoded text:** anything the user reads goes in `app/src/main/res/values/strings.xml`. See below.
+- **No hardcoded text:** anything the user reads goes in `android/app/src/main/res/values/strings.xml`. See below.
 
 ---
 
@@ -153,11 +158,11 @@ Rules for `strings.xml`:
 - **Not translated:** product names (Traefik Manager, CrowdSec), Traefik and YAML terms, example hostnames. Mark a resource `translatable="false"` or keep the name in code.
 - **English only:** add and edit text in `values/strings.xml`. The other languages are translated on Weblate.
 
-`HardcodedTextTest` fails when code shows text that is not a resource. The count in `app/src/test/resources/i18n-baseline.txt` is zero for every folder. `UiText.Raw("...")` marks text that stays as it is on purpose, such as a product name.
+`HardcodedTextTest` fails when code shows text that is not a resource. The count in `android/app/src/test/resources/i18n-baseline.txt` is zero for every folder. `UiText.Raw("...")` marks text that stays as it is on purpose, such as a product name.
 
 `StringFormatTest` checks that every string formats with the arguments its placeholders ask for, and that each translation keeps the placeholders of the English text.
 
-Text that must stay as it is, such as a key the server sends, is listed in `app/src/test/resources/i18n-allowed.txt` as `path|text`.
+Text that must stay as it is, such as a key the server sends, is listed in `android/app/src/test/resources/i18n-allowed.txt` as `path|text`.
 
 ---
 

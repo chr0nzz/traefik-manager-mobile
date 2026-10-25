@@ -4,7 +4,7 @@ local.properties
 keystore.properties
 *.jks
 *.keystore
-!app/debug.keystore
+!android/app/debug.keystore
 *.apk
 *.aab
 .kotlin/
@@ -15,3 +15,9 @@ captures/
 
 signing/
 /logs
+
+# iOS
+ios/build/
+DerivedData/
+xcuserdata/
+*.xcuserstate

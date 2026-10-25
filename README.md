@@ -97,7 +97,11 @@ Tap **Save** and the app will connect immediately.
 
 ## Building from Source
 
+The Android app is the Gradle project in `android/`; the native iOS app is in `ios/`.
+
 ```bash
+cd android
+
 # Debug build
 ./gradlew :app:assembleDebug
 
@@ -108,7 +112,7 @@ Tap **Save** and the app will connect immediately.
 ./gradlew :app:assembleRelease :app:bundleRelease
 ```
 
-Release builds are signed from a `keystore.properties` at the repo root, which is gitignored:
+Release builds are signed from a `keystore.properties` in `android/`, which is gitignored:
 
 ```properties
 storeFile=/path/to/release.jks

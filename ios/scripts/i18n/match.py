@@ -5,7 +5,7 @@ Placeholders are normalised to {} for matching. Android %1$s/%d/%s, iOS %@/%lld/
 import json, re, sys, html
 import xml.etree.ElementTree as ET
 
-RES = '/home/chronzz/code/traefik-manager/traefik-manager-mobile/app/src/main/res'
+RES = '/home/chronzz/code/traefik-manager/traefik-manager-mobile/android/app/src/main/res'
 LANGS = {  # iOS locale -> Android values dir
     'zh-Hans': 'values-b+zh+Hans', 'cs': 'values-cs', 'da': 'values-da', 'de': 'values-de',
     'es': 'values-es', 'fr': 'values-fr', 'fr-CA': 'values-fr-rCA', 'nl': 'values-nl',

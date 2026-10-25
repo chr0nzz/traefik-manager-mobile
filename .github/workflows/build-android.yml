@@ -22,6 +22,10 @@ jobs:
   build:
     name: Signed AAB and APK
     runs-on: ubuntu-latest
+    # The Gradle project lives in android/; the repo root also holds the iOS app.
+    defaults:
+      run:
+        working-directory: android
 
     steps:
       - name: Checkout
@@ -35,6 +39,8 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4.4.0
+        with:
+          build-root-directory: android
 
       - name: Restore the signing key
         env:
@@ -87,9 +93,9 @@ jobs:
         with:
           name: release-${{ steps.name.outputs.version }}
           path: |
-            traefik-manager-*.aab
-            traefik-manager-*.apk
-            checksums.txt
+            android/traefik-manager-*.aab
+            android/traefik-manager-*.apk
+            android/checksums.txt
 
       # Without this, a crash report from a minified build is unreadable, and the mapping is
       # gone the moment the runner is recycled.
@@ -98,9 +104,9 @@ jobs:
         with:
           name: mapping-${{ steps.name.outputs.version }}
           path: |
-            app/build/outputs/mapping/release/mapping.txt
-            app/build/outputs/mapping/release/seeds.txt
-            app/build/outputs/mapping/release/usage.txt
+            android/app/build/outputs/mapping/release/mapping.txt
+            android/app/build/outputs/mapping/release/seeds.txt
+            android/app/build/outputs/mapping/release/usage.txt
           retention-days: 90
 
       # Play takes the AAB from the build artefact; the GitHub release carries the APK, which is
@@ -112,5 +118,5 @@ jobs:
           draft: true
           generate_release_notes: true
           files: |
-            traefik-manager-*.apk
-            checksums.txt
+            android/traefik-manager-*.apk
+            android/checksums.txt
