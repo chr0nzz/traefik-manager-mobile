@@ -181,7 +181,7 @@ class DemoApi : TmApi {
 
     override suspend fun managerVersion() = ManagerVersion(version = "1.10.1", repo = "chr0nzz/traefik-manager")
 
-    override suspend fun traefikVersion() = TraefikVersion(version = "3.5.0", codename = "chevrotin")
+    override suspend fun traefikVersion() = TraefikVersion(version = DEMO_TRAEFIK_VERSION, codename = "langres")
 
     override suspend fun overview(): Overview {
         settle()
@@ -590,6 +590,7 @@ class DemoApi : TmApi {
     override suspend fun staticConfig(server: String?) = StaticConfigResponse(
         path = "/app/traefik.yml",
         raw = DEMO_STATIC,
+        parsed = DEMO_STATIC_PARSED,
     )
 
     override suspend fun staticAvailable() = StaticAvailable(available = true)
@@ -655,7 +656,7 @@ class DemoApi : TmApi {
 
     override suspend fun staticSection(body: StaticSectionRequest): StaticSectionResponse {
         settle()
-        return StaticSectionResponse(ok = true, raw = DEMO_STATIC)
+        return StaticSectionResponse(ok = true, raw = DEMO_STATIC, parsed = DEMO_STATIC_PARSED)
     }
 
     override suspend fun saveStaticConfig(body: StaticSaveRequest) = OkResponse(ok = true)
@@ -663,7 +664,7 @@ class DemoApi : TmApi {
     override suspend fun saveAgentStaticConfig(body: StaticSaveRequest) = OkResponse(ok = true)
 
     private val demoTemplates = mutableListOf(
-        MiddlewareTemplate(id = "demo-1", name = "Secure Headers", yaml = "headers:\n  sslRedirect: true\n"),
+        MiddlewareTemplate(id = "demo-1", name = "Secure Headers", yaml = "headers:\n  frameDeny: true\n"),
     )
 
     override suspend fun saveMiddleware(body: RequestBody) = OkResponse(ok = true)
@@ -867,7 +868,7 @@ class DemoApi : TmApi {
         return listOf(
             TmNotification("2026-08-12 10:31:04", "warning", "Ping all: 7/8 online - unreachable: bin", "traefik", 4, 1786026664),
             TmNotification("2026-08-12 09:12:44", "success", "Route media saved", "config", 3, 1786021964),
-            TmNotification("2026-08-11 22:04:01", "info", "Traefik v3.7.10 is available - update now", "update", 2, 1785981841),
+            TmNotification("2026-08-11 22:04:01", "info", "Traefik v$DEMO_TRAEFIK_VERSION is available - update now", "update", 2, 1785981841),
             TmNotification("2026-08-11 21:58:12", "error", "CrowdSec LAPI unreachable", "crowdsec", 1, 1785981492),
         )
     }
@@ -976,7 +977,7 @@ class DemoApi : TmApi {
 
     override suspend fun testTraefikConnection(body: TestConnectionRequest): TestConnectionResult {
         settle()
-        return TestConnectionResult(ok = true, version = "3.7.10")
+        return TestConnectionResult(ok = true, version = DEMO_TRAEFIK_VERSION)
     }
 
     override suspend fun configs(): ConfigsResponse = ConfigsResponse(
@@ -1049,6 +1050,8 @@ class DemoApi : TmApi {
         .toString()
 }
 
+private const val DEMO_TRAEFIK_VERSION = "3.7.17"
+
 private val DEMO_STATIC = """
     api:
       dashboard: true
@@ -1058,6 +1061,8 @@ private val DEMO_STATIC = """
         address: ":80"
       websecure:
         address: ":443"
+        http:
+          aliasHeadersStrategy: delete
 
     providers:
       file:
@@ -1066,7 +1071,53 @@ private val DEMO_STATIC = """
 
     experimental:
       plugins:
-        crowdsec:
+        crowdsec-bouncer:
           moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
-          version: v1.4.5
+          version: v1.3.5
 """.trimIndent()
+
+private val DEMO_STATIC_PARSED = buildJsonObject {
+    put("api", buildJsonObject { put("dashboard", true) })
+    put(
+        "entryPoints",
+        buildJsonObject {
+            put("web", buildJsonObject { put("address", ":80") })
+            put(
+                "websecure",
+                buildJsonObject {
+                    put("address", ":443")
+                    put("http", buildJsonObject { put("aliasHeadersStrategy", "delete") })
+                },
+            )
+        },
+    )
+    put(
+        "providers",
+        buildJsonObject {
+            put(
+                "file",
+                buildJsonObject {
+                    put("directory", "/app/config/dynamic")
+                    put("watch", true)
+                },
+            )
+        },
+    )
+    put(
+        "experimental",
+        buildJsonObject {
+            put(
+                "plugins",
+                buildJsonObject {
+                    put(
+                        "crowdsec-bouncer",
+                        buildJsonObject {
+                            put("moduleName", "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin")
+                            put("version", "v1.3.5")
+                        },
+                    )
+                },
+            )
+        },
+    )
+}

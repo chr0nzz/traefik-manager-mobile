@@ -42,12 +42,50 @@ private fun JsonObject?.csv(key: String): String =
 
 private fun JsonObject?.has(key: String): Boolean = this?.containsKey(key) == true
 
+enum class HeaderStrategy(val key: String) {
+    ALIAS("aliasHeadersStrategy"),
+    UNDERSCORE("underscoreHeadersStrategy"),
+    UNSUPPORTED("underscoreHeadersStrategy"),
+    UNKNOWN("underscoreHeadersStrategy");
+
+    val editable: Boolean get() = this == ALIAS || this == UNDERSCORE
+
+    val options: List<Pair<String, UiText>>
+        get() = listOf(
+            "" to UiText.of(R.string.static_option_keep_default),
+            "delete" to UiText.of(
+                if (this == ALIAS) R.string.static_option_alias_delete else R.string.static_option_underscore_delete,
+            ),
+            "reject" to UiText.of(
+                if (this == ALIAS) R.string.static_option_alias_reject else R.string.static_option_underscore_reject,
+            ),
+        )
+
+    companion object {
+        private val semver = Regex("""(\d+)\.(\d+)\.(\d+)""")
+
+        fun forVersion(version: String?): HeaderStrategy {
+            val parts = semver.find(version.orEmpty())?.groupValues?.drop(1)?.map { it.toIntOrNull() ?: return UNKNOWN }
+                ?: return UNKNOWN
+            val (major, minor, patch) = parts
+            return when {
+                major > 3 || (major == 3 && minor > 7) -> ALIAS
+                major < 3 || minor < 7 -> UNSUPPORTED
+                patch >= 12 -> ALIAS
+                patch >= 6 -> UNDERSCORE
+                else -> UNSUPPORTED
+            }
+        }
+    }
+}
+
 data class EntrypointForm(
     val name: String = "",
     val address: String = "",
     val redirectTo: String = "",
     val http3: Boolean = false,
-    val underscoreHeaders: String = "",
+    val headersStrategy: String = "",
+    val headersStrategyKey: String = "",
     val trustedIps: String = "",
     val proxyTrustedIps: String = "",
     val forwardedInsecure: Boolean = false,
@@ -61,11 +99,15 @@ data class EntrypointForm(
     val writeTimeout: String = "",
     val idleTimeout: String = "",
 ) {
-    fun data(): JsonObject = buildJsonObject {
+    fun data(strategy: HeaderStrategy): JsonObject = buildJsonObject {
         put("address", JsonPrimitive(address.trim()))
         put("redirect_to", JsonPrimitive(redirectTo.trim()))
         put("http3", JsonPrimitive(http3))
-        put("underscore_headers", JsonPrimitive(underscoreHeaders))
+        put("underscore_headers", JsonPrimitive(if (strategy == HeaderStrategy.UNSUPPORTED) "" else headersStrategy))
+        put(
+            "headers_strategy_key",
+            JsonPrimitive(if (strategy == HeaderStrategy.UNKNOWN) headersStrategyKey.ifEmpty { strategy.key } else strategy.key),
+        )
         put("trusted_ips", JsonPrimitive(trustedIps))
         put("forwarded_insecure", JsonPrimitive(forwardedInsecure))
         put("proxy_trusted_ips", JsonPrimitive(proxyTrustedIps))
@@ -87,12 +129,16 @@ data class EntrypointForm(
             val forwarded = entry.obj("forwardedHeaders")
             val proxy = entry.obj("proxyProtocol")
             val timeouts = entry.obj("transport").obj("respondingTimeouts")
+            val strategyKey = listOf(HeaderStrategy.ALIAS.key, HeaderStrategy.UNDERSCORE.key)
+                .firstOrNull { http.str(it).isNotEmpty() }
+                .orEmpty()
             return EntrypointForm(
                 name = name,
                 address = entry.str("address"),
                 redirectTo = http.obj("redirections").obj("entryPoint").str("to"),
                 http3 = entry.has("http3"),
-                underscoreHeaders = http.str("underscoreHeadersStrategy"),
+                headersStrategy = http.str(strategyKey),
+                headersStrategyKey = strategyKey,
                 trustedIps = forwarded.lines("trustedIPs"),
                 proxyTrustedIps = proxy.lines("trustedIPs"),
                 forwardedInsecure = forwarded.bool("insecure"),
@@ -107,12 +153,6 @@ data class EntrypointForm(
                 idleTimeout = timeouts.str("idleTimeout"),
             )
         }
-
-        val underscoreOptions = listOf(
-            "" to UiText.of(R.string.static_option_keep_default),
-            "delete" to UiText.of(R.string.static_option_underscore_delete),
-            "reject" to UiText.of(R.string.static_option_underscore_reject),
-        )
     }
 }
 

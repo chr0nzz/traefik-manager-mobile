@@ -120,11 +120,13 @@ struct FormSelect: View {
 // MARK: - Sheets (port of `StaticSectionSheets.kt`)
 
 struct EntrypointSheet: View {
+    let headerStrategy: HeaderStrategy
     let adding: Bool
     let onSave: (EntrypointForm) async -> String?
     @State private var form: EntrypointForm
 
-    init(initial: EntrypointForm, adding: Bool, onSave: @escaping (EntrypointForm) async -> String?) {
+    init(initial: EntrypointForm, headerStrategy: HeaderStrategy, adding: Bool, onSave: @escaping (EntrypointForm) async -> String?) {
+        self.headerStrategy = headerStrategy
         self.adding = adding
         self.onSave = onSave
         _form = State(initialValue: initial)
@@ -142,8 +144,13 @@ struct EntrypointSheet: View {
                 FormField(label: String(localized: "HTTP to HTTPS redirect (optional)"), value: $form.redirectTo, placeholder: "websecure",
                           help: String(localized: "The HTTPS entrypoint to redirect to."))
                 FormToggle(title: String(localized: "Enable HTTP/3 (QUIC)"), subtitle: String(localized: "Adds http3 to this entrypoint."), isOn: $form.http3)
-                FormSelect(label: String(localized: "Underscore headers"), value: $form.underscoreHeaders, options: EntrypointForm.underscoreOptions,
-                           help: String(localized: "Stops underscore header aliases from bypassing forwardAuth. Delete recommended."))
+                if headerStrategy.editable {
+                    let alias = headerStrategy == .alias
+                    FormSelect(label: alias ? String(localized: "Alias headers") : String(localized: "Underscore headers"),
+                               value: $form.headersStrategy, options: headerStrategy.options,
+                               help: alias ? String(localized: "Stops aliased header names (e.g. X_Auth_User, X.Auth.User) from bypassing forwardAuth. Delete recommended.")
+                                   : String(localized: "Stops underscore header aliases from bypassing forwardAuth. Delete recommended."))
+                }
             }
             Section("Trusted sources") {
                 FormLines(label: String(localized: "Trusted IPs - forwarded headers"), value: $form.trustedIps, placeholder: "173.245.48.0/20",

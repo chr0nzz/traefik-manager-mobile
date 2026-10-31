@@ -2,6 +2,7 @@ package dev.chr0nzz.traefikmanager
 
 import dev.chr0nzz.traefikmanager.data.model.ApiForm
 import dev.chr0nzz.traefikmanager.data.model.EntrypointForm
+import dev.chr0nzz.traefikmanager.data.model.HeaderStrategy
 import dev.chr0nzz.traefikmanager.data.model.LogForm
 import dev.chr0nzz.traefikmanager.data.model.ObservabilityForm
 import dev.chr0nzz.traefikmanager.data.model.ProvidersForm
@@ -77,7 +78,7 @@ class StaticSectionFormTest {
               "http": {
                 "tls": {"certResolver": "cloudflare"},
                 "middlewares": ["secure-headers@file", "rate-limit@file"],
-                "underscoreHeadersStrategy": "delete",
+                "aliasHeadersStrategy": "delete",
                 "redirections": {"entryPoint": {"to": "websecure"}}
               },
               "forwardedHeaders": {"trustedIPs": ["10.0.0.0/8", "172.16.0.0/12"]},
@@ -117,7 +118,7 @@ class StaticSectionFormTest {
         assertEquals(":443", form.address)
         assertEquals("websecure", form.redirectTo)
         assertEquals(true, form.http3)
-        assertEquals("delete", form.underscoreHeaders)
+        assertEquals("delete", form.headersStrategy)
         assertEquals("10.0.0.0/8\n172.16.0.0/12", form.trustedIps)
         assertEquals("secure-headers@file, rate-limit@file", form.middlewares)
         assertEquals(true, form.tlsEnabled)
@@ -128,7 +129,7 @@ class StaticSectionFormTest {
 
     @Test
     fun `an entrypoint payload uses the server's keys`() {
-        val data = EntrypointForm(name = "web", address = ":80", http3 = true).data()
+        val data = EntrypointForm(name = "web", address = ":80", http3 = true).data(HeaderStrategy.ALIAS)
         assertEquals(":80", (data["address"] as JsonPrimitive).content)
         assertEquals("true", (data["http3"] as JsonPrimitive).content)
         assertTrue(data.containsKey("forwarded_insecure"))
@@ -136,6 +137,88 @@ class StaticSectionFormTest {
         assertTrue(data.containsKey("tls_enabled"))
         assertTrue(data.containsKey("as_default"))
         assertTrue(data.containsKey("read_timeout"))
+    }
+
+    private fun entrypoint(http: String): EntrypointForm = EntrypointForm.read(
+        "web",
+        kotlinx.serialization.json.Json.parseToJsonElement("""{"http": $http}""") as kotlinx.serialization.json.JsonObject,
+    )
+
+    @Test
+    fun `an entrypoint reads the header strategy from either key`() {
+        assertEquals("delete", entrypoint("""{"aliasHeadersStrategy": "delete"}""").headersStrategy)
+        assertEquals("reject", entrypoint("""{"underscoreHeadersStrategy": "reject"}""").headersStrategy)
+        assertEquals("", entrypoint("{}").headersStrategy)
+    }
+
+    @Test
+    fun `an aliased entrypoint keeps its protection through a save`() {
+        val data = entrypoint("""{"aliasHeadersStrategy": "delete"}""").data(HeaderStrategy.ALIAS)
+        assertEquals("delete", (data["underscore_headers"] as JsonPrimitive).content)
+        assertEquals("aliasHeadersStrategy", (data["headers_strategy_key"] as JsonPrimitive).content)
+    }
+
+    @Test
+    fun `the old key moves to the name the running traefik knows`() {
+        val moved = entrypoint("""{"underscoreHeadersStrategy": "reject"}""").data(HeaderStrategy.ALIAS)
+        assertEquals("aliasHeadersStrategy", (moved["headers_strategy_key"] as JsonPrimitive).content)
+        val back = entrypoint("""{"aliasHeadersStrategy": "reject"}""").data(HeaderStrategy.UNDERSCORE)
+        assertEquals("underscoreHeadersStrategy", (back["headers_strategy_key"] as JsonPrimitive).content)
+        assertEquals("reject", (back["underscore_headers"] as JsonPrimitive).content)
+    }
+
+    @Test
+    fun `a traefik with neither option is never sent one`() {
+        val data = entrypoint("""{"underscoreHeadersStrategy": "delete"}""").data(HeaderStrategy.UNSUPPORTED)
+        assertEquals("", (data["underscore_headers"] as JsonPrimitive).content)
+        assertTrue(data.containsKey("headers_strategy_key"))
+    }
+
+    @Test
+    fun `an unknown traefik version leaves the option exactly as it is in the file`() {
+        val alias = entrypoint("""{"aliasHeadersStrategy": "delete"}""").data(HeaderStrategy.UNKNOWN)
+        assertEquals("delete", (alias["underscore_headers"] as JsonPrimitive).content)
+        assertEquals("aliasHeadersStrategy", (alias["headers_strategy_key"] as JsonPrimitive).content)
+        val underscore = entrypoint("""{"underscoreHeadersStrategy": "reject"}""").data(HeaderStrategy.UNKNOWN)
+        assertEquals("reject", (underscore["underscore_headers"] as JsonPrimitive).content)
+        assertEquals("underscoreHeadersStrategy", (underscore["headers_strategy_key"] as JsonPrimitive).content)
+        val none = entrypoint("{}").data(HeaderStrategy.UNKNOWN)
+        assertEquals("", (none["underscore_headers"] as JsonPrimitive).content)
+    }
+
+    @Test
+    fun `the header strategy follows the traefik version`() {
+        val expected = mapOf(
+            "3.7.12" to HeaderStrategy.ALIAS,
+            "v3.7.14" to HeaderStrategy.ALIAS,
+            "3.8.0-rc.1" to HeaderStrategy.ALIAS,
+            "4.0.0" to HeaderStrategy.ALIAS,
+            "3.7.11" to HeaderStrategy.UNDERSCORE,
+            "3.7.6" to HeaderStrategy.UNDERSCORE,
+            "3.7.5" to HeaderStrategy.UNSUPPORTED,
+            "3.6.14" to HeaderStrategy.UNSUPPORTED,
+            "2.11.58" to HeaderStrategy.UNSUPPORTED,
+            "master" to HeaderStrategy.UNKNOWN,
+            "3.7" to HeaderStrategy.UNKNOWN,
+            "" to HeaderStrategy.UNKNOWN,
+        )
+        expected.forEach { (version, strategy) -> assertEquals(version, strategy, HeaderStrategy.forVersion(version)) }
+        assertEquals(HeaderStrategy.UNKNOWN, HeaderStrategy.forVersion(null))
+    }
+
+    @Test
+    fun `the field only shows on versions that have the option`() {
+        assertEquals(
+            listOf(HeaderStrategy.ALIAS, HeaderStrategy.UNDERSCORE),
+            HeaderStrategy.entries.filter { it.editable },
+        )
+    }
+
+    @Test
+    fun `each strategy offers its own wording and the same values`() {
+        assertEquals(listOf("", "delete", "reject"), HeaderStrategy.ALIAS.options.map { it.first })
+        assertEquals(listOf("", "delete", "reject"), HeaderStrategy.UNDERSCORE.options.map { it.first })
+        assertTrue(HeaderStrategy.ALIAS.options != HeaderStrategy.UNDERSCORE.options)
     }
 
     @Test

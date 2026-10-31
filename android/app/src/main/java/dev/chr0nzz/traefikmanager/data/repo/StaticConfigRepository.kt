@@ -35,6 +35,9 @@ class StaticConfigRepository @Inject constructor(
         }
     }.getOrDefault(false)
 
+    suspend fun traefikVersion(): String? =
+        runCatching { apiProvider.api().traefikVersion().version }.getOrNull()
+
     suspend fun read(): StaticConfigResponse = try {
         apiProvider.apiFor(null).staticConfig(server = agent())
     } catch (exception: HttpException) {

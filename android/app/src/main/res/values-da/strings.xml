@@ -837,6 +837,8 @@
         <item quantity="other">%1$d af %2$d servere nede</item>
     </plurals>
     <string name="static_option_keep_default">Behold (standard)</string>
+    <string name="static_option_alias_delete">Slet - fjern alias-headers</string>
+    <string name="static_option_alias_reject">Afvis - 400 ved aliasede headers</string>
     <string name="static_option_underscore_delete">Slet - fjern headers med understregning</string>
     <string name="static_option_underscore_reject">Afvis - 400 ved headers med understregning</string>
     <string name="static_option_challenge_dns">DNS-challenge</string>
@@ -1731,6 +1733,8 @@
     <string name="static_http_to_https_redirect_optional">Omdirigering fra HTTP til HTTPS (valgfri)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">HTTPS-entrypointet, der skal omdirigeres til.</string>
     <string name="static_adds_http3_to_this_entrypoint">Tilføjer http3 til dette entrypoint.</string>
+    <string name="static_alias_headers">Alias-headers</string>
+    <string name="static_stops_aliased_header_names_from_bypassing">Forhindrer aliaserede headernavne (f.eks. X_Auth_User, X.Auth.User) i at omgå forwardAuth. Slet anbefales.</string>
     <string name="static_underscore_headers">Headers med understregning</string>
     <string name="static_stops_underscore_header_aliases_from_bypassing">Forhindrer, at header-aliasser med understregning omgår forwardAuth. Slet anbefales.</string>
     <string name="static_trusted_ips_forwarded_headers">Betroede IP\'er - videresendte headers</string>

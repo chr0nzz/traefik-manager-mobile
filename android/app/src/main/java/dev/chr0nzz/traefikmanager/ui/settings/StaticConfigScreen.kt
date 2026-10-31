@@ -114,6 +114,7 @@ fun StaticConfigScreen(
     when (val open = editing) {
         is StaticEditing.Entrypoint -> EntrypointSheet(
             initial = open.form,
+            headerStrategy = state.headerStrategy,
             adding = open.adding,
             busy = state.busy,
             error = formError?.asString(),
@@ -123,7 +124,7 @@ fun StaticConfigScreen(
                     if (open.adding) "add" else "edit",
                     form.name.trim(),
                     open.form.name,
-                    form.data(),
+                    form.data(state.headerStrategy),
                 )
             },
             onDismiss = { editing = null; formError = null },

@@ -886,6 +886,8 @@
         <item quantity="other">%1$d sur %2$d serveurs indisponibles</item>
     </plurals>
     <string name="static_option_keep_default">Conserver (par défaut)</string>
+    <string name="static_option_alias_delete">Supprimer - retirer les en-têtes avec alias</string>
+    <string name="static_option_alias_reject">Refuser : erreur 400 pour les en-têtes avec alias</string>
     <string name="static_option_underscore_delete">Supprimer - retirer les en-têtes contenant un trait de soulignement</string>
     <string name="static_option_underscore_reject">Refuser : erreur 400 pour les en-têtes contenant des traits de soulignement</string>
     <string name="static_option_challenge_dns">Challenge DNS</string>
@@ -1827,6 +1829,8 @@
     <string name="static_http_to_https_redirect_optional">Redirection HTTP vers HTTPS (optionnel)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">Le point d’entrée HTTPS vers lequel rediriger.</string>
     <string name="static_adds_http3_to_this_entrypoint">Ajoute http3 à ce point d’entrée.</string>
+    <string name="static_alias_headers">En-têtes d’alias</string>
+    <string name="static_stops_aliased_header_names_from_bypassing">Empêche les noms d’en-têtes avec alias (par exemple X_Auth_User, X.Auth.User) de contourner forwardAuth. Option Supprimer recommandée.</string>
     <string name="static_underscore_headers">En-têtes avec traits de soulignement</string>
     <string name="static_stops_underscore_header_aliases_from_bypassing">Empêche les alias d’en-têtes contenant des traits de soulignement de contourner forwardAuth. Option Supprimer recommandée.</string>
     <string name="static_trusted_ips_forwarded_headers">Adresses IP approuvées - en-têtes transmis</string>

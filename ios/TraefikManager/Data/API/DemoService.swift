@@ -25,7 +25,7 @@ struct DemoService: TMService {
     }
 
     func traefikVersion() async throws -> TraefikVersion {
-        TraefikVersion(version: "3.5.0", codename: "chevrotin")
+        TraefikVersion(version: Self.demoTraefikVersion, codename: "langres")
     }
 
     func settings() async throws -> ServerSettings {
@@ -455,6 +455,8 @@ struct DemoService: TMService {
 
     func restartTraefik() async throws { await settle() }
 
+    static let demoTraefikVersion = "3.7.17"
+
     static let demoStatic = """
     api:
       dashboard: true
@@ -469,6 +471,7 @@ struct DemoService: TMService {
       websecure:
         address: ":443"
         http:
+          aliasHeadersStrategy: delete
           tls:
             certResolver: letsencrypt
 
@@ -508,7 +511,7 @@ struct DemoService: TMService {
             ]),
             "websecure": .object([
                 "address": .string(":443"),
-                "http": .object(["tls": .object(["certResolver": .string("letsencrypt")])]),
+                "http": .object(["aliasHeadersStrategy": .string("delete"), "tls": .object(["certResolver": .string("letsencrypt")])]),
             ]),
         ]),
         "certificatesResolvers": .object([
@@ -621,7 +624,7 @@ struct DemoService: TMService {
 
     func testConnection(url: String, user: String, password: String) async throws -> TestConnectionResult {
         await settle()
-        return TestConnectionResult(ok: true, version: "3.5.0")
+        return TestConnectionResult(ok: true, version: Self.demoTraefikVersion)
     }
 
     func agentConfigs() async throws -> [AgentConfig] {
@@ -676,7 +679,7 @@ struct DemoService: TMService {
         return [
             TmNotification(ts: "", type: "warning", msg: "Ping all: 7/8 online - unreachable: bin", category: "traefik", id: 4, at: now - 240),
             TmNotification(ts: "", type: "success", msg: "Route media saved", category: "config", id: 3, at: now - 4_000),
-            TmNotification(ts: "", type: "info", msg: "Traefik v3.7.10 is available - update now", category: "update", id: 2, at: now - 50_000),
+            TmNotification(ts: "", type: "info", msg: "Traefik v\(Self.demoTraefikVersion) is available - update now", category: "update", id: 2, at: now - 50_000),
             TmNotification(ts: "2026-08-11 21:58:12", type: "error", msg: "CrowdSec LAPI unreachable", category: "crowdsec", id: 1, at: 0),
         ]
     }

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.model.ApiForm
+import dev.chr0nzz.traefikmanager.data.model.HeaderStrategy
 import dev.chr0nzz.traefikmanager.data.model.LogForm
 import dev.chr0nzz.traefikmanager.data.model.ObservabilityForm
 import dev.chr0nzz.traefikmanager.data.model.ProvidersForm
@@ -14,6 +15,7 @@ import dev.chr0nzz.traefikmanager.data.model.SystemForm
 import dev.chr0nzz.traefikmanager.data.repo.StaticConfigRepository
 import kotlinx.serialization.json.JsonObject
 import javax.inject.Inject
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +37,9 @@ data class StaticConfigUiState(
     val parsed: JsonObject? = null,
     val pending: Boolean = false,
     val busy: Boolean = false,
+    val traefikVersion: String? = null,
 ) {
+    val headerStrategy: HeaderStrategy get() = HeaderStrategy.forVersion(traefikVersion)
     val entrypoints: List<Pair<String, JsonObject>> get() = StaticEntries.entrypoints(parsed)
     val resolvers: List<Pair<String, JsonObject>> get() = StaticEntries.resolvers(parsed)
     val plugins: List<Triple<String, String, Boolean>> get() = StaticEntries.plugins(parsed)
@@ -68,8 +72,10 @@ class StaticConfigViewModel @Inject constructor(
     fun load() {
         _state.update { it.copy(loading = true, loadError = null) }
         viewModelScope.launch {
+            val version = async { repository.traefikVersion() }
             runCatching { repository.read() }.fold(
                 onSuccess = { doc ->
+                    val traefikVersion = version.await()
                     original = doc.raw
                     content.setTextAndPlaceCursorAtEnd(doc.raw)
                     _state.update {
@@ -80,6 +86,7 @@ class StaticConfigViewModel @Inject constructor(
                             parsed = doc.parsed,
                             pending = false,
                             loadError = null,
+                            traefikVersion = traefikVersion,
                         )
                     }
                 },

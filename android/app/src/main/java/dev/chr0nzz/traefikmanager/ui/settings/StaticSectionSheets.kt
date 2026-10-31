@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.chr0nzz.traefikmanager.data.model.ApiForm
 import dev.chr0nzz.traefikmanager.data.model.EntrypointForm
+import dev.chr0nzz.traefikmanager.data.model.HeaderStrategy
 import dev.chr0nzz.traefikmanager.data.model.LogForm
 import dev.chr0nzz.traefikmanager.data.model.ObservabilityForm
 import dev.chr0nzz.traefikmanager.data.model.ProvidersForm
@@ -20,6 +21,7 @@ import dev.chr0nzz.traefikmanager.data.model.UiText
 @Composable
 fun EntrypointSheet(
     initial: EntrypointForm,
+    headerStrategy: HeaderStrategy,
     adding: Boolean,
     busy: Boolean,
     error: String?,
@@ -51,13 +53,22 @@ fun EntrypointSheet(
             checked = form.http3,
             onChange = { form = form.copy(http3 = it) },
         )
-        FormSelect(
-            label = stringResource(R.string.static_underscore_headers),
-            value = form.underscoreHeaders,
-            options = EntrypointForm.underscoreOptions,
-            onChange = { form = form.copy(underscoreHeaders = it) },
-            help = stringResource(R.string.static_stops_underscore_header_aliases_from_bypassing),
-        )
+        if (headerStrategy.editable) {
+            val alias = headerStrategy == HeaderStrategy.ALIAS
+            FormSelect(
+                label = stringResource(if (alias) R.string.static_alias_headers else R.string.static_underscore_headers),
+                value = form.headersStrategy,
+                options = headerStrategy.options,
+                onChange = { form = form.copy(headersStrategy = it) },
+                help = stringResource(
+                    if (alias) {
+                        R.string.static_stops_aliased_header_names_from_bypassing
+                    } else {
+                        R.string.static_stops_underscore_header_aliases_from_bypassing
+                    },
+                ),
+            )
+        }
 
         FormGroup(stringResource(R.string.static_trusted_sources))
         FormLines(

@@ -253,7 +253,7 @@ struct StaticConfigView: View {
         }
         switch open {
         case let .entrypoint(form, adding):
-            EntrypointSheet(initial: form, adding: adding) { await save(StaticSection.entrypoints, adding ? "add" : "edit", $0.name.trimmed, form.name, $0.data) }
+            EntrypointSheet(initial: form, headerStrategy: model.headerStrategy, adding: adding) { await save(StaticSection.entrypoints, adding ? "add" : "edit", $0.name.trimmed, form.name, $0.data(strategy: model.headerStrategy)) }
         case let .resolver(form, adding):
             ResolverSheet(initial: form, adding: adding) { await save(StaticSection.resolvers, adding ? "add" : "edit", $0.name.trimmed, form.name, $0.data) }
         case let .plugin(form, adding):

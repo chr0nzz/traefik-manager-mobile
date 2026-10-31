@@ -883,6 +883,8 @@
         <item quantity="other">nedostupné servery: %1$d z %2$d</item>
     </plurals>
     <string name="static_option_keep_default">Ponechat (výchozí)</string>
+    <string name="static_option_alias_delete">Smazat: odstranit aliasované hlavičky</string>
+    <string name="static_option_alias_reject">Odmítnout: 400 u aliasovaných hlaviček</string>
     <string name="static_option_underscore_delete">Smazat: odstranit hlavičky s podtržítkem</string>
     <string name="static_option_underscore_reject">Odmítnout: 400 u hlaviček s podtržítkem</string>
     <string name="static_option_challenge_dns">DNS Challenge</string>
@@ -1868,6 +1870,8 @@
     <string name="static_http_to_https_redirect_optional">Přesměrování HTTP na HTTPS (volitelné)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">HTTPS vstupní bod, na který se přesměruje.</string>
     <string name="static_adds_http3_to_this_entrypoint">Přidá http3 k tomuto vstupnímu bodu.</string>
+    <string name="static_alias_headers">Alias hlavičky</string>
+    <string name="static_stops_aliased_header_names_from_bypassing">Brání aliasovaným názvům hlaviček (např. X_Auth_User, X.Auth.User) obejít forwardAuth. Doporučeno: Smazat.</string>
     <string name="static_underscore_headers">Hlavičky s podtržítky</string>
     <string name="static_stops_underscore_header_aliases_from_bypassing">Brání aliasům hlaviček s podtržítkem obejít forwardAuth. Doporučeno: Smazat.</string>
     <string name="static_trusted_ips_forwarded_headers">Důvěryhodné IP - přeposlané hlavičky</string>

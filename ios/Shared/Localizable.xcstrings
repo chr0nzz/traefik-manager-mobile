@@ -22429,6 +22429,76 @@
         }
       }
     },
+    "Alias headers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "别名标头"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alias hlavičky"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alias-headers"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alias-Header"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeceras alias"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En-têtes d’alias"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En-têtes d’alias"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alias-headers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalhos alias"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalhos de alias"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заголовки-псевдонимы"
+          }
+        }
+      }
+    },
     "All": {
       "localizations": {
         "zh-Hans": {
@@ -43275,6 +43345,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "Удалить %@?"
+          }
+        }
+      }
+    },
+    "Delete - strip aliased headers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 - 去除别名标头"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smazat: odstranit aliasované hlavičky"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet - fjern alias-headers"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen - Alias-Header herausfiltern"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar - quita las cabeceras con alias"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer - retirer les en-têtes avec alias"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer - retirer les en-têtes avec alias"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwijderen - aliasheaders weghalen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir - remover cabeçalhos com alias"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar - retirar cabeçalhos com alias"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить - убирать заголовки-псевдонимы"
           }
         }
       }
@@ -91510,6 +91650,76 @@
         }
       }
     },
+    "Reject - 400 on aliased headers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拒绝 - 对别名标头返回 400"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odmítnout: 400 u aliasovaných hlaviček"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afvis - 400 ved aliasede headers"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablehnen - 400 bei Alias-Headern"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechazar - 400 en cabeceras con alias"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejeter : erreur 400 pour les en-têtes avec alias"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refuser : erreur 400 pour les en-têtes avec alias"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afwijzen - 400 bij alias-headers"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejeitar - 400 em cabeçalhos com alias"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejeitar - 400 em cabeçalhos com alias"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонить: 400 для заголовков-псевдонимов"
+          }
+        }
+      }
+    },
     "Reject - 400 on underscore headers": {
       "localizations": {
         "zh-Hans": {
@@ -108943,6 +109153,76 @@
         }
       }
     },
+    "Stops aliased header names (e.g. X_Auth_User, X.Auth.User) from bypassing forwardAuth. Delete recommended.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阻止别名标头名称（例如 X_Auth_User、X.Auth.User）绕过 forwardAuth。推荐选择删除。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brání aliasovaným názvům hlaviček (např. X_Auth_User, X.Auth.User) obejít forwardAuth. Doporučeno: Smazat."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forhindrer aliaserede headernavne (f.eks. X_Auth_User, X.Auth.User) i at omgå forwardAuth. Slet anbefales."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verhindert, dass Header-Namen mit Alias (z. B. X_Auth_User, X.Auth.User) forwardAuth umgehen. Löschen empfohlen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impide que los nombres de cabecera con alias (p. ej., X_Auth_User, X.Auth.User) eludan forwardAuth. Se recomienda Eliminar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empêche les noms d’en-têtes avec alias (par exemple X_Auth_User, X.Auth.User) de contourner forwardAuth. Option Supprimer recommandée."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empêche les noms d’en-têtes avec alias (par exemple X_Auth_User, X.Auth.User) de contourner forwardAuth. Option Supprimer recommandée."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorkomt dat headernamen met een alias (bijv. X_Auth_User, X.Auth.User) forwardAuth omzeilen. Verwijderen aanbevolen."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impede que nomes de cabeçalho com alias (ex.: X_Auth_User, X.Auth.User) contornem o forwardAuth. Recomendado: Excluir."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impede que nomes de cabeçalho com alias (p. ex. X_Auth_User, X.Auth.User) contornem o forwardAuth. Recomendado: Eliminar."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не даёт псевдонимам имён заголовков (например, X_Auth_User, X.Auth.User) обходить forwardAuth. Рекомендуется: Удалить."
+          }
+        }
+      }
+    },
     "Stops underscore header aliases from bypassing forwardAuth. Delete recommended.": {
       "localizations": {
         "zh-Hans": {
@@ -115314,7 +115594,76 @@
         }
       }
     },
-    "This screen is coming in a later build.": {},
+    "This screen is coming in a later build.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此页面将在后续版本中提供。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tato obrazovka přibude v některém z dalších sestavení."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne skærm kommer i et senere build."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Bildschirm kommt in einem späteren Build."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta pantalla llegará en una versión posterior."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet écran arrivera dans une version ultérieure."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet écran arrivera dans une version ultérieure."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit scherm komt in een latere build."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta tela chegará em uma versão posterior."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este ecrã chegará numa versão posterior."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот экран появится в одной из следующих сборок."
+          }
+        }
+      }
+    },
     "this server": {
       "localizations": {
         "zh-Hans": {

@@ -1841,6 +1841,10 @@
     <string name="static_the_https_entrypoint_to_redirect_to">The HTTPS entrypoint to redirect to.</string>
     <string name="static_enable_http_3_quic">Enable HTTP/3 (QUIC)</string>
     <string name="static_adds_http3_to_this_entrypoint">Adds http3 to this entrypoint.</string>
+    <!-- HTTP headers whose name turns into another header's name at the backend, for example X_Auth_User or X.Auth.User -->
+    <string name="static_alias_headers">Alias headers</string>
+    <!-- Keep forwardAuth as it is. Delete is the name of an option. X_Auth_User and X.Auth.User are example header names -->
+    <string name="static_stops_aliased_header_names_from_bypassing">Stops aliased header names (e.g. X_Auth_User, X.Auth.User) from bypassing forwardAuth. Delete recommended.</string>
     <!-- HTTP headers with an underscore in the name -->
     <string name="static_underscore_headers">Underscore headers</string>
     <!-- Keep forwardAuth as it is. Delete is the name of an option -->
@@ -2511,6 +2515,9 @@
     </plurals>
     <!-- Choice: leave headers as they are -->
     <string name="static_option_keep_default">Keep (default)</string>
+    <string name="static_option_alias_delete">Delete - strip aliased headers</string>
+    <!-- 400 is the HTTP status the request is answered with -->
+    <string name="static_option_alias_reject">Reject - 400 on aliased headers</string>
     <string name="static_option_underscore_delete">Delete - strip underscore headers</string>
     <!-- 400 is the HTTP status the request is answered with -->
     <string name="static_option_underscore_reject">Reject - 400 on underscore headers</string>

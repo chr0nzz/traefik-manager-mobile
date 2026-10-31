@@ -792,6 +792,8 @@
         <item quantity="other">%2$d 个服务器中 %1$d 个不可用</item>
     </plurals>
     <string name="static_option_keep_default">保留（默认）</string>
+    <string name="static_option_alias_delete">删除 - 去除别名标头</string>
+    <string name="static_option_alias_reject">拒绝 - 对别名标头返回 400</string>
     <string name="static_option_underscore_delete">删除 - 去除含下划线的标头</string>
     <string name="static_option_underscore_reject">拒绝 - 对下划线标头返回 400</string>
     <string name="static_option_challenge_dns">DNS 质询</string>
@@ -1635,6 +1637,8 @@
     <string name="static_http_to_https_redirect_optional">HTTP 到 HTTPS 重定向（可选）</string>
     <string name="static_the_https_entrypoint_to_redirect_to">要重定向到的 HTTPS 入口点。</string>
     <string name="static_adds_http3_to_this_entrypoint">为此入口点添加 http3。</string>
+    <string name="static_alias_headers">别名标头</string>
+    <string name="static_stops_aliased_header_names_from_bypassing">阻止别名标头名称（例如 X_Auth_User、X.Auth.User）绕过 forwardAuth。推荐选择删除。</string>
     <string name="static_underscore_headers">下划线标头</string>
     <string name="static_stops_underscore_header_aliases_from_bypassing">防止下划线标头别名绕过 forwardAuth。推荐选择删除。</string>
     <string name="static_trusted_ips_forwarded_headers">受信任 IP - 转发标头</string>

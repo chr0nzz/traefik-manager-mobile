@@ -52,6 +52,69 @@ final class PluginStaticTests: XCTestCase {
         XCTAssertEqual(PluginUsage.counts([PluginEntry(name: "geoblock", moduleName: "x")], middlewares), ["geoblock": 1])
     }
 
+    private func entrypoint(_ http: String) throws -> EntrypointForm {
+        let entry = try JSONDecoder().decode(JSONObject.self, from: Data(#"{"http":\#(http)}"#.utf8))
+        return EntrypointForm.read("web", entry)
+    }
+
+    func testEntrypointReadsHeaderStrategyFromEitherKey() throws {
+        XCTAssertEqual(try entrypoint(#"{"aliasHeadersStrategy":"delete"}"#).headersStrategy, "delete")
+        XCTAssertEqual(try entrypoint(#"{"underscoreHeadersStrategy":"reject"}"#).headersStrategy, "reject")
+        XCTAssertEqual(try entrypoint("{}").headersStrategy, "")
+    }
+
+    func testAliasedEntrypointKeepsItsProtectionThroughASave() throws {
+        let data = try entrypoint(#"{"aliasHeadersStrategy":"delete"}"#).data(strategy: .alias)
+        XCTAssertEqual(data["underscore_headers"]?.stringValue, "delete")
+        XCTAssertEqual(data["headers_strategy_key"]?.stringValue, "aliasHeadersStrategy")
+    }
+
+    func testOldKeyMovesToTheNameTheRunningTraefikKnows() throws {
+        let moved = try entrypoint(#"{"underscoreHeadersStrategy":"reject"}"#).data(strategy: .alias)
+        XCTAssertEqual(moved["headers_strategy_key"]?.stringValue, "aliasHeadersStrategy")
+        let back = try entrypoint(#"{"aliasHeadersStrategy":"reject"}"#).data(strategy: .underscore)
+        XCTAssertEqual(back["headers_strategy_key"]?.stringValue, "underscoreHeadersStrategy")
+        XCTAssertEqual(back["underscore_headers"]?.stringValue, "reject")
+    }
+
+    func testTraefikWithNeitherOptionIsNeverSentOne() throws {
+        let data = try entrypoint(#"{"underscoreHeadersStrategy":"delete"}"#).data(strategy: .unsupported)
+        XCTAssertEqual(data["underscore_headers"]?.stringValue, "")
+        XCTAssertNotNil(data["headers_strategy_key"])
+    }
+
+    func testUnknownTraefikVersionLeavesTheOptionExactlyAsItIsInTheFile() throws {
+        let alias = try entrypoint(#"{"aliasHeadersStrategy":"delete"}"#).data(strategy: .unknown)
+        XCTAssertEqual(alias["underscore_headers"]?.stringValue, "delete")
+        XCTAssertEqual(alias["headers_strategy_key"]?.stringValue, "aliasHeadersStrategy")
+        let underscore = try entrypoint(#"{"underscoreHeadersStrategy":"reject"}"#).data(strategy: .unknown)
+        XCTAssertEqual(underscore["underscore_headers"]?.stringValue, "reject")
+        XCTAssertEqual(underscore["headers_strategy_key"]?.stringValue, "underscoreHeadersStrategy")
+        XCTAssertEqual(try entrypoint("{}").data(strategy: .unknown)["underscore_headers"]?.stringValue, "")
+    }
+
+    func testHeaderStrategyFollowsTheTraefikVersion() {
+        let expected: [(String?, HeaderStrategy)] = [
+            ("3.7.12", .alias), ("v3.7.14", .alias), ("3.8.0-rc.1", .alias), ("4.0.0", .alias),
+            ("3.7.11", .underscore), ("3.7.6", .underscore),
+            ("3.7.5", .unsupported), ("3.6.14", .unsupported), ("2.11.58", .unsupported),
+            ("master", .unknown), ("3.7", .unknown), ("", .unknown), (nil, .unknown),
+        ]
+        for (version, strategy) in expected {
+            XCTAssertEqual(HeaderStrategy.forVersion(version), strategy, version ?? "nil")
+        }
+    }
+
+    func testHeaderFieldOnlyShowsOnVersionsThatHaveTheOption() {
+        XCTAssertEqual(HeaderStrategy.allCases.filter(\.editable), [.alias, .underscore])
+    }
+
+    func testEachHeaderStrategyOffersItsOwnWordingAndTheSameValues() {
+        XCTAssertEqual(HeaderStrategy.alias.options.map(\.value), ["", "delete", "reject"])
+        XCTAssertEqual(HeaderStrategy.underscore.options.map(\.value), ["", "delete", "reject"])
+        XCTAssertNotEqual(HeaderStrategy.alias.options, HeaderStrategy.underscore.options)
+    }
+
     func testStaticFormsReadParsedConfig() throws {
         let json = #"""
         {"entryPoints":{"websecure":{"address":":443","http3":{},"forwardedHeaders":{"trustedIPs":["10.0.0.0/8","172.16.0.0/12"]},

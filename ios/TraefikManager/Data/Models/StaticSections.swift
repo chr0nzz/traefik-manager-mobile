@@ -33,12 +33,45 @@ private extension Optional where Wrapped == JSONObject {
     func csv(_ key: String) -> String { strings(key).joined(separator: ", ") }
 }
 
+/// How the running Traefik treats the header strategy option. Port of `HeaderStrategy` in `StaticSections.kt`.
+enum HeaderStrategy: CaseIterable, Hashable {
+    /// 3.7.12 and newer.
+    case alias
+    /// 3.7.6 to 3.7.11.
+    case underscore
+    /// Older versions, where Traefik refuses to start on either name.
+    case unsupported
+    /// The version could not be read, so the option stays exactly as it is in the file.
+    case unknown
+
+    var key: String { self == .alias ? "aliasHeadersStrategy" : "underscoreHeadersStrategy" }
+    var editable: Bool { self == .alias || self == .underscore }
+
+    static func forVersion(_ version: String?) -> HeaderStrategy {
+        guard let match = (version ?? "").firstMatch(of: /(\d+)\.(\d+)\.(\d+)/),
+              let major = Int(match.1), let minor = Int(match.2), let patch = Int(match.3) else { return .unknown }
+        if major > 3 || (major == 3 && minor > 7) { return .alias }
+        if major < 3 || minor < 7 { return .unsupported }
+        if patch >= 12 { return .alias }
+        return patch >= 6 ? .underscore : .unsupported
+    }
+
+    var options: [StaticOption] {
+        [
+            StaticOption(value: "", label: String(localized: "Keep (default)")),
+            StaticOption(value: "delete", label: self == .alias ? String(localized: "Delete - strip aliased headers") : String(localized: "Delete - strip underscore headers")),
+            StaticOption(value: "reject", label: self == .alias ? String(localized: "Reject - 400 on aliased headers") : String(localized: "Reject - 400 on underscore headers")),
+        ]
+    }
+}
+
 struct EntrypointForm: Hashable {
     var name = ""
     var address = ""
     var redirectTo = ""
     var http3 = false
-    var underscoreHeaders = ""
+    var headersStrategy = ""
+    var headersStrategyKey = ""
     var trustedIps = ""
     var proxyTrustedIps = ""
     var forwardedInsecure = false
@@ -52,12 +85,13 @@ struct EntrypointForm: Hashable {
     var writeTimeout = ""
     var idleTimeout = ""
 
-    var data: JSONObject {
+    func data(strategy: HeaderStrategy) -> JSONObject {
         [
             "address": .string(address.trimmed),
             "redirect_to": .string(redirectTo.trimmed),
             "http3": .bool(http3),
-            "underscore_headers": .string(underscoreHeaders),
+            "underscore_headers": .string(strategy == .unsupported ? "" : headersStrategy),
+            "headers_strategy_key": .string(strategy == .unknown ? headersStrategyKey.ifEmpty(strategy.key) : strategy.key),
             "trusted_ips": .string(trustedIps),
             "forwarded_insecure": .bool(forwardedInsecure),
             "proxy_trusted_ips": .string(proxyTrustedIps),
@@ -79,12 +113,14 @@ struct EntrypointForm: Hashable {
         let forwarded = entry.obj("forwardedHeaders")
         let proxy = entry.obj("proxyProtocol")
         let timeouts = entry.obj("transport").obj("respondingTimeouts")
+        let strategyKey = [HeaderStrategy.alias.key, HeaderStrategy.underscore.key].first { !http.str($0).isEmpty } ?? ""
         return EntrypointForm(
             name: name,
             address: entry.str("address"),
             redirectTo: http.obj("redirections").obj("entryPoint").str("to"),
             http3: entry.has("http3"),
-            underscoreHeaders: http.str("underscoreHeadersStrategy"),
+            headersStrategy: http.str(strategyKey),
+            headersStrategyKey: strategyKey,
             trustedIps: forwarded.lines("trustedIPs"),
             proxyTrustedIps: proxy.lines("trustedIPs"),
             forwardedInsecure: forwarded.bool("insecure"),
@@ -98,14 +134,6 @@ struct EntrypointForm: Hashable {
             writeTimeout: timeouts.str("writeTimeout"),
             idleTimeout: timeouts.str("idleTimeout")
         )
-    }
-
-    static var underscoreOptions: [StaticOption] {
-        [
-            StaticOption(value: "", label: String(localized: "Keep (default)")),
-            StaticOption(value: "delete", label: String(localized: "Delete - strip underscore headers")),
-            StaticOption(value: "reject", label: String(localized: "Reject - 400 on underscore headers")),
-        ]
     }
 }
 

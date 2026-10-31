@@ -838,6 +838,8 @@
         <item quantity="other">%1$d von %2$d Servern ausgefallen</item>
     </plurals>
     <string name="static_option_keep_default">Behalten (Standard)</string>
+    <string name="static_option_alias_delete">Löschen - Alias-Header herausfiltern</string>
+    <string name="static_option_alias_reject">Ablehnen - 400 bei Alias-Headern</string>
     <string name="static_option_underscore_delete">Löschen - Header mit Unterstrich herausfiltern</string>
     <string name="static_option_underscore_reject">Ablehnen - 400 bei Headern mit Unterstrich</string>
     <string name="static_option_challenge_dns">DNS-Challenge</string>
@@ -1730,6 +1732,8 @@
     <string name="static_http_to_https_redirect_optional">Weiterleitung HTTP zu HTTPS (optional)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">Der HTTPS-Entrypoint, auf den weitergeleitet wird.</string>
     <string name="static_adds_http3_to_this_entrypoint">Fügt http3 zu diesem Entrypoint hinzu.</string>
+    <string name="static_alias_headers">Alias-Header</string>
+    <string name="static_stops_aliased_header_names_from_bypassing">Verhindert, dass Header-Namen mit Alias (z. B. X_Auth_User, X.Auth.User) forwardAuth umgehen. Löschen empfohlen.</string>
     <string name="static_underscore_headers">Header mit Unterstrich</string>
     <string name="static_stops_underscore_header_aliases_from_bypassing">Verhindert, dass Header-Aliase mit Unterstrich forwardAuth umgehen. Löschen empfohlen.</string>
     <string name="static_trusted_ips_forwarded_headers">Vertrauenswürdige IPs - Forwarded-Header</string>

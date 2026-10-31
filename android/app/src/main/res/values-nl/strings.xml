@@ -839,6 +839,8 @@
         <item quantity="other">%1$d van %2$d servers onbereikbaar</item>
     </plurals>
     <string name="static_option_keep_default">Behouden (standaard)</string>
+    <string name="static_option_alias_delete">Verwijderen - aliasheaders weghalen</string>
+    <string name="static_option_alias_reject">Afwijzen - 400 bij alias-headers</string>
     <string name="static_option_underscore_delete">Verwijderen - headers met underscore weghalen</string>
     <string name="static_option_underscore_reject">Afwijzen - 400 bij headers met underscore</string>
     <string name="static_option_challenge_dns">DNS-challenge</string>
@@ -1731,6 +1733,8 @@
     <string name="static_http_to_https_redirect_optional">HTTP-naar-HTTPS-omleiding (optioneel)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">Het HTTPS-entrypoint om naar om te leiden.</string>
     <string name="static_adds_http3_to_this_entrypoint">Voegt http3 toe aan dit entrypoint.</string>
+    <string name="static_alias_headers">Alias-headers</string>
+    <string name="static_stops_aliased_header_names_from_bypassing">Voorkomt dat headernamen met een alias (bijv. X_Auth_User, X.Auth.User) forwardAuth omzeilen. Verwijderen aanbevolen.</string>
     <string name="static_underscore_headers">Headers met underscores</string>
     <string name="static_stops_underscore_header_aliases_from_bypassing">Voorkomt dat aliassen van headers met underscore forwardAuth omzeilen. Verwijderen aanbevolen.</string>
     <string name="static_trusted_ips_forwarded_headers">Vertrouwde IP’s - doorgestuurde headers</string>

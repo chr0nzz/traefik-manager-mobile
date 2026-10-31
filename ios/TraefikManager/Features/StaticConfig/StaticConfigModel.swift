@@ -18,9 +18,11 @@ final class StaticConfigModel {
     var parsed: JSONObject?
     /// A section change was staged through the server and is not saved yet.
     var pending = false
+    var traefikVersion: String?
 
     private var original = ""
 
+    var headerStrategy: HeaderStrategy { HeaderStrategy.forVersion(traefikVersion) }
     var dirty: Bool { content != original }
     var hasChanges: Bool { pending || dirty }
 
@@ -37,8 +39,10 @@ final class StaticConfigModel {
     func load(_ service: TMService) async {
         loading = parsed == nil && original.isEmpty
         loadError = nil
+        async let version = try? service.traefikVersion().version
         do {
             let doc = try await service.staticConfig()
+            traefikVersion = await version
             original = doc.raw
             content = doc.raw
             path = doc.path
@@ -112,6 +116,7 @@ final class StaticConfigModel {
         content = ""
         original = ""
         pending = false
+        traefikVersion = nil
         restartPending = false
         loadError = nil
         saveError = nil
