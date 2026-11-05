@@ -15,7 +15,7 @@ Native Android and iOS companion app for [Traefik Manager](https://github.com/ch
 | --- | --- |
 | Android (APK) | [Latest release](https://github.com/chr0nzz/traefik-manager-mobile/releases/latest) |
 | Google Play | [Install from Play Store](https://play.google.com/store/apps/details?id=dev.chr0nzz.traefikmanager) |
-| iPhone and iPad | App Store - coming soon |
+| iPhone and iPad | [Download on the App Store](https://apps.apple.com/us/app/traefik-manager/id6826725061) |
 
 Both apps share one version number: the iOS app starts at 2.5.0, alongside Android.
 
