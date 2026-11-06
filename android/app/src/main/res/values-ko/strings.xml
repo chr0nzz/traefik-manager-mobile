@@ -1,0 +1,2599 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false"></string>
+    <string name="widget_description"></string>
+    <string name="widget_config_title"></string>
+    <string name="widget_launcher_label"></string>
+    <string name="widget_launcher_description"></string>
+    <string name="widget_small_label" translatable="false"></string>
+    <string name="widget_large_label"></string>
+    <string name="widget_large_description"></string>
+    <string name="common_save"></string>
+    <string name="common_cancel"></string>
+    <string name="common_reset"></string>
+    <!-- Name shown for the main server, the one the app connects to directly -->
+    <string name="common_host"></string>
+    <!-- Drawer section heading: routes, middleware, services -->
+
+    <string name="nav_section_traffic"></string>
+    <!-- Drawer section heading: logs and CrowdSec -->
+    <string name="nav_section_observability"></string>
+    <!-- Drawer section heading: certificates and plugins -->
+    <string name="nav_section_infrastructure"></string>
+    <!-- Drawer section heading: Traefik providers such as Docker or Kubernetes -->
+    <string name="nav_section_providers"></string>
+    <!-- Drawer section heading: backups and settings -->
+    <string name="nav_section_system"></string>
+    <string name="nav_dashboard"></string>
+    <string name="nav_routes"></string>
+    <!-- Navigation label for the list of Traefik middlewares -->
+    <string name="nav_middlewares"></string>
+    <string name="nav_services"></string>
+    <string name="nav_route_map"></string>
+    <string name="nav_logs"></string>
+    <string name="nav_certificates"></string>
+    <string name="nav_plugins"></string>
+    <string name="nav_backups"></string>
+    <string name="nav_settings"></string>
+    <!-- Button that opens the navigation drawer -->
+    <string name="nav_menu"></string>
+    <plurals name="nav_badge_alerts">
+    </plurals>
+    <!-- Read aloud for the count badge next to a navigation item -->
+    <plurals name="nav_badge_total">
+    </plurals>
+    <string name="nav_editor_title_bar"></string>
+    <string name="nav_editor_title_rail"></string>
+    <string name="nav_editor_help"></string>
+    <!-- Section heading, %1$d is how many items are pinned -->
+    <string name="nav_editor_pinned"></string>
+    <string name="nav_editor_rest"></string>
+    <!-- %1$s is the name of a screen, for example Routes -->
+    <string name="nav_editor_move_up"></string>
+    <!-- %1$s is the name of a screen, for example Routes -->
+    <string name="nav_editor_move_down"></string>
+    <string name="lock_prompt_title"></string>
+    <string name="lock_prompt_subtitle"></string>
+    <!-- Heading shown while the app is locked -->
+    <string name="lock_title"></string>
+    <string name="lock_hint"></string>
+    <!-- Button -->
+    <string name="lock_unlock"></string>
+    <!-- Shown in lowercase under the server name while changing server -->
+
+    <string name="server_switching"></string>
+    <string name="server_show_list"></string>
+    <string name="server_hide_list"></string>
+    <string name="server_active"></string>
+    <!-- Read aloud for the green status dot -->
+    <string name="server_reachable"></string>
+    <!-- Read aloud for the red status dot -->
+    <string name="server_unreachable"></string>
+    <string name="connect_subtitle"></string>
+    <string name="connect_url_label"></string>
+    <string name="connect_key_label"></string>
+    <string name="connect_key_placeholder"></string>
+    <string name="connect_key_show"></string>
+    <string name="connect_key_hide"></string>
+    <string name="connect_key_hint"></string>
+    <!-- Button -->
+    <string name="connect_button"></string>
+    <!-- Button that opens the app with sample data -->
+    <string name="connect_demo"></string>
+    <string name="connect_error_no_url"></string>
+    <string name="connect_error_key_not_enabled"></string>
+    <string name="connect_error_key_required"></string>
+    <string name="connect_error_key_invalid"></string>
+    <!-- %1$d is an HTTP status code such as 500 -->
+    <string name="connect_error_server"></string>
+    <string name="connect_error_unreachable"></string>
+    <string name="connect_error_failed"></string>
+    <string name="settings_language_section"></string>
+    <string name="settings_language_title"></string>
+    <string name="settings_language_system"></string>
+    <string name="common_close"></string>
+    <string name="common_delete"></string>
+    <!-- Button that removes or deletes something -->
+    <string name="common_remove"></string>
+    <!-- Button -->
+    <string name="common_add"></string>
+    <!-- %1$s is the name of the thing being removed -->
+    <string name="common_remove_named"></string>
+    <!-- %1$s is the name of the thing being edited -->
+    <string name="common_edit_named"></string>
+    <string name="common_retry"></string>
+    <!-- Button that puts off an action -->
+    <string name="common_later"></string>
+    <string name="common_filters"></string>
+    <string name="common_clear_filters"></string>
+    <string name="common_close_search"></string>
+    <string name="common_clear_search"></string>
+    <!-- Read aloud for the check mark next to the chosen item -->
+    <string name="common_selected"></string>
+    <string name="common_loading"></string>
+    <string name="common_show_less"></string>
+    <string name="common_no_match_body"></string>
+    <string name="dashboard_settings"></string>
+    <string name="dashboard_notifications"></string>
+    <plurals name="dashboard_notifications_unread">
+    </plurals>
+    <string name="dashboard_refresh"></string>
+    <string name="dashboard_error_load"></string>
+    <string name="dashboard_entry_points"></string>
+    <!-- Lowercase status chip. %1$s is the metrics backend, for example prometheus -->
+    <string name="dashboard_runtime_metrics"></string>
+    <string name="dashboard_runtime_metrics_off"></string>
+    <string name="dashboard_runtime_access_log_on"></string>
+    <string name="dashboard_runtime_access_log_off"></string>
+    <!-- Lowercase status chip. %1$s is the tracing backend, for example otlp -->
+    <string name="dashboard_runtime_tracing"></string>
+    <string name="dashboard_runtime_tracing_off"></string>
+    <!-- %1$s is the name of an app on the dashboard -->
+    <string name="dashboard_app_about"></string>
+    <!-- Lowercase link that collapses a list -->
+    <string name="dashboard_show_less"></string>
+    <!-- Lowercase link that shows the rest of a list -->
+    <plurals name="dashboard_more">
+    </plurals>
+    <!-- Name of a built-in dashboard group -->
+    <string name="dashboard_group_media"></string>
+    <string name="dashboard_group_monitoring"></string>
+    <string name="dashboard_group_infrastructure"></string>
+    <string name="dashboard_group_security"></string>
+    <string name="dashboard_group_home"></string>
+    <string name="dashboard_group_files"></string>
+    <string name="dashboard_group_network"></string>
+    <string name="dashboard_group_dev"></string>
+    <string name="dashboard_group_servers"></string>
+    <string name="dashboard_card_title"></string>
+    <string name="dashboard_card_help"></string>
+    <string name="dashboard_card_name"></string>
+    <string name="dashboard_card_name_placeholder"></string>
+    <!-- Section heading -->
+    <string name="dashboard_card_icon"></string>
+    <!-- Icon choice: pick the icon automatically -->
+    <string name="dashboard_card_icon_auto"></string>
+    <!-- selfh.st is an icon website, slug is the short icon name -->
+    <string name="dashboard_card_icon_slug"></string>
+    <string name="dashboard_card_icon_url"></string>
+    <!-- Section heading: which dashboard group the app belongs to -->
+    <string name="dashboard_card_group"></string>
+    <string name="dashboard_card_group_auto"></string>
+    <string name="dashboard_card_link"></string>
+    <string name="dashboard_card_link_placeholder"></string>
+    <string name="dashboard_card_link_help"></string>
+    <string name="dashboard_card_no_link"></string>
+    <string name="dashboard_card_hide"></string>
+    <!-- Section heading, %1$d is how many groups there are -->
+    <string name="dashboard_groups_title"></string>
+    <string name="dashboard_groups_help"></string>
+    <string name="dashboard_groups_new"></string>
+    <!-- Section heading, %1$d is how many apps are hidden -->
+    <string name="dashboard_hidden_title"></string>
+    <string name="dashboard_hidden_help"></string>
+    <!-- Lowercase button that puts a hidden app back on the dashboard -->
+    <string name="dashboard_hidden_show"></string>
+    <string name="dashboard_saved_layout"></string>
+    <string name="dashboard_saved_card"></string>
+    <!-- Confirmation after hiding an app from the dashboard -->
+    <string name="dashboard_saved_hidden"></string>
+    <!-- Confirmation after putting an app back on the dashboard -->
+    <string name="dashboard_saved_shown"></string>
+    <string name="dashboard_saved_group_added"></string>
+    <string name="dashboard_saved_group_removed"></string>
+    <!-- %1$s is a domain name -->
+    <string name="certs_remove_title_one"></string>
+    <plurals name="certs_remove_title_many">
+    </plurals>
+    <string name="certs_remove_restart"></string>
+    <!-- Follows a sentence about removing certificates. The number is how many of them are still in use -->
+    <plurals name="certs_remove_in_use">
+    </plurals>
+    <string name="certs_remove_backup"></string>
+    <string name="certs_search"></string>
+    <string name="certs_refresh"></string>
+    <string name="certs_loading"></string>
+    <string name="certs_error_load"></string>
+    <string name="certs_empty_server"></string>
+    <string name="certs_empty"></string>
+    <string name="certs_empty_body"></string>
+    <string name="certs_no_search_match"></string>
+    <string name="certs_no_match"></string>
+    <!-- Heading above the list of filters: show all, unused, expiring -->
+    <string name="certs_filter_heading"></string>
+    <!-- Menu item, the number is how many unused certificates there are -->
+    <plurals name="certs_remove_unused">
+    </plurals>
+    <!-- Lowercase badge on a certificate that no certificate resolver owns -->
+    <string name="certs_badge_no_resolver"></string>
+    <string name="certs_remove_one"></string>
+    <string name="certs_copy_domains"></string>
+    <!-- Link that shows the rest of a list, %1$d is how many are hidden -->
+    <string name="certs_more_domains"></string>
+    <!-- Lowercase. %1$s is a date -->
+    <string name="certs_expires"></string>
+    <!-- Lowercase -->
+    <string name="certs_expiry_unknown"></string>
+    <plurals name="certs_domains">
+    </plurals>
+    <!-- How many search results there are -->
+    <plurals name="common_matching">
+    </plurals>
+    <!-- Filter: show all certificates -->
+    <string name="certs_filter_all"></string>
+    <!-- Filter: certificates no route uses -->
+    <string name="certs_filter_unused"></string>
+    <!-- Filter: certificates that no certificate resolver owns -->
+    <string name="certs_filter_no_resolver"></string>
+    <!-- Filter: certificates that expire soon -->
+    <string name="certs_filter_expiring"></string>
+    <plurals name="certs_verdict_expired">
+    </plurals>
+    <!-- The number counts certificates -->
+    <plurals name="certs_verdict_week">
+    </plurals>
+    <!-- The number counts certificates -->
+    <plurals name="certs_verdict_month">
+    </plurals>
+    <string name="certs_verdict_healthy"></string>
+    <plurals name="certs_detail_count">
+    </plurals>
+    <!-- Lowercase summary, the number counts certificates -->
+    <plurals name="certs_detail_expired">
+    </plurals>
+    <!-- Lowercase summary: certificates with under 7 days left. Keep it short -->
+    <plurals name="certs_detail_week">
+    </plurals>
+    <!-- Lowercase summary: certificates with under 30 days left. Keep it short -->
+    <plurals name="certs_detail_month">
+    </plurals>
+    <!-- Lowercase summary -->
+    <string name="certs_detail_none_soon"></string>
+    <!-- Certificate resolvers, a Traefik term -->
+    <plurals name="certs_detail_resolvers">
+    </plurals>
+    <!-- Lowercase summary, the number counts certificates -->
+    <plurals name="certs_detail_unused">
+    </plurals>
+    <!-- Lowercase summary: certificates that no resolver owns -->
+    <plurals name="certs_detail_no_resolver">
+    </plurals>
+    <!-- Lowercase summary. %1$d is a number of days and the d after it is short for days -->
+    <string name="certs_detail_next_expiry"></string>
+    <string name="certs_note_managed"></string>
+    <!-- Follows a sentence about TLS certificates -->
+    <string name="certs_note_removal_restarts"></string>
+    <!-- %1$s is the reason, sent by the server -->
+    <string name="certs_note_removal_off"></string>
+    <!-- Follows a sentence about TLS certificates -->
+    <string name="certs_note_renew"></string>
+    <string name="certs_error_remove"></string>
+    <string name="common_label_protocol"></string>
+    <!-- Label for a host name -->
+    <string name="common_label_host"></string>
+    <!-- Label for a Traefik routing rule -->
+    <string name="common_label_rule"></string>
+    <!-- A Traefik entry point -->
+    <string name="common_label_entry_point"></string>
+    <!-- Traefik entry points -->
+    <string name="common_label_entry_points"></string>
+    <!-- Label for one Traefik middleware -->
+    <string name="common_label_middleware"></string>
+    <string name="common_label_middlewares"></string>
+    <!-- Label for one Traefik service -->
+    <string name="common_label_service"></string>
+    <string name="common_label_services"></string>
+    <!-- Label for a Traefik provider such as Docker -->
+    <string name="common_label_provider"></string>
+    <!-- Label for one Traefik router -->
+    <string name="common_label_router"></string>
+    <string name="common_label_routers"></string>
+    <string name="common_label_routes"></string>
+    <!-- Label for the address a service sends traffic to -->
+    <string name="common_label_target"></string>
+    <string name="common_label_status"></string>
+    <!-- Label, followed by what uses this item -->
+    <string name="common_label_used_by"></string>
+    <string name="common_label_name"></string>
+    <string name="common_label_version"></string>
+    <!-- Label for a URL path -->
+    <string name="common_label_path"></string>
+    <string name="common_label_date"></string>
+    <string name="common_label_country"></string>
+    <string name="common_label_domain"></string>
+    <string name="common_label_duration"></string>
+    <!-- Lowercase value shown when a list is empty -->
+    <string name="common_none"></string>
+    <!-- Lowercase value shown when something is not known -->
+    <string name="common_unknown"></string>
+    <!-- Lowercase value: switched on -->
+    <string name="common_on"></string>
+    <!-- Lowercase value: switched off -->
+    <string name="common_off"></string>
+    <!-- Button that clears a filter -->
+    <string name="common_clear"></string>
+    <plurals name="common_routes_count">
+    </plurals>
+    <plurals name="common_countries_count">
+    </plurals>
+    <!-- %1$s is the name of the thing being deleted -->
+    <string name="common_delete_named_question"></string>
+    <!-- %1$s is a sentence saying what will happen. %2$s is the word the user has to type -->
+    <string name="common_confirm_type"></string>
+    <string name="common_error_traefik_unreachable"></string>
+    <!-- Label, followed by the routers that lead to this service -->
+    <string name="routemap_reached_via"></string>
+    <!-- Lowercase value for the label Reached via, when no router is in between -->
+    <string name="routemap_reached_directly"></string>
+    <string name="routemap_edit_route"></string>
+    <string name="routemap_refresh"></string>
+    <string name="routemap_loading"></string>
+    <string name="routemap_error"></string>
+    <string name="routemap_no_match"></string>
+    <string name="routemap_empty"></string>
+    <string name="routemap_no_match_body"></string>
+    <string name="routemap_empty_body"></string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_loading"></string>
+    <string name="providers_error_body"></string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_empty"></string>
+    <string name="providers_no_match"></string>
+    <!-- Section heading, %1$d is how many there are -->
+    <string name="providers_middlewares_title"></string>
+    <!-- %1$s is a provider name. Read-only means the route cannot be edited here -->
+    <string name="providers_read_only"></string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_search"></string>
+    <!-- %1$s is a provider name such as Docker -->
+    <string name="providers_refresh"></string>
+    <string name="files_title"></string>
+    <string name="files_search"></string>
+    <string name="files_new_name"></string>
+    <string name="files_new_hint"></string>
+    <!-- Button -->
+    <string name="files_create"></string>
+    <string name="files_new"></string>
+    <string name="files_new_body"></string>
+    <string name="files_empty"></string>
+    <string name="files_no_match"></string>
+    <string name="routes_delete_consequence"></string>
+    <!-- Section heading for the list of countries traffic comes from -->
+    <string name="geo_title"></string>
+    <plurals name="geo_more">
+    </plurals>
+    <string name="nav_open_menu"></string>
+    <string name="state_copy_details"></string>
+    <string name="state_details_copied"></string>
+    <!-- Read aloud for the map -->
+    <string name="geo_map_empty"></string>
+    <!-- Read aloud for the map -->
+    <plurals name="geo_map_countries">
+    </plurals>
+    <string name="plugins_add_title"></string>
+    <string name="plugins_add_warning_title"></string>
+    <string name="plugins_add_warning_body"></string>
+    <string name="plugins_add_step_static"></string>
+    <string name="plugins_add_step_static_help"></string>
+    <string name="plugins_add_step_middleware"></string>
+    <!-- Keep {{ }} exactly as it is -->
+    <string name="plugins_add_step_middleware_help"></string>
+    <string name="plugins_add_file"></string>
+    <string name="plugins_add_file_help"></string>
+    <string name="plugins_edit_title"></string>
+    <!-- Label for the Go module path of a plugin -->
+    <string name="plugins_module"></string>
+    <string name="plugins_restart_title"></string>
+    <string name="plugins_restart_body"></string>
+    <string name="plugins_restart_now"></string>
+    <string name="plugins_remove_title"></string>
+    <string name="plugins_remove_body"></string>
+    <string name="plugins_add"></string>
+    <string name="plugins_search"></string>
+    <string name="plugins_refresh"></string>
+    <string name="plugins_loading"></string>
+    <string name="plugins_error_load"></string>
+    <string name="plugins_empty_server"></string>
+    <string name="plugins_empty"></string>
+    <!-- Keep experimental.plugins exactly as it is -->
+    <string name="plugins_empty_body"></string>
+    <string name="plugins_no_match"></string>
+    <!-- Lowercase: no middleware uses this plugin -->
+    <string name="plugins_not_referenced"></string>
+    <!-- Lowercase -->
+    <plurals name="plugins_used_by">
+    </plurals>
+    <string name="plugins_select"></string>
+    <string name="plugins_select_body"></string>
+    <string name="plugins_back"></string>
+    <!-- Small heading above a plugin name -->
+    <string name="plugins_kind"></string>
+    <!-- Label, followed by the newer version that is available -->
+    <string name="plugins_update"></string>
+    <!-- %1$s is a version number -->
+    <string name="plugins_update_available"></string>
+    <string name="plugins_used_by_title"></string>
+    <string name="plugins_used_by_none"></string>
+    <string name="plugins_copy_module"></string>
+    <string name="plugins_open_repo"></string>
+    <string name="plugins_error_no_snippet"></string>
+    <!-- %1$s is one plugin name or a list of names -->
+    <plurals name="plugins_installed">
+    </plurals>
+    <!-- %1$s is one plugin name or a list of names, %2$s is a file name -->
+    <plurals name="plugins_installed_with_middleware">
+    </plurals>
+    <string name="plugins_error_install"></string>
+    <string name="plugins_error_required"></string>
+    <string name="plugins_saved"></string>
+    <string name="common_error_save"></string>
+    <string name="plugins_removed"></string>
+    <string name="common_traefik_restarted"></string>
+    <string name="common_error_restart"></string>
+    <!-- Button -->
+    <string name="common_restore"></string>
+    <!-- %1$s is the name of a backup or a commit -->
+    <string name="common_restore_named_question"></string>
+    <!-- Button -->
+    <string name="common_restart_traefik"></string>
+    <string name="backups_restore_static"></string>
+    <string name="backups_restore_certs"></string>
+    <string name="backups_restore_routes"></string>
+    <string name="backups_delete_title"></string>
+    <string name="backups_restore_commit"></string>
+    <string name="backups_refresh"></string>
+    <!-- Tab: backups of the dynamic Traefik config -->
+    <string name="backups_tab_dynamic"></string>
+    <!-- Tab: backups of the static Traefik config -->
+    <string name="backups_tab_static"></string>
+    <string name="backups_tab_git" translatable="false"></string>
+    <string name="backups_restart_title_certs"></string>
+    <string name="backups_restart_title_static"></string>
+    <string name="backups_restart_body_certs"></string>
+    <string name="backups_restart_body_static"></string>
+    <string name="backups_loading"></string>
+    <string name="backups_error_load"></string>
+    <string name="backups_none"></string>
+    <!-- How many backups are stored -->
+    <plurals name="backups_kept">
+    </plurals>
+    <!-- Lowercase. %1$s is the date and time of the newest backup -->
+    <string name="backups_newest"></string>
+    <!-- Button that makes a backup now -->
+    <string name="backups_create"></string>
+    <string name="backups_certs_help"></string>
+    <string name="backups_static_agent_help"></string>
+    <string name="backups_old_agent_help"></string>
+    <string name="backups_empty_static"></string>
+    <string name="backups_empty_certs"></string>
+    <string name="backups_empty"></string>
+    <string name="backups_empty_static_body"></string>
+    <string name="backups_empty_certs_body"></string>
+    <string name="backups_empty_body"></string>
+    <string name="backups_section_static"></string>
+    <string name="backups_section_certs"></string>
+    <string name="backups_section_dynamic"></string>
+    <string name="backups_git_loading"></string>
+    <string name="backups_git_error"></string>
+    <string name="backups_git_unconfigured"></string>
+    <string name="backups_git_unconfigured_body"></string>
+    <string name="backups_git_on"></string>
+    <!-- Git backup is set up but automatic pushes are turned off -->
+    <string name="backups_git_off"></string>
+    <!-- Lowercase. %1$s is a Git branch name -->
+    <string name="backups_git_branch"></string>
+    <!-- Lowercase -->
+    <string name="backups_git_nothing_pushed"></string>
+    <!-- Button that pushes the config to Git -->
+    <string name="backups_git_push"></string>
+    <string name="backups_git_off_help"></string>
+    <string name="backups_git_empty"></string>
+    <string name="backups_git_empty_body"></string>
+    <!-- Section heading, %1$d is how many commits there are -->
+    <string name="backups_git_history"></string>
+    <!-- Button that shows what a commit changed -->
+    <string name="backups_git_changes"></string>
+    <string name="backups_git_push_title"></string>
+    <string name="backups_git_push_body"></string>
+    <string name="backups_git_push_message"></string>
+    <string name="backups_git_diff_empty"></string>
+    <!-- Lowercase: a file was added in this commit -->
+    <string name="backups_diff_added"></string>
+    <!-- Lowercase: a file was deleted in this commit -->
+    <string name="backups_diff_deleted"></string>
+    <!-- Lowercase: a file was changed in this commit -->
+    <string name="backups_diff_changed"></string>
+    <!-- Lowercase: a file was renamed in this commit -->
+    <string name="backups_diff_renamed"></string>
+    <plurals name="backups_size_bytes">
+    </plurals>
+    <string name="backups_error_create"></string>
+    <string name="backups_created"></string>
+    <!-- %1$s is a file name -->
+    <string name="backups_created_file"></string>
+    <plurals name="backups_created_files">
+    </plurals>
+    <string name="backups_error_create_static"></string>
+    <string name="backups_created_static"></string>
+    <string name="backups_error_delete"></string>
+    <!-- %1$s is the name of a backup -->
+    <string name="backups_deleted"></string>
+    <string name="backups_error_restore"></string>
+    <string name="backups_restored_static"></string>
+    <!-- %1$s is the name of a backup or a commit -->
+    <string name="backups_restored"></string>
+    <string name="backups_restored_certs"></string>
+    <!-- %1$s is the reason, sent by the server -->
+    <string name="backups_restored_certs_no_restart_reason"></string>
+    <string name="backups_restored_certs_no_restart"></string>
+    <string name="backups_git_error_push"></string>
+    <string name="backups_git_pushed"></string>
+    <string name="backups_git_error_restore"></string>
+    <string name="backups_git_error_diff"></string>
+    <string name="logs_select"></string>
+    <string name="logs_select_body"></string>
+    <string name="logs_back"></string>
+    <string name="logs_unparsed_line"></string>
+    <!-- Label for the URL scheme, http or https -->
+    <string name="logs_scheme"></string>
+    <string name="logs_service_url"></string>
+    <!-- Label for the size of a response -->
+    <string name="logs_size"></string>
+    <!-- Label for the HTTP status the backend returned -->
+    <string name="logs_origin_status"></string>
+    <!-- %1$d is an HTTP status code. 0 means the backend sent no status -->
+    <string name="logs_origin_tunnel"></string>
+    <string name="logs_retries_label"></string>
+    <string name="logs_raw_line"></string>
+    <string name="logs_copy_raw"></string>
+    <string name="logs_search"></string>
+    <string name="logs_auto_refresh_stop"></string>
+    <string name="logs_auto_refresh_start"></string>
+    <string name="logs_refresh"></string>
+    <string name="logs_close_record"></string>
+    <string name="logs_loading"></string>
+    <string name="logs_error_load"></string>
+    <string name="logs_unavailable"></string>
+    <string name="logs_empty"></string>
+    <string name="logs_empty_body"></string>
+    <string name="logs_section"></string>
+    <!-- How many log lines are shown out of how many were read -->
+    <plurals name="logs_lines_of">
+    </plurals>
+    <plurals name="logs_no_lines_match">
+    </plurals>
+    <plurals name="logs_verdict_server_errors">
+    </plurals>
+    <plurals name="logs_verdict_client_errors">
+    </plurals>
+    <plurals name="logs_verdict_slow">
+    </plurals>
+    <string name="logs_verdict_no_match"></string>
+    <!-- Headline when the access log shows no errors and no slow requests -->
+    <string name="logs_verdict_clean"></string>
+    <!-- Lowercase word used in place of an HTTP status name, as in: 12 599 response -->
+    <string name="logs_status_fallback"></string>
+    <!-- The number counts requests that took over 500 milliseconds -->
+    <plurals name="logs_slow_count">
+    </plurals>
+    <plurals name="logs_retries_count">
+    </plurals>
+    <!-- Lowercase, one item in a comma-separated list -->
+    <string name="logs_calm_no_server_errors"></string>
+    <!-- Lowercase, one item in a comma-separated list -->
+    <string name="logs_calm_no_client_errors"></string>
+    <!-- Lowercase, one item in a comma-separated list. %1$s is a duration such as 240ms -->
+    <string name="logs_calm_nothing_slower"></string>
+    <!-- Lowercase, one item in a comma-separated list -->
+    <string name="logs_calm_no_timing"></string>
+    <!-- %1$s is a length of time such as 2h 10m. Window is the stretch of time the log lines cover -->
+    <string name="logs_window_span"></string>
+    <plurals name="logs_lines_count">
+    </plurals>
+    <!-- Section heading: the stretch of time and lines being looked at -->
+    <string name="logs_window"></string>
+    <!-- Lowercase -->
+    <plurals name="logs_last_lines">
+    </plurals>
+    <!-- Lowercase. %1$s is the length of time the log lines cover -->
+    <string name="logs_span"></string>
+    <!-- Requests per minute, kept short -->
+    <string name="logs_req_per_min"></string>
+    <!-- Lowercase: log lines the app could not read -->
+    <plurals name="logs_unparsed">
+    </plurals>
+    <!-- %1$s is the name of a filter such as status or path -->
+    <string name="logs_clear_filter"></string>
+    <!-- Lowercase link that removes every filter -->
+    <string name="logs_clear_all"></string>
+    <!-- Lowercase. %1$s is a length of time -->
+    <string name="logs_selection_span"></string>
+    <plurals name="logs_visible_of_last">
+    </plurals>
+    <!-- Lowercase warning: the numbers come from the most recent lines only -->
+    <string name="logs_sample"></string>
+    <!-- Lowercase status chip -->
+    <plurals name="logs_lines_parsed">
+    </plurals>
+    <!-- Lowercase status chip: durations are recorded in nanoseconds -->
+    <string name="logs_chip_ns"></string>
+    <!-- Lowercase status chip: durations are recorded in milliseconds -->
+    <string name="logs_chip_ms"></string>
+    <!-- Lowercase status chip: the log records TLS details -->
+    <string name="logs_chip_tls"></string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_no_tls"></string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_geoip_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_geoip_off"></string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_auto_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="logs_chip_auto_off"></string>
+    <string name="logs_filter_placeholder"></string>
+    <plurals name="logs_matching_lines">
+    </plurals>
+    <!-- Lowercase status chip -->
+    <string name="logs_format_none"></string>
+    <!-- Lowercase status chip -->
+    <string name="logs_format_json"></string>
+    <!-- Lowercase status chip. CLF is the Common Log Format -->
+    <string name="logs_format_clf"></string>
+    <!-- Lowercase status chip. CLF is the Common Log Format -->
+    <string name="logs_format_generic"></string>
+    <string name="logs_card_status"></string>
+    <!-- Lowercase: every response had a 2xx status code -->
+    <string name="logs_ok_all_2xx"></string>
+    <!-- How many other HTTP status codes were seen -->
+    <plurals name="logs_more_codes">
+    </plurals>
+    <!-- Lowercase: how many requests succeeded -->
+    <string name="logs_status_ok"></string>
+    <plurals name="logs_status_redirects">
+    </plurals>
+    <!-- Lowercase: no errors -->
+    <string name="logs_status_clean"></string>
+    <!-- Lowercase: status codes outside the usual ranges -->
+    <string name="logs_counter_other"></string>
+    <string name="logs_card_latency"></string>
+    <!-- Follows a number of requests -->
+    <string name="logs_flag_over_2s"></string>
+    <!-- Label shown before a count of requests -->
+    <string name="logs_flag_over_500ms"></string>
+    <!-- Follows a number -->
+    <plurals name="logs_flag_retries">
+    </plurals>
+    <!-- Lowercase: every request took under 100 milliseconds -->
+    <string name="logs_ok_all_fast"></string>
+    <!-- Lowercase -->
+    <string name="logs_latency_none_completed"></string>
+    <!-- Lowercase: this log format does not record how long a request took -->
+    <string name="logs_latency_no_duration"></string>
+    <!-- Label shown before a count of requests -->
+    <string name="logs_counter_fast"></string>
+    <!-- Label shown before its count. An upgrade is a connection upgrade such as WebSocket -->
+    <plurals name="logs_counter_upgrades">
+    </plurals>
+    <!-- Heading: HTTP methods -->
+    <string name="logs_card_methods"></string>
+    <!-- Follows a number: requests that change data, such as POST or DELETE -->
+    <string name="logs_flag_writes"></string>
+    <!-- Lowercase: no request changed data -->
+    <string name="logs_ok_reads_only"></string>
+    <!-- %1$s is an HTTP method such as GET, %2$d is its share of requests -->
+    <string name="logs_methods_risky"></string>
+    <!-- %1$s is an HTTP method such as GET, %2$d is its share of requests -->
+    <string name="logs_methods_safe"></string>
+    <!-- Lowercase -->
+    <string name="logs_methods_none"></string>
+    <string name="logs_card_domains"></string>
+    <!-- Follows a number of domains, paths, clients or services -->
+    <string name="logs_flag_failing"></string>
+    <!-- Lowercase: every request got an answer -->
+    <string name="logs_ok_all_served"></string>
+    <!-- %1$s is a name such as a domain or a path, %2$s is a number -->
+    <plurals name="logs_top_requests">
+    </plurals>
+    <!-- Lowercase -->
+    <string name="logs_domains_none"></string>
+    <string name="logs_card_paths"></string>
+    <!-- Lowercase: how many other paths have errors -->
+    <string name="logs_more_failing"></string>
+    <!-- Lowercase -->
+    <string name="logs_paths_none"></string>
+    <string name="logs_card_clients"></string>
+    <!-- Lowercase -->
+    <string name="logs_clients_none"></string>
+    <!-- Lowercase -->
+    <string name="logs_ok_all_healthy"></string>
+    <!-- Lowercase: this log format does not record the service -->
+    <string name="logs_services_none"></string>
+    <string name="logs_failures_title"></string>
+    <plurals name="logs_requests_of">
+    </plurals>
+    <!-- %1$s is an HTTP status name such as Not Found, %2$s is a URL path, %3$s is a percentage -->
+    <string name="logs_failure_line"></string>
+    <!-- Lowercase word used when an HTTP status has no name -->
+    <string name="logs_failure_fallback"></string>
+    <!-- %1$s is a number of requests -->
+    <plurals name="logs_more_methods">
+    </plurals>
+    <plurals name="logs_more_domains">
+    </plurals>
+    <plurals name="logs_more_paths">
+    </plurals>
+    <plurals name="logs_more_clients">
+    </plurals>
+    <plurals name="logs_more_services">
+    </plurals>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_public"></string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_private"></string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_loopback"></string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_link_local"></string>
+    <!-- Kind of IP address -->
+    <string name="logs_ip_unknown"></string>
+    <string name="crowdsec_add_decision"></string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_unban_named"></string>
+    <string name="crowdsec_add_value"></string>
+    <string name="crowdsec_add_value_help"></string>
+    <!-- Section heading: the kind of decision, such as ban or captcha -->
+    <string name="crowdsec_add_type"></string>
+    <string name="crowdsec_add_reason"></string>
+    <string name="crowdsec_add_reason_help"></string>
+    <!-- Button label while a decision is being saved -->
+    <string name="crowdsec_adding"></string>
+    <!-- Section heading, %1$d is how many there are -->
+    <string name="crowdsec_own_decisions"></string>
+    <plurals name="common_hours">
+    </plurals>
+    <plurals name="common_days">
+    </plurals>
+    <plurals name="common_years">
+    </plurals>
+    <string name="crowdsec_remove_title"></string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_remove_body"></string>
+    <!-- Button that removes a ban -->
+    <string name="crowdsec_unban"></string>
+    <string name="crowdsec_search"></string>
+    <string name="crowdsec_refresh"></string>
+    <string name="crowdsec_loading"></string>
+    <string name="crowdsec_unconfigured"></string>
+    <!-- Keep CROWDSEC_LAPI_URL exactly as it is -->
+    <string name="crowdsec_unconfigured_body"></string>
+    <!-- LAPI is the CrowdSec Local API -->
+    <string name="crowdsec_error_load"></string>
+    <string name="crowdsec_unavailable"></string>
+    <string name="crowdsec_card_sources"></string>
+    <!-- Lowercase. Keep /v1/alerts exactly as it is -->
+    <string name="crowdsec_sources_blind"></string>
+    <!-- Lowercase. %1$s is an IP address, %2$s is a number -->
+    <plurals name="crowdsec_worst_events">
+    </plurals>
+    <!-- Lowercase -->
+    <string name="crowdsec_no_sources"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_chip_ban_unknown"></string>
+    <!-- Lowercase. The number counts attacking sources that are not banned -->
+    <string name="crowdsec_chip_loose"></string>
+    <!-- Lowercase. The number counts attacking sources that are banned -->
+    <string name="crowdsec_chip_banned"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_chip_all_banned"></string>
+    <!-- Lowercase. The number counts sources that attacked more than once -->
+    <string name="crowdsec_chip_repeat"></string>
+    <!-- Lowercase. The number counts sources that attacked once -->
+    <string name="crowdsec_chip_one_shot"></string>
+    <string name="crowdsec_card_networks"></string>
+    <!-- Keep alert.source exactly as it is. AS is an autonomous system, a network operator -->
+    <string name="crowdsec_networks_blind"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_networks_empty"></string>
+    <!-- Lowercase. %1$s is a network name, %2$s is a number -->
+    <plurals name="crowdsec_worst_alerts">
+    </plurals>
+    <!-- CrowdSec scenarios, the attack patterns it detects -->
+    <string name="crowdsec_card_scenarios"></string>
+    <!-- Lowercase. Keep /v1/alerts exactly as it is -->
+    <string name="crowdsec_scenarios_blind"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_scenarios_empty"></string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_alerts"></string>
+    <!-- Lowercase. %1$s is the name of the worst offender -->
+    <string name="crowdsec_worst"></string>
+    <!-- Lowercase. %1$s is a number -->
+    <plurals name="crowdsec_events_rolled_up">
+    </plurals>
+    <string name="crowdsec_card_paths"></string>
+    <string name="crowdsec_card_accounts"></string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_paths_blind"></string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_accounts_blind"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_targets_empty"></string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_paths"></string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_accounts"></string>
+    <!-- Lowercase. %1$s is the path, account or route that was attacked most -->
+    <string name="crowdsec_most_wanted"></string>
+    <string name="crowdsec_card_routes"></string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_routes_blind"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_routes_empty_none"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_routes_empty_match"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_routes_empty_evidence"></string>
+    <!-- Lowercase unit shown after a large number -->
+    <string name="crowdsec_unit_routers"></string>
+    <!-- Heading: the tools and user agents attackers used -->
+    <string name="crowdsec_card_tooling"></string>
+    <!-- Lowercase. Keep alert.meta[] exactly as it is -->
+    <string name="crowdsec_tooling_blind"></string>
+    <!-- Lowercase -->
+    <string name="crowdsec_tooling_empty"></string>
+    <!-- %1$s is a number -->
+    <plurals name="crowdsec_tools">
+    </plurals>
+    <string name="crowdsec_card_bans"></string>
+    <!-- Stale means the numbers are old -->
+    <string name="crowdsec_card_bans_stale"></string>
+    <!-- Lowercase. Keep /v1/decisions exactly as it is -->
+    <string name="crowdsec_bans_blind"></string>
+    <!-- Lowercase. %1$s is a number of bans -->
+    <string name="crowdsec_bans_own"></string>
+    <!-- Lowercase. The number counts bans that come from a subscribed blocklist -->
+    <string name="crowdsec_bans_subscribed"></string>
+    <!-- Legend for a grid of small squares: how many bans one square stands for -->
+    <string name="crowdsec_cell_scale"></string>
+    <!-- Tab label. %1$s is a number of alerts, or a question mark -->
+    <string name="crowdsec_tab_evidence"></string>
+    <!-- Tab label. %1$s is a number of bans, or a question mark -->
+    <string name="crowdsec_tab_bans"></string>
+    <string name="crowdsec_alerts_no_match"></string>
+    <string name="crowdsec_alerts_unavailable"></string>
+    <string name="crowdsec_decisions_none"></string>
+    <string name="crowdsec_decisions_unavailable"></string>
+    <!-- Both values are numbers -->
+    <plurals name="crowdsec_more_networks">
+    </plurals>
+    <plurals name="crowdsec_more_scenarios">
+    </plurals>
+    <plurals name="crowdsec_more_paths">
+    </plurals>
+    <plurals name="crowdsec_more_accounts">
+    </plurals>
+    <plurals name="crowdsec_more_routers">
+    </plurals>
+    <!-- Agent here is a user agent, the tool an attacker used -->
+    <plurals name="crowdsec_more_agents">
+    </plurals>
+    <string name="crowdsec_decisions_loading"></string>
+    <!-- Both values are numbers of decisions -->
+    <string name="crowdsec_decisions_showing"></string>
+    <string name="common_load_more"></string>
+    <!-- Lowercase state of an alert: the source is banned -->
+    <string name="crowdsec_alert_banned"></string>
+    <!-- Lowercase state of an alert: the source is not banned -->
+    <string name="crowdsec_alert_open"></string>
+    <string name="crowdsec_filter_route"></string>
+    <string name="crowdsec_filter_host"></string>
+    <!-- %1$s is an IP address -->
+    <string name="crowdsec_ban_named"></string>
+    <string name="crowdsec_search_placeholder"></string>
+    <!-- Headline: nobody is attacking at the moment -->
+    <string name="crowdsec_verdict_quiet"></string>
+    <!-- Headline: the server is being attacked right now -->
+    <string name="crowdsec_verdict_probed"></string>
+    <!-- Attacking sources -->
+    <plurals name="crowdsec_sources_count">
+    </plurals>
+    <plurals name="crowdsec_scenarios_count">
+    </plurals>
+    <!-- %1$s is a number -->
+    <plurals name="crowdsec_events_count">
+    </plurals>
+    <!-- Lowercase. The number counts attacking sources that have no active ban -->
+    <plurals name="crowdsec_no_active_ban">
+    </plurals>
+    <!-- Lowercase -->
+    <string name="crowdsec_no_alerts_window"></string>
+    <!-- Lowercase. %1$s is a length of time such as 2h 10m -->
+    <string name="crowdsec_span_of_alerts"></string>
+    <!-- Lowercase. %1$s is how long ago the data was read, such as 40s -->
+    <string name="crowdsec_read_ago"></string>
+    <!-- Lowercase. Keep CROWDSEC_ALERT_LIMIT exactly as it is -->
+    <string name="crowdsec_alerts_capped"></string>
+    <!-- Lowercase. %1$s is a number, or a question mark when it is not known -->
+    <plurals name="crowdsec_retained_alerts">
+    </plurals>
+    <!-- Lowercase. %1$s is a number, or a question mark when it is not known -->
+    <plurals name="crowdsec_bans_count">
+    </plurals>
+    <string name="crowdsec_filtered_by"></string>
+    <string name="crowdsec_clear_all"></string>
+    <!-- Lowercase label on the chip that shows the search text -->
+    <string name="crowdsec_facet_search"></string>
+    <!-- %1$s is the name of a filter such as country or scenario -->
+    <string name="crowdsec_remove_filter"></string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_decision_added"></string>
+    <string name="crowdsec_error_add"></string>
+    <!-- %1$s is an IP address or a range -->
+    <string name="crowdsec_unbanned"></string>
+    <string name="crowdsec_error_delete"></string>
+    <!-- State of a route or an option -->
+    <string name="common_enabled"></string>
+    <!-- State of a route or an option -->
+    <string name="common_disabled"></string>
+    <string name="common_yes"></string>
+    <string name="common_no"></string>
+    <!-- Filter: show everything -->
+    <string name="common_all"></string>
+    <!-- How many more items there are than shown -->
+    <string name="common_more_count"></string>
+    <!-- %1$s is a host name -->
+    <string name="common_open_named"></string>
+    <!-- Lowercase value: the default setting is used -->
+    <string name="common_default"></string>
+    <!-- Read aloud for the button that folds a section -->
+    <string name="common_collapse"></string>
+    <!-- Read aloud for the button that unfolds a section -->
+    <string name="common_expand"></string>
+    <!-- First choice in a dropdown: nothing picked -->
+    <string name="common_none_option"></string>
+    <!-- Button -->
+    <string name="common_create"></string>
+    <string name="common_label_config_file"></string>
+    <string name="common_label_domains"></string>
+    <!-- Label for the priority of a Traefik router -->
+    <string name="common_label_priority"></string>
+    <string name="common_label_type"></string>
+    <!-- Label for the health of backend servers -->
+    <string name="common_label_health"></string>
+    <!-- A Traefik certificate resolver -->
+    <string name="common_label_cert_resolver"></string>
+    <!-- A Traefik option, passHostHeader -->
+    <string name="common_label_pass_host_header"></string>
+    <string name="common_label_port"></string>
+    <!-- Label for the URL scheme, http or https -->
+    <string name="common_label_scheme"></string>
+    <string name="common_label_error"></string>
+    <string name="common_label_timeout"></string>
+    <!-- Label for how often something is checked -->
+    <string name="common_label_interval"></string>
+    <string name="routes_select"></string>
+    <string name="routes_select_body"></string>
+    <string name="routes_back"></string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_disable_named"></string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_enable_named"></string>
+    <!-- Heading: whether the route answers -->
+    <string name="routes_reachability"></string>
+    <!-- Shown while a route is being pinged -->
+    <string name="routes_ping_checking"></string>
+    <!-- Lowercase result of a ping: some backend servers are down -->
+    <string name="routes_ping_degraded"></string>
+    <!-- Lowercase result of a ping -->
+    <string name="routes_ping_reachable"></string>
+    <!-- Lowercase result of a ping -->
+    <string name="routes_ping_unreachable"></string>
+    <!-- Button that checks whether the route answers -->
+    <string name="routes_ping"></string>
+    <string name="routes_ping_again"></string>
+    <!-- Label, followed by the result of the last health check -->
+    <string name="routes_health_checked"></string>
+    <!-- Label, followed by the servers that do not answer -->
+    <string name="routes_health_down_servers"></string>
+    <!-- Label for an extra remark -->
+    <string name="routes_health_note"></string>
+    <string name="routes_health_unverified"></string>
+    <!-- Label: where the health result comes from -->
+    <string name="routes_health_source"></string>
+    <string name="routes_health_source_traefik"></string>
+    <string name="routes_health_source_servers"></string>
+    <string name="routes_health_source_ping"></string>
+    <string name="routes_health_source_self"></string>
+    <string name="routes_details_title"></string>
+    <!-- Label for the TLS options profile of a route -->
+    <string name="routes_tls_options"></string>
+    <!-- Label: skip checking the TLS certificate of the backend -->
+    <string name="routes_skip_verify"></string>
+    <!-- %1$s is a middleware name. The note says it comes from the entry point, not the route -->
+    <string name="routes_middleware_entry_point"></string>
+    <string name="routes_no_middlewares"></string>
+    <!-- A Traefik service type -->
+    <string name="routes_load_balancer"></string>
+    <!-- Label for a backend server -->
+    <string name="routes_server"></string>
+    <!-- Label for one of several backend servers -->
+    <string name="routes_server_numbered"></string>
+    <string name="routes_edit"></string>
+    <string name="routes_delete"></string>
+    <string name="routes_edit_raw"></string>
+    <string name="routes_copy_target"></string>
+    <string name="routes_flow_title"></string>
+    <string name="routes_add"></string>
+    <string name="routes_form_select_file"></string>
+    <plurals name="routes_form_files">
+    </plurals>
+    <!-- Link that lets the user pick another config file -->
+    <string name="routes_form_change_file"></string>
+    <string name="routes_form_name"></string>
+    <string name="routes_form_rename_help"></string>
+    <string name="routes_form_rule_advanced"></string>
+    <!-- Choice: build the routing rule from a subdomain and domains instead of writing it by hand -->
+    <string name="routes_form_rule_simple"></string>
+    <string name="routes_form_subdomain"></string>
+    <string name="routes_form_subdomain_help"></string>
+    <string name="routes_form_add_domain"></string>
+    <string name="routes_form_sni_rule"></string>
+    <!-- Keep HostSNI(`*`) exactly as it is -->
+    <string name="routes_form_sni_help"></string>
+    <string name="routes_form_udp_help"></string>
+    <!-- Choice: list the backend servers here -->
+    <string name="routes_form_backends_build"></string>
+    <!-- Choice: point the route at an existing Traefik service -->
+    <string name="routes_form_backends_service"></string>
+    <string name="routes_form_select_service"></string>
+    <!-- %1$s is a Traefik service type such as weighted or mirroring -->
+    <string name="routes_form_service_owned"></string>
+    <!-- %1$s is a Traefik service type such as weighted or mirroring -->
+    <string name="routes_form_service_external"></string>
+    <string name="routes_form_backends"></string>
+    <!-- Label: whether a backend is an address or a Traefik service -->
+    <string name="routes_form_backend_kind"></string>
+    <!-- Label: the share of traffic that is mirrored -->
+    <string name="routes_form_percent"></string>
+    <!-- Label: the weight of a backend in load balancing -->
+    <string name="routes_form_weight"></string>
+    <string name="routes_form_remove_backend"></string>
+    <string name="routes_form_failover_help"></string>
+    <string name="routes_form_add_backend"></string>
+    <string name="routes_form_combine"></string>
+    <string name="routes_form_composite_warning"></string>
+    <string name="routes_form_load_balancing"></string>
+    <string name="routes_form_sticky"></string>
+    <string name="routes_form_cookie_name"></string>
+    <string name="routes_form_cookie_secure"></string>
+    <string name="routes_form_cookie_http_only"></string>
+    <string name="routes_form_health_check"></string>
+    <string name="routes_form_priority"></string>
+    <string name="routes_form_priority_help"></string>
+    <string name="routes_form_entry_points_help"></string>
+    <string name="routes_form_tls_title"></string>
+    <string name="routes_form_tls_none"></string>
+    <!-- TLS passthrough: Traefik forwards the encrypted traffic without opening it -->
+    <string name="routes_form_tls_passthrough"></string>
+    <string name="routes_form_tls_enable"></string>
+    <string name="routes_form_resolver_none"></string>
+    <string name="routes_form_tls_options"></string>
+    <string name="routes_form_tls_options_none"></string>
+    <string name="routes_form_skip_verify"></string>
+    <string name="routes_form_streaming"></string>
+    <string name="routes_form_wildcard"></string>
+    <string name="routes_form_cert_domain"></string>
+    <string name="routes_form_cert_domain_help"></string>
+    <string name="routes_form_extra_domains"></string>
+    <string name="routes_form_extra_domains_help"></string>
+    <string name="routes_form_preset"></string>
+    <string name="routes_form_preset_collapse"></string>
+    <string name="routes_form_preset_expand"></string>
+    <string name="routes_form_preset_custom"></string>
+    <!-- A security header setting. Keep Content-Type and nosniff as they are -->
+    <string name="routes_form_preset_nosniff"></string>
+    <!-- A security header setting: forbid showing the site in a frame -->
+    <string name="routes_form_preset_frame_deny"></string>
+    <string name="routes_form_preset_referrer"></string>
+    <string name="routes_form_preset_permissions"></string>
+    <string name="routes_error_save"></string>
+    <string name="routes_raw_title"></string>
+    <string name="routes_raw_error_load"></string>
+    <string name="routes_raw_error_empty"></string>
+    <string name="routes_raw_error_save"></string>
+    <!-- Asked after a route is deleted -->
+    <plurals name="routes_cert_offer_title">
+    </plurals>
+    <!-- %1$s is one domain or a list of domains, %2$s is the name of the deleted route -->
+    <string name="routes_cert_offer_body"></string>
+    <string name="routes_new"></string>
+    <string name="routes_error_load"></string>
+    <string name="routes_empty_body"></string>
+    <string name="routes_search"></string>
+    <string name="routes_refresh"></string>
+    <!-- Filter: routes that are serving traffic -->
+    <string name="routes_filter_active"></string>
+    <!-- Filter: routes that are not serving traffic -->
+    <string name="routes_filter_inactive"></string>
+    <!-- Lowercase result of a ping: the route points at the server Traefik Manager runs on -->
+    <string name="routes_ping_self"></string>
+    <!-- Lowercase -->
+    <plurals name="routes_ping_servers_up">
+    </plurals>
+    <!-- Lowercase -->
+    <string name="routes_ping_some_down"></string>
+    <string name="routes_ping_no_response"></string>
+    <string name="routes_ping_failed"></string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_disabled_named"></string>
+    <!-- %1$s is the name of a route -->
+    <string name="routes_enabled_named"></string>
+    <string name="routes_error_toggle"></string>
+    <!-- %1$s is the name of the route or middleware that was deleted -->
+    <string name="routes_deleted_named"></string>
+    <string name="routes_error_delete"></string>
+    <!-- Lowercase -->
+    <string name="common_error_unknown"></string>
+    <!-- %1$s is a technical error message -->
+    <string name="routes_error_unreadable"></string>
+    <string name="services_select"></string>
+    <string name="services_select_body"></string>
+    <string name="services_back"></string>
+    <string name="services_details_title"></string>
+    <!-- Label, followed by who manages the service -->
+    <string name="services_managed"></string>
+    <!-- Lowercase value for the label Managed -->
+    <string name="services_managed_here"></string>
+    <!-- Lowercase value for the label Managed -->
+    <string name="services_managed_file"></string>
+    <!-- Status of a service: everything works -->
+    <string name="services_health_ok"></string>
+    <!-- Status of a service -->
+    <string name="services_health_warning"></string>
+    <string name="services_errors_title"></string>
+    <string name="services_servers_title"></string>
+    <string name="services_servers_none"></string>
+    <!-- State of a backend server: it answers -->
+    <string name="services_server_up"></string>
+    <!-- State of a backend server: it does not answer -->
+    <string name="services_server_down"></string>
+    <!-- State of a backend server: no health check runs on it -->
+    <string name="services_server_unchecked"></string>
+    <!-- Heading: the backends a composite service sends traffic to -->
+    <string name="services_targets_title"></string>
+    <string name="services_used_by_title"></string>
+    <string name="services_used_by_none"></string>
+    <string name="services_copy_urls"></string>
+    <string name="services_stop_managing"></string>
+    <string name="services_start_managing"></string>
+    <string name="services_edit"></string>
+    <string name="services_delete"></string>
+    <string name="services_error_no_name"></string>
+    <string name="services_error_no_backend"></string>
+    <string name="services_error_no_address"></string>
+    <string name="services_new"></string>
+    <!-- Highest random weight is a Traefik service type -->
+    <string name="services_hrw_read_only"></string>
+    <string name="services_form_file_help"></string>
+    <string name="services_form_help_mirroring"></string>
+    <string name="services_form_help_failover"></string>
+    <string name="services_form_help_load_balancer"></string>
+    <string name="services_form_help_weighted"></string>
+    <string name="services_form_health_enable"></string>
+    <string name="services_form_health_enable_help"></string>
+    <string name="services_form_path_placeholder"></string>
+    <!-- Label for the HTTP method of the health check -->
+    <string name="services_form_method"></string>
+    <string name="services_form_status"></string>
+    <!-- Lowercase -->
+    <string name="services_form_status_placeholder"></string>
+    <string name="services_form_unhealthy_interval"></string>
+    <!-- Lowercase -->
+    <string name="services_form_unhealthy_interval_placeholder"></string>
+    <!-- Lowercase -->
+    <string name="services_form_port_placeholder"></string>
+    <string name="services_form_host_header"></string>
+    <!-- Label for the health check mode, http or grpc -->
+    <string name="services_form_mode"></string>
+    <string name="services_form_follow_redirects"></string>
+    <!-- Label for the name of an HTTP header -->
+    <string name="services_form_header"></string>
+    <!-- Label for the value of an HTTP header -->
+    <string name="services_form_header_value"></string>
+    <string name="services_form_remove_header"></string>
+    <string name="services_form_add_header"></string>
+    <!-- Label for the address of a backend server -->
+    <string name="services_form_address"></string>
+    <string name="services_form_remove_backend"></string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_delete_body"></string>
+    <string name="services_blocked_title"></string>
+    <!-- %2$s is a list of route names -->
+    <plurals name="services_blocked_routes">
+    </plurals>
+    <!-- %1$s is a list of service names -->
+    <string name="services_blocked_parents"></string>
+    <string name="services_delete_anyway"></string>
+    <string name="services_keep"></string>
+    <string name="services_add"></string>
+    <!-- Keep TRAEFIK_API_URL and api: {} exactly as they are -->
+    <string name="services_unreachable_body"></string>
+    <string name="services_empty"></string>
+    <string name="services_empty_body"></string>
+    <string name="services_no_match"></string>
+    <string name="services_no_match_body"></string>
+    <string name="services_search"></string>
+    <string name="services_refresh"></string>
+    <!-- Filter: services with warnings -->
+    <string name="services_filter_warnings"></string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_saved"></string>
+    <string name="services_error_save"></string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_deleted"></string>
+    <string name="services_error_delete"></string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_now_managed"></string>
+    <!-- %1$s is the name of a service -->
+    <string name="services_no_longer_managed"></string>
+    <string name="services_error_ownership"></string>
+    <!-- %1$s is a technical error message -->
+    <string name="services_error_unreadable"></string>
+    <string name="middlewares_select"></string>
+    <string name="middlewares_select_body"></string>
+    <string name="middlewares_back"></string>
+    <!-- Label for the type of a middleware, such as basicAuth -->
+    <string name="middlewares_kind"></string>
+    <!-- Label, followed by how many routes use the middleware -->
+    <string name="middlewares_usage"></string>
+    <!-- Lowercase: no route uses this middleware -->
+    <string name="middlewares_unused"></string>
+    <!-- Lowercase -->
+    <plurals name="middlewares_used_by">
+    </plurals>
+    <string name="middlewares_configuration"></string>
+    <string name="middlewares_edit"></string>
+    <string name="middlewares_delete"></string>
+    <string name="middlewares_copy_yaml"></string>
+    <string name="middlewares_add"></string>
+    <!-- Keep ipAllowList and inFlightConn exactly as they are -->
+    <string name="middlewares_form_tcp_help"></string>
+    <string name="middlewares_form_rename_help"></string>
+    <!-- A ready-made starting point for a middleware -->
+    <string name="middlewares_template"></string>
+    <!-- Template choice: write the middleware by hand -->
+    <string name="middlewares_template_custom"></string>
+    <!-- Link that lets the user pick another template -->
+    <string name="middlewares_template_change"></string>
+    <!-- Choice: fill in a guided form instead of writing YAML -->
+    <string name="middlewares_form_wizard"></string>
+    <string name="middlewares_form_wizard_empty"></string>
+    <string name="middlewares_form_yaml_title"></string>
+    <string name="middlewares_form_yaml_help"></string>
+    <string name="middlewares_form_one_per_line"></string>
+    <!-- Heading and button: make a password entry for basic or digest auth -->
+    <string name="middlewares_generate"></string>
+    <!-- Keep user:realm:md5 exactly as it is -->
+    <string name="middlewares_generate_help_digest"></string>
+    <!-- Keep user:hash exactly as it is -->
+    <string name="middlewares_generate_help_basic"></string>
+    <string name="middlewares_generate_username"></string>
+    <string name="middlewares_generate_password"></string>
+    <!-- The realm of HTTP digest authentication -->
+    <string name="middlewares_generate_realm"></string>
+    <!-- Button label while an entry is being made -->
+    <string name="middlewares_generating"></string>
+    <string name="middlewares_template_custom_body"></string>
+    <string name="middlewares_my_templates"></string>
+    <!-- %1$s is the name of a middleware -->
+    <string name="middlewares_error_load_named"></string>
+    <string name="middlewares_error_generate"></string>
+    <string name="middlewares_error_save"></string>
+    <string name="middlewares_error_no_file"></string>
+    <string name="middlewares_error_no_user"></string>
+    <string name="middlewares_error_no_address"></string>
+    <string name="middlewares_error_no_gatekeeper"></string>
+    <string name="middlewares_templates_delete"></string>
+    <string name="middlewares_templates_delete_body"></string>
+    <string name="middlewares_templates_title"></string>
+    <string name="middlewares_templates_add"></string>
+    <string name="middlewares_templates_edit"></string>
+    <!-- Read aloud for the back arrow -->
+    <string name="common_back"></string>
+    <string name="middlewares_templates_help"></string>
+    <string name="middlewares_templates_empty"></string>
+    <string name="middlewares_templates_empty_body"></string>
+    <!-- %1$s is the name of the thing being deleted -->
+    <string name="common_delete_named"></string>
+    <string name="middlewares_templates_name_placeholder"></string>
+    <string name="middlewares_templates_error_no_name"></string>
+    <string name="middlewares_templates_created"></string>
+    <string name="middlewares_templates_updated"></string>
+    <string name="middlewares_templates_error_save"></string>
+    <string name="middlewares_templates_deleted"></string>
+    <string name="middlewares_templates_error_delete"></string>
+    <string name="middlewares_delete_consequence"></string>
+    <!-- %1$s is a list of route names -->
+    <string name="middlewares_blocked_routes"></string>
+    <string name="middlewares_error_load"></string>
+    <string name="middlewares_no_match"></string>
+    <string name="middlewares_empty_body"></string>
+    <string name="middlewares_search"></string>
+    <string name="middlewares_clear_filter"></string>
+    <string name="middlewares_refresh"></string>
+    <string name="middlewares_no_search_match"></string>
+    <string name="middlewares_error_delete"></string>
+    <string name="settings_back"></string>
+    <string name="settings_connection_title"></string>
+    <string name="settings_connection_subtitle"></string>
+    <string name="settings_servers_title"></string>
+    <string name="settings_servers_subtitle"></string>
+    <string name="settings_auth_title"></string>
+    <string name="settings_auth_subtitle"></string>
+    <string name="settings_notifications_title"></string>
+    <string name="settings_notifications_subtitle"></string>
+    <string name="settings_static_title"></string>
+    <string name="settings_static_subtitle"></string>
+    <string name="settings_appearance_title"></string>
+    <string name="settings_appearance_subtitle"></string>
+    <string name="settings_diagnostics_title"></string>
+    <string name="settings_diagnostics_subtitle"></string>
+    <string name="settings_about_title"></string>
+    <string name="settings_about_subtitle"></string>
+    <!-- Section heading, %1$s is the name of the selected server -->
+    <string name="settings_server_section"></string>
+    <string name="settings_agent_help"></string>
+    <string name="settings_app_section"></string>
+    <string name="settings_disconnect"></string>
+    <string name="settings_disconnect_body"></string>
+    <!-- Keep GPL-3.0 and xyzlab.dev as they are -->
+    <string name="about_licence_line"></string>
+    <!-- Label for the version of this app -->
+    <string name="about_app"></string>
+    <!-- Label for the version of the Traefik Manager server -->
+    <string name="about_manager"></string>
+    <string name="about_licences"></string>
+    <string name="appearance_theme"></string>
+    <!-- Theme choice -->
+    <string name="appearance_theme_light"></string>
+    <!-- Theme choice -->
+    <string name="appearance_theme_dark"></string>
+    <!-- Theme choice: follow the device setting -->
+    <string name="appearance_theme_system"></string>
+    <string name="appearance_dynamic"></string>
+    <string name="appearance_dynamic_body"></string>
+    <string name="appearance_dynamic_unsupported"></string>
+    <string name="appearance_navigation"></string>
+    <string name="appearance_hide_nav"></string>
+    <string name="appearance_hide_nav_body"></string>
+    <string name="appearance_nav_items"></string>
+    <string name="appearance_nav_items_body"></string>
+    <string name="appearance_density_body"></string>
+    <!-- Layout choice: apps listed as rows -->
+    <string name="appearance_density_rows"></string>
+    <!-- Layout choice: apps shown as a grid of icons -->
+    <string name="appearance_density_icons"></string>
+    <string name="appearance_security"></string>
+    <string name="appearance_lock"></string>
+    <string name="appearance_lock_unavailable"></string>
+    <string name="appearance_lock_on"></string>
+    <string name="appearance_lock_off"></string>
+    <string name="appearance_local_note"></string>
+    <string name="common_refresh"></string>
+    <string name="diagnostics_unavailable"></string>
+    <!-- Keep ipAllowList as it is -->
+    <string name="diagnostics_help"></string>
+    <string name="diagnostics_address"></string>
+    <!-- Label for the IP address the server uses for this device -->
+    <string name="diagnostics_effective_ip"></string>
+    <!-- Label for the kind of IP address, such as public or private -->
+    <string name="diagnostics_class"></string>
+    <!-- Label for the address that connected to the server directly -->
+    <string name="diagnostics_socket_peer"></string>
+    <string name="diagnostics_peer_class"></string>
+    <string name="diagnostics_proxy_chain"></string>
+    <plurals name="diagnostics_proxy_hops">
+    </plurals>
+    <string name="diagnostics_peer_trusted"></string>
+    <string name="diagnostics_peer_untrusted"></string>
+    <!-- %1$s is a list of proxy addresses -->
+    <string name="diagnostics_trusted"></string>
+    <!-- Keep X-Forwarded-For as it is -->
+    <string name="diagnostics_no_chain"></string>
+    <!-- Section heading: HTTP headers -->
+    <string name="diagnostics_headers"></string>
+    <string name="diagnostics_error_too_old"></string>
+    <string name="diagnostics_error_load"></string>
+    <string name="push_error_blocked"></string>
+    <string name="notifications_delete_title"></string>
+    <string name="notifications_clear_title"></string>
+    <string name="notifications_clear_body"></string>
+    <string name="notifications_clear_all"></string>
+    <!-- Button that marks every notification as read -->
+    <string name="notifications_mark_read"></string>
+    <string name="notifications_refresh"></string>
+    <string name="notifications_clear"></string>
+    <string name="notifications_error_load"></string>
+    <string name="notifications_empty"></string>
+    <string name="notifications_empty_body"></string>
+    <string name="notifications_delete"></string>
+    <string name="notifications_clock_note"></string>
+    <!-- Button that copies text to the clipboard -->
+    <string name="common_copy"></string>
+    <string name="connection_saved"></string>
+    <string name="connection_api_section"></string>
+    <string name="connection_url"></string>
+    <string name="connection_url_invalid"></string>
+    <string name="connection_url_help"></string>
+    <string name="connection_user"></string>
+    <string name="connection_password_new"></string>
+    <string name="connection_password"></string>
+    <string name="connection_password_required"></string>
+    <string name="connection_password_stored"></string>
+    <string name="connection_password_help"></string>
+    <string name="common_hide_password"></string>
+    <string name="common_show_password"></string>
+    <string name="connection_test_help"></string>
+    <string name="connection_test"></string>
+    <string name="connection_testing"></string>
+    <!-- %1$s is a version number -->
+    <string name="connection_test_ok"></string>
+    <string name="connection_defaults"></string>
+    <string name="connection_resolvers"></string>
+    <string name="connection_defaults_help"></string>
+    <string name="connection_error_load"></string>
+    <string name="connection_error_no_response"></string>
+    <string name="connection_error_save"></string>
+    <string name="connection_error_host"></string>
+    <string name="connection_error_url"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_rename_title"></string>
+    <!-- Button -->
+    <string name="servers_rename"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_remove_title"></string>
+    <string name="servers_remove_body"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_rotate_title"></string>
+    <string name="servers_rotate_body"></string>
+    <string name="servers_rotate_confirm"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_key_title_new"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_key_title"></string>
+    <string name="servers_key_body"></string>
+    <string name="servers_key_body_rotated"></string>
+    <!-- Button that closes the dialog showing a new key -->
+    <string name="servers_key_saved"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_install_title"></string>
+    <string name="servers_install_body"></string>
+    <string name="servers_add"></string>
+    <string name="servers_help"></string>
+    <!-- Section heading, %1$d is how many agents there are -->
+    <string name="servers_agents_title"></string>
+    <string name="servers_empty"></string>
+    <string name="servers_empty_body"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_configure_named"></string>
+    <string name="servers_install_snippet"></string>
+    <string name="servers_rotate"></string>
+    <string name="servers_agent_url"></string>
+    <string name="servers_agent_url_help"></string>
+    <string name="servers_name_empty"></string>
+    <string name="servers_switched_to_host"></string>
+    <string name="servers_error_load"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_added"></string>
+    <!-- %1$s is the new name of a server -->
+    <string name="servers_renamed"></string>
+    <string name="servers_error_host_remove"></string>
+    <!-- %1$s is the name of a server -->
+    <string name="servers_removed"></string>
+    <string name="servers_error_host_key"></string>
+    <string name="servers_key_rotated"></string>
+    <string name="servers_error_generic"></string>
+    <plurals name="common_minutes">
+    </plurals>
+    <plurals name="common_seconds">
+    </plurals>
+    <!-- Dialog title, followed by a list of push apps to choose from -->
+    <string name="push_pick_title"></string>
+    <string name="channels_remove_title"></string>
+    <!-- %1$s is the name of a channel -->
+    <string name="channels_remove_body_push"></string>
+    <!-- %1$s is the name of a channel -->
+    <string name="channels_remove_body"></string>
+    <string name="channels_add"></string>
+    <string name="push_section"></string>
+    <string name="push_title"></string>
+    <!-- UnifiedPush and the app names stay as they are -->
+    <string name="push_no_distributor"></string>
+    <!-- %1$s is the name of a push app -->
+    <string name="push_registered_named"></string>
+    <!-- The distributor is the push app that delivers notifications -->
+    <string name="push_registered"></string>
+    <string name="push_waiting"></string>
+    <string name="push_off"></string>
+    <string name="route_checks_section"></string>
+    <string name="route_checks_title"></string>
+    <string name="route_checks_body"></string>
+    <!-- Label, followed by how often routes are checked, such as 5 minutes -->
+    <string name="route_checks_every"></string>
+    <!-- Section heading, %1$d is how many channels there are -->
+    <string name="channels_title"></string>
+    <string name="channels_help"></string>
+    <string name="channels_empty"></string>
+    <string name="channels_empty_body"></string>
+    <string name="webhook_legacy_help"></string>
+    <string name="webhook_section"></string>
+    <string name="webhook_url"></string>
+    <!-- Label for the service a webhook goes to, such as Discord or Slack -->
+    <string name="webhook_provider"></string>
+    <string name="webhook_password"></string>
+    <string name="webhook_password_help"></string>
+    <string name="webhook_test"></string>
+    <string name="webhook_test_ok"></string>
+    <string name="webhook_test_ok_body"></string>
+    <string name="notifications_bell_note"></string>
+    <!-- Lowercase tag on the channel that pushes to this phone -->
+    <string name="channels_this_device"></string>
+    <!-- %1$s is a list of the fields that are still empty -->
+    <string name="channels_needs"></string>
+    <!-- %1$s is the name of a channel -->
+    <string name="channels_test_named"></string>
+    <string name="route_checks_error_save"></string>
+    <string name="notifications_deleted"></string>
+    <string name="notifications_error_delete"></string>
+    <string name="notifications_cleared"></string>
+    <string name="notifications_error_clear"></string>
+    <string name="webhook_error_not_delivered"></string>
+    <string name="webhook_error_delivery"></string>
+    <string name="webhook_saved"></string>
+    <string name="webhook_error_save"></string>
+    <string name="channels_add_title"></string>
+    <string name="channels_edit_title"></string>
+    <string name="channels_name_placeholder"></string>
+    <string name="channels_name_help"></string>
+    <string name="channels_type_help"></string>
+    <!-- HTTP basic authentication -->
+    <string name="channels_auth_section"></string>
+    <string name="channels_auth_help"></string>
+    <string name="channels_auth_placeholder"></string>
+    <string name="channels_delivery_section"></string>
+    <string name="channels_enabled_body"></string>
+    <string name="channels_categories"></string>
+    <string name="channels_categories_help"></string>
+    <string name="channels_severity"></string>
+    <string name="channels_severity_help"></string>
+    <!-- Label: whether events are sent one by one or collected into one message -->
+    <string name="channels_digest"></string>
+    <string name="channels_digest_help"></string>
+    <string name="channels_quiet"></string>
+    <string name="channels_quiet_help"></string>
+    <!-- Label for the start time of quiet hours -->
+    <string name="channels_quiet_from"></string>
+    <!-- Label for the end time of quiet hours -->
+    <string name="channels_quiet_to"></string>
+    <!-- Lowercase word between the start and end time of quiet hours -->
+    <string name="channels_quiet_between"></string>
+    <string name="channels_quiet_clear"></string>
+    <string name="channels_break_through"></string>
+    <string name="channels_break_through_body"></string>
+    <!-- Button that sends a test message -->
+    <string name="channels_test"></string>
+    <string name="channels_test_ok"></string>
+    <!-- Button that confirms the picked time -->
+    <string name="channels_quiet_set"></string>
+    <string name="channels_error_load"></string>
+    <string name="channels_error_update"></string>
+    <string name="channels_test_delivered"></string>
+    <string name="channels_test_failed"></string>
+    <string name="channels_removed"></string>
+    <string name="channels_error_remove"></string>
+    <string name="channels_saved"></string>
+    <string name="channels_error_save"></string>
+    <string name="channels_test_failed_short"></string>
+    <!-- %1$s is a list of the fields that are still empty -->
+    <string name="channels_error_missing"></string>
+    <string name="channels_error_quiet"></string>
+    <string name="auth_sign_out_title"></string>
+    <string name="auth_sign_out_body"></string>
+    <string name="auth_sign_out_confirm"></string>
+    <string name="auth_key_new_title"></string>
+    <string name="auth_revoke_title"></string>
+    <string name="auth_revoke_body"></string>
+    <!-- %1$s is the name of an API key, usually a device name -->
+    <string name="auth_revoke_body_named"></string>
+    <!-- Button that cancels an API key -->
+    <string name="auth_revoke"></string>
+    <string name="auth_section"></string>
+    <!-- State: switched off -->
+    <string name="auth_state_off"></string>
+    <!-- State: switched on -->
+    <string name="auth_state_on"></string>
+    <!-- Keep AUTH_ENABLED as it is -->
+    <string name="auth_note_env"></string>
+    <string name="auth_note_no_password"></string>
+    <string name="auth_note_open"></string>
+    <string name="auth_note_required"></string>
+    <!-- Two-factor authentication -->
+    <string name="auth_otp"></string>
+    <string name="auth_otp_note"></string>
+    <!-- State of single sign-on: set up but not in use -->
+    <string name="auth_oidc_configured"></string>
+    <!-- State of single sign-on: turned on and in use -->
+    <string name="auth_oidc_active"></string>
+    <string name="auth_oidc_note_down"></string>
+    <string name="auth_oidc_note"></string>
+    <string name="auth_read_only_note"></string>
+    <string name="auth_sessions_title"></string>
+    <string name="auth_sessions_body"></string>
+    <string name="auth_sign_out"></string>
+    <!-- Section heading, %1$d is how many keys there are -->
+    <string name="auth_keys_title"></string>
+    <string name="auth_keys_help"></string>
+    <string name="auth_key_device"></string>
+    <string name="auth_key_device_placeholder"></string>
+    <string name="auth_key_create"></string>
+    <string name="auth_key_unnamed"></string>
+    <!-- Lowercase. Keep manager.yml as it is -->
+    <string name="auth_key_legacy"></string>
+    <!-- Lowercase. %1$s is a date and time -->
+    <string name="auth_key_created_at"></string>
+    <!-- %1$s is the name of an API key -->
+    <string name="auth_revoke_named"></string>
+    <string name="auth_error_load"></string>
+    <string name="auth_key_created"></string>
+    <string name="auth_error_create"></string>
+    <string name="auth_key_revoked"></string>
+    <string name="auth_error_revoke"></string>
+    <string name="auth_sessions_revoked"></string>
+    <string name="auth_error_sessions"></string>
+    <string name="static_http_to_https_redirect_optional"></string>
+    <string name="static_the_https_entrypoint_to_redirect_to"></string>
+    <string name="static_enable_http_3_quic"></string>
+    <string name="static_adds_http3_to_this_entrypoint"></string>
+    <!-- HTTP headers whose name turns into another header's name at the backend, for example X_Auth_User or X.Auth.User -->
+    <string name="static_alias_headers"></string>
+    <!-- Keep forwardAuth as it is. Delete is the name of an option. X_Auth_User and X.Auth.User are example header names -->
+    <string name="static_stops_aliased_header_names_from_bypassing"></string>
+    <!-- HTTP headers with an underscore in the name -->
+    <string name="static_underscore_headers"></string>
+    <!-- Keep forwardAuth as it is. Delete is the name of an option -->
+    <string name="static_stops_underscore_header_aliases_from_bypassing"></string>
+    <string name="static_trusted_ips_forwarded_headers"></string>
+    <string name="static_ips_or_cidrs_allowed_to_set"></string>
+    <string name="static_trusted_ips_proxy_protocol"></string>
+    <string name="static_enables_proxy_protocol_from_these_load"></string>
+    <string name="static_trust_forwarded_headers_from_everyone"></string>
+    <string name="static_insecure_lets_any_client_forge_its"></string>
+    <string name="static_accept_proxy_protocol_from_everyone"></string>
+    <string name="static_insecure_testing_only"></string>
+    <string name="static_middleware_chain_optional"></string>
+    <string name="static_prepended_to_every_router_here_comma"></string>
+    <string name="static_tls_on_every_router"></string>
+    <string name="static_routers_on_this_entrypoint_get_tls"></string>
+    <string name="static_default_cert_resolver_optional"></string>
+    <string name="static_default_tls_options_optional"></string>
+    <string name="static_default_entrypoint"></string>
+    <string name="static_used_by_routers_that_list_no"></string>
+    <!-- Label for the idle timeout -->
+    <string name="static_idle"></string>
+    <string name="static_forms_like_30_30s_or_1m30s"></string>
+    <string name="static_challenge_type"></string>
+    <string name="static_dns_provider"></string>
+    <string name="static_http_entrypoint"></string>
+    <string name="static_ca_server_optional"></string>
+    <string name="static_key_type_optional"></string>
+    <string name="static_eab_hmac_optional"></string>
+    <string name="static_both_are_needed_together_or_neither"></string>
+    <string name="static_dns_check_resolvers_optional"></string>
+    <string name="static_used_to_verify_the_record_before"></string>
+    <string name="static_propagation_delay_optional"></string>
+    <string name="static_disable_propagation_checks"></string>
+    <string name="static_module"></string>
+    <string name="static_local_plugin"></string>
+    <string name="static_loaded_from_the_plugins_local_directory"></string>
+    <string name="static_save_changes"></string>
+    <!-- Label for the address of the Docker socket or API -->
+    <string name="static_endpoint"></string>
+    <string name="static_expose_by_default"></string>
+    <string name="static_every_container_is_routable_unless_it"></string>
+    <!-- Label for a folder path -->
+    <string name="static_directory"></string>
+    <string name="static_providers_throttle_optional"></string>
+    <string name="static_minimum_time_between_config_reloads"></string>
+    <string name="static_api_and_dashboard"></string>
+    <string name="static_api_enabled"></string>
+    <string name="static_insecure_mode"></string>
+    <string name="static_exposes_the_api_without_authentication"></string>
+    <string name="static_logging"></string>
+    <string name="static_log_level"></string>
+    <string name="static_log_format"></string>
+    <string name="static_traefik_log_file"></string>
+    <string name="static_leave_empty_for_stdout"></string>
+    <string name="static_access_log"></string>
+    <string name="static_without_it_the_logs_tab_has"></string>
+    <string name="static_access_log_file"></string>
+    <string name="static_empty_for_stdout"></string>
+    <!-- Label for the log format -->
+    <string name="static_format"></string>
+    <string name="static_status_code_filter_optional"></string>
+    <string name="static_only_log_these_responses_comma_separated"></string>
+    <string name="static_min_duration_filter_optional"></string>
+    <string name="static_only_log_requests_slower_than_this"></string>
+    <string name="static_buffering_lines_optional"></string>
+    <string name="static_headers"></string>
+    <string name="static_ping_endpoint"></string>
+    <string name="static_prometheus_metrics"></string>
+    <!-- Request tracing, a Traefik feature -->
+    <string name="static_tracing"></string>
+    <!-- The Traefik dashboard, a web page Traefik serves -->
+    <string name="static_dashboard"></string>
+    <!-- Keep /ping as it is -->
+    <string name="static_ping_help"></string>
+    <string name="static_service_name_optional"></string>
+    <string name="static_sample_rate_optional"></string>
+    <string name="static_between_0_and_1"></string>
+    <string name="static_otlp_http_endpoint_optional"></string>
+    <string name="static_defaults_to_localhost_4318"></string>
+    <string name="static_check_for_new_traefik_versions"></string>
+    <string name="static_send_anonymous_usage_statistics"></string>
+    <string name="static_default_rule_syntax"></string>
+    <string name="static_only_change_this_while_migrating_rules"></string>
+    <string name="static_skip_backend_tls_verification"></string>
+    <string name="static_insecure"></string>
+    <string name="static_root_cas_optional"></string>
+    <string name="static_one_path_per_line"></string>
+    <string name="static_max_idle_conns_per_host_optional"></string>
+    <string name="static_address"></string>
+    <string name="static_trusted_sources"></string>
+    <!-- Section heading -->
+    <string name="static_routing"></string>
+    <string name="static_responding_timeouts"></string>
+    <!-- Label for the read timeout -->
+    <string name="static_read"></string>
+    <!-- Label for the write timeout -->
+    <string name="static_write"></string>
+    <string name="static_email"></string>
+    <string name="static_storage_path"></string>
+    <string name="static_external_account_binding"></string>
+    <string name="static_eab_key_id_optional"></string>
+    <string name="static_dns_checks"></string>
+    <!-- Toggle: watch for changes -->
+    <string name="static_watch"></string>
+    <string name="static_reloads"></string>
+    <string name="static_debug_mode"></string>
+    <!-- Section heading: log file rotation -->
+    <string name="static_rotation"></string>
+    <string name="static_max_size_mb"></string>
+    <string name="static_max_backups"></string>
+    <string name="static_max_age_days"></string>
+    <string name="static_compress_rotated_files"></string>
+    <string name="static_only_log_retry_attempts"></string>
+    <string name="static_entrypoint_labels"></string>
+    <string name="static_router_labels"></string>
+    <string name="static_service_labels"></string>
+    <string name="static_servers_transport_defaults"></string>
+    <string name="static_forwarding_timeouts"></string>
+    <!-- Label for the timeout when connecting to a backend -->
+    <string name="static_dial"></string>
+    <string name="static_response_header"></string>
+    <string name="static_idle_connection"></string>
+    <string name="static_entrypoint_new"></string>
+    <string name="static_entrypoint_edit"></string>
+    <string name="static_entrypoint_add"></string>
+    <string name="static_resolver_new"></string>
+    <string name="static_resolver_edit"></string>
+    <string name="static_resolver_add"></string>
+    <string name="static_plugin_new"></string>
+    <!-- Keep Let's Encrypt as it is -->
+    <string name="static_ca_placeholder"></string>
+    <string name="static_api_enabled_body"></string>
+    <string name="agent_agent_url"></string>
+    <string name="agent_where_the_manager_reaches_this_agent"></string>
+    <string name="agent_listen_port"></string>
+    <string name="agent_tma_port_on_the_agent_blank"></string>
+    <string name="agent_rate_limit"></string>
+    <string name="agent_requests_a_minute_the_agent_accepts"></string>
+    <string name="agent_traefik_api_url"></string>
+    <string name="agent_where_the_agent_reaches_traefik_not"></string>
+    <string name="agent_comma_separated_offered_when_you_create"></string>
+    <string name="agent_skip_tls_verification"></string>
+    <string name="agent_only_for_a_traefik_api_behind"></string>
+    <string name="agent_backups_to_keep"></string>
+    <string name="agent_docker_host"></string>
+    <string name="agent_the_socket_proxy_for_example_tcp"></string>
+    <string name="agent_traefik_container"></string>
+    <string name="agent_the_agent_needs_var_run_docker"></string>
+    <!-- A file whose change tells a watcher to restart Traefik -->
+    <string name="agent_signal_file"></string>
+    <string name="agent_a_watcher_container_restarts_traefik_when"></string>
+    <string name="agent_lapi_url"></string>
+    <string name="agent_used_when_generating_this_agent_s"></string>
+    <string name="agent_bouncer_api_key"></string>
+    <string name="agent_machine_password"></string>
+    <string name="agent_agent"></string>
+    <string name="agent_paths_on_the_agent"></string>
+    <string name="agent_dynamic_config_directory"></string>
+    <string name="agent_backup_directory"></string>
+    <!-- Section heading: how Traefik is restarted -->
+    <string name="agent_restart"></string>
+    <string name="agent_tabs_on_this_server"></string>
+    <string name="agent_static_config_file"></string>
+    <string name="agent_plugins_directory"></string>
+    <string name="agent_machine_id"></string>
+    <string name="agent_client_certificate"></string>
+    <string name="agent_client_key"></string>
+    <string name="agent_ca_certificate"></string>
+    <!-- Restart method: Traefik is not restarted -->
+    <string name="agent_restart_none"></string>
+    <!-- Restart method: through a Docker socket proxy -->
+    <string name="agent_restart_proxy"></string>
+    <!-- Restart method: a signal file that a watcher container reacts to -->
+    <string name="agent_restart_poison"></string>
+    <!-- Restart method: through the Docker socket -->
+    <string name="agent_restart_socket"></string>
+    <string name="agent_back"></string>
+    <string name="agent_error_load"></string>
+    <string name="agent_key_stored"></string>
+    <!-- Keep /v1/decisions as it is -->
+    <string name="agent_key_help"></string>
+    <string name="agent_password_stored"></string>
+    <string name="agent_password_help"></string>
+    <string name="agent_restart_help"></string>
+    <string name="agent_tabs_help"></string>
+    <string name="agent_git_note"></string>
+    <string name="agent_error_gone"></string>
+    <string name="agent_error_required"></string>
+    <string name="agent_nothing_to_save"></string>
+    <string name="agent_saved"></string>
+    <string name="agent_error_save"></string>
+    <!-- Traefik entrypoints -->
+    <string name="static_entrypoints"></string>
+    <string name="static_no_entrypoints_configured"></string>
+    <string name="static_certificate_resolvers"></string>
+    <string name="static_no_certificate_resolvers_configured"></string>
+    <string name="static_no_plugins_installed"></string>
+    <string name="static_traffic_in"></string>
+    <!-- Section heading: settings for running Traefik -->
+    <string name="static_operations"></string>
+    <string name="static_remove_title"></string>
+    <!-- %1$s is the name of an entrypoint, resolver or plugin -->
+    <string name="static_remove_body"></string>
+    <string name="static_discard_title"></string>
+    <string name="static_discard_body"></string>
+    <!-- Button that throws away unsaved changes -->
+    <string name="static_discard"></string>
+    <string name="static_keep_editing"></string>
+    <string name="static_back_sections"></string>
+    <string name="static_raw_editor"></string>
+    <string name="static_reload"></string>
+    <string name="static_error_load"></string>
+    <string name="static_unsaved"></string>
+    <string name="static_saved_pending"></string>
+    <!-- Lowercase -->
+    <string name="static_no_address"></string>
+    <!-- Lowercase status chip. %1$s is a Traefik provider name such as docker -->
+    <string name="static_chip_off"></string>
+    <!-- Lowercase -->
+    <string name="static_no_email"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_enabled"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_disabled"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_dashboard_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_dashboard_off"></string>
+    <!-- Lowercase status chip: the API is open without authentication -->
+    <string name="static_chip_insecure_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_ping_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_ping_off"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_metrics_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_tracing_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_version_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_version_off"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_usage_on"></string>
+    <!-- Lowercase status chip -->
+    <string name="static_chip_usage_off"></string>
+    <!-- Lowercase status chip. %1$s is v2 or v3 -->
+    <string name="static_chip_rule_syntax"></string>
+    <!-- Lowercase -->
+    <string name="static_plugin_is_local"></string>
+    <string name="static_raw_note"></string>
+    <!-- %1$s is a section name such as Entrypoints -->
+    <string name="static_add_to"></string>
+    <!-- Button -->
+    <string name="common_edit"></string>
+    <string name="static_error_apply"></string>
+    <string name="static_saved"></string>
+    <string name="static_error_save"></string>
+    <!-- Name of an HTTP status code. Use the usual wording for this status in the language -->
+    <string name="http_status_100"></string>
+    <string name="http_status_101"></string>
+    <string name="http_status_103"></string>
+    <string name="http_status_200"></string>
+    <string name="http_status_201"></string>
+    <string name="http_status_202"></string>
+    <string name="http_status_204"></string>
+    <string name="http_status_206"></string>
+    <string name="http_status_301"></string>
+    <string name="http_status_302"></string>
+    <string name="http_status_303"></string>
+    <string name="http_status_304"></string>
+    <string name="http_status_307"></string>
+    <string name="http_status_308"></string>
+    <string name="http_status_400"></string>
+    <string name="http_status_401"></string>
+    <string name="http_status_402"></string>
+    <string name="http_status_403"></string>
+    <string name="http_status_404"></string>
+    <string name="http_status_405"></string>
+    <string name="http_status_406"></string>
+    <string name="http_status_407"></string>
+    <string name="http_status_408"></string>
+    <string name="http_status_409"></string>
+    <string name="http_status_410"></string>
+    <string name="http_status_411"></string>
+    <string name="http_status_413"></string>
+    <string name="http_status_414"></string>
+    <string name="http_status_415"></string>
+    <string name="http_status_418"></string>
+    <string name="http_status_421"></string>
+    <string name="http_status_422"></string>
+    <string name="http_status_426"></string>
+    <string name="http_status_429"></string>
+    <string name="http_status_431"></string>
+    <string name="http_status_451"></string>
+    <string name="http_status_500"></string>
+    <string name="http_status_501"></string>
+    <string name="http_status_502"></string>
+    <string name="http_status_503"></string>
+    <string name="http_status_504"></string>
+    <string name="http_status_505"></string>
+    <string name="http_status_507"></string>
+    <string name="http_status_511"></string>
+    <!-- Lowercase. Shown for a connection Traefik kept open with no HTTP status, such as a WebSocket -->
+    <string name="http_status_tunnel"></string>
+    <string name="providers_docker_note"></string>
+    <string name="providers_docker_empty"></string>
+    <string name="providers_kubernetes_note"></string>
+    <string name="providers_kubernetes_empty"></string>
+    <string name="providers_swarm_note"></string>
+    <string name="providers_swarm_empty"></string>
+    <string name="providers_nomad_note"></string>
+    <string name="providers_nomad_empty"></string>
+    <string name="providers_ecs_note"></string>
+    <string name="providers_ecs_empty"></string>
+    <string name="providers_consulcatalog_note"></string>
+    <string name="providers_consulcatalog_empty"></string>
+    <string name="providers_redis_note"></string>
+    <string name="providers_redis_empty"></string>
+    <string name="providers_etcd_note"></string>
+    <string name="providers_etcd_empty"></string>
+    <string name="providers_consul_note"></string>
+    <string name="providers_consul_empty"></string>
+    <string name="providers_zookeeper_note"></string>
+    <string name="providers_zookeeper_empty"></string>
+    <string name="providers_http_provider_note"></string>
+    <string name="providers_http_provider_empty"></string>
+    <!-- Name of the Traefik HTTP provider -->
+    <string name="providers_label_http"></string>
+    <string name="providers_file_external_note"></string>
+    <string name="providers_file_external_empty"></string>
+    <!-- Name of the page for file provider routes that Traefik Manager does not manage -->
+    <string name="providers_label_file_external"></string>
+    <string name="providers_internal_note"></string>
+    <string name="providers_internal_empty"></string>
+    <!-- Name of the page for routes Traefik creates itself -->
+    <string name="providers_label_internal"></string>
+    <plurals name="providers_verdict_not_serving">
+    </plurals>
+    <!-- Live means the routes are serving traffic -->
+    <plurals name="providers_verdict_live">
+    </plurals>
+    <plurals name="common_middlewares_count">
+    </plurals>
+    <string name="providers_verdict_none"></string>
+    <!-- Channel type: a plain JSON webhook -->
+    <string name="channels_kind_generic"></string>
+    <string name="channels_field_server_url"></string>
+    <string name="channels_field_app_token"></string>
+    <string name="channels_field_user_key"></string>
+    <string name="channels_field_access_token"></string>
+    <!-- Channel type: push to the Traefik Manager app on a phone -->
+    <string name="channels_kind_mobile"></string>
+    <string name="channels_field_endpoint"></string>
+    <string name="channels_field_bot_token"></string>
+    <string name="channels_field_chat_id"></string>
+    <string name="channels_help_where_notifications_are_delivered"></string>
+    <string name="channels_help_incoming_webhook_created_in_your"></string>
+    <string name="channels_help_full_topic_url_on_ntfy"></string>
+    <string name="channels_help_receives_a_json_body_you"></string>
+    <string name="channels_help_base_url_of_your_gotify"></string>
+    <string name="channels_help_application_token_from_gotify_stored"></string>
+    <string name="channels_help_application_token_from_your_pushover"></string>
+    <string name="channels_help_your_pushover_user_or_group"></string>
+    <string name="channels_help_access_token_from_your_pushbullet"></string>
+    <string name="channels_help_registered_by_the_traefik_manager"></string>
+    <string name="channels_help_token_issued_by_botfather_stored"></string>
+    <string name="channels_help_target_chat_group_or_channel"></string>
+    <!-- Notification category: changes to the Traefik config -->
+    <string name="channels_category_config"></string>
+    <!-- Notification category -->
+    <string name="channels_category_agents"></string>
+    <!-- Notification category: new versions -->
+    <string name="channels_category_updates"></string>
+    <!-- Severity level of a notification -->
+    <string name="channels_severity_info"></string>
+    <!-- Digest choice: send each event right away -->
+    <string name="channels_digest_immediate"></string>
+    <!-- Digest choice -->
+    <string name="channels_digest_hourly"></string>
+    <!-- Digest choice -->
+    <string name="channels_digest_daily"></string>
+    <string name="channels_summary_all"></string>
+    <!-- %1$s is a severity level such as Warning -->
+    <string name="channels_summary_severity"></string>
+    <string name="channels_summary_hourly"></string>
+    <string name="channels_summary_daily"></string>
+    <!-- %1$s is a time range such as 23:00-07:00 -->
+    <string name="channels_summary_quiet"></string>
+    <!-- %1$s is a time range such as 23:00-07:00 -->
+    <string name="channels_summary_quiet_break"></string>
+    <string name="mw_field_users"></string>
+    <string name="mw_field_realm_optional"></string>
+    <string name="mw_field_auth_service_url"></string>
+    <string name="mw_field_trust_forward_header"></string>
+    <string name="mw_field_auth_response_headers"></string>
+    <string name="mw_field_max_response_body_size"></string>
+    <string name="mw_field_allowed_cidrs"></string>
+    <string name="mw_field_client_ip_source"></string>
+    <string name="mw_field_trusted_hop_depth"></string>
+    <string name="mw_field_proxy_ips_to_exclude"></string>
+    <string name="mw_field_regexes"></string>
+    <string name="mw_field_regex"></string>
+    <string name="mw_field_replacement"></string>
+    <string name="mw_field_status_codes"></string>
+    <string name="mw_field_service"></string>
+    <string name="mw_field_query"></string>
+    <string name="mw_field_auto_detect_the_content_type"></string>
+    <string name="mw_field_allowed_origins"></string>
+    <string name="mw_field_pass_the_whole_certificate"></string>
+    <string name="mw_field_also_pass_selected_certificate_fields"></string>
+    <string name="mw_field_subject_common_name"></string>
+    <string name="mw_field_issuer_common_name"></string>
+    <string name="mw_field_serial_number"></string>
+    <string name="mw_field_expiry_date"></string>
+    <string name="mw_field_gatekeeper_url"></string>
+    <string name="mw_field_policy_optional"></string>
+    <string name="mw_field_forward_authorization_header"></string>
+    <string name="mw_field_provider_url"></string>
+    <string name="mw_field_client_id"></string>
+    <string name="mw_field_client_secret"></string>
+    <string name="mw_field_session_secret"></string>
+    <string name="mw_field_scopes"></string>
+    <string name="mw_field_session_max_age_seconds"></string>
+    <string name="mw_field_forward_claims_as_headers"></string>
+    <string name="mw_field_bypass_rules_optional"></string>
+    <string name="mw_field_average_req_s"></string>
+    <string name="mw_field_burst"></string>
+    <string name="mw_field_period"></string>
+    <string name="mw_field_ssl_redirect_force_https"></string>
+    <string name="mw_field_hsts_strict_transport_security"></string>
+    <string name="mw_field_hsts_max_age_seconds"></string>
+    <string name="mw_field_include_subdomains"></string>
+    <string name="mw_field_preload"></string>
+    <string name="mw_field_x_content_type_options_nosniff"></string>
+    <string name="mw_field_x_frame_options_deny"></string>
+    <string name="mw_field_same_origin_referrer_policy"></string>
+    <string name="mw_field_allowed_headers"></string>
+    <string name="mw_field_max_age_seconds"></string>
+    <string name="mw_field_add_vary_header"></string>
+    <string name="mw_field_allow_encoded_slash_2f" formatted="false"></string>
+    <string name="mw_field_allow_encoded_backslash_5c" formatted="false"></string>
+    <string name="mw_field_allow_encoded_semicolon_3b" formatted="false"></string>
+    <string name="mw_field_allow_encoded_percent_25" formatted="false"></string>
+    <string name="mw_field_allow_encoded_question_mark_3f" formatted="false"></string>
+    <string name="mw_field_allow_encoded_hash_23" formatted="false"></string>
+    <string name="mw_field_scheme"></string>
+    <string name="mw_field_permanent_redirect_301"></string>
+    <string name="mw_field_prefixes"></string>
+    <string name="mw_field_prefix"></string>
+    <string name="mw_field_path"></string>
+    <string name="mw_field_min_response_body_bytes"></string>
+    <string name="mw_field_attempts"></string>
+    <string name="mw_field_initial_interval"></string>
+    <string name="mw_field_expression"></string>
+    <string name="mw_field_max_request_body_bytes"></string>
+    <string name="mw_field_max_response_body_bytes"></string>
+    <string name="mw_field_retry_expression_optional"></string>
+    <string name="mw_field_middlewares"></string>
+    <string name="mw_field_max_in_flight_requests"></string>
+    <string name="mw_help_one_per_line_format_user_htpasswd"></string>
+    <string name="mw_help_bytes_traefik_3_7_warns_on"></string>
+    <string name="mw_help_one_per_line_the_matched_prefix"></string>
+    <string name="mw_help_capture_groups_are_1_2_and"></string>
+    <string name="mw_help_one_per_line_single_codes_or"></string>
+    <string name="mw_help_the_service_that_serves_the_error"></string>
+    <string name="mw_help_optional_status_is_replaced_with_the"></string>
+    <string name="mw_help_one_per_line_converts_grpc_web"></string>
+    <string name="mw_help_one_per_line_format_user_realm"></string>
+    <string name="mw_help_32_character_random_string"></string>
+    <string name="mw_help_one_per_line_format_name_claim"></string>
+    <string name="mw_help_regex_one_per_line"></string>
+    <string name="mw_help_responses_smaller_than_this_are_not"></string>
+    <string name="mw_help_one_per_line_applied_in_order"></string>
+    <!-- Name of a middleware template. Keep product names such as Authentik as they are -->
+    <string name="mw_template_basic_auth"></string>
+    <string name="mw_template_forward_auth"></string>
+    <string name="mw_template_ip_allow_list"></string>
+    <string name="mw_template_custom_error_pages"></string>
+    <string name="mw_template_content_type"></string>
+    <string name="mw_template_digest_auth"></string>
+    <string name="mw_template_forward_auth_authentik"></string>
+    <string name="mw_template_forward_auth_authelia"></string>
+    <string name="mw_template_forward_auth_gatekeeper"></string>
+    <string name="mw_template_oidc_auth_traefik_oidc_auth"></string>
+    <string name="mw_template_ip_allow_list_private_ranges"></string>
+    <string name="mw_template_rate_limit"></string>
+    <string name="mw_template_secure_headers"></string>
+    <string name="mw_template_cors_headers"></string>
+    <string name="mw_template_encoded_characters_traefik_3_7"></string>
+    <string name="mw_template_redirect_to_https"></string>
+    <string name="mw_template_redirect_regex"></string>
+    <string name="mw_template_strip_prefix"></string>
+    <string name="mw_template_add_prefix"></string>
+    <string name="mw_template_replace_path"></string>
+    <string name="mw_template_gzip_compress"></string>
+    <string name="mw_template_retry"></string>
+    <string name="mw_template_circuit_breaker"></string>
+    <string name="mw_template_buffering"></string>
+    <string name="mw_template_middleware_chain"></string>
+    <string name="mw_template_in_flight_limit"></string>
+    <string name="mw_template_strip_prefix_regex"></string>
+    <string name="mw_template_replace_path_regex"></string>
+    <string name="mw_template_pass_tls_client_cert"></string>
+    <string name="mw_field_direct_connection"></string>
+    <string name="mw_field_excluded_proxy_ips"></string>
+    <!-- Middleware category: authentication -->
+    <string name="middlewares_category_auth"></string>
+    <string name="middlewares_category_security"></string>
+    <string name="middlewares_category_routing"></string>
+    <string name="middlewares_category_advanced"></string>
+    <string name="names_error_empty"></string>
+    <string name="names_error_reserved"></string>
+    <string name="names_error_long"></string>
+    <string name="names_error_characters"></string>
+    <string name="middlewares_error_no_name"></string>
+    <string name="middlewares_error_empty"></string>
+    <string name="routes_error_no_name"></string>
+    <string name="routes_error_no_service"></string>
+    <string name="routes_error_backend_service"></string>
+    <string name="routes_error_no_host"></string>
+    <!-- %1$s is TCP or UDP -->
+    <string name="routes_error_no_port"></string>
+    <!-- Way of combining backends: spread traffic across them -->
+    <string name="routes_combine_load_balanced"></string>
+    <!-- A Traefik service type: traffic split by weight -->
+    <string name="services_type_weighted"></string>
+    <!-- A Traefik service type: traffic copied to other backends -->
+    <string name="services_type_mirroring"></string>
+    <!-- A Traefik service type: a second backend takes over when the first fails -->
+    <string name="services_type_failover"></string>
+    <string name="routes_combine_hint_weighted"></string>
+    <string name="routes_combine_hint_mirroring"></string>
+    <string name="routes_combine_hint_failover"></string>
+    <string name="routes_combine_hint_load_balanced"></string>
+    <string name="health_up_self"></string>
+    <plurals name="health_up_servers">
+    </plurals>
+    <!-- %1$d is a time in milliseconds -->
+    <string name="health_up_latency"></string>
+    <!-- State of a route: it answers -->
+    <string name="health_up"></string>
+    <plurals name="health_degraded_servers">
+    </plurals>
+    <!-- State of a route: some backend servers are down -->
+    <string name="health_degraded"></string>
+    <plurals name="health_down_servers">
+    </plurals>
+    <!-- %1$s is the reason, sent by the server -->
+    <string name="health_down_reason"></string>
+    <!-- State of a route: it does not answer -->
+    <string name="health_down"></string>
+    <string name="health_unchecked"></string>
+    <!-- Shown in place of a certificate that has no domain -->
+    <string name="certs_unknown"></string>
+    <!-- Lowercase -->
+    <string name="certs_expired"></string>
+    <!-- Lowercase. %1$d is a number of days and the d after it is short for days. Keep it short -->
+    <string name="certs_days_left"></string>
+    <plurals name="certs_removed">
+    </plurals>
+    <plurals name="certs_removed_no_restart">
+    </plurals>
+    <!-- %2$s is the reason, sent by the server -->
+    <plurals name="certs_removed_no_restart_reason">
+    </plurals>
+    <string name="certs_error_partial"></string>
+    <!-- Lowercase name of a filter. A CrowdSec scenario, an attack pattern -->
+    <string name="crowdsec_facet_scenario"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_network"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_country"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_path"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_account"></string>
+    <!-- Lowercase name of a filter. The tool or user agent an attacker used -->
+    <string name="crowdsec_facet_tool"></string>
+    <!-- Lowercase name of a filter. HTTP method -->
+    <string name="crowdsec_facet_method"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_route"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="crowdsec_facet_host"></string>
+    <!-- Lowercase name of a filter. Whether the source ended up banned -->
+    <string name="crowdsec_facet_outcome"></string>
+    <!-- Lowercase name of a filter. Where a ban came from -->
+    <string name="crowdsec_facet_origin"></string>
+    <!-- Lowercase name of a filter. The kind of decision, such as ban -->
+    <string name="crowdsec_facet_type"></string>
+    <!-- Lowercase. Why an app on the dashboard cannot be opened -->
+    <string name="dashboard_no_link_disabled"></string>
+    <string name="dashboard_no_link_bad_override"></string>
+    <string name="dashboard_no_link_stream"></string>
+    <string name="dashboard_no_link_no_rule"></string>
+    <string name="dashboard_no_link_wildcard"></string>
+    <string name="dashboard_no_link_no_host"></string>
+    <string name="dashboard_no_link_pattern"></string>
+    <!-- Name of the dashboard group for apps that fit no other group -->
+    <string name="dashboard_group_other"></string>
+    <string name="push_error_network"></string>
+    <!-- The distributor is the push app that delivers notifications -->
+    <string name="push_error_action"></string>
+    <!-- Keep VAPID as it is -->
+    <string name="push_error_vapid"></string>
+    <string name="push_error_register"></string>
+    <!-- Lowercase. How many backend servers answer out of the total -->
+    <string name="services_backends_active"></string>
+    <plurals name="common_servers_count">
+    </plurals>
+    <!-- Lowercase: the service uses sticky sessions -->
+    <string name="services_meta_sticky"></string>
+    <!-- Lowercase: the service has a health check -->
+    <string name="services_meta_health_check"></string>
+    <!-- %1$s is a service name, %2$d is the share of traffic copied to it -->
+    <string name="services_target_mirror"></string>
+    <!-- %1$s is the name of the service that takes over on failure -->
+    <string name="services_target_fallback"></string>
+    <!-- A Traefik service type -->
+    <string name="services_type_load_balancer"></string>
+    <!-- A Traefik service type -->
+    <string name="services_type_hrw"></string>
+    <!-- Lowercase role of the first backend in a mirroring service -->
+    <string name="services_row_serves"></string>
+    <!-- Lowercase role of a backend: it gets a copy of the traffic -->
+    <string name="services_row_mirror"></string>
+    <!-- Lowercase role of the first backend in a failover service -->
+    <string name="services_row_primary"></string>
+    <!-- Lowercase role of the backend that takes over on failure -->
+    <string name="services_row_fallback"></string>
+    <!-- Lowercase -->
+    <plurals name="health_all_servers_down">
+    </plurals>
+    <!-- Lowercase -->
+    <plurals name="health_servers_down">
+    </plurals>
+    <!-- Choice: leave headers as they are -->
+    <string name="static_option_keep_default"></string>
+    <string name="static_option_alias_delete"></string>
+    <!-- 400 is the HTTP status the request is answered with -->
+    <string name="static_option_alias_reject"></string>
+    <string name="static_option_underscore_delete"></string>
+    <!-- 400 is the HTTP status the request is answered with -->
+    <string name="static_option_underscore_reject"></string>
+    <!-- An ACME challenge type -->
+    <string name="static_option_challenge_dns"></string>
+    <!-- An ACME challenge type -->
+    <string name="static_option_challenge_http"></string>
+    <!-- An ACME challenge type -->
+    <string name="static_option_challenge_tls"></string>
+    <!-- Keep RSA4096 as it is -->
+    <string name="static_option_key_default"></string>
+    <!-- Log format choice: plain text -->
+    <string name="static_option_format_text"></string>
+    <!-- Log format choice. CLF is the Common Log Format, keep it as it is -->
+    <string name="static_option_format_clf"></string>
+    <!-- Choice: leave HTTP headers out of the access log -->
+    <string name="static_option_headers_drop"></string>
+    <!-- Choice: write HTTP headers to the access log -->
+    <string name="static_option_headers_keep"></string>
+    <!-- Choice: write HTTP header names to the access log but hide their values -->
+    <string name="static_option_headers_redact"></string>
+    <string name="static_option_syntax_v3"></string>
+    <string name="static_option_syntax_v2"></string>
+    <!-- %1$s is an error message, %2$d is the HTTP status code -->
+    <string name="common_error_http"></string>
+    <string name="error_could_not_restart_traefik"></string>
+    <!-- Shown when a static config backup is asked for on an agent server -->
+    <string name="backups_agent_static_included"></string>
+    <string name="error_could_not_save_the_dashboard"></string>
+    <string name="error_could_not_create_the_template"></string>
+    <string name="error_could_not_update_the_template"></string>
+    <string name="error_could_not_read_the_channels"></string>
+    <string name="error_could_not_save_the_channel"></string>
+    <string name="error_could_not_remove_the_channel"></string>
+    <string name="error_could_not_change_the_route"></string>
+    <string name="error_could_not_add_the_server"></string>
+    <string name="error_could_not_save_the_server"></string>
+    <string name="error_could_not_remove_the_server"></string>
+    <string name="error_could_not_rotate_the_key"></string>
+    <string name="error_the_server_did_not_return_a"></string>
+    <string name="error_a_name_and_a_url_are"></string>
+    <string name="error_the_name_cannot_be_empty"></string>
+    <string name="error_the_url_cannot_be_empty"></string>
+    <string name="error_could_not_save_the_static_config"></string>
+    <string name="error_the_restart_failed"></string>
+    <string name="error_could_not_change_the_plugin"></string>
+    <string name="routes_ping_no_host"></string>
+    <string name="certs_error_lost_connection"></string>
+    <string name="certs_note_too_old"></string>
+    <string name="crowdsec_error_empty"></string>
+    <!-- %1$s is the error message. Keep /v1/decisions and CROWDSEC_API_KEY as they are -->
+    <string name="crowdsec_hint_bouncer"></string>
+    <string name="crowdsec_error_decisions"></string>
+    <!-- Lowercase reason: Traefik reports the object as disabled -->
+    <string name="dashboard_reason_disabled"></string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_warning"></string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_no_status"></string>
+    <!-- Lowercase reason: the router is attached to no entry point -->
+    <string name="dashboard_reason_unbound"></string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_no_health_check"></string>
+    <!-- Lowercase reason: no router uses this middleware -->
+    <string name="dashboard_reason_unreferenced"></string>
+    <!-- Lowercase -->
+    <plurals name="dashboard_reason_all_down">
+    </plurals>
+    <!-- Lowercase -->
+    <plurals name="dashboard_reason_some_down">
+    </plurals>
+    <string name="dashboard_card_http"></string>
+    <string name="dashboard_card_stream"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_empty_http"></string>
+    <!-- Lowercase. Stream routers are TCP and UDP routers -->
+    <string name="dashboard_empty_stream"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_empty_services"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_empty_middlewares"></string>
+    <!-- Lowercase. The number counts routers that are serving traffic -->
+    <string name="dashboard_sub_live"></string>
+    <!-- Lowercase: every TCP and UDP router is working -->
+    <string name="dashboard_sub_forwarding"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_sub_no_health_checks"></string>
+    <!-- Lowercase -->
+    <plurals name="dashboard_backends_up">
+    </plurals>
+    <!-- Lowercase. The number counts middlewares -->
+    <string name="dashboard_sub_in_use"></string>
+    <!-- Lowercase. The number counts middlewares -->
+    <string name="dashboard_sub_unused"></string>
+    <!-- Lowercase. Follows a number -->
+    <string name="dashboard_flag_warnings"></string>
+    <!-- Lowercase. Follows a number of routers or services that carry no traffic -->
+    <string name="dashboard_flag_idle"></string>
+    <string name="dashboard_unreachable"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_sub_overview_only"></string>
+    <!-- Lowercase. How many routes are not shown because they come from other providers -->
+    <string name="dashboard_sub_hidden"></string>
+    <!-- Lowercase health label -->
+    <string name="dashboard_health_down"></string>
+    <!-- Lowercase health label -->
+    <string name="dashboard_health_healthy"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_strip_no_data"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_strip_empty"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_entry_unlisted"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_entry_unbound"></string>
+    <!-- %1$s is the name of a certificate resolver -->
+    <string name="dashboard_entry_tls_via"></string>
+    <!-- Keep certResolver as it is -->
+    <string name="dashboard_entry_tls_no_resolver"></string>
+    <!-- %1$s is the name of a TLS options profile -->
+    <string name="dashboard_entry_tls_options"></string>
+    <!-- Lowercase description of an entry point -->
+    <string name="dashboard_entry_udp"></string>
+    <!-- Lowercase description of an entry point -->
+    <string name="dashboard_entry_tcp"></string>
+    <!-- Description of an entry point -->
+    <string name="dashboard_entry_https"></string>
+    <!-- Lowercase description of an entry point -->
+    <string name="dashboard_entry_http"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_verdict_unreadable"></string>
+    <!-- An object is a router, service or middleware -->
+    <plurals name="dashboard_verdict_down">
+    </plurals>
+    <!-- Lowercase -->
+    <plurals name="dashboard_verdict_also_degraded">
+    </plurals>
+    <!-- Lowercase. Follows a headline about objects that are down -->
+    <string name="dashboard_verdict_no_traffic"></string>
+    <plurals name="dashboard_verdict_degraded">
+    </plurals>
+    <!-- Lowercase -->
+    <string name="dashboard_verdict_still_serving"></string>
+    <string name="dashboard_verdict_healthy"></string>
+    <!-- Lowercase -->
+    <string name="dashboard_verdict_clean"></string>
+    <string name="migration_carried_over"></string>
+    <string name="migration_unreadable"></string>
+    <!-- Lowercase -->
+    <string name="time_just_now"></string>
+    <!-- Lowercase, kept short. %1$d is a number of minutes -->
+    <string name="time_minutes_ago"></string>
+    <!-- Lowercase, kept short. %1$d is a number of hours -->
+    <string name="time_hours_ago"></string>
+    <!-- Lowercase, kept short. %1$d is a number of days -->
+    <string name="time_days_ago"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_status"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_domain"></string>
+    <!-- Lowercase name of a filter: the kind of IP address, such as public or private. Keep it short -->
+    <string name="logs_facet_ip_class"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_service"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_router"></string>
+    <!-- Lowercase name of a filter -->
+    <string name="logs_facet_provider"></string>
+    <!-- Lowercase name of a filter, short for duration. Keep it short -->
+    <string name="logs_facet_duration"></string>
+    <!-- Lowercase unit after a large number -->
+    <plurals name="widget_unit_entry_points">
+    </plurals>
+    <!-- Lowercase. The number counts entry points that nothing uses -->
+    <string name="widget_chip_idle"></string>
+    <!-- Lowercase. %1$s is an entry point name, %2$s its address -->
+    <string name="widget_busiest"></string>
+    <!-- Lowercase: no router uses any entry point -->
+    <string name="widget_nothing_bound"></string>
+    <!-- Lowercase unit after a large number, short for certificate -->
+    <plurals name="widget_unit_certs">
+    </plurals>
+    <!-- Lowercase. Certificates with under a week left -->
+    <string name="widget_chip_critical"></string>
+    <!-- Lowercase. Certificates with under 30 days left -->
+    <string name="widget_chip_expiring"></string>
+    <!-- Lowercase: no certificate expires soon -->
+    <string name="widget_chip_current"></string>
+    <!-- Lowercase. %1$s is a domain, %2$d a number of days and the d after it is short for days -->
+    <string name="widget_soonest_days"></string>
+    <!-- Lowercase. %1$s is the domain whose certificate expires first -->
+    <string name="widget_soonest"></string>
+    <!-- Lowercase -->
+    <string name="widget_no_certs"></string>
+    <!-- A number of days, the d after it is short for days. Keep it short -->
+    <string name="widget_days_short"></string>
+    <!-- Lowercase unit after a large number: attacking sources -->
+    <plurals name="widget_unit_sources">
+    </plurals>
+    <!-- Lowercase. A scenario is a CrowdSec attack pattern -->
+    <string name="widget_no_scenario"></string>
+    <!-- Lowercase unit after a large number -->
+    <plurals name="widget_unit_bans">
+    </plurals>
+    <!-- Lowercase unit after a large number -->
+    <string name="widget_unit_services"></string>
+    <!-- Lowercase unit after a large number -->
+    <string name="widget_unit_middlewares"></string>
+    <!-- Lowercase health label -->
+    <string name="widget_no_answer"></string>
+    <string name="widget_crowdsec_silent"></string>
+    <!-- Lowercase -->
+    <string name="widget_server_silent"></string>
+    <string name="widget_card_all_servers"></string>
+    <string name="widget_card_http"></string>
+    <string name="widget_card_stream"></string>
+    <!-- Description of a widget card -->
+    <string name="widget_blurb_overview"></string>
+    <string name="widget_blurb_http"></string>
+    <string name="widget_blurb_stream"></string>
+    <string name="widget_blurb_services"></string>
+    <string name="widget_blurb_middlewares"></string>
+    <string name="widget_blurb_sources"></string>
+    <string name="widget_blurb_scenarios"></string>
+    <string name="widget_blurb_paths"></string>
+    <string name="widget_blurb_bans"></string>
+    <string name="widget_blurb_entrypoints"></string>
+    <string name="widget_blurb_certs"></string>
+    <!-- Widget layout: a grid of small squares -->
+    <string name="widget_layout_mosaic"></string>
+    <string name="widget_layout_mosaic_blurb"></string>
+    <!-- Widget layout -->
+    <string name="widget_layout_numbers"></string>
+    <string name="widget_layout_numbers_blurb"></string>
+    <string name="widget_layout_rows_blurb"></string>
+    <string name="widget_preset_crowdsec"></string>
+    <string name="widget_preset_crowdsec_blurb"></string>
+    <string name="widget_preset_traefik"></string>
+    <string name="widget_preset_traefik_blurb"></string>
+    <string name="widget_blurb_servers_preset"></string>
+    <!-- Title of a widget that mixes several kinds of card -->
+    <string name="widget_overview"></string>
+    <string name="widget_unreachable"></string>
+    <string name="widget_loading"></string>
+    <string name="widget_title"></string>
+    <string name="widget_tap_to_set_up"></string>
+    <string name="widget_no_servers"></string>
+    <!-- Lowercase unit after a large number -->
+    <plurals name="widget_unit_servers">
+    </plurals>
+    <!-- Lowercase: every server answers -->
+    <string name="widget_all_up"></string>
+    <!-- Lowercase. The number counts servers that do not answer -->
+    <string name="widget_down_count"></string>
+    <plurals name="widget_routers_count">
+    </plurals>
+    <plurals name="widget_services_count">
+    </plurals>
+    <!-- %1$s is a number, possibly shortened such as 1.2k -->
+    <plurals name="widget_bans_count">
+    </plurals>
+    <plurals name="widget_warnings_count">
+    </plurals>
+    <!-- Lowercase: the data shown is old -->
+    <string name="widget_stale"></string>
+    <string name="widget_open_app"></string>
+    <!-- Lowercase: the server does not answer -->
+    <string name="widget_offline"></string>
+    <!-- Lowercase and short. The number counts warnings -->
+    <string name="widget_row_warn"></string>
+    <!-- Heading above a ranked list, shown in capitals -->
+    <string name="widget_worst_offenders"></string>
+    <string name="widget_nothing_to_launch"></string>
+    <string name="widget_config_shows"></string>
+    <string name="widget_config_stack_help"></string>
+    <string name="widget_config_add_slot"></string>
+    <!-- Section heading: how often the widget refreshes -->
+    <string name="widget_config_interval"></string>
+    <!-- Short form of a number of minutes -->
+    <string name="widget_config_minutes"></string>
+    <string name="widget_config_interval_help"></string>
+    <string name="widget_config_add"></string>
+    <string name="widget_launcher_servers_help"></string>
+    <!-- Section heading: whether app names are shown -->
+    <string name="widget_launcher_names"></string>
+    <string name="widget_launcher_hide_names"></string>
+    <string name="widget_launcher_hide_names_help"></string>
+    <!-- Button -->
+    <string name="widget_launcher_done"></string>
+    <!-- Description of the Android notification channel -->
+    <string name="push_channel_description"></string>
+    <!-- Shown by the push app when Traefik Manager registers with it -->
+    <string name="push_distributor_message"></string>
+    <string name="push_error_old_server"></string>
+</resources>
