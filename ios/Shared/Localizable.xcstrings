@@ -18442,6 +18442,82 @@
         }
       }
     },
+    "A forwardAuth middleware is in use, so this is high priority.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在使用 forwardAuth 中间件，因此优先级很高。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Používá se middleware forwardAuth, takže to má vysokou prioritu."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En forwardAuth-middleware er i brug, så dette har høj prioritet."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine forwardAuth-Middleware ist im Einsatz, daher hat dies hohe Priorität."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay un middleware forwardAuth en uso, así que esto es prioritario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un middleware forwardAuth est utilisé, c’est donc prioritaire."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un middleware forwardAuth est utilisé, c’est donc prioritaire."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forwardAuth 미들웨어를 사용 중이므로 우선순위가 높습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is een forwardAuth-middleware in gebruik, dus dit heeft hoge prioriteit."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Está a ser usado um middleware forwardAuth, por isso isto é prioritário."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um middleware forwardAuth está em uso, então isso é prioritário."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Используется middleware forwardAuth, поэтому приоритет высокий."
+          }
+        }
+      }
+    },
     "A key is stored. Leave this empty to keep it.": {
       "localizations": {
         "zh-Hans": {
@@ -29765,6 +29841,666 @@
         }
       }
     },
+    "backend degraded, %lld of %lld servers up": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后端降级，%2$lld 台服务器中 %1$lld 台在线"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend omezený, běží %1$lld z %2$lld serverů"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend forringet, %1$lld af %2$lld servere oppe"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend beeinträchtigt, %1$lld von %2$lld Servern erreichbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend degradado, %1$lld de %2$lld servidores activos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend dégradé, %1$lld serveurs actifs sur %2$lld"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend dégradé, %1$lld serveurs actifs sur %2$lld"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백엔드 저하됨, 서버 %2$lld개 중 %1$lld개 정상"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend gedegradeerd, %1$lld van %2$lld servers bereikbaar"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend degradado, %1$lld de %2$lld servidores ativos"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend degradado, %1$lld de %2$lld servidores ativos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "бэкенд с деградацией, доступно %1$lld из %2$lld серверов"
+          }
+        }
+      }
+    },
+    "backend down, 0 of %lld servers up": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend down, 0 of %lld server up"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend down, 0 of %lld servers up"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "后端不可用，%lld 台服务器中 0 台在线"
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend nefunguje, běží 0 z %lld serveru"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend nefunguje, běží 0 z %lld serverů"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend nefunguje, běží 0 z %lld serverů"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend nefunguje, běží 0 z %lld serverů"
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend nede, 0 af %lld server oppe"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend nede, 0 af %lld servere oppe"
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Backend ausgefallen, 0 von %lld Server erreichbar"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Backend ausgefallen, 0 von %lld Servern erreichbar"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend caído, 0 de %lld servidor activo"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend caído, 0 de %lld servidores activos"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend caído, 0 de %lld servidores activos"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend hors service, 0 serveur actif sur %lld"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend hors service, aucun des %lld serveurs actif"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend hors service, aucun des %lld serveurs actif"
+                }
+              }
+            }
+          }
+        },
+        "fr-CA": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend hors service, 0 serveur actif sur %lld"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend hors service, aucun des %lld serveurs actif"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend hors service, aucun des %lld serveurs actif"
+                }
+              }
+            }
+          }
+        },
+        "ko": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "백엔드 다운, 서버 %lld개 중 0개 정상"
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend uitgevallen, 0 van %lld server bereikbaar"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend uitgevallen, 0 van %lld servers bereikbaar"
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend em baixo, 0 de %lld servidor ativo"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend em baixo, 0 de %lld servidores ativos"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend em baixo, 0 de %lld servidores ativos"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend fora do ar, 0 de %lld servidor ativo"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend fora do ar, 0 de %lld servidores ativos"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "backend fora do ar, 0 de %lld servidores ativos"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "бэкенд недоступен, доступно 0 из %lld сервера"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "бэкенд недоступен, доступно 0 из %lld серверов"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "бэкенд недоступен, доступно 0 из %lld серверов"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "бэкенд недоступен, доступно 0 из %lld серверов"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Backend server name": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后端服务器名称"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Název backend serveru"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend-servernavn"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend-Servername"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre del servidor backend"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du serveur backend"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du serveur backend"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백엔드 서버 이름"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend-servernaam"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do servidor backend"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do servidor backend"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя backend-сервера"
+          }
+        }
+      }
+    },
+    "Backend server name (SNI)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后端服务器名称（SNI）"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Název backend serveru (SNI)"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend-servernavn (SNI)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend-Servername (SNI)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre del servidor backend (SNI)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du serveur backend (SNI)"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du serveur backend (SNI)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백엔드 서버 이름(SNI)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend-servernaam (SNI)"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do servidor backend (SNI)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do servidor backend (SNI)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя backend-сервера (SNI)"
+          }
+        }
+      }
+    },
+    "backend unreachable": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后端无法访问"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend nedostupný"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend utilgængelig"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend nicht erreichbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inaccesible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inaccessible"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend injoignable"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백엔드 접속 불가"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend onbereikbaar"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inacessível"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inacessível"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "бэкенд недоступен"
+          }
+        }
+      }
+    },
+    "backend unreachable, %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后端无法访问，%@"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend nedostupný, %@"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend utilgængelig, %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend nicht erreichbar, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inaccesible, %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inaccessible, %@"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend injoignable, %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백엔드 접속 불가, %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend onbereikbaar, %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inacessível, %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "backend inacessível, %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "бэкенд недоступен, %@"
+          }
+        }
+      }
+    },
     "Backends": {
       "localizations": {
         "zh-Hans": {
@@ -31205,6 +31941,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Basic Auth"
+          }
+        }
+      }
+    },
+    "BasicAuth request coalescing reintroduces a username enumeration timing oracle": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BasicAuth 请求合并重新引入了可枚举用户名的计时预言"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slučování požadavků BasicAuth znovu zavádí časový orákul pro zjišťování uživatelských jmen"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samling af BasicAuth-anmodninger genindfører et timing-orakel til gætning af brugernavne"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Zusammenfassen von BasicAuth-Anfragen bringt ein Timing-Orakel zur Ermittlung von Benutzernamen zurück"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agrupar solicitudes BasicAuth reintroduce un oráculo de tiempos para enumerar nombres de usuario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le regroupement des requêtes BasicAuth réintroduit un oracle temporel permettant d’énumérer les noms d’utilisateur"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le regroupement des requêtes BasicAuth réintroduit un oracle temporel permettant d’énumérer les noms d’utilisateur"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BasicAuth 요청 병합으로 사용자 이름을 알아낼 수 있는 타이밍 오라클이 다시 생김"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het samenvoegen van BasicAuth-verzoeken brengt een timing-orakel voor het raden van gebruikersnamen terug"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O agrupamento de pedidos BasicAuth reintroduz um oráculo de tempo para enumerar nomes de utilizador"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O agrupamento de requisições BasicAuth reintroduz um oráculo de tempo para enumerar nomes de usuário"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Объединение запросов BasicAuth снова создаёт тайминговый оракул для перебора имён пользователей"
           }
         }
       }
@@ -43904,6 +44716,82 @@
         }
       }
     },
+    "Critical": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "严重"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kritická"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kritisk"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kritisch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crítica"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critique"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critique"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "심각"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kritiek"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crítica"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crítica"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Критическая"
+          }
+        }
+      }
+    },
     "CrowdSec": {},
     "CrowdSec did not answer": {
       "localizations": {
@@ -48131,6 +49019,82 @@
         }
       }
     },
+    "Details": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详情"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podrobnosti"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detaljer"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Détails"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Détails"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자세히"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подробнее"
+          }
+        }
+      }
+    },
     "Dev": {
       "localizations": {
         "zh-Hans": {
@@ -49951,6 +50915,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Consul 서비스 카탈로그를 통해 발견되었으며 읽기 전용입니다. Consul 서비스 등록에서 편집하세요."
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrýt"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afvis"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausblenden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignorer"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignorer"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negeren"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispensar"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispensar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть"
           }
         }
       }
@@ -57155,6 +58195,158 @@
         }
       }
     },
+    "FastProxy backend connection pool leaks NTLM and Negotiate identity to unauthenticated clients": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FastProxy 后端连接池会向未认证的客户端泄露 NTLM 和 Negotiate 身份"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fond spojení s backendem ve FastProxy vyzrazuje identitu NTLM a Negotiate neověřeným klientům"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FastProxys backend-forbindelsespulje lækker NTLM- og Negotiate-identitet til ikke-godkendte klienter"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Backend-Verbindungspool von FastProxy gibt NTLM- und Negotiate-Identitäten an nicht authentifizierte Clients weiter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El grupo de conexiones con el backend de FastProxy filtra la identidad NTLM y Negotiate a clientes no autenticados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le pool de connexions backend de FastProxy divulgue l’identité NTLM et Negotiate à des clients non authentifiés"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le pool de connexions backend de FastProxy divulgue l’identité NTLM et Negotiate à des clients non authentifiés"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FastProxy 백엔드 연결 풀이 인증되지 않은 클라이언트에 NTLM 및 Negotiate ID를 노출함"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De backendverbindingspool van FastProxy lekt NTLM- en Negotiate-identiteit naar niet-geauthenticeerde clients"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O conjunto de ligações ao backend do FastProxy divulga a identidade NTLM e Negotiate a clientes não autenticados"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O pool de conexões com o backend do FastProxy vaza a identidade NTLM e Negotiate para clientes não autenticados"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пул соединений FastProxy с бэкендом раскрывает NTLM- и Negotiate-личность неаутентифицированным клиентам"
+          }
+        }
+      }
+    },
+    "FastProxy data race after an HTTP/1 upgrade lets an unauthenticated client crash Traefik": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/1 升级后 FastProxy 中的数据竞争可让未认证的客户端使 Traefik 崩溃"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Souběh (data race) ve FastProxy po HTTP/1 upgradu umožní neověřenému klientovi shodit Traefik"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Et data race i FastProxy efter en HTTP/1-upgrade lader en ikke-godkendt klient få Traefik til at gå ned"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Data Race in FastProxy nach einem HTTP/1-Upgrade lässt einen nicht authentifizierten Client Traefik zum Absturz bringen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una condición de carrera en FastProxy tras una actualización HTTP/1 permite a un cliente no autenticado bloquear Traefik"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une situation de concurrence dans FastProxy après une mise à niveau HTTP/1 permet à un client non authentifié de faire planter Traefik"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une situation de concurrence dans FastProxy après une mise à niveau HTTP/1 permet à un client non authentifié de faire planter Traefik"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/1 업그레이드 후 FastProxy의 데이터 경합으로 인증되지 않은 클라이언트가 Traefik을 중단시킬 수 있음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een data race in FastProxy na een HTTP/1-upgrade laat een niet-geauthenticeerde client Traefik laten crashen"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma condição de corrida no FastProxy após um upgrade HTTP/1 permite a um cliente não autenticado fazer o Traefik falhar"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma condição de corrida no FastProxy após um upgrade HTTP/1 permite que um cliente não autenticado derrube o Traefik"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гонка данных в FastProxy после обновления HTTP/1 позволяет неаутентифицированному клиенту обрушить Traefik"
+          }
+        }
+      }
+    },
     "File": {},
     "File (external)": {
       "localizations": {
@@ -59052,6 +60244,234 @@
           "stringUnit": {
             "state": "translated",
             "value": "클레임을 헤더로 전달"
+          }
+        }
+      }
+    },
+    "ForwardAuth authentication bypass via forwarded header aliases": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可通过转发标头别名绕过 ForwardAuth 认证"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obejití ověření ForwardAuth přes aliasy přeposlaných hlaviček"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth-godkendelse kan omgås via videresendte header-aliasser"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth-Authentifizierung lässt sich über weitergeleitete Header-Aliase umgehen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se puede eludir la autenticación ForwardAuth con alias de cabeceras reenviadas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contournement de l’authentification ForwardAuth via des alias d’en-têtes transférés"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contournement de l’authentification ForwardAuth via des alias d’en-têtes transférés"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전달된 헤더 별칭으로 ForwardAuth 인증을 우회할 수 있음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth-authenticatie is te omzeilen via doorgestuurde header-aliassen"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contorno da autenticação ForwardAuth através de aliases de cabeçalhos reencaminhados"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desvio da autenticação ForwardAuth por aliases de cabeçalhos encaminhados"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обход аутентификации ForwardAuth через псевдонимы пересылаемых заголовков"
+          }
+        }
+      }
+    },
+    "ForwardAuth identity spoofing via dot-form header aliases": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可通过带点的标头别名伪造 ForwardAuth 身份"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podvržení identity ForwardAuth přes aliasy hlaviček s tečkami"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth-identitet kan forfalskes via header-aliasser med punktum"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth-Identitäten lassen sich über Header-Aliase mit Punkten fälschen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se puede suplantar la identidad de ForwardAuth con alias de cabeceras con puntos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usurpation d’identité ForwardAuth via des alias d’en-têtes avec points"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usurpation d’identité ForwardAuth via des alias d’en-têtes avec points"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "점이 포함된 헤더 별칭으로 ForwardAuth ID를 위조할 수 있음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth-identiteit is te vervalsen via header-aliassen met punten"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falsificação de identidade ForwardAuth através de aliases de cabeçalhos com pontos"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falsificação de identidade ForwardAuth através de aliases de cabeçalhos com pontos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подмена личности ForwardAuth через псевдонимы заголовков с точками"
+          }
+        }
+      }
+    },
+    "ForwardAuth shares its auth server connections between clients, leaking NTLM and Negotiate identity": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth 在客户端之间共享与认证服务器的连接，泄露 NTLM 和 Negotiate 身份"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth sdílí spojení s ověřovacím serverem mezi klienty a vyzrazuje identitu NTLM a Negotiate"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth deler forbindelser til godkendelsesserveren mellem klienter og lækker NTLM- og Negotiate-identitet"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth teilt Verbindungen zum Auth-Server zwischen Clients und gibt so NTLM- und Negotiate-Identitäten weiter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth comparte sus conexiones con el servidor de autenticación entre clientes y filtra la identidad NTLM y Negotiate"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth partage ses connexions au serveur d’authentification entre clients, divulguant l’identité NTLM et Negotiate"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth partage ses connexions au serveur d’authentification entre clients, divulguant l’identité NTLM et Negotiate"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth가 인증 서버 연결을 클라이언트 간에 공유해 NTLM 및 Negotiate ID가 노출됨"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth deelt verbindingen met de authenticatieserver tussen clients en lekt zo NTLM- en Negotiate-identiteit"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O ForwardAuth partilha as ligações ao servidor de autenticação entre clientes, divulgando a identidade NTLM e Negotiate"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O ForwardAuth compartilha as conexões com o servidor de autenticação entre clientes, vazando a identidade NTLM e Negotiate"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ForwardAuth делит соединения с сервером аутентификации между клиентами, раскрывая NTLM- и Negotiate-личность"
           }
         }
       }
@@ -61109,6 +62529,82 @@
         }
       }
     },
+    "h2c upgrade headers forwarded to the backend let a client tunnel past the whole middleware chain": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转发到后端的 h2c 升级标头让客户端可以绕过整个中间件链"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hlavičky h2c upgrade přeposlané backendu umožní klientovi obejít celý řetězec middlewarů"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "h2c-upgrade-headere videresendt til backenden lader en klient tunnelere forbi hele middleware-kæden"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An das Backend weitergeleitete h2c-Upgrade-Header lassen einen Client die gesamte Middleware-Kette umgehen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las cabeceras de actualización h2c reenviadas al backend permiten a un cliente saltarse toda la cadena de middlewares"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les en-têtes de mise à niveau h2c transmis au backend permettent à un client de contourner toute la chaîne de middlewares"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les en-têtes de mise à niveau h2c transmis au backend permettent à un client de contourner toute la chaîne de middlewares"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백엔드로 전달된 h2c 업그레이드 헤더로 클라이언트가 미들웨어 체인 전체를 우회할 수 있음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naar de backend doorgestuurde h2c-upgradeheaders laten een client langs de hele middlewareketen tunnelen"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalhos de upgrade h2c reenviados ao backend deixam um cliente contornar toda a cadeia de middlewares"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalhos de upgrade h2c encaminhados ao backend permitem que um cliente passe por toda a cadeia de middlewares"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заголовки обновления h2c, переданные бэкенду, позволяют клиенту обойти всю цепочку middleware"
+          }
+        }
+      }
+    },
     "Header": {
       "localizations": {
         "zh-Hans": {
@@ -61181,6 +62677,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "헤더"
+          }
+        }
+      }
+    },
+    "Header name sanitization (aliasHeadersStrategy, forwarded header stripping) bypassed via request trailers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可通过请求尾部字段绕过标头名称清理（aliasHeadersStrategy、转发标头剥离）"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Čištění názvů hlaviček (aliasHeadersStrategy, odstraňování přeposlaných hlaviček) lze obejít přes trailery požadavku"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rensning af headernavne (aliasHeadersStrategy, fjernelse af videresendte headere) kan omgås via request-trailere"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Bereinigung von Headernamen (aliasHeadersStrategy, Entfernen weitergeleiteter Header) lässt sich über Request-Trailer umgehen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La limpieza de nombres de cabecera (aliasHeadersStrategy, eliminación de cabeceras reenviadas) se puede eludir con trailers de la solicitud"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nettoyage des noms d’en-têtes (aliasHeadersStrategy, suppression des en-têtes transférés) est contourné via les trailers de requête"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nettoyage des noms d’en-têtes (aliasHeadersStrategy, suppression des en-têtes transférés) est contourné via les trailers de requête"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "요청 트레일러로 헤더 이름 정리(aliasHeadersStrategy, 전달된 헤더 제거)를 우회할 수 있음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het opschonen van headernamen (aliasHeadersStrategy, verwijderen van doorgestuurde headers) is te omzeilen via request-trailers"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A limpeza de nomes de cabeçalhos (aliasHeadersStrategy, remoção de cabeçalhos reencaminhados) é contornada através de trailers do pedido"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A limpeza de nomes de cabeçalhos (aliasHeadersStrategy, remoção de cabeçalhos encaminhados) é burlada por trailers da requisição"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистку имён заголовков (aliasHeadersStrategy, удаление пересылаемых заголовков) можно обойти через трейлеры запроса"
           }
         }
       }
@@ -62017,6 +63589,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "여기서 탭을 숨기면 이 서버의 앱과 웹 UI에서 모두 숨겨집니다."
+          }
+        }
+      }
+    },
+    "High": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vysoká"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Høj"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élevée"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Élevée"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoog"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alta"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alta"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Высокая"
           }
         }
       }
@@ -63918,6 +65566,158 @@
           "stringUnit": {
             "state": "translated",
             "value": "지원되지 않는 HTTP 버전"
+          }
+        }
+      }
+    },
+    "HTTP/3 also uses UDP on this port. Publish it too, for example %@ in Docker, and allow it through any firewall. Only routers with TLS can use HTTP/3.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 在此端口上还会使用 UDP。请同时发布它，例如 Docker 中的 %@，并在防火墙中放行。只有启用 TLS 的路由器才能使用 HTTP/3。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 na tomto portu používá také UDP. Zveřejněte ho také, například %@ v Dockeru, a povolte ho v každém firewallu. HTTP/3 mohou používat jen routery s TLS."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 bruger også UDP på denne port. Udgiv den også, for eksempel %@ i Docker, og tillad den i enhver firewall. Kun routere med TLS kan bruge HTTP/3."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 nutzt auf diesem Port auch UDP. Veröffentliche ihn ebenfalls, zum Beispiel %@ in Docker, und erlaube ihn in jeder Firewall. Nur Router mit TLS können HTTP/3 nutzen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 también usa UDP en este puerto. Publícalo también, por ejemplo %@ en Docker, y permítelo en cualquier cortafuegos. Solo los routers con TLS pueden usar HTTP/3."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 utilise aussi l’UDP sur ce port. Publiez-le aussi, par exemple %@ dans Docker, et autorisez-le dans tout pare-feu. Seuls les routeurs avec TLS peuvent utiliser HTTP/3."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 utilise aussi l’UDP sur ce port. Publiez-le aussi, par exemple %@ dans Docker, et autorisez-le dans tout coupe-feu. Seuls les routeurs avec TLS peuvent utiliser HTTP/3."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3은 이 포트에서 UDP도 사용합니다. Docker의 %@처럼 UDP 포트도 게시하고 방화벽에서 허용하세요. TLS를 사용하는 라우터만 HTTP/3을 쓸 수 있습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 gebruikt op deze poort ook UDP. Publiceer die ook, bijvoorbeeld %@ in Docker, en sta hem toe in elke firewall. Alleen routers met TLS kunnen HTTP/3 gebruiken."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O HTTP/3 também usa UDP nesta porta. Publique-a também, por exemplo %@ no Docker, e permita-a em qualquer firewall. Só os routers com TLS podem usar HTTP/3."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O HTTP/3 também usa UDP nesta porta. Publique-a também, por exemplo %@ no Docker, e libere-a em qualquer firewall. Só routers com TLS podem usar HTTP/3."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 также использует UDP на этом порту. Опубликуйте и его, например %@ в Docker, и разрешите его в межсетевом экране. HTTP/3 доступен только роутерам с TLS."
+          }
+        }
+      }
+    },
+    "HTTP/3 backend connection reuse leaks NTLM and Kerberos identity between clients": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 后端连接复用会在客户端之间泄露 NTLM 和 Kerberos 身份"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opakované použití HTTP/3 spojení s backendem vyzrazuje identitu NTLM a Kerberos mezi klienty"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genbrug af HTTP/3-backendforbindelser lækker NTLM- og Kerberos-identitet mellem klienter"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wiederverwendung von HTTP/3-Backend-Verbindungen gibt NTLM- und Kerberos-Identitäten zwischen Clients weiter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La reutilización de conexiones HTTP/3 con el backend filtra la identidad NTLM y Kerberos entre clientes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La réutilisation des connexions HTTP/3 vers le backend divulgue l’identité NTLM et Kerberos entre clients"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La réutilisation des connexions HTTP/3 vers le backend divulgue l’identité NTLM et Kerberos entre clients"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP/3 백엔드 연결 재사용으로 클라이언트 간에 NTLM 및 Kerberos ID가 노출됨"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hergebruik van HTTP/3-backendverbindingen lekt NTLM- en Kerberos-identiteit tussen clients"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A reutilização de ligações HTTP/3 ao backend divulga a identidade NTLM e Kerberos entre clientes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A reutilização de conexões HTTP/3 com o backend vaza a identidade NTLM e Kerberos entre clientes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторное использование HTTP/3-соединений с бэкендом раскрывает NTLM- и Kerberos-личность между клиентами"
           }
         }
       }
@@ -75220,6 +77020,82 @@
         }
       }
     },
+    "Moderate": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Střední"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderat"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mittel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modérée"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modérée"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보통"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemiddeld"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderada"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderada"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Средняя"
+          }
+        }
+      }
+    },
     "Module": {
       "localizations": {
         "zh-Hans": {
@@ -76509,6 +78385,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "필요: %@"
+          }
+        }
+      }
+    },
+    "Negated Host matcher causes a TLS option conflict that disables client certificate authentication on the excluded host": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取反的 Host 匹配器会引发 TLS 选项冲突，在被排除的主机上禁用客户端证书认证"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negovaný matcher Host způsobí konflikt voleb TLS, který na vyloučeném hostiteli vypne ověřování klientským certifikátem"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En negeret Host-matcher skaber en TLS-indstillingskonflikt, der slår klientcertifikat-godkendelse fra på den udelukkede vært"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein negierter Host-Matcher verursacht einen TLS-Optionskonflikt, der die Client-Zertifikat-Authentifizierung auf dem ausgeschlossenen Host abschaltet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un matcher Host negado provoca un conflicto de opciones TLS que desactiva la autenticación por certificado de cliente en el host excluido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un matcher Host inversé crée un conflit d’options TLS qui désactive l’authentification par certificat client sur l’hôte exclu"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un matcher Host inversé crée un conflit d’options TLS qui désactive l’authentification par certificat client sur l’hôte exclu"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "부정된 Host 매처가 TLS 옵션 충돌을 일으켜 제외된 호스트에서 클라이언트 인증서 인증이 꺼짐"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een genegeerde Host-matcher veroorzaakt een conflict in TLS-opties dat clientcertificaat-authenticatie op de uitgesloten host uitschakelt"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um matcher Host negado causa um conflito de opções TLS que desativa a autenticação por certificado de cliente no anfitrião excluído"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um matcher Host negado causa um conflito de opções TLS que desativa a autenticação por certificado de cliente no host excluído"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отрицание в Host-матчере вызывает конфликт TLS-опций, отключающий аутентификацию по клиентскому сертификату на исключённом хосте"
           }
         }
       }
@@ -86276,6 +88228,82 @@
         }
       }
     },
+    "NTLM and Kerberos sticky connections are not keyed by service, so one service TLS client config applies to another": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NTLM 和 Kerberos 粘性连接未按服务区分，导致一个服务的 TLS 客户端配置作用于另一个服务"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trvalá spojení NTLM a Kerberos nejsou oddělena podle služby, takže konfigurace TLS klienta jedné služby platí pro jinou"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sticky NTLM- og Kerberos-forbindelser er ikke adskilt pr. tjeneste, så én tjenestes TLS-klientkonfiguration gælder for en anden"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sticky-Verbindungen für NTLM und Kerberos sind nicht pro Service getrennt, sodass die TLS-Client-Konfiguration eines Service für einen anderen gilt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las conexiones persistentes NTLM y Kerberos no se separan por servicio, así que la configuración de cliente TLS de un servicio se aplica a otro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les connexions persistantes NTLM et Kerberos ne sont pas séparées par service, si bien que la configuration client TLS d’un service s’applique à un autre"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les connexions persistantes NTLM et Kerberos ne sont pas séparées par service, si bien que la configuration client TLS d’un service s’applique à un autre"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NTLM 및 Kerberos 고정 연결이 서비스별로 구분되지 않아 한 서비스의 TLS 클라이언트 설정이 다른 서비스에 적용됨"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sticky NTLM- en Kerberos-verbindingen zijn niet per service gescheiden, waardoor de TLS-clientconfiguratie van de ene service voor een andere geldt"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As ligações persistentes NTLM e Kerberos não são separadas por serviço, por isso a configuração de cliente TLS de um serviço aplica-se a outro"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As conexões persistentes NTLM e Kerberos não são separadas por serviço, então a configuração de cliente TLS de um serviço vale para outro"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Липкие соединения NTLM и Kerberos не разделяются по сервисам, поэтому TLS-настройки клиента одного сервиса применяются к другому"
+          }
+        }
+      }
+    },
     "Observability": {
       "localizations": {
         "zh-Hans": {
@@ -89464,6 +91492,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "다른 브라우저 세션을 로그아웃했습니다"
+          }
+        }
+      }
+    },
+    "Other providers": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他提供程序"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jiní poskytovatelé"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andre udbydere"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere Provider"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otros proveedores"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres fournisseurs"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres fournisseurs"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 프로바이더"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere providers"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outros fornecedores"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outros provedores"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другие провайдеры"
           }
         }
       }
@@ -93569,6 +95673,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "포트"
+          }
+        }
+      }
+    },
+    "Preauthenticated Negotiate contaminates the shared backend connection pool": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预认证的 Negotiate 会污染共享的后端连接池"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Předem ověřený Negotiate znečistí sdílený fond spojení s backendem"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forhåndsgodkendt Negotiate forurener den delte backend-forbindelsespulje"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorab authentifiziertes Negotiate verunreinigt den gemeinsamen Backend-Verbindungspool"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negotiate preautenticado contamina el grupo compartido de conexiones con el backend"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un Negotiate préauthentifié contamine le pool partagé de connexions vers le backend"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un Negotiate préauthentifié contamine le pool partagé de connexions vers le backend"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사전 인증된 Negotiate가 공유 백엔드 연결 풀을 오염시킴"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vooraf geauthenticeerde Negotiate vervuilt de gedeelde pool met backendverbindingen"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negotiate pré-autenticado contamina o conjunto partilhado de ligações ao backend"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negotiate pré-autenticado contamina o pool compartilhado de conexões com o backend"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предварительно аутентифицированный Negotiate загрязняет общий пул соединений с бэкендом"
           }
         }
       }
@@ -105326,6 +107506,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "루트 CA(선택 사항)"
+          }
+        }
+      }
+    },
+    "Rootless request target routes as / but is forwarded verbatim, bypassing path rules, forwardAuth and access logs": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不带路径的请求目标按 / 路由但被原样转发，从而绕过路径规则、forwardAuth 和访问日志"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cíl požadavku bez cesty se směruje jako /, ale přeposílá se beze změny, čímž obchází pravidla cest, forwardAuth a přístupové logy"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Et anmodningsmål uden sti routes som / men videresendes uændret og omgår stiregler, forwardAuth og adgangslogs"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Anfrageziel ohne Pfad wird als / geroutet, aber unverändert weitergeleitet und umgeht so Pfadregeln, forwardAuth und Zugriffslogs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un destino de solicitud sin ruta se enruta como / pero se reenvía tal cual, saltándose reglas de ruta, forwardAuth y registros de acceso"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une cible de requête sans chemin est routée comme / mais transmise telle quelle, contournant les règles de chemin, forwardAuth et les journaux d’accès"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une cible de requête sans chemin est routée comme / mais transmise telle quelle, contournant les règles de chemin, forwardAuth et les journaux d’accès"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "경로 없는 요청 대상이 /로 라우팅되지만 그대로 전달되어 경로 규칙, forwardAuth, 접근 로그를 우회함"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een verzoekdoel zonder pad wordt als / gerouteerd maar letterlijk doorgestuurd, waardoor padregels, forwardAuth en toegangslogs worden omzeild"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um destino de pedido sem caminho é encaminhado como / mas reenviado tal como está, contornando regras de caminho, forwardAuth e registos de acesso"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um destino de requisição sem caminho é roteado como / mas encaminhado como está, ignorando regras de caminho, forwardAuth e logs de acesso"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цель запроса без пути маршрутизируется как /, но передаётся как есть, обходя правила путей, forwardAuth и журналы доступа"
           }
         }
       }
@@ -122356,6 +124612,82 @@
         }
       }
     },
+    "The name Traefik sends as SNI and checks the backend certificate against. Use it when the backend serves its certificate for a different name than the target address.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik 作为 SNI 发送并用来校验后端证书的名称。当后端证书签发给与目标地址不同的名称时使用。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Název, který Traefik posílá jako SNI a podle kterého ověřuje certifikát backendu. Použijte ho, když backend předkládá certifikát pro jiný název, než je cílová adresa."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navnet, Traefik sender som SNI og tjekker backendens certifikat mod. Brug det, når backenden har sit certifikat udstedt til et andet navn end måladressen."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Name, den Traefik als SNI sendet und mit dem es das Backend-Zertifikat prüft. Nutze ihn, wenn das Backend sein Zertifikat für einen anderen Namen als die Zieladresse ausstellt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El nombre que Traefik envía como SNI y con el que comprueba el certificado del backend. Úsalo cuando el backend sirve su certificado para un nombre distinto de la dirección de destino."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nom que Traefik envoie comme SNI et auquel il compare le certificat du backend. Utilisez-le quand le backend présente un certificat pour un autre nom que l’adresse cible."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nom que Traefik envoie comme SNI et auquel il compare le certificat du backend. Utilisez-le quand le backend présente un certificat pour un autre nom que l’adresse cible."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik이 SNI로 보내고 백엔드 인증서를 확인할 때 쓰는 이름입니다. 백엔드 인증서가 대상 주소와 다른 이름으로 발급된 경우에 사용하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De naam die Traefik als SNI verstuurt en waartegen het backendcertificaat wordt gecontroleerd. Gebruik dit als de backend een certificaat voor een andere naam dan het doeladres heeft."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O nome que o Traefik envia como SNI e com que verifica o certificado do backend. Use-o quando o backend apresenta o certificado para um nome diferente do endereço de destino."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O nome que o Traefik envia como SNI e com o qual verifica o certificado do backend. Use quando o backend apresenta o certificado para um nome diferente do endereço de destino."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя, которое Traefik отправляет как SNI и по которому проверяет сертификат бэкенда. Используйте его, если сертификат бэкенда выдан на другое имя, чем целевой адрес."
+          }
+        }
+      }
+    },
     "The old key stops working immediately and every request to this server fails until you update its compose file and recreate the container. Health checks will keep looking green, because they are unauthenticated.": {
       "localizations": {
         "zh-Hans": {
@@ -128136,6 +130468,82 @@
       }
     },
     "Traefik Manager": {},
+    "Traefik Manager cannot edit %@, because another provider such as Docker labels defines it. It stops working until you remove the middleware there.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager 无法编辑 %@，因为它们由 Docker 标签等其他提供程序定义。在那里移除该中间件之前，它们将无法工作。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager nemůže upravit %@, protože ho definuje jiný poskytovatel, například Docker štítky. Přestane fungovat, dokud tam middleware neodeberete."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager kan ikke redigere %@, fordi en anden udbyder som Docker-labels definerer den. Den virker ikke, før du fjerner middlewaren der."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager kann %@ nicht bearbeiten, weil ein anderer Provider wie Docker-Labels ihn definiert. Er funktioniert erst wieder, wenn du die Middleware dort entfernst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager no puede editar %@, porque lo define otro proveedor, como las etiquetas de Docker. Dejará de funcionar hasta que quites allí el middleware."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager ne peut pas modifier %@, car un autre fournisseur comme les labels Docker le définit. Il ne fonctionnera plus tant que vous n’y aurez pas retiré le middleware."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager ne peut pas modifier %@, car un autre fournisseur comme les étiquettes Docker le définit. Il ne fonctionnera plus tant que vous n’y aurez pas retiré le middleware."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker 레이블 같은 다른 프로바이더가 %@을(를) 정의하므로 Traefik Manager에서 편집할 수 없습니다. 그곳에서 미들웨어를 제거할 때까지 작동하지 않습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager kan %@ niet bewerken, omdat een andere provider zoals Docker-labels hem definieert. Hij werkt pas weer als je de middleware daar verwijdert."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Traefik Manager não pode editar %@, porque outro fornecedor, como as etiquetas do Docker, o define. Deixa de funcionar até remover lá o middleware."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Traefik Manager não pode editar %@, porque outro provedor, como as labels do Docker, o define. Ele para de funcionar até você remover o middleware lá."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik Manager не может изменить %@: его задаёт другой провайдер, например Docker-метки. Он не будет работать, пока вы не уберёте там middleware."
+          }
+        }
+      }
+    },
     "Traefik Manager now manages %@": {
       "localizations": {
         "zh-Hans": {
@@ -128288,6 +130696,286 @@
         }
       }
     },
+    "Traefik Manager removes it from %lld routes in your config files.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager removes it from %lld route in your config files."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager removes it from %lld routes in your config files."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager 会从你配置文件中的 %lld 条路由中移除它。"
+                }
+              }
+            }
+          }
+        },
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager ho odebere z %lld trasy ve vašich konfiguračních souborech."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager ho odebere z %lld tras ve vašich konfiguračních souborech."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager ho odebere z %lld tras ve vašich konfiguračních souborech."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager ho odebere z %lld tras ve vašich konfiguračních souborech."
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager fjerner den fra %lld rute i dine konfigurationsfiler."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager fjerner den fra %lld ruter i dine konfigurationsfiler."
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager entfernt sie aus %lld Route in deinen Konfigurationsdateien."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager entfernt sie aus %lld Routen in deinen Konfigurationsdateien."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager lo quita de %lld ruta en tus archivos de configuración."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager lo quita de %lld rutas en tus archivos de configuración."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager lo quita de %lld rutas en tus archivos de configuración."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager le retire de %lld route dans vos fichiers de configuration."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager le retire de %lld routes dans vos fichiers de configuration."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager le retire de %lld routes dans vos fichiers de configuration."
+                }
+              }
+            }
+          }
+        },
+        "fr-CA": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager le retire de %lld route dans vos fichiers de configuration."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager le retire de %lld routes dans vos fichiers de configuration."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager le retire de %lld routes dans vos fichiers de configuration."
+                }
+              }
+            }
+          }
+        },
+        "ko": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager가 구성 파일의 라우트 %lld개에서 이 미들웨어를 제거합니다."
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager verwijdert hem uit %lld route in je configuratiebestanden."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager verwijdert hem uit %lld routes in je configuratiebestanden."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O Traefik Manager remove-o de %lld rota nos seus ficheiros de configuração."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O Traefik Manager remove-o de %lld rotas nos seus ficheiros de configuração."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O Traefik Manager remove-o de %lld rotas nos seus ficheiros de configuração."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O Traefik Manager remove o middleware de %lld rota nos seus arquivos de configuração."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O Traefik Manager remove o middleware de %lld rotas nos seus arquivos de configuração."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "O Traefik Manager remove o middleware de %lld rotas nos seus arquivos de configuração."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager уберёт его из %lld маршрута в ваших файлах конфигурации."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager уберёт его из %lld маршрутов в ваших файлах конфигурации."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager уберёт его из %lld маршрутов в ваших файлах конфигурации."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Traefik Manager уберёт его из %lld маршрутов в ваших файлах конфигурации."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Traefik restarted": {
       "localizations": {
         "zh-Hans": {
@@ -128436,6 +131124,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Traefik은 위에서 아래 순서로 실행합니다."
+          }
+        }
+      }
+    },
+    "Traefik security advisory": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik 安全公告"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bezpečnostní upozornění Traefiku"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik-sikkerhedsadvarsel"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik-Sicherheitshinweis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso de seguridad de Traefik"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avis de sécurité Traefik"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avis de sécurité Traefik"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik 보안 권고"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik-beveiligingsadvies"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso de segurança do Traefik"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerta de segurança do Traefik"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уязвимость Traefik"
           }
         }
       }
@@ -131784,6 +134548,82 @@
         }
       }
     },
+    "Unsynchronized write to the sticky round tripper shared by concurrent HTTP/2 streams": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "并发 HTTP/2 流共享的粘性 round tripper 存在未同步的写入"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nesynchronizovaný zápis do trvalého round tripperu sdíleného souběžnými HTTP/2 streamy"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usynkroniseret skrivning til den sticky round tripper, som samtidige HTTP/2-streams deler"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht synchronisierter Schreibzugriff auf den Sticky-Round-Tripper, den parallele HTTP/2-Streams teilen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escritura no sincronizada en el round tripper persistente que comparten flujos HTTP/2 simultáneos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écriture non synchronisée dans le round tripper persistant partagé par des flux HTTP/2 simultanés"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écriture non synchronisée dans le round tripper persistant partagé par des flux HTTP/2 simultanés"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동시 HTTP/2 스트림이 공유하는 고정 round tripper에 동기화되지 않은 쓰기가 발생함"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet-gesynchroniseerd schrijven naar de sticky round tripper die gelijktijdige HTTP/2-streams delen"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escrita não sincronizada no round tripper persistente partilhado por fluxos HTTP/2 simultâneos"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escrita não sincronizada no round tripper persistente compartilhado por fluxos HTTP/2 simultâneos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Несинхронизированная запись в липкий round tripper, общий для параллельных потоков HTTP/2"
+          }
+        }
+      }
+    },
     "Unused": {
       "localizations": {
         "zh-Hans": {
@@ -132084,6 +134924,158 @@
           "stringUnit": {
             "state": "translated",
             "value": "업데이트"
+          }
+        }
+      }
+    },
+    "Update Traefik to %@ or %@.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请将 Traefik 更新到 %1$@ 或 %2$@。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizujte Traefik na %1$@ nebo %2$@."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdater Traefik til %1$@ eller %2$@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisiere Traefik auf %1$@ oder %2$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiza Traefik a %1$@ o %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettez à jour Traefik vers %1$@ ou %2$@."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettez à jour Traefik vers %1$@ ou %2$@."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik을 %1$@ 또는 %2$@ 버전으로 업데이트하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werk Traefik bij naar %1$@ of %2$@."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualize o Traefik para %1$@ ou %2$@."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualize o Traefik para %1$@ ou %2$@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновите Traefik до %1$@ или %2$@."
+          }
+        }
+      }
+    },
+    "Update Traefik to %@.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请将 Traefik 更新到 %@。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualizujte Traefik na %@."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdater Traefik til %@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisiere Traefik auf %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiza Traefik a %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettez à jour Traefik vers %@."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettez à jour Traefik vers %@."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik을 %@ 버전으로 업데이트하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werk Traefik bij naar %@."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualize o Traefik para %@."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualize o Traefik para %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновите Traefik до %@."
           }
         }
       }
@@ -137834,6 +140826,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pushover 사용자 키 또는 그룹 키입니다. 암호화되어 저장됩니다."
+          }
+        }
+      }
+    },
+    "Your Traefik v%@ is affected by %@ (%@) - %@.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的 Traefik v%1$@ 受 %2$@（%3$@）影响 - %4$@。"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Váš Traefik v%1$@ je zasažen chybou %2$@ (%3$@) - %4$@."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Din Traefik v%1$@ er ramt af %2$@ (%3$@) - %4$@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Traefik v%1$@ ist von %2$@ (%3$@) betroffen - %4$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu Traefik v%1$@ está afectado por %2$@ (%3$@) - %4$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre Traefik v%1$@ est concerné par %2$@ (%3$@) - %4$@."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre Traefik v%1$@ est visé par %2$@ (%3$@) - %4$@."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traefik v%1$@ 버전이 %2$@(%3$@)의 영향을 받습니다 - %4$@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je Traefik v%1$@ is getroffen door %2$@ (%3$@) - %4$@."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O seu Traefik v%1$@ é afetado por %2$@ (%3$@) - %4$@."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O seu Traefik v%1$@ é afetado por %2$@ (%3$@) - %4$@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш Traefik v%1$@ подвержен %2$@ (%3$@) - %4$@."
           }
         }
       }
