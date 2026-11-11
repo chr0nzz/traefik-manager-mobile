@@ -2327,7 +2327,7 @@
     </plurals>
     <string name="middlewares_other_providers">Другие провайдеры</string>
     <string name="static_http3_udp_hint">HTTP/3 также использует UDP на этом порту. Опубликуйте и его, например %s в Docker, и разрешите его в межсетевом экране. HTTP/3 доступен только роутерам с TLS.</string>
-    <string name="dashboard_flag_unreachable">недоступны</string>
+    <string name="dashboard_flag_unreachable">недоступно</string>
     <string name="dashboard_reason_route_unreachable">бэкенд недоступен</string>
     <string name="dashboard_reason_route_unreachable_error">бэкенд недоступен, %s</string>
     <plurals name="dashboard_reason_route_servers_down">
