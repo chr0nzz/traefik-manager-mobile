@@ -2183,7 +2183,7 @@
     <string name="advisory_severity_high">Hoog</string>
     <string name="advisory_severity_moderate">Gemiddeld</string>
     <string name="advisory_details">Details</string>
-    <string name="advisory_dismiss">Verbergen</string>
+    <string name="advisory_dismiss">Negeren</string>
     <string name="advisory_http3_identity_leak">Hergebruik van HTTP/3-backendverbindingen lekt NTLM- en Kerberos-identiteit tussen clients</string>
     <string name="advisory_rootless_target">Een verzoekdoel zonder pad wordt als / gerouteerd maar letterlijk doorgestuurd, waardoor padregels, forwardAuth en toegangslogs worden omzeild</string>
     <string name="advisory_h2c_upgrade">Naar de backend doorgestuurde h2c-upgradeheaders laten een client langs de hele middlewareketen tunnelen</string>
