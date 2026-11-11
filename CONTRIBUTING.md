@@ -43,12 +43,16 @@ Open a [Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml) issue befor
 
 ## Submitting a pull request
 
-1. Fork the repo and create your branch from `main`.
+> [!IMPORTANT]
+> **All pull requests target `dev`.** Never open a PR against `main` - it only moves when a release is cut. PRs against `main` will be asked to retarget.
+
+1. Fork the repo and create your branch from `dev`.
 2. Keep PRs focused - one fix or feature per PR.
 3. For anything beyond a small bug fix, open an issue first so we can align on approach.
 4. Test against a real Traefik Manager instance, on a phone *and* a tablet if the change touches layout.
 5. Run the unit tests before opening the PR.
 6. Do not bump `versionCode` or `versionName` - releases handle that.
+7. Open the PR against `dev`. GitHub preselects `main` - change the base branch dropdown when creating the PR.
 
 ---
 
@@ -68,7 +72,7 @@ The app targets **Android 13 (API 33) and above**.
 ```bash
 git clone https://github.com/chr0nzz/traefik-manager-mobile.git
 cd traefik-manager-mobile
-git checkout main
+git checkout dev
 ```
 
 Create `android/local.properties` with your SDK location if Android Studio has not already:
@@ -170,7 +174,10 @@ Text that must stay as it is, such as a key the server sends, is listed in `andr
 
 | Branch | Purpose | Accepts PRs? |
 |--------|---------|--------------|
-| `main` | The current app - version 2.x, Kotlin and Jetpack Compose | **Yes - every PR targets `main`** |
+| `dev` | Active development of the current app (2.x, Kotlin and Jetpack Compose) - all features, bug fixes and docs for the next release | **Yes - every PR targets `dev`** |
+| `main` | Release branch - only moves when a version is tagged | **No - never open PRs here** |
 | `v1` | The retired 1.x React Native app, preserved for anyone still running it | No - archived, not maintained |
 
 Version 2.0 is a ground-up rewrite in Kotlin and Jetpack Compose. The old React Native app stays on `v1` so existing users can still build it, but it receives no fixes. Pull requests and issues should assume 2.x unless they explicitly say otherwise.
+
+Everything lands on `dev` first. When `dev` is ready for release it is merged to `main` and tagged, and the tag builds the signed release.
