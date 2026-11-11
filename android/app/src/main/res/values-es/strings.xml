@@ -2274,7 +2274,7 @@
     <string name="advisory_severity_high">Alta</string>
     <string name="advisory_severity_moderate">Moderada</string>
     <string name="advisory_details">Detalles</string>
-    <string name="advisory_dismiss">Descartar</string>
+    <string name="advisory_dismiss">Ocultar</string>
     <string name="advisory_http3_identity_leak">La reutilización de conexiones HTTP/3 con el backend filtra la identidad NTLM y Kerberos entre clientes</string>
     <string name="advisory_rootless_target">Un destino de solicitud sin ruta se enruta como / pero se reenvía tal cual, saltándose reglas de ruta, forwardAuth y registros de acceso</string>
     <string name="advisory_h2c_upgrade">Las cabeceras de actualización h2c reenviadas al backend permiten a un cliente saltarse toda la cadena de middlewares</string>
