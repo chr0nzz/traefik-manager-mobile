@@ -193,8 +193,11 @@ struct RouteDetailView: View {
             DetailRow(
                 label: String(localized: "Skip verify"),
                 value: route.insecureSkipVerify ? String(localized: "Yes") : String(localized: "No"),
-                last: true
+                last: (route.serverName ?? "").isEmpty
             )
+            if let serverName = route.serverName, !serverName.isEmpty {
+                DetailRow(label: String(localized: "Backend server name"), value: serverName, mono: true, last: true)
+            }
         }
     }
 

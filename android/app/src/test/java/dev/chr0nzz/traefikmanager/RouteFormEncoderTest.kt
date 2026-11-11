@@ -161,4 +161,31 @@ class RouteFormEncoderTest {
         assertFalse(noPort.isValid)
         assertTrue(noPort.copy(backends = listOf(BackendServer(host = "10.0.0.9", port = "5432"))).isValid)
     }
+
+    @Test
+    fun `backend server name is sent trimmed when the server supports it`() {
+        val fields = RouteFormEncoder.fields(
+            httpForm.copy(serverNameSupported = true, backendServerName = " backend.example.com "),
+            agentId = null,
+        )
+        assertEquals("backend.example.com", fields.valueOf("backendServerName"))
+    }
+
+    @Test
+    fun `an empty backend server name is sent so the server clears it`() {
+        val fields = RouteFormEncoder.fields(httpForm.copy(serverNameSupported = true), agentId = null)
+        assertEquals("", fields.valueOf("backendServerName"))
+    }
+
+    @Test
+    fun `backend server name is left out on servers without it and for other protocols`() {
+        assertEquals(null, RouteFormEncoder.fields(httpForm.copy(backendServerName = "b.example.com"), agentId = null).valueOf("backendServerName"))
+        val tcp = httpForm.copy(
+            protocol = RouteProtocol.Tcp,
+            serverNameSupported = true,
+            backendServerName = "b.example.com",
+            backends = listOf(BackendServer(host = "10.0.0.9", port = "5432")),
+        )
+        assertEquals(null, RouteFormEncoder.fields(tcp, agentId = null).valueOf("backendServerName"))
+    }
 }

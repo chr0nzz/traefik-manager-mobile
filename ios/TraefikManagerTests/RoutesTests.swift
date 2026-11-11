@@ -28,6 +28,12 @@ final class RouteModelTests: XCTestCase {
         XCTAssertEqual(try route(#"{"target":"N/A"}"#).status(), .error)
         XCTAssertEqual(try route(#"{"target":"http://x"}"#).status(health: RouteHealth(state: "degraded")), .warn)
     }
+
+    func testServerNameIsNilOnlyWhenTheServerLeavesItOut() throws {
+        XCTAssertNil(try route(#"{"id":"a"}"#).serverName)
+        XCTAssertEqual(try route(#"{"serverName":""}"#).serverName, "")
+        XCTAssertEqual(try route(#"{"serverName":"b.example.com"}"#).serverName, "b.example.com")
+    }
 }
 
 final class RouteFormTests: XCTestCase {
@@ -64,6 +70,20 @@ final class RouteFormTests: XCTestCase {
         XCTAssertEqual(lookup["domains"], "example.com")
         XCTAssertEqual(fields.filter { $0.0 == "targetIp" }.map(\.1), ["10.0.0.9", "", ""])
         XCTAssertTrue(lookup["backendsJsonHttp"]?.contains("10.0.0.9") == true)
+    }
+
+    func testEncoderBackendServerName() {
+        var form = RouteForm()
+        form.name = "a"
+        form.backends = [BackendServer(scheme: "https", host: "10.0.0.9", port: "8443")]
+        form.backendServerName = " backend.example.com "
+        XCTAssertNil(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" })
+        form.serverNameSupported = true
+        XCTAssertEqual(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" }?.1, "backend.example.com")
+        form.backendServerName = ""
+        XCTAssertEqual(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" }?.1, "")
+        form.protocol = .tcp
+        XCTAssertNil(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" })
     }
 
     func testEncoderDisabledTLSSendsSentinel() {

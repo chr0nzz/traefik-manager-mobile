@@ -863,6 +863,17 @@ private fun TlsSection(
                 checked = form.insecureSkipVerify,
                 onCheckedChange = { checked -> viewModel.update { it.copy(insecureSkipVerify = checked) } },
             )
+            if (form.serverNameSupported && !form.usesSharedService && form.isManagedService) {
+                OutlinedTextField(
+                    value = form.backendServerName,
+                    onValueChange = { value -> viewModel.update { it.copy(backendServerName = value) } },
+                    label = { Text(stringResource(R.string.routes_form_server_name)) },
+                    placeholder = { Text("backend.example.com") },
+                    supportingText = { Text(stringResource(R.string.routes_form_server_name_help)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(top = TmSpacing.sm),
+                )
+            }
             CheckboxRow(
                 label = stringResource(R.string.routes_form_streaming),
                 checked = form.streamingEnabled,

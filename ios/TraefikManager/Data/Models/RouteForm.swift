@@ -112,6 +112,8 @@ struct RouteForm: Hashable, Sendable {
     var middlewares: [String] = []
     var passHostHeader = true
     var insecureSkipVerify = false
+    var backendServerName = ""
+    var serverNameSupported = false
     var certResolver = ""
     var tlsEnabled = true
     var tcpTLSMode: TCPTLSMode = .none
@@ -243,6 +245,9 @@ enum RouteFormEncoder {
             fields.append(("scheme", form.backends.first?.scheme ?? "http"))
             fields.append(("passHostHeader", String(form.effectivePassHostHeader)))
             fields.append(("insecureSkipVerify", String(form.insecureSkipVerify)))
+            if form.serverNameSupported && manualBackends {
+                fields.append(("backendServerName", form.backendServerName.trimmed))
+            }
             fields.append(("tlsOptionsProfile", form.tlsOptionsProfile))
 
             if form.wildcardEnabled && !form.tlsMainDomain.isBlank {
@@ -411,6 +416,8 @@ enum RouteFormParsing {
         form.middlewares = route.middlewareNames
         form.passHostHeader = route.passHostHeader ?? true
         form.insecureSkipVerify = route.insecureSkipVerify
+        form.backendServerName = route.serverName ?? ""
+        form.serverNameSupported = route.serverName != nil
         form.certResolver = route.certResolver
         form.tlsEnabled = route.tlsEnabled
         form.tcpTLSMode = route.protocol != "tcp" ? .none : route.tlsPassthrough ? .passthrough : route.tlsEnabled ? .terminate : .none

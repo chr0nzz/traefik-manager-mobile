@@ -62,6 +62,7 @@ final class RouteFormModel {
             if form.domains.isEmpty, let domain = loadedSettings.domains.first { form.domains = [domain] }
             if form.certResolver.isEmpty { form.certResolver = loadedResolvers.first ?? "" }
             form.tlsEnabled = !loadedResolvers.isEmpty
+            form.serverNameSupported = loadedSnapshot?.routes.contains { $0.serverName != nil } ?? false
         }
         refreshServiceOptions()
         loading = false
