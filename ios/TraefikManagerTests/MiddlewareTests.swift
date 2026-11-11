@@ -76,3 +76,40 @@ final class MiddlewareUsageTests: XCTestCase {
         XCTAssertEqual(fields["agent_id"], "edge")
     }
 }
+
+final class MiddlewareExternalUsageTests: XCTestCase {
+    private let envelope = ProtoEnvelope(
+        http: [
+            TraefikObject("auth@file", "file", "enabled", usedBy: ["api@file", "web@docker", "dash@kubernetescrd"]),
+            TraefikObject("auth@docker", "docker", "enabled", usedBy: ["other@docker"]),
+            TraefikObject("unused@file", "file", "enabled", usedBy: ["api@file"]),
+        ],
+        tcp: [TraefikObject("ipallow@file", "file", "enabled", usedBy: ["db@docker"])]
+    )
+
+    private func middlewares(_ json: String) throws -> [MiddlewareDef] {
+        try JSONDecoder().decode([MiddlewareDef].self, from: Data(json.utf8))
+    }
+
+    func testLiveUsersKeepOnlyRoutersFromOtherProviders() {
+        XCTAssertEqual(MiddlewareUsage.liveUsers(envelope), [
+            "http:auth": ["web@docker", "dash@kubernetescrd"],
+            "tcp:ipallow": ["db@docker"],
+        ])
+    }
+
+    func testExternalUsersMatchProtocolAndSkipKnownRoutes() throws {
+        let external = MiddlewareUsage.externalUsers(
+            live: MiddlewareUsage.liveUsers(envelope),
+            routes: [Route(id: "web@docker", name: "web")],
+            middlewares: try middlewares(#"[{"name":"auth","type":"http"},{"name":"ipallow","type":"http"},{"name":"unused","type":"http"}]"#)
+        )
+        XCTAssertEqual(external, ["auth": ["dash@kubernetescrd"]])
+    }
+
+    func testBlockedTextNamesRoutersFromOtherProviders() {
+        let text = MiddlewareDetailView.blockedText("auth is still used by api, web@docker", routers: ["api", "web@docker"], external: ["web@docker"])
+        XCTAssertTrue(text.contains("1 routes in your config files"))
+        XCTAssertTrue(text.contains("cannot edit web@docker"))
+    }
+}

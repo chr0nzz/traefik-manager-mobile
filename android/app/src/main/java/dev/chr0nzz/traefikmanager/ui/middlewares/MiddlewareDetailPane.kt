@@ -57,6 +57,7 @@ fun MiddlewareDetailPane(
     middleware: MiddlewareDef?,
     usageCount: Int,
     showBack: Boolean,
+    externalUsers: List<String> = emptyList(),
     onBack: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
     onEdit: (MiddlewareDef) -> Unit = {},
@@ -151,8 +152,16 @@ fun MiddlewareDetailPane(
                     } else {
                         pluralStringResource(R.plurals.middlewares_used_by, usageCount, usageCount)
                     },
-                    last = true,
+                    last = externalUsers.isEmpty(),
                 )
+                if (externalUsers.isNotEmpty()) {
+                    DetailRow(
+                        label = stringResource(R.string.middlewares_other_providers),
+                        value = externalUsers.joinToString("\n"),
+                        mono = true,
+                        last = true,
+                    )
+                }
             }
 
             SectionLabel(stringResource(R.string.middlewares_configuration))
