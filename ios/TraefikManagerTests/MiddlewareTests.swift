@@ -109,7 +109,7 @@ final class MiddlewareExternalUsageTests: XCTestCase {
 
     func testBlockedTextNamesRoutersFromOtherProviders() {
         let text = MiddlewareDetailView.blockedText("auth is still used by api, web@docker", routers: ["api", "web@docker"], external: ["web@docker"])
-        XCTAssertTrue(text.contains("1 routes in your config files"))
+        XCTAssertTrue(text.contains("1 route in your config files"))
         XCTAssertTrue(text.contains("cannot edit web@docker"))
     }
 }
