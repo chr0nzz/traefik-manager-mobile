@@ -2054,7 +2054,7 @@
     </plurals>
     <string name="middlewares_other_providers">다른 프로바이더</string>
     <string name="static_http3_udp_hint">HTTP/3은 이 포트에서 UDP도 사용합니다. Docker의 %s처럼 UDP 포트도 게시하고 방화벽에서 허용하세요. TLS를 사용하는 라우터만 HTTP/3을 쓸 수 있습니다.</string>
-    <string name="dashboard_flag_unreachable">연결 불가</string>
+    <string name="dashboard_flag_unreachable">접속 불가</string>
     <string name="dashboard_reason_route_unreachable">백엔드 접속 불가</string>
     <string name="dashboard_reason_route_unreachable_error">백엔드 접속 불가, %s</string>
     <plurals name="dashboard_reason_route_servers_down">
