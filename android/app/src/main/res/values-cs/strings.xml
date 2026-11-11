@@ -2351,7 +2351,7 @@
     <string name="advisory_severity_high">Vysoká</string>
     <string name="advisory_severity_moderate">Střední</string>
     <string name="advisory_details">Podrobnosti</string>
-    <string name="advisory_dismiss">Zavřít</string>
+    <string name="advisory_dismiss">Skrýt</string>
     <string name="advisory_http3_identity_leak">Opakované použití HTTP/3 spojení s backendem vyzrazuje identitu NTLM a Kerberos mezi klienty</string>
     <string name="advisory_rootless_target">Cíl požadavku bez cesty se směruje jako /, ale přeposílá se beze změny, čímž obchází pravidla cest, forwardAuth a přístupové logy</string>
     <string name="advisory_h2c_upgrade">Hlavičky h2c upgrade přeposlané backendu umožní klientovi obejít celý řetězec middlewarů</string>
