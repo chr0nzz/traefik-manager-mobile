@@ -6,6 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.chr0nzz.traefikmanager.data.repo.DashboardBuilder
 import dev.chr0nzz.traefikmanager.data.repo.DashboardRepository
 import dev.chr0nzz.traefikmanager.data.repo.DashboardSnapshot
+import dev.chr0nzz.traefikmanager.data.model.AdvisoryNotice
+import dev.chr0nzz.traefikmanager.data.model.TraefikAdvisories
+import dev.chr0nzz.traefikmanager.data.store.PreferencesStore
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,12 +26,14 @@ data class DashboardUiState(
     val refreshing: Boolean = false,
     val snapshot: DashboardSnapshot? = null,
     val error: UiText? = null,
+    val advisory: AdvisoryNotice? = null,
 )
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val repository: DashboardRepository,
     routesRepository: dev.chr0nzz.traefikmanager.data.repo.RoutesRepository,
+    private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
 
     init {
@@ -41,10 +46,13 @@ class DashboardViewModel @Inject constructor(
     private val loadState = MutableStateFlow(DashboardUiState())
 
     val state: StateFlow<DashboardUiState> =
-        combine(repository.raw, providerFilter, loadState) { raw, filter, load ->
+        combine(repository.raw, providerFilter, loadState, preferencesStore.advisoryDismissals) { raw, filter, load, dismissed ->
             val loading = load.loading || (raw == null && load.error == null)
             load.copy(
                 snapshot = raw?.let { DashboardBuilder.build(it, filter) },
+                advisory = raw?.let {
+                    TraefikAdvisories.notice(it.version?.version, it.middlewares?.all.orEmpty(), dismissed)
+                },
                 loading = loading,
                 refreshing = load.refreshing && !loading,
             )
@@ -55,6 +63,10 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun refresh() = load(initial = false)
+
+    fun dismissAdvisory(notice: AdvisoryNotice) {
+        viewModelScope.launch { preferencesStore.dismissAdvisory(notice.advisory.id, notice.version) }
+    }
 
     fun onProviderClick(provider: String) {
         providerFilter.update { current -> if (current == provider) null else provider }

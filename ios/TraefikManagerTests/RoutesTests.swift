@@ -214,3 +214,33 @@ final class DashboardBuilderTests: XCTestCase {
         XCTAssertEqual(snapshot.verdict.headline, "1 object is down")
     }
 }
+
+final class TraefikAdvisoryTests: XCTestCase {
+    func testFirstMatchingAdvisoryIsReported() {
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("3.7.12")?.id, "CVE-2026-88007")
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("v3.7.13")?.id, "GHSA-qm9f-w54v-q2qh")
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("3.7.15")?.id, "GHSA-hrpp-p4fc-wwf8")
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("2.11.59")?.id, "GHSA-hrpp-p4fc-wwf8")
+    }
+
+    func testPatchedAndUnparseableVersionsReportNothing() {
+        XCTAssertNil(TraefikAdvisories.firstAffecting("3.7.16"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting("2.11.60"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting("4.0.0"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting("dev"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting(nil))
+    }
+
+    func testDismissalHidesOnlyThatVersion() {
+        let dismissed = ["GHSA-hrpp-p4fc-wwf8": "3.7.15"]
+        XCTAssertNil(TraefikAdvisories.notice(version: "v3.7.15", middlewares: [], dismissed: { dismissed[$0] }))
+        XCTAssertEqual(TraefikAdvisories.notice(version: "2.11.59", middlewares: [], dismissed: { dismissed[$0] })?.version, "2.11.59")
+    }
+
+    func testForwardAuthRaisesPriorityOnlyWhenRelated() {
+        let auth = [TraefikObject("sso@file", "file", "enabled", type: "forwardauth")]
+        XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.15", middlewares: auth, dismissed: { _ in nil })?.forwardAuthInUse, true)
+        XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.13", middlewares: auth, dismissed: { _ in nil })?.forwardAuthInUse, false)
+        XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.15", middlewares: [], dismissed: { _ in nil })?.forwardAuthInUse, false)
+    }
+}

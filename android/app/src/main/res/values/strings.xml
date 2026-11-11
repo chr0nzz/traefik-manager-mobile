@@ -2662,6 +2662,33 @@
     <string name="dashboard_health_down">down</string>
     <!-- Lowercase health label -->
     <string name="dashboard_health_healthy">healthy</string>
+    <string name="advisory_title">Traefik security advisory</string>
+    <!-- %1$s is the Traefik version, %2$s the advisory ID, %3$s its severity, %4$s the summary -->
+    <string name="advisory_body">Your Traefik v%1$s is affected by %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">A forwardAuth middleware is in use, so this is high priority.</string>
+    <!-- %s is a Traefik version, such as v3.7.15 -->
+    <string name="advisory_update">Update Traefik to %s.</string>
+    <!-- %1$s and %2$s are Traefik versions, such as v3.7.16 and v2.11.60 -->
+    <string name="advisory_update_either">Update Traefik to %1$s or %2$s.</string>
+    <string name="advisory_severity_critical">Critical</string>
+    <string name="advisory_severity_high">High</string>
+    <string name="advisory_severity_moderate">Moderate</string>
+    <string name="advisory_details">Details</string>
+    <string name="advisory_dismiss">Dismiss</string>
+    <string name="advisory_http3_identity_leak">HTTP/3 backend connection reuse leaks NTLM and Kerberos identity between clients</string>
+    <string name="advisory_rootless_target">Rootless request target routes as / but is forwarded verbatim, bypassing path rules, forwardAuth and access logs</string>
+    <string name="advisory_h2c_upgrade">h2c upgrade headers forwarded to the backend let a client tunnel past the whole middleware chain</string>
+    <string name="advisory_trailer_sanitization">Header name sanitization (aliasHeadersStrategy, forwarded header stripping) bypassed via request trailers</string>
+    <string name="advisory_negotiate_pool">Preauthenticated Negotiate contaminates the shared backend connection pool</string>
+    <string name="advisory_sticky_tls_config">NTLM and Kerberos sticky connections are not keyed by service, so one service TLS client config applies to another</string>
+    <string name="advisory_fastproxy_identity_leak">FastProxy backend connection pool leaks NTLM and Negotiate identity to unauthenticated clients</string>
+    <string name="advisory_forwardauth_alias_bypass">ForwardAuth authentication bypass via forwarded header aliases</string>
+    <string name="advisory_forwardauth_dot_alias">ForwardAuth identity spoofing via dot-form header aliases</string>
+    <string name="advisory_basicauth_timing">BasicAuth request coalescing reintroduces a username enumeration timing oracle</string>
+    <string name="advisory_negated_host_mtls">Negated Host matcher causes a TLS option conflict that disables client certificate authentication on the excluded host</string>
+    <string name="advisory_sticky_h2_race">Unsynchronized write to the sticky round tripper shared by concurrent HTTP/2 streams</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth shares its auth server connections between clients, leaking NTLM and Negotiate identity</string>
+    <string name="advisory_fastproxy_upgrade_race">FastProxy data race after an HTTP/1 upgrade lets an unauthenticated client crash Traefik</string>
     <!-- Lowercase -->
     <string name="dashboard_strip_no_data">no data</string>
     <!-- Lowercase -->
