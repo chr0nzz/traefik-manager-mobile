@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 RES = '/home/chronzz/code/traefik-manager/traefik-manager-mobile/android/app/src/main/res'
 LANGS = {  # iOS locale -> Android values dir
     'zh-Hans': 'values-b+zh+Hans', 'cs': 'values-cs', 'da': 'values-da', 'de': 'values-de',
-    'es': 'values-es', 'fr': 'values-fr', 'fr-CA': 'values-fr-rCA', 'nl': 'values-nl',
+    'es': 'values-es', 'fr': 'values-fr', 'fr-CA': 'values-fr-rCA', 'ko': 'values-ko', 'nl': 'values-nl',
     'pt-PT': 'values-pt', 'pt-BR': 'values-pt-rBR', 'ru': 'values-ru',
 }
 
