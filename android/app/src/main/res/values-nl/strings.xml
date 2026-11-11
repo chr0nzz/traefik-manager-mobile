@@ -2150,4 +2150,52 @@
     <string name="push_error_old_server">Deze server is ouder dan 1.12.0 en heeft dus geen kanalen om via te pushen.</string>
     <string name="auth_oidc_active">Actief</string>
     <string name="backups_agent_static_included">Op een agent bevat de gewone back-up de statische configuratie al.</string>
+    <string name="routes_server_name">Backend-servernaam</string>
+    <string name="routes_form_server_name">Backend-servernaam (SNI)</string>
+    <string name="routes_form_server_name_help">De naam die Traefik als SNI verstuurt en waartegen het backendcertificaat wordt gecontroleerd. Gebruik dit als de backend een certificaat voor een andere naam dan het doeladres heeft.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager verwijdert hem uit %d route in je configuratiebestanden.</item>
+        <item quantity="other">Traefik Manager verwijdert hem uit %d routes in je configuratiebestanden.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager kan %s niet bewerken, omdat een andere provider zoals Docker-labels hem definieert. Hij werkt pas weer als je de middleware daar verwijdert.</item>
+        <item quantity="other">Traefik Manager kan %s niet bewerken, omdat een andere provider zoals Docker-labels ze definieert. Ze werken pas weer als je de middleware daar verwijdert.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Andere providers</string>
+    <string name="static_http3_udp_hint">HTTP/3 gebruikt op deze poort ook UDP. Publiceer die ook, bijvoorbeeld %s in Docker, en sta hem toe in elke firewall. Alleen routers met TLS kunnen HTTP/3 gebruiken.</string>
+    <string name="dashboard_flag_unreachable">onbereikbaar</string>
+    <string name="dashboard_reason_route_unreachable">backend onbereikbaar</string>
+    <string name="dashboard_reason_route_unreachable_error">backend onbereikbaar, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend uitgevallen, 0 van %d server bereikbaar</item>
+        <item quantity="other">backend uitgevallen, 0 van %d servers bereikbaar</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend gedegradeerd, %1$d van %2$d server bereikbaar</item>
+        <item quantity="other">backend gedegradeerd, %1$d van %2$d servers bereikbaar</item>
+    </plurals>
+    <string name="advisory_title">Traefik-beveiligingsadvies</string>
+    <string name="advisory_body">Je Traefik v%1$s is getroffen door %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">Er is een forwardAuth-middleware in gebruik, dus dit heeft hoge prioriteit.</string>
+    <string name="advisory_update">Werk Traefik bij naar %s.</string>
+    <string name="advisory_update_either">Werk Traefik bij naar %1$s of %2$s.</string>
+    <string name="advisory_severity_critical">Kritiek</string>
+    <string name="advisory_severity_high">Hoog</string>
+    <string name="advisory_severity_moderate">Gemiddeld</string>
+    <string name="advisory_details">Details</string>
+    <string name="advisory_dismiss">Negeren</string>
+    <string name="advisory_http3_identity_leak">Hergebruik van HTTP/3-backendverbindingen lekt NTLM- en Kerberos-identiteit tussen clients</string>
+    <string name="advisory_rootless_target">Een verzoekdoel zonder pad wordt als / gerouteerd maar letterlijk doorgestuurd, waardoor padregels, forwardAuth en toegangslogs worden omzeild</string>
+    <string name="advisory_h2c_upgrade">Naar de backend doorgestuurde h2c-upgradeheaders laten een client langs de hele middlewareketen tunnelen</string>
+    <string name="advisory_trailer_sanitization">Het opschonen van headernamen (aliasHeadersStrategy, verwijderen van doorgestuurde headers) is te omzeilen via request-trailers</string>
+    <string name="advisory_negotiate_pool">Vooraf geauthenticeerde Negotiate vervuilt de gedeelde pool met backendverbindingen</string>
+    <string name="advisory_sticky_tls_config">Sticky NTLM- en Kerberos-verbindingen zijn niet per service gescheiden, waardoor de TLS-clientconfiguratie van de ene service voor een andere geldt</string>
+    <string name="advisory_fastproxy_identity_leak">De backendverbindingspool van FastProxy lekt NTLM- en Negotiate-identiteit naar niet-geauthenticeerde clients</string>
+    <string name="advisory_forwardauth_alias_bypass">ForwardAuth-authenticatie is te omzeilen via doorgestuurde header-aliassen</string>
+    <string name="advisory_forwardauth_dot_alias">ForwardAuth-identiteit is te vervalsen via header-aliassen met punten</string>
+    <string name="advisory_basicauth_timing">Het samenvoegen van BasicAuth-verzoeken brengt een timing-orakel voor het raden van gebruikersnamen terug</string>
+    <string name="advisory_negated_host_mtls">Een genegeerde Host-matcher veroorzaakt een conflict in TLS-opties dat clientcertificaat-authenticatie op de uitgesloten host uitschakelt</string>
+    <string name="advisory_sticky_h2_race">Niet-gesynchroniseerd schrijven naar de sticky round tripper die gelijktijdige HTTP/2-streams delen</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth deelt verbindingen met de authenticatieserver tussen clients en lekt zo NTLM- en Negotiate-identiteit</string>
+    <string name="advisory_fastproxy_upgrade_race">Een data race in FastProxy na een HTTP/1-upgrade laat een niet-geauthenticeerde client Traefik laten crashen</string>
 </resources>

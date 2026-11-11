@@ -2043,4 +2043,48 @@
     <string name="push_channel_description">Traefik Manager에서 푸시한 이벤트</string>
     <string name="push_distributor_message">Traefik Manager 이벤트</string>
     <string name="push_error_old_server">이 서버는 1.12.0보다 오래되어 푸시할 채널이 없습니다.</string>
+    <string name="routes_server_name">백엔드 서버 이름</string>
+    <string name="routes_form_server_name">백엔드 서버 이름(SNI)</string>
+    <string name="routes_form_server_name_help">Traefik이 SNI로 보내고 백엔드 인증서를 확인할 때 쓰는 이름입니다. 백엔드 인증서가 대상 주소와 다른 이름으로 발급된 경우에 사용하세요.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="other">Traefik Manager가 구성 파일의 라우트 %d개에서 이 미들웨어를 제거합니다.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="other">Docker 레이블 같은 다른 프로바이더가 %s을(를) 정의하므로 Traefik Manager에서 편집할 수 없습니다. 그곳에서 미들웨어를 제거할 때까지 작동하지 않습니다.</item>
+    </plurals>
+    <string name="middlewares_other_providers">다른 프로바이더</string>
+    <string name="static_http3_udp_hint">HTTP/3은 이 포트에서 UDP도 사용합니다. Docker의 %s처럼 UDP 포트도 게시하고 방화벽에서 허용하세요. TLS를 사용하는 라우터만 HTTP/3을 쓸 수 있습니다.</string>
+    <string name="dashboard_flag_unreachable">접속 불가</string>
+    <string name="dashboard_reason_route_unreachable">백엔드 접속 불가</string>
+    <string name="dashboard_reason_route_unreachable_error">백엔드 접속 불가, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="other">백엔드 다운, 서버 %d개 중 0개 정상</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="other">백엔드 저하됨, 서버 %2$d개 중 %1$d개 정상</item>
+    </plurals>
+    <string name="advisory_title">Traefik 보안 권고</string>
+    <string name="advisory_body">Traefik v%1$s 버전이 %2$s(%3$s)의 영향을 받습니다 - %4$s.</string>
+    <string name="advisory_forward_auth">forwardAuth 미들웨어를 사용 중이므로 우선순위가 높습니다.</string>
+    <string name="advisory_update">Traefik을 %s 버전으로 업데이트하세요.</string>
+    <string name="advisory_update_either">Traefik을 %1$s 또는 %2$s 버전으로 업데이트하세요.</string>
+    <string name="advisory_severity_critical">심각</string>
+    <string name="advisory_severity_high">높음</string>
+    <string name="advisory_severity_moderate">보통</string>
+    <string name="advisory_details">자세히</string>
+    <string name="advisory_dismiss">닫기</string>
+    <string name="advisory_http3_identity_leak">HTTP/3 백엔드 연결 재사용으로 클라이언트 간에 NTLM 및 Kerberos ID가 노출됨</string>
+    <string name="advisory_rootless_target">경로 없는 요청 대상이 /로 라우팅되지만 그대로 전달되어 경로 규칙, forwardAuth, 접근 로그를 우회함</string>
+    <string name="advisory_h2c_upgrade">백엔드로 전달된 h2c 업그레이드 헤더로 클라이언트가 미들웨어 체인 전체를 우회할 수 있음</string>
+    <string name="advisory_trailer_sanitization">요청 트레일러로 헤더 이름 정리(aliasHeadersStrategy, 전달된 헤더 제거)를 우회할 수 있음</string>
+    <string name="advisory_negotiate_pool">사전 인증된 Negotiate가 공유 백엔드 연결 풀을 오염시킴</string>
+    <string name="advisory_sticky_tls_config">NTLM 및 Kerberos 고정 연결이 서비스별로 구분되지 않아 한 서비스의 TLS 클라이언트 설정이 다른 서비스에 적용됨</string>
+    <string name="advisory_fastproxy_identity_leak">FastProxy 백엔드 연결 풀이 인증되지 않은 클라이언트에 NTLM 및 Negotiate ID를 노출함</string>
+    <string name="advisory_forwardauth_alias_bypass">전달된 헤더 별칭으로 ForwardAuth 인증을 우회할 수 있음</string>
+    <string name="advisory_forwardauth_dot_alias">점이 포함된 헤더 별칭으로 ForwardAuth ID를 위조할 수 있음</string>
+    <string name="advisory_basicauth_timing">BasicAuth 요청 병합으로 사용자 이름을 알아낼 수 있는 타이밍 오라클이 다시 생김</string>
+    <string name="advisory_negated_host_mtls">부정된 Host 매처가 TLS 옵션 충돌을 일으켜 제외된 호스트에서 클라이언트 인증서 인증이 꺼짐</string>
+    <string name="advisory_sticky_h2_race">동시 HTTP/2 스트림이 공유하는 고정 round tripper에 동기화되지 않은 쓰기가 발생함</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth가 인증 서버 연결을 클라이언트 간에 공유해 NTLM 및 Negotiate ID가 노출됨</string>
+    <string name="advisory_fastproxy_upgrade_race">HTTP/1 업그레이드 후 FastProxy의 데이터 경합으로 인증되지 않은 클라이언트가 Traefik을 중단시킬 수 있음</string>
 </resources>

@@ -2257,4 +2257,56 @@
     <string name="push_error_old_server">Este servidor é anterior à versão 1.12.0, por isso não tem canais para enviar push.</string>
     <string name="auth_oidc_active">Ativo</string>
     <string name="backups_agent_static_included">Num agente, a cópia de segurança normal já inclui a configuração estática.</string>
+    <string name="routes_server_name">Nome do servidor backend</string>
+    <string name="routes_form_server_name">Nome do servidor backend (SNI)</string>
+    <string name="routes_form_server_name_help">O nome que o Traefik envia como SNI e com que verifica o certificado do backend. Use-o quando o backend apresenta o certificado para um nome diferente do endereço de destino.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">O Traefik Manager remove-o de %d rota nos seus ficheiros de configuração.</item>
+        <item quantity="many">O Traefik Manager remove-o de %d rotas nos seus ficheiros de configuração.</item>
+        <item quantity="other">O Traefik Manager remove-o de %d rotas nos seus ficheiros de configuração.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">O Traefik Manager não pode editar %s, porque outro fornecedor, como as etiquetas do Docker, o define. Deixa de funcionar até remover lá o middleware.</item>
+        <item quantity="many">O Traefik Manager não pode editar %s, porque outro fornecedor, como as etiquetas do Docker, os define. Deixam de funcionar até remover lá o middleware.</item>
+        <item quantity="other">O Traefik Manager não pode editar %s, porque outro fornecedor, como as etiquetas do Docker, os define. Deixam de funcionar até remover lá o middleware.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Outros fornecedores</string>
+    <string name="static_http3_udp_hint">O HTTP/3 também usa UDP nesta porta. Publique-a também, por exemplo %s no Docker, e permita-a em qualquer firewall. Só os routers com TLS podem usar HTTP/3.</string>
+    <string name="dashboard_flag_unreachable">inacessíveis</string>
+    <string name="dashboard_reason_route_unreachable">backend inacessível</string>
+    <string name="dashboard_reason_route_unreachable_error">backend inacessível, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend em baixo, 0 de %d servidor ativo</item>
+        <item quantity="many">backend em baixo, 0 de %d servidores ativos</item>
+        <item quantity="other">backend em baixo, 0 de %d servidores ativos</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend degradado, %1$d de %2$d servidor ativo</item>
+        <item quantity="many">backend degradado, %1$d de %2$d servidores ativos</item>
+        <item quantity="other">backend degradado, %1$d de %2$d servidores ativos</item>
+    </plurals>
+    <string name="advisory_title">Aviso de segurança do Traefik</string>
+    <string name="advisory_body">O seu Traefik v%1$s é afetado por %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">Está a ser usado um middleware forwardAuth, por isso isto é prioritário.</string>
+    <string name="advisory_update">Atualize o Traefik para %s.</string>
+    <string name="advisory_update_either">Atualize o Traefik para %1$s ou %2$s.</string>
+    <string name="advisory_severity_critical">Crítica</string>
+    <string name="advisory_severity_high">Alta</string>
+    <string name="advisory_severity_moderate">Moderada</string>
+    <string name="advisory_details">Detalhes</string>
+    <string name="advisory_dismiss">Dispensar</string>
+    <string name="advisory_http3_identity_leak">A reutilização de ligações HTTP/3 ao backend divulga a identidade NTLM e Kerberos entre clientes</string>
+    <string name="advisory_rootless_target">Um destino de pedido sem caminho é encaminhado como / mas reenviado tal como está, contornando regras de caminho, forwardAuth e registos de acesso</string>
+    <string name="advisory_h2c_upgrade">Cabeçalhos de upgrade h2c reenviados ao backend deixam um cliente contornar toda a cadeia de middlewares</string>
+    <string name="advisory_trailer_sanitization">A limpeza de nomes de cabeçalhos (aliasHeadersStrategy, remoção de cabeçalhos reencaminhados) é contornada através de trailers do pedido</string>
+    <string name="advisory_negotiate_pool">Negotiate pré-autenticado contamina o conjunto partilhado de ligações ao backend</string>
+    <string name="advisory_sticky_tls_config">As ligações persistentes NTLM e Kerberos não são separadas por serviço, por isso a configuração de cliente TLS de um serviço aplica-se a outro</string>
+    <string name="advisory_fastproxy_identity_leak">O conjunto de ligações ao backend do FastProxy divulga a identidade NTLM e Negotiate a clientes não autenticados</string>
+    <string name="advisory_forwardauth_alias_bypass">Contorno da autenticação ForwardAuth através de aliases de cabeçalhos reencaminhados</string>
+    <string name="advisory_forwardauth_dot_alias">Falsificação de identidade ForwardAuth através de aliases de cabeçalhos com pontos</string>
+    <string name="advisory_basicauth_timing">O agrupamento de pedidos BasicAuth reintroduz um oráculo de tempo para enumerar nomes de utilizador</string>
+    <string name="advisory_negated_host_mtls">Um matcher Host negado causa um conflito de opções TLS que desativa a autenticação por certificado de cliente no anfitrião excluído</string>
+    <string name="advisory_sticky_h2_race">Escrita não sincronizada no round tripper persistente partilhado por fluxos HTTP/2 simultâneos</string>
+    <string name="advisory_forwardauth_connection_leak">O ForwardAuth partilha as ligações ao servidor de autenticação entre clientes, divulgando a identidade NTLM e Negotiate</string>
+    <string name="advisory_fastproxy_upgrade_race">Uma condição de corrida no FastProxy após um upgrade HTTP/1 permite a um cliente não autenticado fazer o Traefik falhar</string>
 </resources>

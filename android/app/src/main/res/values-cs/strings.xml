@@ -2310,4 +2310,60 @@
     <string name="push_error_old_server">Tento server je starší než 1.12.0, takže nemá žádné kanály pro push.</string>
     <string name="auth_oidc_active">Aktivní</string>
     <string name="backups_agent_static_included">U agenta už běžná záloha zahrnuje statickou konfiguraci.</string>
+    <string name="routes_server_name">Název backend serveru</string>
+    <string name="routes_form_server_name">Název backend serveru (SNI)</string>
+    <string name="routes_form_server_name_help">Název, který Traefik posílá jako SNI a podle kterého ověřuje certifikát backendu. Použijte ho, když backend předkládá certifikát pro jiný název, než je cílová adresa.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager ho odebere z %d trasy ve vašich konfiguračních souborech.</item>
+        <item quantity="few">Traefik Manager ho odebere z %d tras ve vašich konfiguračních souborech.</item>
+        <item quantity="many">Traefik Manager ho odebere z %d tras ve vašich konfiguračních souborech.</item>
+        <item quantity="other">Traefik Manager ho odebere z %d tras ve vašich konfiguračních souborech.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager nemůže upravit %s, protože ho definuje jiný poskytovatel, například Docker štítky. Přestane fungovat, dokud tam middleware neodeberete.</item>
+        <item quantity="few">Traefik Manager nemůže upravit %s, protože je definuje jiný poskytovatel, například Docker štítky. Přestanou fungovat, dokud tam middleware neodeberete.</item>
+        <item quantity="many">Traefik Manager nemůže upravit %s, protože je definuje jiný poskytovatel, například Docker štítky. Přestanou fungovat, dokud tam middleware neodeberete.</item>
+        <item quantity="other">Traefik Manager nemůže upravit %s, protože je definuje jiný poskytovatel, například Docker štítky. Přestanou fungovat, dokud tam middleware neodeberete.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Jiní poskytovatelé</string>
+    <string name="static_http3_udp_hint">HTTP/3 na tomto portu používá také UDP. Zveřejněte ho také, například %s v Dockeru, a povolte ho v každém firewallu. HTTP/3 mohou používat jen routery s TLS.</string>
+    <string name="dashboard_flag_unreachable">nedostupné</string>
+    <string name="dashboard_reason_route_unreachable">backend nedostupný</string>
+    <string name="dashboard_reason_route_unreachable_error">backend nedostupný, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend nefunguje, běží 0 z %d serveru</item>
+        <item quantity="few">backend nefunguje, běží 0 z %d serverů</item>
+        <item quantity="many">backend nefunguje, běží 0 z %d serverů</item>
+        <item quantity="other">backend nefunguje, běží 0 z %d serverů</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend omezený, běží %1$d z %2$d serveru</item>
+        <item quantity="few">backend omezený, běží %1$d z %2$d serverů</item>
+        <item quantity="many">backend omezený, běží %1$d z %2$d serverů</item>
+        <item quantity="other">backend omezený, běží %1$d z %2$d serverů</item>
+    </plurals>
+    <string name="advisory_title">Bezpečnostní upozornění Traefiku</string>
+    <string name="advisory_body">Váš Traefik v%1$s je zasažen chybou %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">Používá se middleware forwardAuth, takže to má vysokou prioritu.</string>
+    <string name="advisory_update">Aktualizujte Traefik na %s.</string>
+    <string name="advisory_update_either">Aktualizujte Traefik na %1$s nebo %2$s.</string>
+    <string name="advisory_severity_critical">Kritická</string>
+    <string name="advisory_severity_high">Vysoká</string>
+    <string name="advisory_severity_moderate">Střední</string>
+    <string name="advisory_details">Podrobnosti</string>
+    <string name="advisory_dismiss">Skrýt</string>
+    <string name="advisory_http3_identity_leak">Opakované použití HTTP/3 spojení s backendem vyzrazuje identitu NTLM a Kerberos mezi klienty</string>
+    <string name="advisory_rootless_target">Cíl požadavku bez cesty se směruje jako /, ale přeposílá se beze změny, čímž obchází pravidla cest, forwardAuth a přístupové logy</string>
+    <string name="advisory_h2c_upgrade">Hlavičky h2c upgrade přeposlané backendu umožní klientovi obejít celý řetězec middlewarů</string>
+    <string name="advisory_trailer_sanitization">Čištění názvů hlaviček (aliasHeadersStrategy, odstraňování přeposlaných hlaviček) lze obejít přes trailery požadavku</string>
+    <string name="advisory_negotiate_pool">Předem ověřený Negotiate znečistí sdílený fond spojení s backendem</string>
+    <string name="advisory_sticky_tls_config">Trvalá spojení NTLM a Kerberos nejsou oddělena podle služby, takže konfigurace TLS klienta jedné služby platí pro jinou</string>
+    <string name="advisory_fastproxy_identity_leak">Fond spojení s backendem ve FastProxy vyzrazuje identitu NTLM a Negotiate neověřeným klientům</string>
+    <string name="advisory_forwardauth_alias_bypass">Obejití ověření ForwardAuth přes aliasy přeposlaných hlaviček</string>
+    <string name="advisory_forwardauth_dot_alias">Podvržení identity ForwardAuth přes aliasy hlaviček s tečkami</string>
+    <string name="advisory_basicauth_timing">Slučování požadavků BasicAuth znovu zavádí časový orákul pro zjišťování uživatelských jmen</string>
+    <string name="advisory_negated_host_mtls">Negovaný matcher Host způsobí konflikt voleb TLS, který na vyloučeném hostiteli vypne ověřování klientským certifikátem</string>
+    <string name="advisory_sticky_h2_race">Nesynchronizovaný zápis do trvalého round tripperu sdíleného souběžnými HTTP/2 streamy</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth sdílí spojení s ověřovacím serverem mezi klienty a vyzrazuje identitu NTLM a Negotiate</string>
+    <string name="advisory_fastproxy_upgrade_race">Souběh (data race) ve FastProxy po HTTP/1 upgradu umožní neověřenému klientovi shodit Traefik</string>
 </resources>
