@@ -2257,4 +2257,56 @@
     <string name="push_error_old_server">Este servidor es anterior a la 1.12.0, por lo que no tiene canales para enviar notificaciones push.</string>
     <string name="auth_oidc_active">Activo</string>
     <string name="backups_agent_static_included">En un agente, la copia de seguridad normal ya incluye la configuración estática.</string>
+    <string name="routes_server_name">Nombre del servidor backend</string>
+    <string name="routes_form_server_name">Nombre del servidor backend (SNI)</string>
+    <string name="routes_form_server_name_help">El nombre que Traefik envía como SNI y con el que comprueba el certificado del backend. Úsalo cuando el backend sirve su certificado para un nombre distinto de la dirección de destino.</string>
+    <string name="middlewares_other_providers">Otros proveedores</string>
+    <string name="static_http3_udp_hint">HTTP/3 también usa UDP en este puerto. Publícalo también, por ejemplo %s en Docker, y permítelo en cualquier cortafuegos. Solo los routers con TLS pueden usar HTTP/3.</string>
+    <string name="dashboard_flag_unreachable">inaccesibles</string>
+    <string name="dashboard_reason_route_unreachable">backend inaccesible</string>
+    <string name="dashboard_reason_route_unreachable_error">backend inaccesible, %s</string>
+    <string name="advisory_title">Aviso de seguridad de Traefik</string>
+    <string name="advisory_body">Tu Traefik v%1$s está afectado por %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">Hay un middleware forwardAuth en uso, así que esto es prioritario.</string>
+    <string name="advisory_update">Actualiza Traefik a %s.</string>
+    <string name="advisory_update_either">Actualiza Traefik a %1$s o %2$s.</string>
+    <string name="advisory_severity_critical">Crítica</string>
+    <string name="advisory_severity_high">Alta</string>
+    <string name="advisory_severity_moderate">Moderada</string>
+    <string name="advisory_details">Detalles</string>
+    <string name="advisory_dismiss">Descartar</string>
+    <string name="advisory_http3_identity_leak">La reutilización de conexiones HTTP/3 con el backend filtra la identidad NTLM y Kerberos entre clientes</string>
+    <string name="advisory_rootless_target">Un destino de solicitud sin ruta se enruta como / pero se reenvía tal cual, saltándose reglas de ruta, forwardAuth y registros de acceso</string>
+    <string name="advisory_h2c_upgrade">Las cabeceras de actualización h2c reenviadas al backend permiten a un cliente saltarse toda la cadena de middlewares</string>
+    <string name="advisory_trailer_sanitization">La limpieza de nombres de cabecera (aliasHeadersStrategy, eliminación de cabeceras reenviadas) se puede eludir con trailers de la solicitud</string>
+    <string name="advisory_negotiate_pool">Negotiate preautenticado contamina el grupo compartido de conexiones con el backend</string>
+    <string name="advisory_sticky_tls_config">Las conexiones persistentes NTLM y Kerberos no se separan por servicio, así que la configuración de cliente TLS de un servicio se aplica a otro</string>
+    <string name="advisory_fastproxy_identity_leak">El grupo de conexiones con el backend de FastProxy filtra la identidad NTLM y Negotiate a clientes no autenticados</string>
+    <string name="advisory_forwardauth_alias_bypass">Se puede eludir la autenticación ForwardAuth con alias de cabeceras reenviadas</string>
+    <string name="advisory_forwardauth_dot_alias">Se puede suplantar la identidad de ForwardAuth con alias de cabeceras con puntos</string>
+    <string name="advisory_basicauth_timing">Agrupar solicitudes BasicAuth reintroduce un oráculo de tiempos para enumerar nombres de usuario</string>
+    <string name="advisory_negated_host_mtls">Un matcher Host negado provoca un conflicto de opciones TLS que desactiva la autenticación por certificado de cliente en el host excluido</string>
+    <string name="advisory_sticky_h2_race">Escritura no sincronizada en el round tripper persistente que comparten flujos HTTP/2 simultáneos</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth comparte sus conexiones con el servidor de autenticación entre clientes y filtra la identidad NTLM y Negotiate</string>
+    <string name="advisory_fastproxy_upgrade_race">Una condición de carrera en FastProxy tras una actualización HTTP/1 permite a un cliente no autenticado bloquear Traefik</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager lo quita de %d ruta en tus archivos de configuración.</item>
+        <item quantity="many">Traefik Manager lo quita de %d rutas en tus archivos de configuración.</item>
+        <item quantity="other">Traefik Manager lo quita de %d rutas en tus archivos de configuración.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager no puede editar %s, porque lo define otro proveedor, como las etiquetas de Docker. Dejará de funcionar hasta que quites allí el middleware.</item>
+        <item quantity="many">Traefik Manager no puede editar %s, porque los define otro proveedor, como las etiquetas de Docker. Dejarán de funcionar hasta que quites allí el middleware.</item>
+        <item quantity="other">Traefik Manager no puede editar %s, porque los define otro proveedor, como las etiquetas de Docker. Dejarán de funcionar hasta que quites allí el middleware.</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend caído, 0 de %d servidor activo</item>
+        <item quantity="many">backend caído, 0 de %d servidores activos</item>
+        <item quantity="other">backend caído, 0 de %d servidores activos</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend degradado, %1$d de %2$d servidor activo</item>
+        <item quantity="many">backend degradado, %1$d de %2$d servidores activos</item>
+        <item quantity="other">backend degradado, %1$d de %2$d servidores activos</item>
+    </plurals>
 </resources>
