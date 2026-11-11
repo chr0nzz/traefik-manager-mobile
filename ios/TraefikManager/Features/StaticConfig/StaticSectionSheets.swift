@@ -143,7 +143,7 @@ struct EntrypointSheet: View {
                 FormField(label: String(localized: "Address"), value: $form.address, placeholder: ":443", mono: true)
                 FormField(label: String(localized: "HTTP to HTTPS redirect (optional)"), value: $form.redirectTo, placeholder: "websecure",
                           help: String(localized: "The HTTPS entrypoint to redirect to."))
-                FormToggle(title: String(localized: "Enable HTTP/3 (QUIC)"), subtitle: String(localized: "Adds http3 to this entrypoint."), isOn: $form.http3)
+                FormToggle(title: String(localized: "Enable HTTP/3 (QUIC)"), subtitle: String(localized: "HTTP/3 also uses UDP on this port. Publish it too, for example \("443:443/udp") in Docker, and allow it through any firewall. Only routers with TLS can use HTTP/3."), isOn: $form.http3)
                 if headerStrategy.editable {
                     let alias = headerStrategy == .alias
                     FormSelect(label: alias ? String(localized: "Alias headers") : String(localized: "Underscore headers"),

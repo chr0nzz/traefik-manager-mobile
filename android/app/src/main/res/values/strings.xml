@@ -1852,7 +1852,7 @@
     <string name="static_http_to_https_redirect_optional">HTTP to HTTPS redirect (optional)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">The HTTPS entrypoint to redirect to.</string>
     <string name="static_enable_http_3_quic">Enable HTTP/3 (QUIC)</string>
-    <string name="static_adds_http3_to_this_entrypoint">Adds http3 to this entrypoint.</string>
+    <string name="static_http3_udp_hint">HTTP/3 also uses UDP on this port. Publish it too, for example %s in Docker, and allow it through any firewall. Only routers with TLS can use HTTP/3.</string>
     <!-- HTTP headers whose name turns into another header's name at the backend, for example X_Auth_User or X.Auth.User -->
     <string name="static_alias_headers">Alias headers</string>
     <!-- Keep forwardAuth as it is. Delete is the name of an option. X_Auth_User and X.Auth.User are example header names -->

@@ -1731,7 +1731,6 @@
     <string name="auth_sessions_revoked">Andere Browser-Sitzungen abgemeldet</string>
     <string name="static_http_to_https_redirect_optional">Weiterleitung HTTP zu HTTPS (optional)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">Der HTTPS-Entrypoint, auf den weitergeleitet wird.</string>
-    <string name="static_adds_http3_to_this_entrypoint">Fügt http3 zu diesem Entrypoint hinzu.</string>
     <string name="static_alias_headers">Alias-Header</string>
     <string name="static_stops_aliased_header_names_from_bypassing">Verhindert, dass Header-Namen mit Alias (z. B. X_Auth_User, X.Auth.User) forwardAuth umgehen. Löschen empfohlen.</string>
     <string name="static_underscore_headers">Header mit Unterstrich</string>
