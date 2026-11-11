@@ -2150,4 +2150,52 @@
     <string name="push_error_old_server">Denne server er ældre end 1.12.0, så den har ingen kanaler at pushe igennem.</string>
     <string name="auth_oidc_active">Aktiv</string>
     <string name="backups_agent_static_included">På en agent indeholder den almindelige backup allerede den statiske konfiguration.</string>
+    <string name="routes_server_name">Backend-servernavn</string>
+    <string name="routes_form_server_name">Backend-servernavn (SNI)</string>
+    <string name="routes_form_server_name_help">Navnet, Traefik sender som SNI og tjekker backendens certifikat mod. Brug det, når backenden har sit certifikat udstedt til et andet navn end måladressen.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager fjerner den fra %d rute i dine konfigurationsfiler.</item>
+        <item quantity="other">Traefik Manager fjerner den fra %d ruter i dine konfigurationsfiler.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager kan ikke redigere %s, fordi en anden udbyder som Docker-labels definerer den. Den virker ikke, før du fjerner middlewaren der.</item>
+        <item quantity="other">Traefik Manager kan ikke redigere %s, fordi en anden udbyder som Docker-labels definerer dem. De virker ikke, før du fjerner middlewaren der.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Andre udbydere</string>
+    <string name="static_http3_udp_hint">HTTP/3 bruger også UDP på denne port. Udgiv den også, for eksempel %s i Docker, og tillad den i enhver firewall. Kun routere med TLS kan bruge HTTP/3.</string>
+    <string name="dashboard_flag_unreachable">utilgængelige</string>
+    <string name="dashboard_reason_route_unreachable">backend utilgængelig</string>
+    <string name="dashboard_reason_route_unreachable_error">backend utilgængelig, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend nede, 0 af %d server oppe</item>
+        <item quantity="other">backend nede, 0 af %d servere oppe</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend forringet, %1$d af %2$d server oppe</item>
+        <item quantity="other">backend forringet, %1$d af %2$d servere oppe</item>
+    </plurals>
+    <string name="advisory_title">Traefik-sikkerhedsadvarsel</string>
+    <string name="advisory_body">Din Traefik v%1$s er ramt af %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">En forwardAuth-middleware er i brug, så dette har høj prioritet.</string>
+    <string name="advisory_update">Opdater Traefik til %s.</string>
+    <string name="advisory_update_either">Opdater Traefik til %1$s eller %2$s.</string>
+    <string name="advisory_severity_critical">Kritisk</string>
+    <string name="advisory_severity_high">Høj</string>
+    <string name="advisory_severity_moderate">Moderat</string>
+    <string name="advisory_details">Detaljer</string>
+    <string name="advisory_dismiss">Afvis</string>
+    <string name="advisory_http3_identity_leak">Genbrug af HTTP/3-backendforbindelser lækker NTLM- og Kerberos-identitet mellem klienter</string>
+    <string name="advisory_rootless_target">Et anmodningsmål uden sti routes som / men videresendes uændret og omgår stiregler, forwardAuth og adgangslogs</string>
+    <string name="advisory_h2c_upgrade">h2c-upgrade-headere videresendt til backenden lader en klient tunnelere forbi hele middleware-kæden</string>
+    <string name="advisory_trailer_sanitization">Rensning af headernavne (aliasHeadersStrategy, fjernelse af videresendte headere) kan omgås via request-trailere</string>
+    <string name="advisory_negotiate_pool">Forhåndsgodkendt Negotiate forurener den delte backend-forbindelsespulje</string>
+    <string name="advisory_sticky_tls_config">Sticky NTLM- og Kerberos-forbindelser er ikke adskilt pr. tjeneste, så én tjenestes TLS-klientkonfiguration gælder for en anden</string>
+    <string name="advisory_fastproxy_identity_leak">FastProxys backend-forbindelsespulje lækker NTLM- og Negotiate-identitet til ikke-godkendte klienter</string>
+    <string name="advisory_forwardauth_alias_bypass">ForwardAuth-godkendelse kan omgås via videresendte header-aliasser</string>
+    <string name="advisory_forwardauth_dot_alias">ForwardAuth-identitet kan forfalskes via header-aliasser med punktum</string>
+    <string name="advisory_basicauth_timing">Samling af BasicAuth-anmodninger genindfører et timing-orakel til gætning af brugernavne</string>
+    <string name="advisory_negated_host_mtls">En negeret Host-matcher skaber en TLS-indstillingskonflikt, der slår klientcertifikat-godkendelse fra på den udelukkede vært</string>
+    <string name="advisory_sticky_h2_race">Usynkroniseret skrivning til den sticky round tripper, som samtidige HTTP/2-streams deler</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth deler forbindelser til godkendelsesserveren mellem klienter og lækker NTLM- og Negotiate-identitet</string>
+    <string name="advisory_fastproxy_upgrade_race">Et data race i FastProxy efter en HTTP/1-upgrade lader en ikke-godkendt klient få Traefik til at gå ned</string>
 </resources>
