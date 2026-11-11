@@ -87,6 +87,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
@@ -146,7 +147,19 @@ fun MiddlewaresScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(TmSpacing.xs)) {
                     Text(blocked.reason.asString())
-                    if (blocked.routers.isNotEmpty()) {
+                    if (blocked.external.isNotEmpty()) {
+                        val fileCount = blocked.routers.size - blocked.external.size
+                        if (fileCount > 0) {
+                            Text(pluralStringResource(R.plurals.middlewares_blocked_file_routes, fileCount, fileCount))
+                        }
+                        Text(
+                            pluralStringResource(
+                                R.plurals.middlewares_blocked_external,
+                                blocked.external.size,
+                                blocked.external.joinToString(", "),
+                            ),
+                        )
+                    } else if (blocked.routers.isNotEmpty()) {
                         Text(stringResource(R.string.middlewares_blocked_routes, blocked.routers.joinToString(", ")))
                     }
                 }
@@ -236,6 +249,7 @@ fun MiddlewaresScreen(
                     MiddlewareDetailPane(
                         middleware = selected,
                         usageCount = selected?.let { state.usageFor(it.name) } ?: 0,
+                        externalUsers = selected?.let { state.externalFor(it.name) }.orEmpty(),
                         showBack = navigator.canNavigateBack(),
                         contentPadding = insets,
                         onBack = { scope.launch { navigator.navigateBack() } },

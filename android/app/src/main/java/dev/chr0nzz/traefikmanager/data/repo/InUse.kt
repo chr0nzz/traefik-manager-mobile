@@ -13,6 +13,7 @@ class InUseException(
     val reason: UiText,
     val routers: List<String> = emptyList(),
     val parents: List<String> = emptyList(),
+    val external: List<String> = emptyList(),
 ) : Exception()
 
 object InUse {
@@ -33,6 +34,7 @@ object InUse {
             reason = UiText.messageOr(text, fallback),
             routers = parsed.strings("inUseBy"),
             parents = parsed.strings("parents"),
+            external = parsed.strings("externalUsers"),
         )
     }
 

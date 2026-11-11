@@ -1494,6 +1494,15 @@
     <string name="middlewares_delete_consequence">Any route still referencing it will stop working.</string>
     <!-- %1$s is a list of route names -->
     <string name="middlewares_blocked_routes">Deleting it removes it from %1$s.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager removes it from %d route in your config files.</item>
+        <item quantity="other">Traefik Manager removes it from %d routes in your config files.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager cannot edit %s, because another provider such as Docker labels defines it. It stops working until you remove the middleware there.</item>
+        <item quantity="other">Traefik Manager cannot edit %s, because another provider such as Docker labels defines them. They stop working until you remove the middleware there.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Other providers</string>
     <string name="middlewares_error_load">Could not load middlewares</string>
     <string name="middlewares_no_match">No middlewares match</string>
     <string name="middlewares_empty_body">Middlewares you create appear here.</string>

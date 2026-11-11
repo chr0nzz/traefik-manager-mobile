@@ -132,6 +132,30 @@ enum MiddlewareUsage {
         return Dictionary(uniqueKeysWithValues: middlewares.map { ($0.name, referenced[$0.name] ?? 0) })
     }
 
+    /// Routers from other providers that use a file middleware, keyed `proto:name`.
+    static func liveUsers(_ envelope: ProtoEnvelope) -> [String: [String]] {
+        var out: [String: [String]] = [:]
+        for (proto, items) in [("http", envelope.http), ("tcp", envelope.tcp)] {
+            for item in items where item.name.hasSuffix("@file") {
+                let users = (item.usedBy ?? []).filter { $0.contains("@") && !$0.hasSuffix("@file") }
+                if !users.isEmpty { out["\(proto):\(RouteDetailView.shortName(item.name))"] = users }
+            }
+        }
+        return out
+    }
+
+    static func externalUsers(live: [String: [String]], routes: [Route], middlewares: [MiddlewareDef]) -> [String: [String]] {
+        let known = Set(routes.map(\.id))
+        var out: [String: [String]] = [:]
+        for middleware in middlewares {
+            let users = (live["\(middleware.proto.rawValue):\(RouteDetailView.shortName(middleware.name))"] ?? [])
+                .filter { !known.contains($0) }
+                .sorted()
+            if !users.isEmpty { out[middleware.name] = users }
+        }
+        return out
+    }
+
     private static func chainRefs(_ yaml: String) -> [String] {
         guard let range = yaml.range(of: "chain:") else { return [] }
         return yaml[range.upperBound...]

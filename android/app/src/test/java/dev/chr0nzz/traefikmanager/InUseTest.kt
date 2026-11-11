@@ -50,6 +50,21 @@ class InUseTest {
     }
 
     @Test
+    fun `a middleware refusal carries the routers from other providers`() {
+        val thrown = InUse.from(
+            refusal(
+                409,
+                """{"ok":false,"message":"auth is still used by api, web@docker","inUseBy":["api","web@docker"],
+                   "externalUsers":["web@docker"]}""",
+            ),
+            R.string.middlewares_error_delete,
+        )
+        val blocked = thrown as InUseException
+        assertEquals(listOf("api", "web@docker"), blocked.routers)
+        assertEquals(listOf("web@docker"), blocked.external)
+    }
+
+    @Test
     fun `a refusal with neither array still reports its reason`() {
         val thrown = InUse.from(
             refusal(409, """{"ok":false,"error":"pool-backend-1 is still used by other"}"""),

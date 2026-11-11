@@ -16,11 +16,20 @@ struct MiddlewaresView: View {
     @State private var creating = DebugLaunch.form == "new-mw"
     @State private var showTemplates = false
     @State private var debugDetail: String? = DebugLaunch.route
+    @State private var live: [String: [String]] = [:]
 
     private var store: RoutesStore { app.routes }
     private var middlewares: [MiddlewareDef] { store.snapshot?.middlewares ?? [] }
 
-    private var usage: [String: Int] { MiddlewareUsage.counts(routes: store.routes, middlewares: middlewares) }
+    private var external: [String: [String]] {
+        MiddlewareUsage.externalUsers(live: live, routes: store.routes, middlewares: middlewares)
+    }
+
+    private var usage: [String: Int] {
+        let extra = self.external
+        return MiddlewareUsage.counts(routes: store.routes, middlewares: middlewares)
+            .reduce(into: [:]) { $0[$1.key] = $1.value + (extra[$1.key]?.count ?? 0) }
+    }
 
     private var visible: [MiddlewareDef] {
         let needle = query.trimmed.lowercased()
@@ -54,10 +63,10 @@ struct MiddlewaresView: View {
                 }
             }
             .navigationDestination(for: String.self) { name in
-                MiddlewareDetailView(name: name, usage: usage[name] ?? 0, message: $message)
+                MiddlewareDetailView(name: name, usage: usage[name] ?? 0, externalUsers: external[name] ?? [], message: $message)
             }
             .navigationDestination(item: $debugDetail) { name in
-                MiddlewareDetailView(name: name, usage: usage[name] ?? 0, message: $message)
+                MiddlewareDetailView(name: name, usage: usage[name] ?? 0, externalUsers: external[name] ?? [], message: $message)
             }
             .sheet(isPresented: $creating) {
                 NavigationStack {
@@ -67,9 +76,23 @@ struct MiddlewaresView: View {
             .sheet(isPresented: $showTemplates) {
                 NavigationStack { MiddlewareTemplatesView() }
             }
-            .task(id: app.generation) { await app.refreshRoutes() }
-            .refreshable { await app.refreshRoutes() }
+            .task(id: app.generation) {
+                await app.refreshRoutes()
+                await refreshLive()
+            }
+            .refreshable {
+                await app.refreshRoutes()
+                await refreshLive()
+            }
             .toast($message)
+    }
+
+    private func refreshLive() async {
+        guard let service = app.service, let envelope = try? await service.middlewares() else {
+            live = [:]
+            return
+        }
+        live = MiddlewareUsage.liveUsers(envelope)
     }
 
     @ViewBuilder

@@ -159,7 +159,7 @@ struct ServiceDetailView: View {
                 dismiss()
                 await app.refreshServices()
                 app.routes.noteExternalChange()
-            } catch let APIError.inUse(text, routers, parents) {
+            } catch let APIError.inUse(text, routers, parents, _) {
                 blocked = (text ?? String(localized: "Could not delete the service"), routers, parents)
             } catch {
                 message = error.localizedDescription

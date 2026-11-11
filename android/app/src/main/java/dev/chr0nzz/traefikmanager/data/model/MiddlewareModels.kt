@@ -106,6 +106,29 @@ object MiddlewareUsage {
         return middlewares.associate { it.name to (referenced[it.name] ?: 0) }
     }
 
+    fun liveUsers(envelope: ProtoEnvelope): Map<String, List<String>> = buildMap {
+        listOf("http" to envelope.http, "tcp" to envelope.tcp).forEach { (proto, items) ->
+            items.forEach { item ->
+                if (!item.name.endsWith("@file")) return@forEach
+                val users = item.usedBy.orEmpty().filter { it.contains('@') && !it.endsWith("@file") }
+                if (users.isNotEmpty()) put("$proto:${item.name.substringBefore('@')}", users)
+            }
+        }
+    }
+
+    fun externalUsersFor(
+        live: Map<String, List<String>>,
+        routes: List<Route>,
+        middlewares: List<MiddlewareDef>,
+    ): Map<String, List<String>> {
+        val known = routes.map { it.id }.toSet()
+        return middlewares.mapNotNull { middleware ->
+            val key = "${middleware.type.ifEmpty { "http" }.lowercase()}:${middleware.name.substringBefore('@')}"
+            val users = live[key].orEmpty().filter { it !in known }.sorted()
+            if (users.isEmpty()) null else middleware.name to users
+        }.toMap()
+    }
+
     private val CHAIN_ITEM = Regex("""^\s*-\s*(.+?)\s*$""", RegexOption.MULTILINE)
 
     private fun chainRefs(yaml: String): List<String> {

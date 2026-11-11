@@ -10,6 +10,7 @@ import dev.chr0nzz.traefikmanager.data.repo.InUseException
 import dev.chr0nzz.traefikmanager.data.repo.MiddlewaresRepository
 import dev.chr0nzz.traefikmanager.data.repo.RoutesRepository
 import javax.inject.Inject
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,7 @@ data class BlockedMiddlewareDelete(
     val reason: UiText,
     val routers: List<String>,
     val middleware: MiddlewareDef,
+    val external: List<String> = emptyList(),
 )
 
 data class MiddlewaresUiState(
@@ -34,6 +36,7 @@ data class MiddlewaresUiState(
     val refreshing: Boolean = false,
     val middlewares: List<MiddlewareDef> = emptyList(),
     val usage: Map<String, Int> = emptyMap(),
+    val externalUsers: Map<String, List<String>> = emptyMap(),
     val query: String = "",
     val blockedDelete: BlockedMiddlewareDelete? = null,
     val filter: MiddlewareFilter = MiddlewareFilter.All,
@@ -55,7 +58,9 @@ data class MiddlewaresUiState(
             matchesProtocol && matchesQuery
         }.sortedBy { it.name.lowercase() }
 
-    fun usageFor(name: String): Int = usage[name] ?: 0
+    fun usageFor(name: String): Int = (usage[name] ?: 0) + externalFor(name).size
+
+    fun externalFor(name: String): List<String> = externalUsers[name].orEmpty()
 }
 
 @HiltViewModel
@@ -104,6 +109,7 @@ class MiddlewaresViewModel @Inject constructor(
                                     reason = throwable.reason,
                                     routers = throwable.routers,
                                     middleware = middleware,
+                                    external = throwable.external.filter { it in throwable.routers },
                                 ),
                             )
                         }
@@ -125,14 +131,17 @@ class MiddlewaresViewModel @Inject constructor(
             it.copy(loading = initial && it.middlewares.isEmpty(), refreshing = !initial, error = null)
         }
         viewModelScope.launch {
+            val live = async { middlewaresRepository.liveUsers() }
             runCatching { routesRepository.load() }.fold(
                 onSuccess = { snapshot ->
+                    val external = MiddlewareUsage.externalUsersFor(live.await(), snapshot.routes, snapshot.middlewares)
                     _state.update {
                         it.copy(
                             loading = false,
                             refreshing = false,
                             middlewares = snapshot.middlewares,
                             usage = MiddlewareUsage.countsFor(snapshot.routes, snapshot.middlewares),
+                            externalUsers = external,
                             error = null,
                         )
                     }

@@ -6,11 +6,12 @@ struct MiddlewareDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let name: String
     let usage: Int
+    var externalUsers: [String] = []
     @Binding var message: String?
 
     @State private var editing = false
     @State private var confirmDelete = false
-    @State private var blocked: (message: String, routers: [String])?
+    @State private var blocked: (message: String, routers: [String], external: [String])?
 
     private var middleware: MiddlewareDef? { app.routes.snapshot?.middlewares.first { $0.name == name } }
 
@@ -44,8 +45,16 @@ struct MiddlewareDetailView: View {
                     DetailRow(
                         label: String(localized: "Usage"),
                         value: usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes"),
-                        last: true
+                        last: externalUsers.isEmpty
                     )
+                    if !externalUsers.isEmpty {
+                        DetailRow(
+                            label: String(localized: "Other providers"),
+                            value: externalUsers.joined(separator: "\n"),
+                            mono: true,
+                            last: true
+                        )
+                    }
                 }
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     SectionLabel(text: String(localized: "Configuration"))
@@ -97,10 +106,7 @@ struct MiddlewareDetailView: View {
             Button("Keep it", role: .cancel) {}
         } message: {
             if let blocked {
-                Text(blocked.routers.isEmpty
-                    ? blocked.message
-                    : blocked.message + "\n" + String(localized: "Deleting it removes it from \(blocked.routers.joined(separator: ", ")).")
-                )
+                Text(Self.blockedText(blocked.message, routers: blocked.routers, external: blocked.external))
             }
         }
     }
@@ -118,11 +124,26 @@ struct MiddlewareDetailView: View {
                 dismiss()
                 app.routes.noteExternalChange()
                 await app.refreshRoutes()
-            } catch let APIError.inUse(text, routers, _) {
-                blocked = (text ?? String(localized: "Could not delete the middleware"), routers)
+            } catch let APIError.inUse(text, routers, _, external) {
+                blocked = (text ?? String(localized: "Could not delete the middleware"), routers, external.filter { routers.contains($0) })
             } catch {
                 message = error.localizedDescription
             }
         }
+    }
+
+    static func blockedText(_ message: String, routers: [String], external: [String]) -> String {
+        guard !external.isEmpty else {
+            return routers.isEmpty
+                ? message
+                : message + "\n" + String(localized: "Deleting it removes it from \(routers.joined(separator: ", ")).")
+        }
+        var lines = [message]
+        let fileCount = routers.count - external.count
+        if fileCount > 0 {
+            lines.append(String(localized: "Traefik Manager removes it from \(fileCount) routes in your config files."))
+        }
+        lines.append(String(localized: "Traefik Manager cannot edit \(external.joined(separator: ", ")), because another provider such as Docker labels defines it. It stops working until you remove the middleware there."))
+        return lines.joined(separator: "\n")
     }
 }

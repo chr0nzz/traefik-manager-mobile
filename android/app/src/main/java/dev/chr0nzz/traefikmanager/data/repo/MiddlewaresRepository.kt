@@ -8,6 +8,7 @@ import dev.chr0nzz.traefikmanager.data.model.HtpasswdRequest
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareForm
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareFormEncoder
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareTemplate
+import dev.chr0nzz.traefikmanager.data.model.MiddlewareUsage
 import dev.chr0nzz.traefikmanager.data.model.TemplateBody
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +20,10 @@ class MiddlewaresRepository @Inject constructor(
     private val apiProvider: ApiProvider,
     private val routesRepository: RoutesRepository,
 ) {
+
+    suspend fun liveUsers(): Map<String, List<String>> = runCatching {
+        MiddlewareUsage.liveUsers(apiProvider.ready().api.middlewares())
+    }.getOrDefault(emptyMap())
 
     suspend fun save(form: MiddlewareForm) {
         val ready = apiProvider.ready()
