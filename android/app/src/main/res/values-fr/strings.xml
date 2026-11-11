@@ -2301,8 +2301,8 @@
     </plurals>
     <plurals name="dashboard_reason_route_servers_down">
         <item quantity="one">backend hors service, 0 serveur actif sur %d</item>
-        <item quantity="many">backend hors service, 0 serveur actif sur %d</item>
-        <item quantity="other">backend hors service, 0 serveur actif sur %d</item>
+        <item quantity="many">backend hors service, aucun des %d serveurs actif</item>
+        <item quantity="other">backend hors service, aucun des %d serveurs actif</item>
     </plurals>
     <plurals name="dashboard_reason_route_degraded">
         <item quantity="one">backend dégradé, %1$d serveur actif sur %2$d</item>
