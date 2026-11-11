@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.chr0nzz.traefikmanager.data.model.UiText
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,6 +13,25 @@ import org.robolectric.RobolectricTestRunner
 class UiTextTest {
 
     private val resources = ApplicationProvider.getApplicationContext<Context>().resources
+
+    private fun refusal(code: Int, body: String) = retrofit2.HttpException(
+        retrofit2.Response.error<Any>(code, body.toResponseBody(null)),
+    )
+
+    @Test
+    fun `an http failure shows the cause the server names`() {
+        val failure = UiText.failure(
+            refusal(502, """{"error":"Cannot reach agent (connection refused)"}"""),
+            R.string.routes_error_load,
+        )
+        assertEquals("Cannot reach agent (connection refused)", failure.resolve(resources))
+    }
+
+    @Test
+    fun `an http failure without a body falls back to the status`() {
+        val failure = UiText.failure(refusal(504, ""), R.string.routes_error_load)
+        assertEquals(UiText.http(R.string.routes_error_load, 504), failure)
+    }
 
     @Test
     fun `raw text is returned as it is`() {
