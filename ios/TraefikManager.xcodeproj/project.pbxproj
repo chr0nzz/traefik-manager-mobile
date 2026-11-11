@@ -218,6 +218,7 @@
 				es,
 				fr,
 				"fr-CA",
+				ko,
 				nl,
 				"pt-PT",
 				"pt-BR",
