@@ -120,4 +120,12 @@ class RouteParsingTest {
         val ruleless = Route(id = "d", name = "d", rule = "")
         assertFalse(ruleless.isPlainHostRule)
     }
+
+    @Test
+    fun `server name is null when the server does not send it and kept when it does`() {
+        val body = """{"apps":[{"id":"a","name":"a","protocol":"http"%s}],"middlewares":[]}"""
+        assertEquals(null, parse(body.format("")).apps.first().serverName)
+        assertEquals("", parse(body.format(",\"serverName\":\"\"")).apps.first().serverName)
+        assertEquals("b.example.com", parse(body.format(",\"serverName\":\"b.example.com\"")).apps.first().serverName)
+    }
 }

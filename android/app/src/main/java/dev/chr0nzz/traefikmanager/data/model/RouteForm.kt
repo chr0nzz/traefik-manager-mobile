@@ -126,6 +126,8 @@ data class RouteForm(
     val middlewares: List<String> = emptyList(),
     val passHostHeader: Boolean = true,
     val insecureSkipVerify: Boolean = false,
+    val backendServerName: String = "",
+    val serverNameSupported: Boolean = false,
     val certResolver: String = "",
     val tlsEnabled: Boolean = true,
     val tcpTlsMode: TcpTlsMode = TcpTlsMode.None,
@@ -243,6 +245,9 @@ object RouteFormEncoder {
                 add("scheme" to (form.backends.firstOrNull()?.scheme ?: "http"))
                 add("passHostHeader" to form.effectivePassHostHeader.toString())
                 add("insecureSkipVerify" to form.insecureSkipVerify.toString())
+                if (form.serverNameSupported && manualBackends) {
+                    add("backendServerName" to form.backendServerName.trim())
+                }
                 add("tlsOptionsProfile" to form.tlsOptionsProfile)
 
                 if (form.wildcardEnabled && form.tlsMainDomain.isNotBlank()) {

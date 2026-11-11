@@ -105,6 +105,7 @@ struct Route: Codable, Hashable, Identifiable, Sendable {
     var certResolver = ""
     var tlsOptionsProfile = ""
     var insecureSkipVerify = false
+    var serverName: String?
     var passHostHeader: Bool?
     var priority: Int?
     var serviceType = "loadBalancer"
@@ -121,7 +122,7 @@ struct Route: Codable, Hashable, Identifiable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case id, name, rule, target, servers, middlewares, entryPoints, entrypointMiddlewares
-        case `protocol`, tls, enabled, certResolver, tlsOptionsProfile, insecureSkipVerify, passHostHeader
+        case `protocol`, tls, enabled, certResolver, tlsOptionsProfile, insecureSkipVerify, serverName, passHostHeader
         case priority, serviceType, serviceOwned, compositeChildren, configFile, provider, sticky
         case stickyEnabled, healthCheck, tlsDomains, streaming, headersPreset
         case serviceName = "service_name"
@@ -149,6 +150,7 @@ struct Route: Codable, Hashable, Identifiable, Sendable {
         certResolver = c.value(.certResolver, default: "")
         tlsOptionsProfile = c.value(.tlsOptionsProfile, default: "")
         insecureSkipVerify = c.value(.insecureSkipVerify, default: false)
+        serverName = c.contains(.serverName) ? c.lenientString(.serverName) : nil
         passHostHeader = c.optional(.passHostHeader)
         priority = c.contains(.priority) && (try? c.decodeNil(forKey: .priority)) == false ? c.lenientInt(.priority) : nil
         serviceType = c.value(.serviceType, default: "loadBalancer")

@@ -368,6 +368,18 @@ struct RouteFormView: View {
                 ))
                 .disabled(model.form.streamingEnabled)
                 Toggle("Skip TLS verification", isOn: $model.form.insecureSkipVerify)
+                if model.form.serverNameSupported && !model.form.usesSharedService && model.form.isManagedService {
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField("Backend server name (SNI)", text: $model.form.backendServerName, prompt: Text(verbatim: "backend.example.com"))
+                            .font(.body.monospaced())
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .keyboardType(.URL)
+                        Text("The name Traefik sends as SNI and checks the backend certificate against. Use it when the backend serves its certificate for a different name than the target address.")
+                            .font(.caption)
+                            .foregroundStyle(Palette.muted)
+                    }
+                }
                 Toggle("Optimize for streaming (Jellyfin / Emby / Plex)", isOn: Binding(
                     get: { model.form.streamingEnabled },
                     set: {

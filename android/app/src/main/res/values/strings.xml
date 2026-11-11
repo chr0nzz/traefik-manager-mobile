@@ -1173,6 +1173,7 @@
     <string name="routes_tls_options">Options</string>
     <!-- Label: skip checking the TLS certificate of the backend -->
     <string name="routes_skip_verify">Skip verify</string>
+    <string name="routes_server_name">Backend server name</string>
     <!-- %1$s is a middleware name. The note says it comes from the entry point, not the route -->
     <string name="routes_middleware_entry_point">%1$s (entry point)</string>
     <string name="routes_no_middlewares">No middlewares configured</string>
@@ -1246,6 +1247,8 @@
     <string name="routes_form_tls_options">TLS options profile</string>
     <string name="routes_form_tls_options_none">None (default)</string>
     <string name="routes_form_skip_verify">Skip TLS verification</string>
+    <string name="routes_form_server_name">Backend server name (SNI)</string>
+    <string name="routes_form_server_name_help">The name Traefik sends as SNI and checks the backend certificate against. Use it when the backend serves its certificate for a different name than the target address.</string>
     <string name="routes_form_streaming">Optimize for streaming (Jellyfin / Emby / Plex)</string>
     <string name="routes_form_wildcard">Request wildcard certificate</string>
     <string name="routes_form_cert_domain">Certificate domain</string>

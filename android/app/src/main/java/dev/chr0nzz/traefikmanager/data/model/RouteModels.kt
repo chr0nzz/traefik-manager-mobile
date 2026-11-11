@@ -34,6 +34,7 @@ data class Route(
     val certResolver: String = "",
     val tlsOptionsProfile: String = "",
     val insecureSkipVerify: Boolean = false,
+    val serverName: String? = null,
     val passHostHeader: Boolean? = null,
     val priority: Int? = null,
     val serviceType: String = "loadBalancer",
