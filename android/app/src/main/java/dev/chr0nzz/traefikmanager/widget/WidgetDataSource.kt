@@ -103,12 +103,14 @@ class WidgetDataSource @Inject constructor(
         val routers = async { runCatching { api.routers() }.getOrNull() }
         val services = async { runCatching { api.services() }.getOrNull() }
         val middlewares = async { runCatching { api.middlewares() }.getOrNull() }
+        val health = async { runCatching { api.routeHealth(agentId).routes }.getOrNull() }
         val raw = RawDashboard(
             overview = overview.await(),
             entrypoints = entrypoints.await(),
             routers = routers.await(),
             services = services.await(),
             middlewares = middlewares.await(),
+            routeHealth = health.await(),
         )
         val snapshot = DashboardBuilder.build(raw, providerFilter = null)
         buildMap {
