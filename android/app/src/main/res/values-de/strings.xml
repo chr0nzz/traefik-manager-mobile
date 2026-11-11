@@ -2150,4 +2150,52 @@
     <string name="push_error_old_server">Dieser Server ist älter als 1.12.0 und hat daher keine Kanäle für Push.</string>
     <string name="auth_oidc_active">Aktiv</string>
     <string name="backups_agent_static_included">Auf einem Agent ist die statische Konfiguration bereits im normalen Backup enthalten.</string>
+    <string name="routes_server_name">Backend-Servername</string>
+    <string name="routes_form_server_name">Backend-Servername (SNI)</string>
+    <string name="routes_form_server_name_help">Der Name, den Traefik als SNI sendet und mit dem es das Backend-Zertifikat prüft. Nutze ihn, wenn das Backend sein Zertifikat für einen anderen Namen als die Zieladresse ausstellt.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager entfernt sie aus %d Route in deinen Konfigurationsdateien.</item>
+        <item quantity="other">Traefik Manager entfernt sie aus %d Routen in deinen Konfigurationsdateien.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager kann %s nicht bearbeiten, weil ein anderer Provider wie Docker-Labels ihn definiert. Er funktioniert erst wieder, wenn du die Middleware dort entfernst.</item>
+        <item quantity="other">Traefik Manager kann %s nicht bearbeiten, weil ein anderer Provider wie Docker-Labels sie definiert. Sie funktionieren erst wieder, wenn du die Middleware dort entfernst.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Andere Provider</string>
+    <string name="static_http3_udp_hint">HTTP/3 nutzt auf diesem Port auch UDP. Veröffentliche ihn ebenfalls, zum Beispiel %s in Docker, und erlaube ihn in jeder Firewall. Nur Router mit TLS können HTTP/3 nutzen.</string>
+    <string name="dashboard_flag_unreachable">nicht erreichbar</string>
+    <string name="dashboard_reason_route_unreachable">Backend nicht erreichbar</string>
+    <string name="dashboard_reason_route_unreachable_error">Backend nicht erreichbar, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">Backend ausgefallen, 0 von %d Server erreichbar</item>
+        <item quantity="other">Backend ausgefallen, 0 von %d Servern erreichbar</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">Backend beeinträchtigt, %1$d von %2$d Server erreichbar</item>
+        <item quantity="other">Backend beeinträchtigt, %1$d von %2$d Servern erreichbar</item>
+    </plurals>
+    <string name="advisory_title">Traefik-Sicherheitshinweis</string>
+    <string name="advisory_body">Dein Traefik v%1$s ist von %2$s (%3$s) betroffen - %4$s.</string>
+    <string name="advisory_forward_auth">Eine forwardAuth-Middleware ist im Einsatz, daher hat dies hohe Priorität.</string>
+    <string name="advisory_update">Aktualisiere Traefik auf %s.</string>
+    <string name="advisory_update_either">Aktualisiere Traefik auf %1$s oder %2$s.</string>
+    <string name="advisory_severity_critical">Kritisch</string>
+    <string name="advisory_severity_high">Hoch</string>
+    <string name="advisory_severity_moderate">Mittel</string>
+    <string name="advisory_details">Details</string>
+    <string name="advisory_dismiss">Ausblenden</string>
+    <string name="advisory_http3_identity_leak">Die Wiederverwendung von HTTP/3-Backend-Verbindungen gibt NTLM- und Kerberos-Identitäten zwischen Clients weiter</string>
+    <string name="advisory_rootless_target">Ein Anfrageziel ohne Pfad wird als / geroutet, aber unverändert weitergeleitet und umgeht so Pfadregeln, forwardAuth und Zugriffslogs</string>
+    <string name="advisory_h2c_upgrade">An das Backend weitergeleitete h2c-Upgrade-Header lassen einen Client die gesamte Middleware-Kette umgehen</string>
+    <string name="advisory_trailer_sanitization">Die Bereinigung von Headernamen (aliasHeadersStrategy, Entfernen weitergeleiteter Header) lässt sich über Request-Trailer umgehen</string>
+    <string name="advisory_negotiate_pool">Vorab authentifiziertes Negotiate verunreinigt den gemeinsamen Backend-Verbindungspool</string>
+    <string name="advisory_sticky_tls_config">Sticky-Verbindungen für NTLM und Kerberos sind nicht pro Service getrennt, sodass die TLS-Client-Konfiguration eines Service für einen anderen gilt</string>
+    <string name="advisory_fastproxy_identity_leak">Der Backend-Verbindungspool von FastProxy gibt NTLM- und Negotiate-Identitäten an nicht authentifizierte Clients weiter</string>
+    <string name="advisory_forwardauth_alias_bypass">ForwardAuth-Authentifizierung lässt sich über weitergeleitete Header-Aliase umgehen</string>
+    <string name="advisory_forwardauth_dot_alias">ForwardAuth-Identitäten lassen sich über Header-Aliase mit Punkten fälschen</string>
+    <string name="advisory_basicauth_timing">Das Zusammenfassen von BasicAuth-Anfragen bringt ein Timing-Orakel zur Ermittlung von Benutzernamen zurück</string>
+    <string name="advisory_negated_host_mtls">Ein negierter Host-Matcher verursacht einen TLS-Optionskonflikt, der die Client-Zertifikat-Authentifizierung auf dem ausgeschlossenen Host abschaltet</string>
+    <string name="advisory_sticky_h2_race">Nicht synchronisierter Schreibzugriff auf den Sticky-Round-Tripper, den parallele HTTP/2-Streams teilen</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth teilt Verbindungen zum Auth-Server zwischen Clients und gibt so NTLM- und Negotiate-Identitäten weiter</string>
+    <string name="advisory_fastproxy_upgrade_race">Ein Data Race in FastProxy nach einem HTTP/1-Upgrade lässt einen nicht authentifizierten Client Traefik zum Absturz bringen</string>
 </resources>
