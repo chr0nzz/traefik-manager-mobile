@@ -248,6 +248,21 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(TmSpacing.md),
                     modifier = Modifier.fillMaxSize(),
                 ) {
+                    state.advisory?.let { notice ->
+                        item(span = { GridItemSpan(maxLineSpan) }, key = "advisory") {
+                            AdvisoryCard(
+                                notice = notice,
+                                onDetails = {
+                                    runCatching {
+                                        context.startActivity(
+                                            android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(notice.advisory.url)),
+                                        )
+                                    }
+                                },
+                                onDismiss = { viewModel.dismissAdvisory(notice) },
+                            )
+                        }
+                    }
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         VerdictLine(snapshot.verdict)
                     }

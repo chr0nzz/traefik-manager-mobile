@@ -63,6 +63,16 @@ class PreferencesStore @Inject constructor(
         )
     }
 
+    val advisoryDismissals: Flow<Map<String, String>> = dataStore.data.map { prefs ->
+        prefs.asMap().entries
+            .filter { it.key.name.startsWith(ADVISORY_PREFIX) }
+            .associate { it.key.name.removePrefix(ADVISORY_PREFIX) to it.value.toString() }
+    }
+
+    suspend fun dismissAdvisory(id: String, version: String) {
+        dataStore.edit { it[stringPreferencesKey(ADVISORY_PREFIX + id)] = version }
+    }
+
     suspend fun setPushEnabled(enabled: Boolean) {
         dataStore.edit { it[KEY_PUSH_ENABLED] = enabled }
     }
@@ -153,6 +163,7 @@ class PreferencesStore @Inject constructor(
         val KEY_NAV_ITEMS = stringPreferencesKey("nav_items")
         val KEY_NAV_SCOPES = stringPreferencesKey("nav_scopes")
         val KEY_HIDE_NAV_BAR = booleanPreferencesKey("hide_nav_bar")
+        const val ADVISORY_PREFIX = "advisory_dismissed_"
     }
 }
 
