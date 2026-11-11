@@ -3,6 +3,7 @@ package dev.chr0nzz.traefikmanager.data.repo
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.data.model.toProtoEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.model.UiText
@@ -16,6 +17,9 @@ data class ObjectSignal(
     val state: ObjectState,
     val reason: UiText?,
     val provider: String,
+    val service: String? = null,
+    val down: Boolean = false,
+    val degraded: Boolean = false,
 )
 
 data class SignalFlag(
@@ -86,6 +90,7 @@ object DashboardBuilder {
         routers = raw.routers?.filterProvider(providerFilter),
         services = raw.services?.toProtoEnvelope()?.filterProvider(providerFilter),
         middlewares = raw.middlewares?.filterProvider(providerFilter),
+        routeHealth = raw.routeHealth.orEmpty(),
         runtime = RuntimeInfo(
             version = raw.version?.version,
             codename = raw.version?.codename,
@@ -116,6 +121,7 @@ object DashboardBuilder {
         routers: ProtoEnvelope?,
         services: ProtoEnvelope?,
         middlewares: ProtoEnvelope?,
+        routeHealth: Map<String, RouteHealth> = emptyMap(),
         runtime: RuntimeInfo = RuntimeInfo(null, null, null, null, null),
         providerFilter: String? = null,
         allProviders: List<ProviderCount>? = null,
@@ -125,7 +131,7 @@ object DashboardBuilder {
         val middlewaresListed = middlewares != null && middlewares.reachable
         val reachable = routersListed || overview?.isBlind == false
 
-        val httpRouters = routers?.http.orEmpty().map(::classifyRouter)
+        val httpRouters = routers?.http.orEmpty().map { applyHealth(classifyRouter(it), routeHealth) }
         val tcpRouters = routers?.tcp.orEmpty().map(::classifyRouter)
         val udpRouters = routers?.udp.orEmpty().map(::classifyRouter)
         val streamRouters = tcpRouters + udpRouters
@@ -199,8 +205,13 @@ object DashboardBuilder {
             ),
         )
 
+        val servicesDown = allServices.filter { it.down }.map { it.name }.toSet()
+        val servicesDegraded = allServices.filter { it.degraded }.map { it.name }.toSet()
+        val overlapErrors = httpRouters.count { it.down && it.service in servicesDown }
+        val overlapWarnings = httpRouters.count { it.degraded && it.service in servicesDegraded }
+
         return DashboardSnapshot(
-            verdict = verdict(cards, reachable, backendsUp, backendsTotal),
+            verdict = verdict(cards, reachable, backendsUp, backendsTotal, overlapErrors, overlapWarnings),
             cards = cards,
             entrypoints = entrypointRows(entrypoints, routers),
             traefikReachable = reachable,
@@ -213,12 +224,40 @@ object DashboardBuilder {
 
     fun classifyRouter(obj: TraefikObject): ObjectSignal {
         val bound = (obj.using ?: obj.entryPoints).orEmpty()
+        val service = obj.service?.substringBefore('@')
         return when {
             obj.status == "disabled" -> ObjectSignal(obj.shortName, ObjectState.Err, UiText.of(R.string.dashboard_reason_disabled), obj.provider)
             obj.status == "warning" -> ObjectSignal(obj.shortName, ObjectState.Warn, UiText.of(R.string.dashboard_reason_warning), obj.provider)
             obj.status != "enabled" -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_no_status), obj.provider)
             bound.isEmpty() -> ObjectSignal(obj.shortName, ObjectState.Idle, UiText.of(R.string.dashboard_reason_unbound), obj.provider)
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
+        }.copy(service = service)
+    }
+
+    fun healthFor(name: String, health: Map<String, RouteHealth>): RouteHealth? =
+        health[name] ?: health.entries.firstOrNull { (id, _) -> id.substringAfter("::") == name }?.value
+
+    fun applyHealth(signal: ObjectSignal, health: Map<String, RouteHealth>): ObjectSignal {
+        if (signal.state != ObjectState.Ok) return signal
+        val check = healthFor(signal.name, health) ?: return signal
+        val total = check.servers?.total ?: 0
+        return when (check.state) {
+            RouteHealth.STATE_DOWN -> signal.copy(
+                state = ObjectState.Err,
+                down = true,
+                reason = when {
+                    check.source == "traefik" || check.source == "servers" ->
+                        UiText.plural(R.plurals.dashboard_reason_route_servers_down, total, total)
+                    !check.error.isNullOrBlank() -> UiText.of(R.string.dashboard_reason_route_unreachable_error, check.error)
+                    else -> UiText.of(R.string.dashboard_reason_route_unreachable)
+                },
+            )
+            RouteHealth.STATE_DEGRADED -> signal.copy(
+                state = ObjectState.Warn,
+                degraded = true,
+                reason = UiText.plural(R.plurals.dashboard_reason_route_degraded, total, check.servers?.up ?: 0, total),
+            )
+            else -> signal
         }
     }
 
@@ -238,12 +277,14 @@ object DashboardBuilder {
                     ObjectState.Err,
                     UiText.plural(R.plurals.dashboard_reason_all_down, servers.size),
                     obj.provider,
+                    down = true,
                 )
             down > 0 -> ObjectSignal(
                 obj.shortName,
                 ObjectState.Warn,
                 UiText.plural(R.plurals.dashboard_reason_some_down, servers.size, down, servers.size),
                 obj.provider,
+                degraded = true,
             )
             else -> ObjectSignal(obj.shortName, ObjectState.Ok, null, obj.provider)
         }
@@ -316,9 +357,16 @@ object DashboardBuilder {
         }
         val hidden = if (listed && overviewTotal != null) (overviewTotal - signals.size).coerceAtLeast(0) else 0
 
+        val down = signals.count { it.down }
+        val degraded = signals.count { it.degraded }
         val flags = buildList {
-            if (err > 0) add(SignalFlag(err, UiText.of(R.string.dashboard_reason_disabled), TmStatus.Error))
-            if (warn > 0) add(SignalFlag(warn, UiText.of(R.string.dashboard_flag_warnings), TmStatus.Warn))
+            if (err - down > 0) add(SignalFlag(err - down, UiText.of(R.string.dashboard_reason_disabled), TmStatus.Error))
+            if (down > 0) {
+                val label = if (key == "http") R.string.dashboard_flag_unreachable else R.string.dashboard_health_down
+                add(SignalFlag(down, UiText.of(label), TmStatus.Error))
+            }
+            if (degraded > 0) add(SignalFlag(degraded, UiText.of(R.string.routes_ping_degraded), TmStatus.Warn))
+            if (warn - degraded > 0) add(SignalFlag(warn - degraded, UiText.of(R.string.dashboard_flag_warnings), TmStatus.Warn))
             if (idle > 0) {
                 add(
                     SignalFlag(
@@ -427,7 +475,14 @@ object DashboardBuilder {
         )
     }
 
-    private fun verdict(cards: List<SignalCard>, reachable: Boolean, backendsUp: Int, backendsTotal: Int): Verdict {
+    private fun verdict(
+        cards: List<SignalCard>,
+        reachable: Boolean,
+        backendsUp: Int,
+        backendsTotal: Int,
+        overlapErrors: Int = 0,
+        overlapWarnings: Int = 0,
+    ): Verdict {
         if (!reachable) {
             return Verdict(
                 headline = UiText.of(R.string.dashboard_unreachable),
@@ -435,8 +490,8 @@ object DashboardBuilder {
                 status = TmStatus.Warn,
             )
         }
-        val errors = cards.sumOf { card -> card.flags.filter { it.status == TmStatus.Error }.sumOf { it.count } }
-        val warnings = cards.sumOf { card -> card.flags.filter { it.status == TmStatus.Warn }.sumOf { it.count } }
+        val errors = cards.sumOf { card -> card.flags.filter { it.status == TmStatus.Error }.sumOf { it.count } } - overlapErrors
+        val warnings = cards.sumOf { card -> card.flags.filter { it.status == TmStatus.Warn }.sumOf { it.count } } - overlapWarnings
         return when {
             errors > 0 -> Verdict(
                 headline = UiText.plural(R.plurals.dashboard_verdict_down, errors),

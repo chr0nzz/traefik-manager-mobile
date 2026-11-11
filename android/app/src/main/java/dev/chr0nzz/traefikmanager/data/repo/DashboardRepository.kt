@@ -4,6 +4,7 @@ import dev.chr0nzz.traefikmanager.data.api.ApiProvider
 import dev.chr0nzz.traefikmanager.data.model.Entrypoint
 import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
 import dev.chr0nzz.traefikmanager.data.model.ServiceEnvelope
 import dev.chr0nzz.traefikmanager.data.model.TraefikVersion
 import dev.chr0nzz.traefikmanager.data.store.SnapshotStore
@@ -32,6 +33,7 @@ data class RawDashboard(
     val services: ServiceEnvelope? = null,
     val middlewares: ProtoEnvelope? = null,
     val version: TraefikVersion? = null,
+    val routeHealth: Map<String, RouteHealth>? = null,
 )
 
 @Singleton
@@ -92,6 +94,7 @@ class DashboardRepository @Inject constructor(
         val services = async { runCatching { api.services() }.getOrNull() }
         val middlewares = async { runCatching { api.middlewares() }.getOrNull() }
         val version = async { runCatching { api.traefikVersion() }.getOrNull() }
+        val health = async { runCatching { api.routeHealth(apiProvider.ready().agentId).routes }.getOrNull() }
         val fetched = RawDashboard(
             overview = overview.await(),
             entrypoints = entrypoints.await(),
@@ -99,6 +102,7 @@ class DashboardRepository @Inject constructor(
             services = services.await(),
             middlewares = middlewares.await(),
             version = version.await(),
+            routeHealth = health.await(),
         )
         if (generation.get() == startedAt) {
             _raw.value = fetched

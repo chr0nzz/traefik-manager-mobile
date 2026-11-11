@@ -148,4 +148,69 @@ final class DashboardBuilderTests: XCTestCase {
         XCTAssertFalse(snapshot.traefikReachable)
         XCTAssertEqual(snapshot.verdict.status, .warn)
     }
+
+    private func routed(_ name: String, service: String) -> TraefikObject {
+        var obj = TraefikObject("\(name)@file", "file", "enabled", using: ["websecure"])
+        obj.service = service
+        return obj
+    }
+
+    private func health(_ state: String, source: String = "ping", error: String? = nil, up: Int? = nil, total: Int? = nil) -> RouteHealth {
+        var check = RouteHealth(state: state)
+        check.source = source
+        check.error = error
+        if let up, let total { check.servers = RouteServerTally(up: up, total: total) }
+        return check
+    }
+
+    func testRouteChecksMarkHealthyRoutersUnreachableOrDegraded() {
+        let checks = [
+            "routes.yml::a": health(RouteHealth.down, error: "connection refused"),
+            "b": health(RouteHealth.degraded, source: "servers", up: 1, total: 2),
+            "c": health(RouteHealth.down, source: "traefik", up: 0, total: 2),
+        ]
+        let a = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("a", service: "a-service")), health: checks)
+        XCTAssertEqual(a.state, .err)
+        XCTAssertTrue(a.down)
+        XCTAssertEqual(a.reason, "backend unreachable, connection refused")
+        let b = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("b", service: "b-service")), health: checks)
+        XCTAssertEqual(b.state, .warn)
+        XCTAssertEqual(b.reason, "backend degraded, 1 of 2 servers up")
+        let c = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("c", service: "c-service")), health: checks)
+        XCTAssertEqual(c.reason, "backend down, 0 of 2 servers up")
+        let disabled = DashboardBuilder.applyHealth(
+            DashboardBuilder.classifyRouter(TraefikObject("a@file", "file", "disabled", using: ["websecure"])),
+            health: checks
+        )
+        XCTAssertFalse(disabled.down)
+    }
+
+    func testUnreachableRoutesShowOnTheHTTPCardAndVerdict() {
+        let snapshot = DashboardBuilder.build(
+            overview: nil,
+            entrypoints: nil,
+            routers: ProtoEnvelope(http: [routed("a", service: "a-service"), routed("b", service: "b-service"), routed("ok", service: "ok-service")]),
+            services: ProtoEnvelope(),
+            middlewares: ProtoEnvelope(),
+            routeHealth: ["a": health(RouteHealth.down), "b": health(RouteHealth.down), "ok": health(RouteHealth.up)]
+        )
+        let http = snapshot.cards.first { $0.kind == .http }
+        XCTAssertEqual(http?.flags.map(\.count), [2])
+        XCTAssertEqual(http?.flags.first?.label, "unreachable")
+        XCTAssertEqual(snapshot.verdict.status, .error)
+        XCTAssertEqual(snapshot.verdict.headline, "2 objects are down")
+    }
+
+    func testRouteWhoseServiceIsDownIsNotCountedTwice() {
+        let snapshot = DashboardBuilder.build(
+            overview: nil,
+            entrypoints: nil,
+            routers: ProtoEnvelope(http: [routed("a", service: "pool@file")]),
+            services: ProtoEnvelope(http: [TraefikObject("pool@file", "file", "enabled", serverStatus: ["x": "DOWN"])]),
+            middlewares: ProtoEnvelope(),
+            routeHealth: ["a": health(RouteHealth.down)]
+        )
+        XCTAssertEqual(snapshot.cards.first { $0.kind == .services }?.flags.first?.label, "down")
+        XCTAssertEqual(snapshot.verdict.headline, "1 object is down")
+    }
 }

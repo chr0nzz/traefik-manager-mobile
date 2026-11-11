@@ -115,7 +115,15 @@ enum WidgetPublisher {
         async let routers = try? service.routers()
         async let services = try? service.services()
         async let middlewares = try? service.middlewares()
-        let raw = await RawDashboard(overview: overview, entrypoints: entrypoints, routers: routers, services: services, middlewares: middlewares)
+        async let health = try? service.routeHealth()
+        let raw = await RawDashboard(
+            overview: overview,
+            entrypoints: entrypoints,
+            routers: routers,
+            services: services,
+            middlewares: middlewares,
+            routeHealth: await health?.routes
+        )
         guard raw.routers != nil || raw.services != nil || raw.overview != nil else { return [:] }
         let snapshot = DashboardBuilder.build(raw, providerFilter: nil)
         var cards: [String: WidgetCard] = [:]

@@ -50,13 +50,15 @@ final class DashboardStore {
         async let services = try? service.services()
         async let middlewares = try? service.middlewares()
         async let version = try? service.traefikVersion()
+        async let health = try? service.routeHealth()
         let fetched = await RawDashboard(
             overview: overview,
             entrypoints: entrypoints,
             routers: routers,
             services: services,
             middlewares: middlewares,
-            version: version
+            version: version,
+            routeHealth: health?.routes
         )
         guard generation == started, !Task.isCancelled else { return }
         loading = false
