@@ -1828,7 +1828,6 @@
     <string name="auth_sessions_revoked">Outras sessões do navegador terminadas</string>
     <string name="static_http_to_https_redirect_optional">Redirecionamento HTTP para HTTPS (opcional)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">O entrypoint HTTPS para onde redirecionar.</string>
-    <string name="static_adds_http3_to_this_entrypoint">Adiciona http3 a este entrypoint.</string>
     <string name="static_alias_headers">Cabeçalhos de alias</string>
     <string name="static_stops_aliased_header_names_from_bypassing">Impede que nomes de cabeçalho com alias (p. ex. X_Auth_User, X.Auth.User) contornem o forwardAuth. Recomendado: Eliminar.</string>
     <string name="static_underscore_headers">Cabeçalhos com underscore</string>

@@ -49,7 +49,7 @@ fun EntrypointSheet(
         )
         FormToggle(
             title = stringResource(R.string.static_enable_http_3_quic),
-            subtitle = stringResource(R.string.static_adds_http3_to_this_entrypoint),
+            subtitle = stringResource(R.string.static_http3_udp_hint, "443:443/udp"),
             checked = form.http3,
             onChange = { form = form.copy(http3 = it) },
         )
