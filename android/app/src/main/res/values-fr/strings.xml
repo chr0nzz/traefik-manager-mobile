@@ -2257,4 +2257,56 @@
     <string name="push_error_old_server">Ce serveur est antérieur à la version 1.12.0, il n’a donc aucun canal pour envoyer des notifications push.</string>
     <string name="auth_oidc_active">Actif</string>
     <string name="backups_agent_static_included">Sur un agent, la sauvegarde ordinaire inclut déjà la configuration statique.</string>
+    <string name="routes_server_name">Nom du serveur backend</string>
+    <string name="routes_form_server_name">Nom du serveur backend (SNI)</string>
+    <string name="routes_form_server_name_help">Le nom que Traefik envoie comme SNI et auquel il compare le certificat du backend. Utilisez-le quand le backend présente un certificat pour un autre nom que l’adresse cible.</string>
+    <string name="middlewares_other_providers">Autres fournisseurs</string>
+    <string name="static_http3_udp_hint">HTTP/3 utilise aussi l’UDP sur ce port. Publiez-le aussi, par exemple %s dans Docker, et autorisez-le dans tout pare-feu. Seuls les routeurs avec TLS peuvent utiliser HTTP/3.</string>
+    <string name="dashboard_flag_unreachable">inaccessibles</string>
+    <string name="dashboard_reason_route_unreachable">backend inaccessible</string>
+    <string name="dashboard_reason_route_unreachable_error">backend inaccessible, %s</string>
+    <string name="advisory_title">Avis de sécurité Traefik</string>
+    <string name="advisory_body">Votre Traefik v%1$s est concerné par %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">Un middleware forwardAuth est utilisé, c’est donc prioritaire.</string>
+    <string name="advisory_update">Mettez à jour Traefik vers %s.</string>
+    <string name="advisory_update_either">Mettez à jour Traefik vers %1$s ou %2$s.</string>
+    <string name="advisory_severity_critical">Critique</string>
+    <string name="advisory_severity_high">Élevée</string>
+    <string name="advisory_severity_moderate">Modérée</string>
+    <string name="advisory_details">Détails</string>
+    <string name="advisory_dismiss">Ignorer</string>
+    <string name="advisory_http3_identity_leak">La réutilisation des connexions HTTP/3 vers le backend divulgue l’identité NTLM et Kerberos entre clients</string>
+    <string name="advisory_rootless_target">Une cible de requête sans chemin est routée comme / mais transmise telle quelle, contournant les règles de chemin, forwardAuth et les journaux d’accès</string>
+    <string name="advisory_h2c_upgrade">Les en-têtes de mise à niveau h2c transmis au backend permettent à un client de contourner toute la chaîne de middlewares</string>
+    <string name="advisory_trailer_sanitization">Le nettoyage des noms d’en-têtes (aliasHeadersStrategy, suppression des en-têtes transférés) est contourné via les trailers de requête</string>
+    <string name="advisory_negotiate_pool">Un Negotiate préauthentifié contamine le pool partagé de connexions vers le backend</string>
+    <string name="advisory_sticky_tls_config">Les connexions persistantes NTLM et Kerberos ne sont pas séparées par service, si bien que la configuration client TLS d’un service s’applique à un autre</string>
+    <string name="advisory_fastproxy_identity_leak">Le pool de connexions backend de FastProxy divulgue l’identité NTLM et Negotiate à des clients non authentifiés</string>
+    <string name="advisory_forwardauth_alias_bypass">Contournement de l’authentification ForwardAuth via des alias d’en-têtes transférés</string>
+    <string name="advisory_forwardauth_dot_alias">Usurpation d’identité ForwardAuth via des alias d’en-têtes avec points</string>
+    <string name="advisory_basicauth_timing">Le regroupement des requêtes BasicAuth réintroduit un oracle temporel permettant d’énumérer les noms d’utilisateur</string>
+    <string name="advisory_negated_host_mtls">Un matcher Host inversé crée un conflit d’options TLS qui désactive l’authentification par certificat client sur l’hôte exclu</string>
+    <string name="advisory_sticky_h2_race">Écriture non synchronisée dans le round tripper persistant partagé par des flux HTTP/2 simultanés</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth partage ses connexions au serveur d’authentification entre clients, divulguant l’identité NTLM et Negotiate</string>
+    <string name="advisory_fastproxy_upgrade_race">Une situation de concurrence dans FastProxy après une mise à niveau HTTP/1 permet à un client non authentifié de faire planter Traefik</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager le retire de %d route dans vos fichiers de configuration.</item>
+        <item quantity="many">Traefik Manager le retire de %d routes dans vos fichiers de configuration.</item>
+        <item quantity="other">Traefik Manager le retire de %d routes dans vos fichiers de configuration.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager ne peut pas modifier %s, car un autre fournisseur comme les labels Docker le définit. Il ne fonctionnera plus tant que vous n’y aurez pas retiré le middleware.</item>
+        <item quantity="many">Traefik Manager ne peut pas modifier %s, car un autre fournisseur comme les labels Docker les définit. Ils ne fonctionneront plus tant que vous n’y aurez pas retiré le middleware.</item>
+        <item quantity="other">Traefik Manager ne peut pas modifier %s, car un autre fournisseur comme les labels Docker les définit. Ils ne fonctionneront plus tant que vous n’y aurez pas retiré le middleware.</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend hors service, 0 serveur actif sur %d</item>
+        <item quantity="many">backend hors service, 0 serveur actif sur %d</item>
+        <item quantity="other">backend hors service, 0 serveur actif sur %d</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend dégradé, %1$d serveur actif sur %2$d</item>
+        <item quantity="many">backend dégradé, %1$d serveurs actifs sur %2$d</item>
+        <item quantity="other">backend dégradé, %1$d serveurs actifs sur %2$d</item>
+    </plurals>
 </resources>
