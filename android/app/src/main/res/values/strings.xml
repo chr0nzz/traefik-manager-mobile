@@ -1173,6 +1173,7 @@
     <string name="routes_tls_options">Options</string>
     <!-- Label: skip checking the TLS certificate of the backend -->
     <string name="routes_skip_verify">Skip verify</string>
+    <string name="routes_server_name">Backend server name</string>
     <!-- %1$s is a middleware name. The note says it comes from the entry point, not the route -->
     <string name="routes_middleware_entry_point">%1$s (entry point)</string>
     <string name="routes_no_middlewares">No middlewares configured</string>
@@ -1246,6 +1247,8 @@
     <string name="routes_form_tls_options">TLS options profile</string>
     <string name="routes_form_tls_options_none">None (default)</string>
     <string name="routes_form_skip_verify">Skip TLS verification</string>
+    <string name="routes_form_server_name">Backend server name (SNI)</string>
+    <string name="routes_form_server_name_help">The name Traefik sends as SNI and checks the backend certificate against. Use it when the backend serves its certificate for a different name than the target address.</string>
     <string name="routes_form_streaming">Optimize for streaming (Jellyfin / Emby / Plex)</string>
     <string name="routes_form_wildcard">Request wildcard certificate</string>
     <string name="routes_form_cert_domain">Certificate domain</string>
@@ -1491,6 +1494,15 @@
     <string name="middlewares_delete_consequence">Any route still referencing it will stop working.</string>
     <!-- %1$s is a list of route names -->
     <string name="middlewares_blocked_routes">Deleting it removes it from %1$s.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager removes it from %d route in your config files.</item>
+        <item quantity="other">Traefik Manager removes it from %d routes in your config files.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager cannot edit %s, because another provider such as Docker labels defines it. It stops working until you remove the middleware there.</item>
+        <item quantity="other">Traefik Manager cannot edit %s, because another provider such as Docker labels defines them. They stop working until you remove the middleware there.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Other providers</string>
     <string name="middlewares_error_load">Could not load middlewares</string>
     <string name="middlewares_no_match">No middlewares match</string>
     <string name="middlewares_empty_body">Middlewares you create appear here.</string>
@@ -1840,7 +1852,7 @@
     <string name="static_http_to_https_redirect_optional">HTTP to HTTPS redirect (optional)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">The HTTPS entrypoint to redirect to.</string>
     <string name="static_enable_http_3_quic">Enable HTTP/3 (QUIC)</string>
-    <string name="static_adds_http3_to_this_entrypoint">Adds http3 to this entrypoint.</string>
+    <string name="static_http3_udp_hint">HTTP/3 also uses UDP on this port. Publish it too, for example %s in Docker, and allow it through any firewall. Only routers with TLS can use HTTP/3.</string>
     <!-- HTTP headers whose name turns into another header's name at the backend, for example X_Auth_User or X.Auth.User -->
     <string name="static_alias_headers">Alias headers</string>
     <!-- Keep forwardAuth as it is. Delete is the name of an option. X_Auth_User and X.Auth.User are example header names -->
@@ -2625,6 +2637,22 @@
     <string name="dashboard_flag_warnings">warnings</string>
     <!-- Lowercase. Follows a number of routers or services that carry no traffic -->
     <string name="dashboard_flag_idle">idle</string>
+    <!-- Lowercase. Follows a number of routes whose backend Traefik Manager cannot reach -->
+    <string name="dashboard_flag_unreachable">unreachable</string>
+    <!-- Lowercase reason -->
+    <string name="dashboard_reason_route_unreachable">backend unreachable</string>
+    <!-- Lowercase reason. %s is the connection error -->
+    <string name="dashboard_reason_route_unreachable_error">backend unreachable, %s</string>
+    <!-- Lowercase reason -->
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">backend down, 0 of %d server up</item>
+        <item quantity="other">backend down, 0 of %d servers up</item>
+    </plurals>
+    <!-- Lowercase reason -->
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">backend degraded, %1$d of %2$d server up</item>
+        <item quantity="other">backend degraded, %1$d of %2$d servers up</item>
+    </plurals>
     <string name="dashboard_unreachable">Traefik API unreachable</string>
     <!-- Lowercase -->
     <string name="dashboard_sub_overview_only">total from overview, the list is unavailable</string>
@@ -2634,6 +2662,33 @@
     <string name="dashboard_health_down">down</string>
     <!-- Lowercase health label -->
     <string name="dashboard_health_healthy">healthy</string>
+    <string name="advisory_title">Traefik security advisory</string>
+    <!-- %1$s is the Traefik version, %2$s the advisory ID, %3$s its severity, %4$s the summary -->
+    <string name="advisory_body">Your Traefik v%1$s is affected by %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">A forwardAuth middleware is in use, so this is high priority.</string>
+    <!-- %s is a Traefik version, such as v3.7.15 -->
+    <string name="advisory_update">Update Traefik to %s.</string>
+    <!-- %1$s and %2$s are Traefik versions, such as v3.7.16 and v2.11.60 -->
+    <string name="advisory_update_either">Update Traefik to %1$s or %2$s.</string>
+    <string name="advisory_severity_critical">Critical</string>
+    <string name="advisory_severity_high">High</string>
+    <string name="advisory_severity_moderate">Moderate</string>
+    <string name="advisory_details">Details</string>
+    <string name="advisory_dismiss">Dismiss</string>
+    <string name="advisory_http3_identity_leak">HTTP/3 backend connection reuse leaks NTLM and Kerberos identity between clients</string>
+    <string name="advisory_rootless_target">Rootless request target routes as / but is forwarded verbatim, bypassing path rules, forwardAuth and access logs</string>
+    <string name="advisory_h2c_upgrade">h2c upgrade headers forwarded to the backend let a client tunnel past the whole middleware chain</string>
+    <string name="advisory_trailer_sanitization">Header name sanitization (aliasHeadersStrategy, forwarded header stripping) bypassed via request trailers</string>
+    <string name="advisory_negotiate_pool">Preauthenticated Negotiate contaminates the shared backend connection pool</string>
+    <string name="advisory_sticky_tls_config">NTLM and Kerberos sticky connections are not keyed by service, so one service TLS client config applies to another</string>
+    <string name="advisory_fastproxy_identity_leak">FastProxy backend connection pool leaks NTLM and Negotiate identity to unauthenticated clients</string>
+    <string name="advisory_forwardauth_alias_bypass">ForwardAuth authentication bypass via forwarded header aliases</string>
+    <string name="advisory_forwardauth_dot_alias">ForwardAuth identity spoofing via dot-form header aliases</string>
+    <string name="advisory_basicauth_timing">BasicAuth request coalescing reintroduces a username enumeration timing oracle</string>
+    <string name="advisory_negated_host_mtls">Negated Host matcher causes a TLS option conflict that disables client certificate authentication on the excluded host</string>
+    <string name="advisory_sticky_h2_race">Unsynchronized write to the sticky round tripper shared by concurrent HTTP/2 streams</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth shares its auth server connections between clients, leaking NTLM and Negotiate identity</string>
+    <string name="advisory_fastproxy_upgrade_race">FastProxy data race after an HTTP/1 upgrade lets an unauthenticated client crash Traefik</string>
     <!-- Lowercase -->
     <string name="dashboard_strip_no_data">no data</string>
     <!-- Lowercase -->

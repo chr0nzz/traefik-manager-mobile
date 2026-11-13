@@ -1870,7 +1870,6 @@
     <string name="auth_sessions_revoked">Другие сессии браузера завершены</string>
     <string name="static_http_to_https_redirect_optional">Редирект HTTP на HTTPS (необязательно)</string>
     <string name="static_the_https_entrypoint_to_redirect_to">HTTPS-точка входа для редиректа.</string>
-    <string name="static_adds_http3_to_this_entrypoint">Добавляет http3 к этой точке входа.</string>
     <string name="static_alias_headers">Заголовки-псевдонимы</string>
     <string name="static_stops_aliased_header_names_from_bypassing">Не даёт псевдонимам имён заголовков (например, X_Auth_User, X.Auth.User) обходить forwardAuth. Рекомендуется: Удалить.</string>
     <string name="static_underscore_headers">Заголовки с подчёркиванием</string>
@@ -2311,4 +2310,60 @@
     <string name="push_error_old_server">Версия этого сервера ниже 1.12.0, поэтому у него нет каналов для push-уведомлений.</string>
     <string name="auth_oidc_active">Активно</string>
     <string name="backups_agent_static_included">На агенте обычная резервная копия уже включает статическую конфигурацию.</string>
+    <string name="routes_server_name">Имя backend-сервера</string>
+    <string name="routes_form_server_name">Имя backend-сервера (SNI)</string>
+    <string name="routes_form_server_name_help">Имя, которое Traefik отправляет как SNI и по которому проверяет сертификат бэкенда. Используйте его, если сертификат бэкенда выдан на другое имя, чем целевой адрес.</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="one">Traefik Manager уберёт его из %d маршрута в ваших файлах конфигурации.</item>
+        <item quantity="few">Traefik Manager уберёт его из %d маршрутов в ваших файлах конфигурации.</item>
+        <item quantity="many">Traefik Manager уберёт его из %d маршрутов в ваших файлах конфигурации.</item>
+        <item quantity="other">Traefik Manager уберёт его из %d маршрутов в ваших файлах конфигурации.</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="one">Traefik Manager не может изменить %s: его задаёт другой провайдер, например Docker-метки. Он не будет работать, пока вы не уберёте там middleware.</item>
+        <item quantity="few">Traefik Manager не может изменить %s: их задаёт другой провайдер, например Docker-метки. Они не будут работать, пока вы не уберёте там middleware.</item>
+        <item quantity="many">Traefik Manager не может изменить %s: их задаёт другой провайдер, например Docker-метки. Они не будут работать, пока вы не уберёте там middleware.</item>
+        <item quantity="other">Traefik Manager не может изменить %s: их задаёт другой провайдер, например Docker-метки. Они не будут работать, пока вы не уберёте там middleware.</item>
+    </plurals>
+    <string name="middlewares_other_providers">Другие провайдеры</string>
+    <string name="static_http3_udp_hint">HTTP/3 также использует UDP на этом порту. Опубликуйте и его, например %s в Docker, и разрешите его в межсетевом экране. HTTP/3 доступен только роутерам с TLS.</string>
+    <string name="dashboard_flag_unreachable">недоступно</string>
+    <string name="dashboard_reason_route_unreachable">бэкенд недоступен</string>
+    <string name="dashboard_reason_route_unreachable_error">бэкенд недоступен, %s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="one">бэкенд недоступен, доступно 0 из %d сервера</item>
+        <item quantity="few">бэкенд недоступен, доступно 0 из %d серверов</item>
+        <item quantity="many">бэкенд недоступен, доступно 0 из %d серверов</item>
+        <item quantity="other">бэкенд недоступен, доступно 0 из %d серверов</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="one">бэкенд с деградацией, доступно %1$d из %2$d сервера</item>
+        <item quantity="few">бэкенд с деградацией, доступно %1$d из %2$d серверов</item>
+        <item quantity="many">бэкенд с деградацией, доступно %1$d из %2$d серверов</item>
+        <item quantity="other">бэкенд с деградацией, доступно %1$d из %2$d серверов</item>
+    </plurals>
+    <string name="advisory_title">Уязвимость Traefik</string>
+    <string name="advisory_body">Ваш Traefik v%1$s подвержен %2$s (%3$s) - %4$s.</string>
+    <string name="advisory_forward_auth">Используется middleware forwardAuth, поэтому приоритет высокий.</string>
+    <string name="advisory_update">Обновите Traefik до %s.</string>
+    <string name="advisory_update_either">Обновите Traefik до %1$s или %2$s.</string>
+    <string name="advisory_severity_critical">Критическая</string>
+    <string name="advisory_severity_high">Высокая</string>
+    <string name="advisory_severity_moderate">Средняя</string>
+    <string name="advisory_details">Подробнее</string>
+    <string name="advisory_dismiss">Скрыть</string>
+    <string name="advisory_http3_identity_leak">Повторное использование HTTP/3-соединений с бэкендом раскрывает NTLM- и Kerberos-личность между клиентами</string>
+    <string name="advisory_rootless_target">Цель запроса без пути маршрутизируется как /, но передаётся как есть, обходя правила путей, forwardAuth и журналы доступа</string>
+    <string name="advisory_h2c_upgrade">Заголовки обновления h2c, переданные бэкенду, позволяют клиенту обойти всю цепочку middleware</string>
+    <string name="advisory_trailer_sanitization">Очистку имён заголовков (aliasHeadersStrategy, удаление пересылаемых заголовков) можно обойти через трейлеры запроса</string>
+    <string name="advisory_negotiate_pool">Предварительно аутентифицированный Negotiate загрязняет общий пул соединений с бэкендом</string>
+    <string name="advisory_sticky_tls_config">Липкие соединения NTLM и Kerberos не разделяются по сервисам, поэтому TLS-настройки клиента одного сервиса применяются к другому</string>
+    <string name="advisory_fastproxy_identity_leak">Пул соединений FastProxy с бэкендом раскрывает NTLM- и Negotiate-личность неаутентифицированным клиентам</string>
+    <string name="advisory_forwardauth_alias_bypass">Обход аутентификации ForwardAuth через псевдонимы пересылаемых заголовков</string>
+    <string name="advisory_forwardauth_dot_alias">Подмена личности ForwardAuth через псевдонимы заголовков с точками</string>
+    <string name="advisory_basicauth_timing">Объединение запросов BasicAuth снова создаёт тайминговый оракул для перебора имён пользователей</string>
+    <string name="advisory_negated_host_mtls">Отрицание в Host-матчере вызывает конфликт TLS-опций, отключающий аутентификацию по клиентскому сертификату на исключённом хосте</string>
+    <string name="advisory_sticky_h2_race">Несинхронизированная запись в липкий round tripper, общий для параллельных потоков HTTP/2</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth делит соединения с сервером аутентификации между клиентами, раскрывая NTLM- и Negotiate-личность</string>
+    <string name="advisory_fastproxy_upgrade_race">Гонка данных в FastProxy после обновления HTTP/1 позволяет неаутентифицированному клиенту обрушить Traefik</string>
 </resources>

@@ -135,6 +135,7 @@ class RouteFormViewModel @Inject constructor(
                         },
                         certResolver = current.form.certResolver.ifEmpty { resolvers.firstOrNull().orEmpty() },
                         tlsEnabled = resolvers.isNotEmpty(),
+                        serverNameSupported = snapshot?.routes.orEmpty().any { it.serverName != null },
                     )
                 },
             )
@@ -178,6 +179,8 @@ class RouteFormViewModel @Inject constructor(
                 middlewares = route.middlewareNames,
                 passHostHeader = route.passHostHeader ?: true,
                 insecureSkipVerify = route.insecureSkipVerify,
+                backendServerName = route.serverName.orEmpty(),
+                serverNameSupported = route.serverName != null,
                 certResolver = route.certResolver,
                 tlsEnabled = route.tlsEnabled,
                 tcpTlsMode = when {

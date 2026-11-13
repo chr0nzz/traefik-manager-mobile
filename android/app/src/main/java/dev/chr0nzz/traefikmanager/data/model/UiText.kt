@@ -4,6 +4,10 @@ import android.content.res.Resources
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import dev.chr0nzz.traefikmanager.R
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import retrofit2.HttpException
 
 sealed interface UiText {
 
@@ -42,7 +46,18 @@ sealed interface UiText {
         fun http(@StringRes what: Int, code: Int): UiText = Res(R.string.common_error_http, listOf(Res(what), code))
 
         fun failure(throwable: Throwable, @StringRes fallback: Int): UiText =
-            (throwable as? LocalizedException)?.text ?: messageOr(throwable.message, fallback)
+            (throwable as? LocalizedException)?.text
+                ?: (throwable as? HttpException)?.let { http(it, fallback) }
+                ?: messageOr(throwable.message, fallback)
+
+        private fun http(exception: HttpException, @StringRes fallback: Int): UiText {
+            val body = runCatching { exception.response()?.errorBody()?.string() }.getOrNull()
+            val parsed = body?.takeIf { it.isNotBlank() }
+                ?.let { runCatching { Json.parseToJsonElement(it) as? JsonObject }.getOrNull() }
+            val message = listOf("error", "message")
+                .firstNotNullOfOrNull { (parsed?.get(it) as? JsonPrimitive)?.content?.takeIf { m -> m.isNotBlank() } }
+            return message?.take(300)?.let(::Raw) ?: http(fallback, exception.code())
+        }
 
         private fun resolved(args: List<Any>, resources: Resources): Array<Any> =
             args.map { if (it is UiText) it.resolve(resources) else it }.toTypedArray()

@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showNotifications = DebugLaunch.form == "history"
     @State private var message: String?
+    @State private var dismissedAdvisory = 0
 
     private var store: DashboardStore { app.dashboard }
     private var compact: Bool { sizeClass != .regular }
@@ -69,10 +70,27 @@ struct HomeView: View {
         .onChange(of: app.routes.changes) { Task { await refreshAll() } }
     }
 
+    private var advisoryNotice: AdvisoryNotice? {
+        _ = dismissedAdvisory
+        guard let raw = store.raw else { return nil }
+        return TraefikAdvisories.notice(
+            version: raw.version?.version,
+            middlewares: raw.middlewares?.all ?? [],
+            dismissed: { TraefikAdvisories.dismissed($0) }
+        )
+    }
+
     private func content(_ snapshot: DashboardSnapshot) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.md) {
                 if app.isDemo && !DebugLaunch.cleanShots { DemoBanner() }
+
+                if let notice = advisoryNotice {
+                    AdvisoryCard(notice: notice) {
+                        TraefikAdvisories.dismiss(notice)
+                        dismissedAdvisory += 1
+                    }
+                }
 
                 VerdictCard(verdict: snapshot.verdict)
 
@@ -135,6 +153,29 @@ private struct DemoBanner: View {
             .padding(.vertical, Spacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Palette.secondaryContainer, in: RoundedRectangle(cornerRadius: Radius.md))
+    }
+}
+
+private struct AdvisoryCard: View {
+    let notice: AdvisoryNotice
+    let onDismiss: () -> Void
+
+    var body: some View {
+        Card(accent: Palette.red, spacing: Spacing.xs) {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "exclamationmark.shield").foregroundStyle(Palette.red)
+                Text("Traefik security advisory").font(.subheadline.weight(.semibold))
+            }
+            Text(notice.message)
+                .font(.footnote)
+                .foregroundStyle(Palette.muted)
+            HStack {
+                Spacer()
+                Button("Dismiss", action: onDismiss)
+                Link("Details", destination: notice.advisory.url)
+            }
+            .font(.footnote.weight(.semibold))
+        }
     }
 }
 

@@ -28,6 +28,12 @@ final class RouteModelTests: XCTestCase {
         XCTAssertEqual(try route(#"{"target":"N/A"}"#).status(), .error)
         XCTAssertEqual(try route(#"{"target":"http://x"}"#).status(health: RouteHealth(state: "degraded")), .warn)
     }
+
+    func testServerNameIsNilOnlyWhenTheServerLeavesItOut() throws {
+        XCTAssertNil(try route(#"{"id":"a"}"#).serverName)
+        XCTAssertEqual(try route(#"{"serverName":""}"#).serverName, "")
+        XCTAssertEqual(try route(#"{"serverName":"b.example.com"}"#).serverName, "b.example.com")
+    }
 }
 
 final class RouteFormTests: XCTestCase {
@@ -64,6 +70,20 @@ final class RouteFormTests: XCTestCase {
         XCTAssertEqual(lookup["domains"], "example.com")
         XCTAssertEqual(fields.filter { $0.0 == "targetIp" }.map(\.1), ["10.0.0.9", "", ""])
         XCTAssertTrue(lookup["backendsJsonHttp"]?.contains("10.0.0.9") == true)
+    }
+
+    func testEncoderBackendServerName() {
+        var form = RouteForm()
+        form.name = "a"
+        form.backends = [BackendServer(scheme: "https", host: "10.0.0.9", port: "8443")]
+        form.backendServerName = " backend.example.com "
+        XCTAssertNil(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" })
+        form.serverNameSupported = true
+        XCTAssertEqual(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" }?.1, "backend.example.com")
+        form.backendServerName = ""
+        XCTAssertEqual(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" }?.1, "")
+        form.protocol = .tcp
+        XCTAssertNil(RouteFormEncoder.fields(form, agentId: nil).first { $0.0 == "backendServerName" })
     }
 
     func testEncoderDisabledTLSSendsSentinel() {
@@ -127,5 +147,100 @@ final class DashboardBuilderTests: XCTestCase {
         let snapshot = DashboardBuilder.build(overview: nil, entrypoints: nil, routers: nil, services: nil, middlewares: nil)
         XCTAssertFalse(snapshot.traefikReachable)
         XCTAssertEqual(snapshot.verdict.status, .warn)
+    }
+
+    private func routed(_ name: String, service: String) -> TraefikObject {
+        var obj = TraefikObject("\(name)@file", "file", "enabled", using: ["websecure"])
+        obj.service = service
+        return obj
+    }
+
+    private func health(_ state: String, source: String = "ping", error: String? = nil, up: Int? = nil, total: Int? = nil) -> RouteHealth {
+        var check = RouteHealth(state: state)
+        check.source = source
+        check.error = error
+        if let up, let total { check.servers = RouteServerTally(up: up, total: total) }
+        return check
+    }
+
+    func testRouteChecksMarkHealthyRoutersUnreachableOrDegraded() {
+        let checks = [
+            "routes.yml::a": health(RouteHealth.down, error: "connection refused"),
+            "b": health(RouteHealth.degraded, source: "servers", up: 1, total: 2),
+            "c": health(RouteHealth.down, source: "traefik", up: 0, total: 2),
+        ]
+        let a = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("a", service: "a-service")), health: checks)
+        XCTAssertEqual(a.state, .err)
+        XCTAssertTrue(a.down)
+        XCTAssertEqual(a.reason, "backend unreachable, connection refused")
+        let b = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("b", service: "b-service")), health: checks)
+        XCTAssertEqual(b.state, .warn)
+        XCTAssertEqual(b.reason, "backend degraded, 1 of 2 servers up")
+        let c = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("c", service: "c-service")), health: checks)
+        XCTAssertEqual(c.reason, "backend down, 0 of 2 servers up")
+        let disabled = DashboardBuilder.applyHealth(
+            DashboardBuilder.classifyRouter(TraefikObject("a@file", "file", "disabled", using: ["websecure"])),
+            health: checks
+        )
+        XCTAssertFalse(disabled.down)
+    }
+
+    func testUnreachableRoutesShowOnTheHTTPCardAndVerdict() {
+        let snapshot = DashboardBuilder.build(
+            overview: nil,
+            entrypoints: nil,
+            routers: ProtoEnvelope(http: [routed("a", service: "a-service"), routed("b", service: "b-service"), routed("ok", service: "ok-service")]),
+            services: ProtoEnvelope(),
+            middlewares: ProtoEnvelope(),
+            routeHealth: ["a": health(RouteHealth.down), "b": health(RouteHealth.down), "ok": health(RouteHealth.up)]
+        )
+        let http = snapshot.cards.first { $0.kind == .http }
+        XCTAssertEqual(http?.flags.map(\.count), [2])
+        XCTAssertEqual(http?.flags.first?.label, "unreachable")
+        XCTAssertEqual(snapshot.verdict.status, .error)
+        XCTAssertEqual(snapshot.verdict.headline, "2 objects are down")
+    }
+
+    func testRouteWhoseServiceIsDownIsNotCountedTwice() {
+        let snapshot = DashboardBuilder.build(
+            overview: nil,
+            entrypoints: nil,
+            routers: ProtoEnvelope(http: [routed("a", service: "pool@file")]),
+            services: ProtoEnvelope(http: [TraefikObject("pool@file", "file", "enabled", serverStatus: ["x": "DOWN"])]),
+            middlewares: ProtoEnvelope(),
+            routeHealth: ["a": health(RouteHealth.down)]
+        )
+        XCTAssertEqual(snapshot.cards.first { $0.kind == .services }?.flags.first?.label, "down")
+        XCTAssertEqual(snapshot.verdict.headline, "1 object is down")
+    }
+}
+
+final class TraefikAdvisoryTests: XCTestCase {
+    func testFirstMatchingAdvisoryIsReported() {
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("3.7.12")?.id, "CVE-2026-88007")
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("v3.7.13")?.id, "GHSA-qm9f-w54v-q2qh")
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("3.7.15")?.id, "GHSA-hrpp-p4fc-wwf8")
+        XCTAssertEqual(TraefikAdvisories.firstAffecting("2.11.59")?.id, "GHSA-hrpp-p4fc-wwf8")
+    }
+
+    func testPatchedAndUnparseableVersionsReportNothing() {
+        XCTAssertNil(TraefikAdvisories.firstAffecting("3.7.16"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting("2.11.60"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting("4.0.0"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting("dev"))
+        XCTAssertNil(TraefikAdvisories.firstAffecting(nil))
+    }
+
+    func testDismissalHidesOnlyThatVersion() {
+        let dismissed = ["GHSA-hrpp-p4fc-wwf8": "3.7.15"]
+        XCTAssertNil(TraefikAdvisories.notice(version: "v3.7.15", middlewares: [], dismissed: { dismissed[$0] }))
+        XCTAssertEqual(TraefikAdvisories.notice(version: "2.11.59", middlewares: [], dismissed: { dismissed[$0] })?.version, "2.11.59")
+    }
+
+    func testForwardAuthRaisesPriorityOnlyWhenRelated() {
+        let auth = [TraefikObject("sso@file", "file", "enabled", type: "forwardauth")]
+        XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.15", middlewares: auth, dismissed: { _ in nil })?.forwardAuthInUse, true)
+        XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.13", middlewares: auth, dismissed: { _ in nil })?.forwardAuthInUse, false)
+        XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.15", middlewares: [], dismissed: { _ in nil })?.forwardAuthInUse, false)
     }
 }

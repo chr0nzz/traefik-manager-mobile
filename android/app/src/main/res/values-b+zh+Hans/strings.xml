@@ -1636,7 +1636,6 @@
     <string name="auth_sessions_revoked">其他浏览器会话已退出登录</string>
     <string name="static_http_to_https_redirect_optional">HTTP 到 HTTPS 重定向（可选）</string>
     <string name="static_the_https_entrypoint_to_redirect_to">要重定向到的 HTTPS 入口点。</string>
-    <string name="static_adds_http3_to_this_entrypoint">为此入口点添加 http3。</string>
     <string name="static_alias_headers">别名标头</string>
     <string name="static_stops_aliased_header_names_from_bypassing">阻止别名标头名称（例如 X_Auth_User、X.Auth.User）绕过 forwardAuth。推荐选择删除。</string>
     <string name="static_underscore_headers">下划线标头</string>
@@ -2044,4 +2043,48 @@
     <string name="push_error_old_server">此服务器版本低于 1.12.0，没有可用于推送的渠道。</string>
     <string name="auth_oidc_active">生效中</string>
     <string name="backups_agent_static_included">在 Agent 上，普通备份已包含静态配置。</string>
+    <string name="routes_server_name">后端服务器名称</string>
+    <string name="routes_form_server_name">后端服务器名称（SNI）</string>
+    <string name="routes_form_server_name_help">Traefik 作为 SNI 发送并用来校验后端证书的名称。当后端证书签发给与目标地址不同的名称时使用。</string>
+    <plurals name="middlewares_blocked_file_routes">
+        <item quantity="other">Traefik Manager 会从你配置文件中的 %d 条路由中移除它。</item>
+    </plurals>
+    <plurals name="middlewares_blocked_external">
+        <item quantity="other">Traefik Manager 无法编辑 %s，因为它们由 Docker 标签等其他提供程序定义。在那里移除该中间件之前，它们将无法工作。</item>
+    </plurals>
+    <string name="middlewares_other_providers">其他提供程序</string>
+    <string name="static_http3_udp_hint">HTTP/3 在此端口上还会使用 UDP。请同时发布它，例如 Docker 中的 %s，并在防火墙中放行。只有启用 TLS 的路由器才能使用 HTTP/3。</string>
+    <string name="dashboard_flag_unreachable">无法访问</string>
+    <string name="dashboard_reason_route_unreachable">后端无法访问</string>
+    <string name="dashboard_reason_route_unreachable_error">后端无法访问，%s</string>
+    <plurals name="dashboard_reason_route_servers_down">
+        <item quantity="other">后端不可用，%d 台服务器中 0 台在线</item>
+    </plurals>
+    <plurals name="dashboard_reason_route_degraded">
+        <item quantity="other">后端降级，%2$d 台服务器中 %1$d 台在线</item>
+    </plurals>
+    <string name="advisory_title">Traefik 安全公告</string>
+    <string name="advisory_body">你的 Traefik v%1$s 受 %2$s（%3$s）影响 - %4$s。</string>
+    <string name="advisory_forward_auth">正在使用 forwardAuth 中间件，因此优先级很高。</string>
+    <string name="advisory_update">请将 Traefik 更新到 %s。</string>
+    <string name="advisory_update_either">请将 Traefik 更新到 %1$s 或 %2$s。</string>
+    <string name="advisory_severity_critical">严重</string>
+    <string name="advisory_severity_high">高</string>
+    <string name="advisory_severity_moderate">中</string>
+    <string name="advisory_details">详情</string>
+    <string name="advisory_dismiss">关闭</string>
+    <string name="advisory_http3_identity_leak">HTTP/3 后端连接复用会在客户端之间泄露 NTLM 和 Kerberos 身份</string>
+    <string name="advisory_rootless_target">不带路径的请求目标按 / 路由但被原样转发，从而绕过路径规则、forwardAuth 和访问日志</string>
+    <string name="advisory_h2c_upgrade">转发到后端的 h2c 升级标头让客户端可以绕过整个中间件链</string>
+    <string name="advisory_trailer_sanitization">可通过请求尾部字段绕过标头名称清理（aliasHeadersStrategy、转发标头剥离）</string>
+    <string name="advisory_negotiate_pool">预认证的 Negotiate 会污染共享的后端连接池</string>
+    <string name="advisory_sticky_tls_config">NTLM 和 Kerberos 粘性连接未按服务区分，导致一个服务的 TLS 客户端配置作用于另一个服务</string>
+    <string name="advisory_fastproxy_identity_leak">FastProxy 后端连接池会向未认证的客户端泄露 NTLM 和 Negotiate 身份</string>
+    <string name="advisory_forwardauth_alias_bypass">可通过转发标头别名绕过 ForwardAuth 认证</string>
+    <string name="advisory_forwardauth_dot_alias">可通过带点的标头别名伪造 ForwardAuth 身份</string>
+    <string name="advisory_basicauth_timing">BasicAuth 请求合并重新引入了可枚举用户名的计时预言</string>
+    <string name="advisory_negated_host_mtls">取反的 Host 匹配器会引发 TLS 选项冲突，在被排除的主机上禁用客户端证书认证</string>
+    <string name="advisory_sticky_h2_race">并发 HTTP/2 流共享的粘性 round tripper 存在未同步的写入</string>
+    <string name="advisory_forwardauth_connection_leak">ForwardAuth 在客户端之间共享与认证服务器的连接，泄露 NTLM 和 Negotiate 身份</string>
+    <string name="advisory_fastproxy_upgrade_race">HTTP/1 升级后 FastProxy 中的数据竞争可让未认证的客户端使 Traefik 崩溃</string>
 </resources>

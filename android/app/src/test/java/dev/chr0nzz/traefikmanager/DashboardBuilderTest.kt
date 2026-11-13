@@ -9,6 +9,8 @@ import dev.chr0nzz.traefikmanager.data.model.Overview
 import dev.chr0nzz.traefikmanager.data.model.OverviewCounts
 import dev.chr0nzz.traefikmanager.data.model.OverviewSection
 import dev.chr0nzz.traefikmanager.data.model.ProtoEnvelope
+import dev.chr0nzz.traefikmanager.data.model.RouteHealth
+import dev.chr0nzz.traefikmanager.data.model.RouteServerTally
 import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.repo.DashboardBuilder
 import dev.chr0nzz.traefikmanager.data.repo.ObjectState
@@ -209,5 +211,68 @@ class DashboardBuilderTest {
         assertEquals(listOf(TmStatus.Ok, TmStatus.Ok), card.cells)
         assertEquals("healthy", card.healthLabel.english())
         assertTrue(card.flags.isEmpty())
+    }
+
+    private fun routed(name: String, service: String) =
+        TraefikObject(name = "$name@file", provider = "file", status = "enabled", using = listOf("websecure"), service = service)
+
+    @Test
+    fun `route checks mark healthy routers unreachable or degraded`() {
+        val health = mapOf(
+            "routes.yml::a" to RouteHealth(state = RouteHealth.STATE_DOWN, source = "ping", error = "connection refused"),
+            "b" to RouteHealth(state = RouteHealth.STATE_DEGRADED, source = "servers", servers = RouteServerTally(up = 1, total = 2)),
+            "c" to RouteHealth(state = RouteHealth.STATE_DOWN, source = "traefik", servers = RouteServerTally(up = 0, total = 2)),
+        )
+        val a = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("a", "a-service")), health)
+        assertEquals(ObjectState.Err, a.state)
+        assertTrue(a.down)
+        assertEquals("backend unreachable, connection refused", a.reason.english())
+
+        val b = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("b", "b-service")), health)
+        assertEquals(ObjectState.Warn, b.state)
+        assertEquals("backend degraded, 1 of 2 servers up", b.reason.english())
+
+        val c = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(routed("c", "c-service")), health)
+        assertEquals("backend down, 0 of 2 servers up", c.reason.english())
+
+        val disabled = DashboardBuilder.applyHealth(DashboardBuilder.classifyRouter(router("a", "disabled")), health)
+        assertFalse(disabled.down)
+    }
+
+    @Test
+    fun `unreachable routes show on the http card and in the verdict`() {
+        val snapshot = DashboardBuilder.build(
+            overview = null,
+            entrypoints = null,
+            routers = ProtoEnvelope(http = listOf(routed("a", "a-service"), routed("b", "b-service"), routed("ok", "ok-service"))),
+            services = ProtoEnvelope(),
+            middlewares = ProtoEnvelope(),
+            routeHealth = mapOf(
+                "a" to RouteHealth(state = RouteHealth.STATE_DOWN),
+                "b" to RouteHealth(state = RouteHealth.STATE_DOWN),
+                "ok" to RouteHealth(state = RouteHealth.STATE_UP),
+            ),
+        )
+        val http = snapshot.cards.first { it.key == "http" }
+        assertEquals(listOf(2), http.flags.map { it.count })
+        assertEquals("unreachable", http.flags.first().label.english())
+        assertEquals(TmStatus.Error, snapshot.verdict.status)
+        assertEquals("2 objects are down", snapshot.verdict.headline.english())
+    }
+
+    @Test
+    fun `a route whose service is already down is not counted twice in the verdict`() {
+        val snapshot = DashboardBuilder.build(
+            overview = null,
+            entrypoints = null,
+            routers = ProtoEnvelope(http = listOf(routed("a", "pool@file"))),
+            services = ProtoEnvelope(
+                http = listOf(TraefikObject(name = "pool@file", status = "enabled", serverStatus = mapOf("x" to "DOWN"))),
+            ),
+            middlewares = ProtoEnvelope(),
+            routeHealth = mapOf("a" to RouteHealth(state = RouteHealth.STATE_DOWN)),
+        )
+        assertEquals("down", snapshot.cards.first { it.key == "services" }.flags.first().label.english())
+        assertEquals("1 object is down", snapshot.verdict.headline.english())
     }
 }

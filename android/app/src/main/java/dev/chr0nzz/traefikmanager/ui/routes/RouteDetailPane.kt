@@ -263,8 +263,11 @@ fun RouteDetailPane(
                 DetailRow(
                     stringResource(R.string.routes_skip_verify),
                     stringResource(if (route.insecureSkipVerify) R.string.common_yes else R.string.common_no),
-                    last = true,
+                    last = route.serverName.isNullOrEmpty(),
                 )
+                route.serverName?.takeIf { it.isNotEmpty() }?.let {
+                    DetailRow(stringResource(R.string.routes_server_name), it, mono = true, last = true)
+                }
             }
         }
 

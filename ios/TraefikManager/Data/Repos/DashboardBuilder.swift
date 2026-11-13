@@ -8,6 +8,7 @@ struct RawDashboard: Codable, Sendable {
     var services: ProtoEnvelope?
     var middlewares: ProtoEnvelope?
     var version: TraefikVersion?
+    var routeHealth: [String: RouteHealth]?
 }
 
 enum ObjectState: Int, Comparable {
@@ -30,6 +31,9 @@ struct ObjectSignal {
     var state: ObjectState
     var reason: String?
     var provider: String
+    var service: String?
+    var down = false
+    var degraded = false
 }
 
 struct SignalFlag: Hashable {
@@ -114,6 +118,7 @@ enum DashboardBuilder {
             routers: raw.routers?.filtered(provider: providerFilter),
             services: raw.services?.filtered(provider: providerFilter),
             middlewares: raw.middlewares?.filtered(provider: providerFilter),
+            routeHealth: raw.routeHealth ?? [:],
             runtime: RuntimeInfo(
                 version: raw.version?.version,
                 codename: raw.version?.codename,
@@ -132,6 +137,7 @@ enum DashboardBuilder {
         routers: ProtoEnvelope?,
         services: ProtoEnvelope?,
         middlewares: ProtoEnvelope?,
+        routeHealth: [String: RouteHealth] = [:],
         runtime: RuntimeInfo = RuntimeInfo(),
         providerFilter: String? = nil,
         allProviders: [ProviderCount]? = nil
@@ -141,7 +147,7 @@ enum DashboardBuilder {
         let middlewaresListed = middlewares?.reachable == true
         let reachable = routersListed || overview?.isBlind == false
 
-        let httpRouters = (routers?.http ?? []).map(classifyRouter)
+        let httpRouters = (routers?.http ?? []).map { applyHealth(classifyRouter($0), health: routeHealth) }
         let tcpRouters = (routers?.tcp ?? []).map(classifyRouter)
         let udpRouters = (routers?.udp ?? []).map(classifyRouter)
         let streamRouters = tcpRouters + udpRouters
@@ -209,8 +215,20 @@ enum DashboardBuilder {
             ),
         ]
 
+        let servicesDown = Set(allServices.filter(\.down).map(\.name))
+        let servicesDegraded = Set(allServices.filter(\.degraded).map(\.name))
+        let overlapErrors = httpRouters.filter { $0.down && servicesDown.contains($0.service ?? "") }.count
+        let overlapWarnings = httpRouters.filter { $0.degraded && servicesDegraded.contains($0.service ?? "") }.count
+
         return DashboardSnapshot(
-            verdict: verdict(cards: cards, reachable: reachable, backendsUp: backendsUp, backendsTotal: backendsTotal),
+            verdict: verdict(
+                cards: cards,
+                reachable: reachable,
+                backendsUp: backendsUp,
+                backendsTotal: backendsTotal,
+                overlapErrors: overlapErrors,
+                overlapWarnings: overlapWarnings
+            ),
             cards: cards,
             entrypoints: entrypointRows(entrypoints, routers: routers),
             traefikReachable: reachable,
@@ -223,11 +241,49 @@ enum DashboardBuilder {
     // MARK: - Classification
 
     static func classifyRouter(_ obj: TraefikObject) -> ObjectSignal {
-        if let common = commonState(obj) { return common }
-        if obj.boundEntryPoints.isEmpty {
-            return ObjectSignal(name: obj.shortName, state: .idle, reason: String(localized: "bound to no entry point"), provider: obj.provider)
+        var signal: ObjectSignal
+        if let common = commonState(obj) {
+            signal = common
+        } else if obj.boundEntryPoints.isEmpty {
+            signal = ObjectSignal(name: obj.shortName, state: .idle, reason: String(localized: "bound to no entry point"), provider: obj.provider)
+        } else {
+            signal = ObjectSignal(name: obj.shortName, state: .ok, provider: obj.provider)
         }
-        return ObjectSignal(name: obj.shortName, state: .ok, provider: obj.provider)
+        signal.service = obj.service.map(shortName)
+        return signal
+    }
+
+    static func healthFor(_ name: String, in health: [String: RouteHealth]) -> RouteHealth? {
+        if let exact = health[name] { return exact }
+        return health.first { id, _ in
+            (id.range(of: "::").map { String(id[$0.upperBound...]) } ?? id) == name
+        }?.value
+    }
+
+    /// Folds Traefik Manager's route checks into a healthy router, as the web dashboard does.
+    static func applyHealth(_ signal: ObjectSignal, health: [String: RouteHealth]) -> ObjectSignal {
+        guard signal.state == .ok, let check = healthFor(signal.name, in: health) else { return signal }
+        let total = check.servers?.total ?? 0
+        var out = signal
+        switch check.state {
+        case RouteHealth.down:
+            out.state = .err
+            out.down = true
+            if check.source == "traefik" || check.source == "servers" {
+                out.reason = String(localized: "backend down, 0 of \(total) servers up")
+            } else if let error = check.error, !error.isBlank {
+                out.reason = String(localized: "backend unreachable, \(error)")
+            } else {
+                out.reason = String(localized: "backend unreachable")
+            }
+        case RouteHealth.degraded:
+            out.state = .warn
+            out.degraded = true
+            out.reason = String(localized: "backend degraded, \(check.servers?.up ?? 0) of \(total) servers up")
+        default:
+            break
+        }
+        return out
     }
 
     static func classifyService(_ obj: TraefikObject) -> ObjectSignal {
@@ -241,10 +297,10 @@ enum DashboardBuilder {
             return ObjectSignal(name: obj.shortName, state: .idle, reason: String(localized: "no health check configured"), provider: obj.provider)
         }
         if down == servers.count {
-            return ObjectSignal(name: obj.shortName, state: .err, reason: String(localized: "all \(servers.count) backends down"), provider: obj.provider)
+            return ObjectSignal(name: obj.shortName, state: .err, reason: String(localized: "all \(servers.count) backends down"), provider: obj.provider, down: true)
         }
         if down > 0 {
-            return ObjectSignal(name: obj.shortName, state: .warn, reason: String(localized: "\(down) of \(servers.count) backends down"), provider: obj.provider)
+            return ObjectSignal(name: obj.shortName, state: .warn, reason: String(localized: "\(down) of \(servers.count) backends down"), provider: obj.provider, degraded: true)
         }
         return ObjectSignal(name: obj.shortName, state: .ok, provider: obj.provider)
     }
@@ -329,9 +385,16 @@ enum DashboardBuilder {
         let total: Int? = listed ? signals.count : overviewTotal
         let hidden = listed && overviewTotal != nil ? max((overviewTotal ?? 0) - signals.count, 0) : 0
 
+        let down = signals.filter(\.down).count
+        let degraded = signals.filter(\.degraded).count
         var flags: [SignalFlag] = []
-        if err > 0 { flags.append(SignalFlag(count: err, label: String(localized: "disabled"), status: .error)) }
-        if warn > 0 { flags.append(SignalFlag(count: warn, label: String(localized: "warnings"), status: .warn)) }
+        if err - down > 0 { flags.append(SignalFlag(count: err - down, label: String(localized: "disabled"), status: .error)) }
+        if down > 0 {
+            let label = kind == .http ? String(localized: "unreachable") : String(localized: "down")
+            flags.append(SignalFlag(count: down, label: label, status: .error))
+        }
+        if degraded > 0 { flags.append(SignalFlag(count: degraded, label: String(localized: "degraded"), status: .warn)) }
+        if warn - degraded > 0 { flags.append(SignalFlag(count: warn - degraded, label: String(localized: "warnings"), status: .warn)) }
         if idle > 0 {
             let label = kind == .middlewares ? String(localized: "unused") : String(localized: "idle")
             flags.append(SignalFlag(count: idle, label: label, status: .unknown))
@@ -426,7 +489,14 @@ enum DashboardBuilder {
         }
     }
 
-    private static func verdict(cards: [SignalCard], reachable: Bool, backendsUp: Int, backendsTotal: Int) -> Verdict {
+    private static func verdict(
+        cards: [SignalCard],
+        reachable: Bool,
+        backendsUp: Int,
+        backendsTotal: Int,
+        overlapErrors: Int = 0,
+        overlapWarnings: Int = 0
+    ) -> Verdict {
         guard reachable else {
             return Verdict(
                 headline: String(localized: "Traefik API unreachable"),
@@ -434,8 +504,8 @@ enum DashboardBuilder {
                 status: .warn
             )
         }
-        let errors = cards.reduce(0) { $0 + $1.flags.filter { $0.status == .error }.reduce(0) { $0 + $1.count } }
-        let warnings = cards.reduce(0) { $0 + $1.flags.filter { $0.status == .warn }.reduce(0) { $0 + $1.count } }
+        let errors = cards.reduce(0) { $0 + $1.flags.filter { $0.status == .error }.reduce(0) { $0 + $1.count } } - overlapErrors
+        let warnings = cards.reduce(0) { $0 + $1.flags.filter { $0.status == .warn }.reduce(0) { $0 + $1.count } } - overlapWarnings
         if errors > 0 {
             return Verdict(
                 headline: String(localized: "\(errors) objects are down"),
