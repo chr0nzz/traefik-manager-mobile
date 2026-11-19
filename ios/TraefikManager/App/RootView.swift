@@ -21,14 +21,16 @@ struct RootView: View {
 }
 
 /// Tab bar on compact widths (iPhone, folded), sidebar on regular widths (iPad, unfolded, landscape Max).
+/// Both shells read and write `AppModel.selection`, so switching between them keeps the current screen.
 struct MainShell: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(AppModel.self) private var app
 
     var body: some View {
         if sizeClass == .regular {
             SidebarShell()
         } else {
-            TabShell()
+            TabShell(initial: app.selection)
         }
     }
 }
@@ -39,20 +41,20 @@ private struct TabShell: View {
     private static let moreTag = "more"
 
     @Environment(AppModel.self) private var app
-    @State private var selection = TabShell.initialSelection
+    @State private var tab: String
+    @State private var morePath: [Destination]
 
-    /// A debug `-tmTab` for a screen that lives under More opens More with that screen pushed.
-    private static var initialSelection: String {
-        guard let tab = DebugLaunch.tab else { return Destination.home.id }
-        if let destination = Destination(rawValue: tab), !destination.primary { return moreTag }
-        return tab
+    /// A screen that lives under More opens More with that screen pushed.
+    init(initial: Destination) {
+        _tab = State(initialValue: initial.primary ? initial.id : Self.moreTag)
+        _morePath = State(initialValue: initial.primary ? [] : [initial])
     }
 
     var body: some View {
         let destinations = app.destinations
         let primary = destinations.filter(\.primary)
 
-        TabView(selection: $selection) {
+        TabView(selection: $tab) {
             ForEach(primary) { destination in
                 NavigationStack {
                     DestinationView(destination: destination)
@@ -63,7 +65,7 @@ private struct TabShell: View {
                 .tag(destination.id)
             }
 
-            NavigationStack {
+            NavigationStack(path: $morePath) {
                 MoreList(destinations: destinations.filter { !$0.primary })
                     .toolbar { ToolbarItem(placement: .topBarLeading) { ServerSwitcher(compact: true) } }
             }
@@ -71,17 +73,28 @@ private struct TabShell: View {
             .tabItem { Label("More", systemImage: "ellipsis.circle") }
             .tag(Self.moreTag)
         }
+        .onChange(of: tab) { publishSelection() }
+        .onChange(of: morePath) { publishSelection() }
         .onChange(of: destinations) {
-            if selection != Self.moreTag && !primary.contains(where: { $0.id == selection }) {
-                selection = Destination.home.id
+            if tab != Self.moreTag && !primary.contains(where: { $0.id == tab }) {
+                tab = Destination.home.id
             }
+            morePath.removeAll { !destinations.contains($0) }
+        }
+    }
+
+    /// On the More root nothing new is chosen, so the last screen stays selected for the sidebar.
+    private func publishSelection() {
+        if tab == Self.moreTag {
+            if let last = morePath.last { app.selection = last }
+        } else if let destination = Destination(rawValue: tab) {
+            app.selection = destination
         }
     }
 }
 
 private struct MoreList: View {
     let destinations: [Destination]
-    @State private var debugDestination: Destination? = DebugLaunch.tab.flatMap(Destination.init(rawValue:)).flatMap { $0.primary ? nil : $0 }
 
     var body: some View {
         List {
@@ -100,7 +113,6 @@ private struct MoreList: View {
         }
         .navigationTitle("More")
         .navigationDestination(for: Destination.self) { DestinationView(destination: $0) }
-        .navigationDestination(item: $debugDestination) { DestinationView(destination: $0) }
     }
 }
 
@@ -108,13 +120,16 @@ private struct MoreList: View {
 
 private struct SidebarShell: View {
     @Environment(AppModel.self) private var app
-    @State private var selection: Destination? = DebugLaunch.tab.flatMap(Destination.init(rawValue:)) ?? .home
 
     var body: some View {
         let destinations = app.destinations
+        let selection = Binding<Destination?>(
+            get: { app.selection },
+            set: { if let destination = $0 { app.selection = destination } }
+        )
 
         NavigationSplitView {
-            List(selection: $selection) {
+            List(selection: selection) {
                 Section {
                     ServerSwitcher()
                 }
@@ -134,12 +149,12 @@ private struct SidebarShell: View {
             .navigationSplitViewColumnWidth(min: 240, ideal: 280)
         } detail: {
             NavigationStack {
-                DestinationView(destination: selection ?? .home)
+                DestinationView(destination: app.selection)
             }
-            .id("\(selection?.id ?? "home")-\(app.generation)")
+            .id("\(app.selection.id)-\(app.generation)")
         }
         .onChange(of: destinations) {
-            if let selection, !destinations.contains(selection) { self.selection = .home }
+            if !destinations.contains(app.selection) { app.selection = .home }
         }
     }
 }

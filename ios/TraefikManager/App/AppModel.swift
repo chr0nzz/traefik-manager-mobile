@@ -22,6 +22,10 @@ final class AppModel {
         }
     }
 
+    /// The screen on show. Lives here rather than in the tab bar or sidebar shell so folding,
+    /// unfolding or resizing (which swaps one shell for the other) keeps the user where they were.
+    var selection: Destination = DebugLaunch.tab.flatMap(Destination.init(rawValue:)) ?? .home
+
     let dashboard = DashboardStore()
     let routes = RoutesStore()
     let launcher = LauncherStore()
