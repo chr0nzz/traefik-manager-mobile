@@ -1,6 +1,7 @@
 package dev.chr0nzz.traefikmanager.ui.dashboard
 
 import androidx.compose.foundation.background
+import dev.chr0nzz.traefikmanager.ui.components.contentAdaptiveInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
@@ -45,7 +46,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -116,8 +116,8 @@ fun DashboardScreen(
     }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val launcherColumns = when {
-        currentWindowAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(1200) -> 3
-        currentWindowAdaptiveInfo().windowSizeClass
+        contentAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(1200) -> 3
+        contentAdaptiveInfo().windowSizeClass
             .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 2
         else -> 1
     }
@@ -239,7 +239,7 @@ fun DashboardScreen(
             )
             else -> {
                 val snapshot = state.snapshot ?: return@PullToRefreshBox
-                val compact = !currentWindowAdaptiveInfo().windowSizeClass
+                val compact = !contentAdaptiveInfo().windowSizeClass
                     .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
                 LazyVerticalGrid(
                     columns = if (compact) GridCells.Fixed(2) else GridCells.Adaptive(minSize = 280.dp),

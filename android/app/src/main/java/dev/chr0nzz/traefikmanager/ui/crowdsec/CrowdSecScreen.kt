@@ -1,6 +1,7 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
 import androidx.annotation.PluralsRes
+import dev.chr0nzz.traefikmanager.ui.components.contentAdaptiveInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,7 +77,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -313,7 +313,7 @@ private fun CrowdSecBody(
     onLoadMore: () -> Unit,
 ) {
     val palette = LocalTmPalette.current
-    val wide = currentWindowAdaptiveInfo().windowSizeClass
+    val wide = contentAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val alerts = state.visibleAlerts
     val snapshot = state.snapshot
