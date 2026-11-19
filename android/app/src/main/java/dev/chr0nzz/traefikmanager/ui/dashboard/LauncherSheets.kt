@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +73,7 @@ fun CardSettingsSheet(
     var url by remember { mutableStateOf(current.url) }
     var linkDisabled by remember { mutableStateOf(current.linkDisabled) }
     var hidden by remember { mutableStateOf(current.hidden) }
-    var groupOpen by remember { mutableStateOf(false) }
+    var groupOpen by rememberSaveable { mutableStateOf(false) }
 
     val draft = RouteOverride(
         iconType = if (iconType == "auto") "" else iconType,
@@ -231,7 +232,7 @@ fun DashboardSettingsSheet(
 ) {
     val palette = LocalTmPalette.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var name by remember { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

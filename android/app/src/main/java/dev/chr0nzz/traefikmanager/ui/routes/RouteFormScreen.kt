@@ -46,6 +46,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -135,10 +136,10 @@ fun RouteFormBody(
 ) {
     val palette = LocalTmPalette.current
     val form = state.form
-    var configSheetOpen by remember { mutableStateOf(false) }
-    var lbExpanded by remember { mutableStateOf(false) }
-    var presetExpanded by remember { mutableStateOf(false) }
-    var newDomain by remember { mutableStateOf("") }
+    var configSheetOpen by rememberSaveable { mutableStateOf(false) }
+    var lbExpanded by rememberSaveable { mutableStateOf(false) }
+    var presetExpanded by rememberSaveable { mutableStateOf(false) }
+    var newDomain by rememberSaveable { mutableStateOf("") }
 
     if (configSheetOpen) {
         ConfigFileSheet(
@@ -1031,7 +1032,7 @@ private fun DropdownField(
     placeholder: String = "",
     allowEmpty: Boolean = false,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it },

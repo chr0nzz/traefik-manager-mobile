@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -51,9 +52,9 @@ fun ConfigFileSheet(
 ) {
     val palette = LocalTmPalette.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var query by remember { mutableStateOf("") }
-    var newName by remember { mutableStateOf("") }
-    var creating by remember { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var newName by rememberSaveable { mutableStateOf("") }
+    var creating by rememberSaveable { mutableStateOf(false) }
 
     val matches = remember(files, query) {
         val needle = query.trim().lowercase()

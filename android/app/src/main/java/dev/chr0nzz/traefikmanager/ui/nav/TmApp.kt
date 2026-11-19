@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -161,7 +162,7 @@ private fun ConnectedApp(
     val activeServer by viewModel.activeServer.collectAsStateWithLifecycle()
     val switchingServer by viewModel.switching.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle(RootViewModel.DefaultPreferences)
-    var serverListExpanded by remember { mutableStateOf(false) }
+    var serverListExpanded by rememberSaveable { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val biometricAvailable = remember(context) { AppLock.available(context) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -249,7 +250,7 @@ private fun ConnectedApp(
         }
         else -> destinations
     }
-    var navEditorOpen by remember { mutableStateOf(false) }
+    var navEditorOpen by rememberSaveable { mutableStateOf(false) }
     val editorRequested by viewModel.navEditorOpen.collectAsStateWithLifecycle()
     LaunchedEffect(editorRequested) {
         if (editorRequested) {
