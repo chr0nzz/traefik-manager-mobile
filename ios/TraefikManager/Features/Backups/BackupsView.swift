@@ -19,6 +19,7 @@ enum BackupsTab: String, CaseIterable, Identifiable {
 struct BackupsView: View {
     @Environment(AppModel.self) private var app
     @State private var tab: BackupsTab = DebugLaunch.form == "git" ? .git : .dynamic
+    @State private var columns = 1
     @State private var list: BackupsList?
     @State private var loading = true
     @State private var error: String?
@@ -187,19 +188,28 @@ struct BackupsView: View {
                     } else {
                         SectionLabel(text: isStatic ? String(localized: "Static config") : isCerts ? String(localized: "Certificate stores") : String(localized: "Dynamic config"))
                             .padding(.top, Spacing.xs)
-                        ForEach(rows) { entry in
-                            BackupCard(entry: entry, busy: busy) { restoreTarget = entry; askRestore = true } onDelete: { deleteTarget = entry }
+                        if columns == 1 {
+                            ForEach(rows) { backupCard($0) }
                         }
                     }
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+
+                if columns > 1 {
+                    CardRows(rows, id: \.id, columns: columns) { backupCard($0) }
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
             .refreshable { await refresh() }
         }
+    }
+
+    private func backupCard(_ entry: BackupEntry) -> some View {
+        BackupCard(entry: entry, busy: busy) { restoreTarget = entry; askRestore = true } onDelete: { deleteTarget = entry }
     }
 
     private func note(_ text: String) -> some View {

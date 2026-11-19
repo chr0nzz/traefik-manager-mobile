@@ -33,6 +33,7 @@ struct ServicesView: View {
     @State private var provider: String?
     @State private var creating = DebugLaunch.form == "new-svc"
     @State private var message: String?
+    @State private var columns = 1
     @State private var debugDetail: String? = DebugLaunch.route
 
     private var store: ServicesStore { app.services }
@@ -116,18 +117,25 @@ struct ServicesView: View {
                     }
                     .listRowBackground(Color.clear)
                 }
-                ForEach(visible) { row in
-                    ZStack {
-                        NavigationLink(value: row.id) { EmptyView() }.opacity(0)
-                        ServiceCard(row: row)
+                if columns > 1 {
+                    CardRows(visible, id: \.id, columns: columns) { row in
+                        NavigationLink(value: row.id) { ServiceCard(row: row) }.buttonStyle(.plain)
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+                } else {
+                    ForEach(visible) { row in
+                        ZStack {
+                            NavigationLink(value: row.id) { EmptyView() }.opacity(0)
+                            ServiceCard(row: row)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+                    }
                 }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
         }
     }
 
