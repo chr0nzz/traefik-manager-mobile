@@ -10,6 +10,7 @@ struct ProviderView: View {
     @State private var reachable = true
     @State private var loading = true
     @State private var error: String?
+    @State private var columns = 1
     @State private var query = ""
     @State private var protocolFilter: ProtocolFilter = .all
     @State private var statusFilter: StatusFilter = .all
@@ -89,12 +90,18 @@ struct ProviderView: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
 
-                ForEach(visible) { route in
-                    Button { selected = route } label: { ProviderRouteCard(route: route) }
-                        .buttonStyle(.plain)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+                if columns > 1 {
+                    CardRows(visible, id: \.id, columns: columns) { route in
+                        Button { selected = route } label: { ProviderRouteCard(route: route) }.buttonStyle(.plain)
+                    }
+                } else {
+                    ForEach(visible) { route in
+                        Button { selected = route } label: { ProviderRouteCard(route: route) }
+                            .buttonStyle(.plain)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+                    }
                 }
 
                 if !middlewares.isEmpty {
@@ -115,6 +122,7 @@ struct ProviderView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
         }
     }
 

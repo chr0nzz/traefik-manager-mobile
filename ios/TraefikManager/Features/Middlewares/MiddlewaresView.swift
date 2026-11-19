@@ -13,6 +13,7 @@ struct MiddlewaresView: View {
     @State private var query = ""
     @State private var filter: MiddlewareFilter = .all
     @State private var message: String?
+    @State private var columns = 1
     @State private var creating = DebugLaunch.form == "new-mw"
     @State private var showTemplates = false
     @State private var debugDetail: String? = DebugLaunch.route
@@ -114,17 +115,29 @@ struct MiddlewaresView: View {
                 Text(middlewares.isEmpty ? "Middlewares you create appear here." : "Try a different search or filter.")
             }
         } else {
-            List(visible, id: \.name) { middleware in
-                ZStack {
-                    NavigationLink(value: middleware.name) { EmptyView() }.opacity(0)
-                    MiddlewareCard(middleware: middleware, usage: usage[middleware.name] ?? 0)
+            List {
+                if columns > 1 {
+                    CardRows(visible, id: \.name, columns: columns) { middleware in
+                        NavigationLink(value: middleware.name) {
+                            MiddlewareCard(middleware: middleware, usage: usage[middleware.name] ?? 0)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } else {
+                    ForEach(visible, id: \.name) { middleware in
+                        ZStack {
+                            NavigationLink(value: middleware.name) { EmptyView() }.opacity(0)
+                            MiddlewareCard(middleware: middleware, usage: usage[middleware.name] ?? 0)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+                    }
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
         }
     }
 }

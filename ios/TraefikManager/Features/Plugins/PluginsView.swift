@@ -19,6 +19,7 @@ struct PluginsView: View {
     @State private var restartDetail: String?
     @State private var restarting = false
     @State private var message: String?
+    @State private var columns = 1
     @State private var debugDetail: String? = DebugLaunch.route
 
     private var visible: [PluginEntry] {
@@ -29,6 +30,17 @@ struct PluginsView: View {
 
     private func users(_ name: String) -> [String] { PluginUsage.userNames(name, config: middlewares, runtime: runtimeMiddlewares) }
     private func usage(_ name: String) -> Int { users(name).count }
+
+    private func pluginCard(_ plugin: PluginEntry) -> some View {
+        PluginCard(
+            plugin: plugin,
+            usage: usage(plugin.name),
+            latest: updates[plugin.name],
+            canManage: canManage,
+            onEdit: { editing = plugin },
+            onDelete: { pendingDelete = plugin }
+        )
+    }
 
     var body: some View {
         content
@@ -115,26 +127,28 @@ struct PluginsView: View {
                     if visible.isEmpty {
                         Text("No plugins match your search").font(.footnote).foregroundStyle(Palette.muted)
                     }
-                    ForEach(visible) { plugin in
-                        ZStack {
-                            NavigationLink(value: plugin) { EmptyView() }.opacity(0)
-                            PluginCard(
-                                plugin: plugin,
-                                usage: usage(plugin.name),
-                                latest: updates[plugin.name],
-                                canManage: canManage,
-                                onEdit: { editing = plugin },
-                                onDelete: { pendingDelete = plugin }
-                            )
+                    if columns == 1 {
+                        ForEach(visible) { plugin in
+                            ZStack {
+                                NavigationLink(value: plugin) { EmptyView() }.opacity(0)
+                                pluginCard(plugin)
+                            }
                         }
                     }
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+
+                if columns > 1 {
+                    CardRows(visible, id: \.id, columns: columns) { plugin in
+                        NavigationLink(value: plugin) { pluginCard(plugin) }.buttonStyle(.plain)
+                    }
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
             .overlay { if busy { ProgressView().padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)) } }
         }
     }
@@ -246,8 +260,8 @@ private struct PluginCard: View {
                     .frame(width: 32, height: 32)
                     .background(Palette.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: Radius.sm))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(plugin.name).font(.subheadline.weight(.semibold)).lineLimit(1)
-                    Text(plugin.displayModule).font(.caption2.monospaced()).foregroundStyle(Palette.muted).lineLimit(1)
+                    Text(plugin.name).font(.subheadline.weight(.semibold)).lineLimit(2)
+                    Text(plugin.displayModule).font(.caption2.monospaced()).foregroundStyle(Palette.muted).lineLimit(1).truncationMode(.middle)
                 }
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 1) {
