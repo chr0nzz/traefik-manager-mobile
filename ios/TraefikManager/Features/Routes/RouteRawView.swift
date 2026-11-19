@@ -3,6 +3,7 @@ import SwiftUI
 /// Edit a route's YAML directly. Port of `RouteRawScreen`.
 struct RouteRawView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.dismiss) private var dismiss
     let routeId: String
     /// Called with `true` after a successful save, `false` on cancel.
     var onFinish: (Bool) -> Void
@@ -52,7 +53,7 @@ struct RouteRawView: View {
                 }
             }
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { onFinish(false) }
+                Button("Cancel") { finish(false) }
             }
             ToolbarItem(placement: .confirmationAction) {
                 if saving {
@@ -90,10 +91,17 @@ struct RouteRawView: View {
             defer { saving = false }
             do {
                 try await app.routes.saveRaw(routeId: routeId, content: content, service: service)
-                onFinish(true)
+                finish(true)
             } catch {
                 self.error = error.localizedDescription
             }
         }
+    }
+
+    /// Closes itself as well as telling the caller, since the caller may have been rebuilt
+    /// (fold or unfold) while this sheet stayed open.
+    private func finish(_ saved: Bool) {
+        onFinish(saved)
+        dismiss()
     }
 }

@@ -55,11 +55,11 @@ struct HomeView: View {
                 .accessibilityLabel("Refresh overview")
             }
         }
-        .sheet(item: $editingApp) { item in
+        .shellSheet(item: $editingApp) { item in
             CardSettingsSheet(item: item) { message = $0 }
         }
         .navigationDestination(isPresented: $showNotifications) { NotificationHistoryView() }
-        .sheet(isPresented: $showSettings) {
+        .shellSheet(isPresented: $showSettings) {
             DashboardSettingsSheet { message = $0 }
         }
         .navigationDestination(item: $infoRoute) { id in

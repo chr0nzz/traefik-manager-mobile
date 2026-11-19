@@ -32,11 +32,15 @@ struct RouteMapView: View {
             .sheet(item: $focus) { node in
                 NodeSheet(node: node, graph: graph) { routeId in
                     focus = nil
-                    editing = routeId
+                    Task {
+                        // The editor is presented from the shell, which can't present while this sheet is still leaving.
+                        try? await Task.sleep(for: .milliseconds(400))
+                        editing = routeId
+                    }
                 }
                 .presentationDetents([.medium, .large])
             }
-            .sheet(item: $editing) { id in
+            .shellSheet(item: $editing) { id in
                 NavigationStack {
                     RouteFormView(routeId: id) { message = String(localized: "\($0) saved") }
                 }

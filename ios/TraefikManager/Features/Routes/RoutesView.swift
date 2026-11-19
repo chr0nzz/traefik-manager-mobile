@@ -60,10 +60,10 @@ struct RoutesView: View {
                         .accessibilityLabel("New route")
                 }
             }
-            .sheet(item: $debugEdit) { id in
+            .shellSheet(item: $debugEdit) { id in
                 NavigationStack { RouteFormView(routeId: id) }
             }
-            .sheet(isPresented: $creating) {
+            .shellSheet(isPresented: $creating) {
                 NavigationStack {
                     RouteFormView(routeId: nil) { name in message = String(localized: "\(name) saved") }
                 }
