@@ -13,6 +13,11 @@ struct TraefikManagerApp: App {
             }
             .environment(app)
             .preferredColorScheme(themeMode.colorScheme)
+            // Launcher widget tiles on iOS 17 can only open this app; pass the app's page on to the browser.
+            .onOpenURL { url in
+                guard url.scheme == "http" || url.scheme == "https" else { return }
+                UIApplication.shared.open(url)
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
