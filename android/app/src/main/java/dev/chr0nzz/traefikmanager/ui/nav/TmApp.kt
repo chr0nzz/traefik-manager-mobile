@@ -93,6 +93,15 @@ import dev.chr0nzz.traefikmanager.ui.providers.ProviderScreen
 import dev.chr0nzz.traefikmanager.ui.routemap.RouteMapScreen
 import dev.chr0nzz.traefikmanager.ui.services.ServicesScreen
 import kotlinx.coroutines.launch
+import dev.chr0nzz.traefikmanager.data.repo.ServerEntry
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.PermanentDrawerSheet
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.automirrored.outlined.MenuOpen
+import dev.chr0nzz.traefikmanager.ui.components.ProvideContentWidth
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.style.TextOverflow
 
@@ -192,49 +201,51 @@ private fun ConnectedApp(
         suiteType == NavigationSuiteType.ShortNavigationBarMedium ||
         suiteType == NavigationSuiteType.NavigationBar
 
+    var sidebarOpen by rememberSaveable { mutableStateOf(true) }
+    val sidebar = !bar && sidebarOpen
+    LaunchedEffect(bar) { if (!bar) drawerState.close() }
+
+    val navMenu: @Composable (inDrawer: Boolean) -> Unit = { inDrawer ->
+        NavMenu(
+            servers = servers,
+            activeServer = activeServer,
+            serverListExpanded = serverListExpanded,
+            switchingServer = switchingServer,
+            onToggleServers = { serverListExpanded = !serverListExpanded },
+            onSelectServer = { id ->
+                serverListExpanded = false
+                viewModel.switchServer(id)
+                if (inDrawer) scope.launch { drawerState.close() }
+            },
+            destinations = destinations,
+            badges = badges,
+            isSelected = { destination ->
+                currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true
+            },
+            onSelect = { destination ->
+                if (inDrawer) scope.launch { drawerState.close() }
+                goTo(destination, null)
+            },
+            onCollapse = if (inDrawer) null else ({ sidebarOpen = false }),
+        )
+    }
+
+    LaunchedEffect(sidebar) { if (sidebar) viewModel.loadServers() }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = bar,
         drawerContent = {
-            ModalDrawerSheet(drawerState = drawerState) {
-                ServerSwitcherHeader(
-                    servers = servers,
-                    active = activeServer,
-                    expanded = serverListExpanded,
-                    switching = switchingServer,
-                    onToggle = { serverListExpanded = !serverListExpanded },
-                    onSelect = { id ->
-                        serverListExpanded = false
-                        viewModel.switchServer(id)
-                        scope.launch { drawerState.close() }
-                    },
-                )
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
-                    Text(
-                        text = stringResource(section.label).uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 6.dp),
-                    )
-                    destinations.filter { it.section == section }.forEach { destination ->
-                    val badge = badges.forRoute(destination.route)
-                    NavigationDrawerItem(
-                        label = { Text(destination.label.asString()) },
-                        icon = { Icon(destination.icon, contentDescription = null) },
-                        badge = drawerBadge(badge),
-                        selected = currentDestination?.hierarchy?.any { it.route?.substringBefore('?') == destination.route } == true,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            goTo(destination, null)
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                    )
-                    }
-                }
-                }
-            }
+            ModalDrawerSheet(drawerState = drawerState) { navMenu(true) }
         },
     ) {
+    Row(modifier = Modifier.fillMaxSize()) {
+    if (sidebar) {
+        PermanentDrawerSheet(
+            modifier = Modifier.width(SidebarWidth),
+            drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) { navMenu(false) }
+    }
 
     val activeAgentId by viewModel.activeAgentId.collectAsStateWithLifecycle()
     val navScope = navScopeOf(activeAgentId, bar)
@@ -286,13 +297,17 @@ private fun ConnectedApp(
 
     NavigationSuiteScaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        navigationSuiteType = if (preferences.hideNavBar && bar) NavigationSuiteType.None else suiteType,
+        navigationSuiteType = when {
+            sidebar -> NavigationSuiteType.None
+            preferences.hideNavBar && bar -> NavigationSuiteType.None
+            else -> suiteType
+        },
         navigationItemVerticalArrangement = if (bar) Arrangement.Center else Arrangement.Top,
         navigationItems = {
             if (!bar) {
                 NavigationSuiteItem(
                     selected = false,
-                    onClick = { scope.launch { drawerState.open() } },
+                    onClick = { sidebarOpen = true },
                     icon = { Icon(Icons.Outlined.Menu, contentDescription = null) },
                     label = { Text(stringResource(R.string.nav_menu), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     navigationSuiteType = suiteType,
@@ -312,6 +327,7 @@ private fun ConnectedApp(
     ) {
         val fade = tween<Float>(durationMillis = 200)
         ProvideTopBarMenu(bar) {
+        ProvideContentWidth(Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
             startDestination = TmDestination.Home.route,
@@ -507,7 +523,65 @@ private fun ConnectedApp(
             }
         }
         }
+        }
     }
+    }
+    }
+}
+
+private val SidebarWidth = 280.dp
+
+@Composable
+private fun NavMenu(
+    servers: List<ServerEntry>,
+    activeServer: ServerEntry?,
+    serverListExpanded: Boolean,
+    switchingServer: Boolean,
+    onToggleServers: () -> Unit,
+    onSelectServer: (String?) -> Unit,
+    destinations: List<TmDestination>,
+    badges: NavBadges,
+    isSelected: (TmDestination) -> Boolean,
+    onSelect: (TmDestination) -> Unit,
+    onCollapse: (() -> Unit)?,
+) {
+    if (onCollapse != null) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(end = 8.dp, top = 8.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            IconButton(onClick = onCollapse) {
+                Icon(Icons.AutoMirrored.Outlined.MenuOpen, contentDescription = stringResource(R.string.common_collapse))
+            }
+        }
+    }
+    ServerSwitcherHeader(
+        servers = servers,
+        active = activeServer,
+        expanded = serverListExpanded,
+        switching = switchingServer,
+        onToggle = onToggleServers,
+        onSelect = onSelectServer,
+    )
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        TmSection.entries.filter { section -> destinations.any { it.section == section } }.forEach { section ->
+            Text(
+                text = stringResource(section.label).uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 6.dp),
+            )
+            destinations.filter { it.section == section }.forEach { destination ->
+                NavigationDrawerItem(
+                    label = { Text(destination.label.asString()) },
+                    icon = { Icon(destination.icon, contentDescription = null) },
+                    badge = drawerBadge(badges.forRoute(destination.route)),
+                    selected = isSelected(destination),
+                    onClick = { onSelect(destination) },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+            }
+        }
     }
 }
 
