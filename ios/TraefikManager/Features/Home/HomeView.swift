@@ -214,12 +214,12 @@ struct ProviderChips: View {
     var active: String?
     var onSelect: ((String) -> Void)?
 
+    /// Wraps rather than scrolls: in narrow cards (Dashboard tiles, unfolded iPhone Duo) a scroller
+    /// clipped the last chips with nothing to show there was more.
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Spacing.sm) {
-                ForEach(providers) { provider in
-                    chip(provider)
-                }
+        FlowLayout(spacing: Spacing.sm, lineSpacing: 2) {
+            ForEach(providers) { provider in
+                chip(provider)
             }
         }
     }
