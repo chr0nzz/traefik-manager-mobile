@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,9 +77,9 @@ fun AuthSettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
 
-    var newKeyName by remember { mutableStateOf("") }
+    var newKeyName by rememberSaveable { mutableStateOf("") }
     var revokeTarget by remember { mutableStateOf<ApiKeyEntry?>(null) }
-    var confirmSignOut by remember { mutableStateOf(false) }
+    var confirmSignOut by rememberSaveable { mutableStateOf(false) }
 
     if (confirmSignOut) {
         AlertDialog(

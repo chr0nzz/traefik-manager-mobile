@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
@@ -28,7 +29,7 @@ fun TypedConfirmDialog(
     onConfirm: () -> Unit,
     word: String = actionLabel.uppercase(),
 ) {
-    var typed by remember { mutableStateOf("") }
+    var typed by rememberSaveable { mutableStateOf("") }
     val palette = LocalTmPalette.current
     val armed = typed.trim() == word
 

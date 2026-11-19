@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -100,7 +101,7 @@ fun NotificationsScreen(
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
-    var typeMenuOpen by remember { mutableStateOf(false) }
+    var typeMenuOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
@@ -560,7 +561,7 @@ private fun ChannelRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteCheckIntervalPicker(value: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
-    var open by remember { mutableStateOf(false) }
+    var open by rememberSaveable { mutableStateOf(false) }
     Box {
         TextButton(onClick = { open = true }, enabled = enabled) {
             Text(RouteCheckIntervals.label(value).asString())

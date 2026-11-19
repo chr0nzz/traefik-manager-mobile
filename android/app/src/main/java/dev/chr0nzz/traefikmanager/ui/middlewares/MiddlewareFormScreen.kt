@@ -52,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -145,8 +146,8 @@ private fun MiddlewareFormBody(
 ) {
     val palette = LocalTmPalette.current
     val form = state.form
-    var configSheetOpen by remember { mutableStateOf(false) }
-    var templateSheetOpen by remember { mutableStateOf(false) }
+    var configSheetOpen by rememberSaveable { mutableStateOf(false) }
+    var templateSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     if (configSheetOpen) {
         ConfigFileSheet(
@@ -444,7 +445,7 @@ private fun ChoiceField(
     selected: String,
     onSelect: (String) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
     val current = options.firstOrNull { it.first == selected }?.second?.asString().orEmpty()
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -482,9 +483,9 @@ private fun HashGeneratorCard(
     viewModel: MiddlewareFormViewModel,
 ) {
     val palette = LocalTmPalette.current
-    var username by remember { mutableStateOf("") }
+    var username by rememberSaveable { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var realm by remember { mutableStateOf("traefik") }
+    var realm by rememberSaveable { mutableStateOf("traefik") }
 
     TmCard {
         SectionLabel(stringResource(R.string.middlewares_generate))

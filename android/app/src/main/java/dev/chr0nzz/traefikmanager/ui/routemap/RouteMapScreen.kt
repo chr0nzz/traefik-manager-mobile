@@ -27,6 +27,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.getValue
@@ -59,7 +60,7 @@ fun RouteMapScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val palette = LocalTmPalette.current
-    var filterMenuOpen by remember { mutableStateOf(false) }
+    var filterMenuOpen by rememberSaveable { mutableStateOf(false) }
     var editing by remember { mutableStateOf<String?>(null) }
 
     Scaffold(

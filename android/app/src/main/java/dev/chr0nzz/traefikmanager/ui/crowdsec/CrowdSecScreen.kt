@@ -83,6 +83,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -147,7 +148,7 @@ fun CrowdSecScreen(
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     var addSheetFor by remember { mutableStateOf<String?>(null) }
-    var addSheetOpen by remember { mutableStateOf(false) }
+    var addSheetOpen by rememberSaveable { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<CsDecision?>(null) }
 
     LaunchedEffect(viewModel.queryState) {

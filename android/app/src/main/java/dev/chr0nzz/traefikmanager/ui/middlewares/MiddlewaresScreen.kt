@@ -351,7 +351,7 @@ private fun MiddlewaresTopBar(
 ) {
     val scope = rememberCoroutineScope()
     val palette = LocalTmPalette.current
-    var filterMenuOpen by remember { mutableStateOf(false) }
+    var filterMenuOpen by rememberSaveable { mutableStateOf(false) }
     val filtersActive = filter != MiddlewareFilter.All
 
     TopAppBar(

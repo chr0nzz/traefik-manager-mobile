@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -75,7 +76,7 @@ fun NotificationHistoryScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
     var pendingDelete by remember { mutableStateOf<TmNotification?>(null) }
-    var clearOpen by remember { mutableStateOf(false) }
+    var clearOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect

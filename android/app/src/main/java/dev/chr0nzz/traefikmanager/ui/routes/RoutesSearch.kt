@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -76,7 +77,7 @@ fun RoutesTopBar(
 ) {
     val scope = rememberCoroutineScope()
     val palette = LocalTmPalette.current
-    var filterMenuOpen by remember { mutableStateOf(false) }
+    var filterMenuOpen by rememberSaveable { mutableStateOf(false) }
     val filtersActive = protocol != ProtocolFilter.All || status != StatusFilter.All
 
     TopAppBar(

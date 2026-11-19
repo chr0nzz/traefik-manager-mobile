@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,7 +87,7 @@ fun ServersScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
 
-    var addOpen by remember { mutableStateOf(false) }
+    var addOpen by rememberSaveable { mutableStateOf(false) }
     var renameTarget by remember { mutableStateOf<ServerEntry?>(null) }
     var deleteTarget by remember { mutableStateOf<ServerEntry?>(null) }
     var rotateTarget by remember { mutableStateOf<ServerEntry?>(null) }
@@ -374,8 +375,8 @@ fun ServersScreen(
 
 @Composable
 private fun AddServerDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var url by remember { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,

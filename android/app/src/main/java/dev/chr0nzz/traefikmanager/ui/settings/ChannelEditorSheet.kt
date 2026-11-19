@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +72,7 @@ fun ChannelEditorSheet(
     val palette = LocalTmPalette.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val kind = ChannelKinds.of(draft.kind)
-    var kindOpen by remember { mutableStateOf(false) }
+    var kindOpen by rememberSaveable { mutableStateOf(false) }
     var picking by remember { mutableStateOf<String?>(null) }
 
     ModalBottomSheet(
