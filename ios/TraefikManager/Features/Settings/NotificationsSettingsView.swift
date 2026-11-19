@@ -49,7 +49,7 @@ struct NotificationsSettingsView: View {
                 }
             }
         }
-        .sheet(item: $editing) { draft in
+        .shellSheet(item: $editing) { draft in
             NavigationStack {
                 ChannelEditorView(draft: draft) { saved in
                     replace(saved)
@@ -64,6 +64,8 @@ struct NotificationsSettingsView: View {
                  ? String(localized: "Remove \"\(channel.name)\"? Push to that phone stops until the app registers again.")
                  : String(localized: "Remove channel \"\(channel.name)\"? Events will stop being delivered to it."))
         }
+        // An editor that outlived a fold or unfold reported back to the screen it replaced.
+        .onChange(of: app.sheet == nil) { if app.sheet == nil { Task { await load() } } }
         .task { await load() }
         .refreshable { await load() }
         .toast($message)

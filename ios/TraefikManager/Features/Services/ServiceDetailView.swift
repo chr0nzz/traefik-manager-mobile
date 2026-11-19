@@ -102,7 +102,7 @@ struct ServiceDetailView: View {
         .navigationTitle(row.shortName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { actions(row) }
-        .sheet(item: $editing) { draft in
+        .shellSheet(item: $editing) { draft in
             NavigationStack {
                 ServiceEditorView(draft: draft) { message = String(localized: "Service \($0) saved") }
             }

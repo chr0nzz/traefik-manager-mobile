@@ -91,7 +91,7 @@ struct MiddlewareDetailView: View {
                 .accessibilityLabel("Actions")
             }
         }
-        .sheet(isPresented: $editing) {
+        .shellSheet(isPresented: $editing) {
             NavigationStack {
                 MiddlewareFormView(name: middleware.name) { message = String(localized: "\($0) saved") }
             }

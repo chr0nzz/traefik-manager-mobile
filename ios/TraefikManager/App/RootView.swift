@@ -14,6 +14,8 @@ struct RootView: View {
             } else {
                 MainShell()
                     .task(id: app.connection) { await app.refresh() }
+                    // Editors live here, above the shells, so they stay open when the shell swaps.
+                    .shellSheetHost()
             }
         }
         .animation(.default, value: app.connection == nil)

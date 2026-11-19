@@ -39,6 +39,9 @@ final class AppModel {
 
     private let connectionStore = ConnectionStore()
 
+    /// Editor or result sheet shown above the tab bar / sidebar shells; see `shellSheet`.
+    var sheet: ShellSheet?
+
     init() {
         #if DEBUG
         // Launch arguments for simulator screenshots: `-tm-demo` opens demo mode, `-tm-reset` signs out.

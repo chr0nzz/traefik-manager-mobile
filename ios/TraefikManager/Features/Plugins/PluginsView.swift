@@ -65,7 +65,7 @@ struct PluginsView: View {
                     PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: users(plugin.name))
                 }
             }
-            .sheet(isPresented: $installing) {
+            .shellSheet(isPresented: $installing) {
                 NavigationStack {
                     PluginInstallSheet { response in
                         restartDetail = Self.installedText(response)
@@ -74,7 +74,7 @@ struct PluginsView: View {
                     }
                 }
             }
-            .sheet(item: $editing) { plugin in
+            .shellSheet(item: $editing) { plugin in
                 NavigationStack {
                     PluginEditSheet(plugin: plugin) {
                         message = String(localized: "Plugin saved - restart Traefik to apply")
@@ -88,6 +88,8 @@ struct PluginsView: View {
             } message: { plugin in
                 Text("Remove plugin \"\(plugin.name)\"? Traefik keeps running it until it restarts.")
             }
+            // An editor that outlived a fold or unfold reported back to the screen it replaced.
+            .onChange(of: app.sheet == nil) { if app.sheet == nil { Task { await load() } } }
             .task(id: app.generation) {
                 plugins = []
                 loading = true

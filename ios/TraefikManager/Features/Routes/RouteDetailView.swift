@@ -15,13 +15,13 @@ struct RouteDetailView: View {
 
     let routeId: String
     @Binding var message: String?
+    @State private var showRaw = false
+    @State private var editing = false
     /// A route that is not in the file route list, such as a provider page's router. Shown read-only.
     var fixedRoute: Route? = nil
 
     @State private var ping: PingState?
     @State private var confirmDelete = false
-    @State private var showRaw = false
-    @State private var editing = false
     @State private var working = false
 
     private var route: Route? { fixedRoute ?? app.routes.routes.first { $0.id == routeId } }
@@ -63,7 +63,7 @@ struct RouteDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { actions(route) }
         .task { if !app.services.loaded { await app.refreshServices() } }
-        .sheet(isPresented: $showRaw) {
+        .shellSheet(isPresented: $showRaw) {
             NavigationStack {
                 RouteRawView(routeId: route.id) { saved in
                     showRaw = false
@@ -74,7 +74,7 @@ struct RouteDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $editing) {
+        .shellSheet(isPresented: $editing) {
             NavigationStack {
                 RouteFormView(routeId: route.id) { name in message = String(localized: "\(name) saved") }
             }

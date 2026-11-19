@@ -70,7 +70,7 @@ struct ServicesView: View {
             .navigationDestination(item: $debugDetail) { key in
                 ServiceDetailView(key: key, message: $message)
             }
-            .sheet(isPresented: $creating) {
+            .shellSheet(isPresented: $creating) {
                 NavigationStack {
                     ServiceEditorView(draft: ServiceDraft()) { message = String(localized: "Service \($0) saved") }
                 }

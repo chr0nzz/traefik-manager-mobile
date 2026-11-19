@@ -69,12 +69,12 @@ struct MiddlewaresView: View {
             .navigationDestination(item: $debugDetail) { name in
                 MiddlewareDetailView(name: name, usage: usage[name] ?? 0, externalUsers: external[name] ?? [], message: $message)
             }
-            .sheet(isPresented: $creating) {
+            .shellSheet(isPresented: $creating) {
                 NavigationStack {
                     MiddlewareFormView(name: nil) { message = String(localized: "\($0) saved") }
                 }
             }
-            .sheet(isPresented: $showTemplates) {
+            .shellSheet(isPresented: $showTemplates) {
                 NavigationStack { MiddlewareTemplatesView() }
             }
             .task(id: app.generation) {

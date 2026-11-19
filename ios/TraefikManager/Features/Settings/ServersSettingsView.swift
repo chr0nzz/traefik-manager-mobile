@@ -90,7 +90,7 @@ struct ServersSettingsView: View {
         } message: { _ in
             Text("The old key stops working immediately and every request to this server fails until you update its compose file and recreate the container. Health checks will keep looking green, because they are unauthenticated.")
         }
-        .sheet(item: $issued) { key in
+        .shellSheet(item: $issued) { key in
             NavigationStack { KeySheet(title: key.rotated ? String(localized: "New key for \(key.agentName)") : String(localized: "Key for \(key.agentName)"),
                                        body: key.rotated ? String(localized: "Save this key - it will not be shown again. The agent stops working until you update it.")
                                                          : String(localized: "Save this key - it will not be shown again."),
@@ -98,7 +98,7 @@ struct ServersSettingsView: View {
                 .interactiveDismissDisabled()
         }
         .navigationDestination(item: $configuring) { AgentConfigView(agentId: $0) }
-        .sheet(item: $compose) { snippet in
+        .shellSheet(item: $compose) { snippet in
             NavigationStack { ComposeSheet(snippet: snippet) }
         }
         .task(id: app.generation) { await load() }
