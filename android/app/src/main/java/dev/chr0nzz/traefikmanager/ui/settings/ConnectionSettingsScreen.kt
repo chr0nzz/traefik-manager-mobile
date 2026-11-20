@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,7 +71,7 @@ fun ConnectionSettingsScreen(
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
     val savedMessage = stringResource(R.string.connection_saved)
-    var showPassword by remember { mutableStateOf(false) }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.saved) {
         if (state.saved) {

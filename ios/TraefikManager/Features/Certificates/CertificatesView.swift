@@ -30,6 +30,7 @@ struct CertificatesView: View {
     @State private var confirming = false
     @State private var removing = false
     @State private var message: String?
+    @State private var columns = 1
 
     private func verdict(_ cert: CertRow) -> CertVerdict? { usage?.verdict(cert.resolver, cert.main) }
 
@@ -116,19 +117,21 @@ struct CertificatesView: View {
                             .font(.footnote)
                             .foregroundStyle(Palette.muted)
                     }
-                    ForEach(visible) { cert in
-                        CertCard(cert: cert, verdict: verdict(cert), removable: removable(cert)) { ask([cert]) } onCopy: {
-                            UIPasteboard.general.string = ([cert.main] + cert.extraDomains).filter { !$0.isEmpty }.joined(separator: "\n")
-                            message = String(localized: "Copied")
-                        }
+                    if columns == 1 {
+                        ForEach(visible) { certCard($0) }
                     }
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+
+                if columns > 1 {
+                    CardRows(visible, id: \.id, columns: columns) { certCard($0) }
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
             .overlay { if removing { ProgressView().padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)) } }
         }
     }
@@ -186,6 +189,13 @@ struct CertificatesView: View {
             inUse > 0 ? String(localized: "\(inUse) still serve routes, so Traefik requests new certificates for them.") : nil,
             String(localized: "A copy of acme.json is saved to Backups first."),
         ].compactMap { $0 }.joined(separator: " ")
+    }
+
+    private func certCard(_ cert: CertRow) -> some View {
+        CertCard(cert: cert, verdict: verdict(cert), removable: removable(cert)) { ask([cert]) } onCopy: {
+            UIPasteboard.general.string = ([cert.main] + cert.extraDomains).filter { !$0.isEmpty }.joined(separator: "\n")
+            message = String(localized: "Copied")
+        }
     }
 
     private func ask(_ rows: [CertRow]) {

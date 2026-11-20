@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -326,6 +327,16 @@ struct LauncherWidgetView: View {
             Text(app.name).font(.system(size: 9)).foregroundStyle(Palette.text).lineLimit(1)
         }
         .frame(maxWidth: .infinity)
-        if let url = URL(string: app.url) { Link(destination: url) { content } } else { content }
+        if let url = URL(string: app.url) {
+            if #available(iOS 18.0, *) {
+                // Opens the app's page directly. A widget `Link` can only open Traefik Manager,
+                // which then passes the page on (see `TraefikManagerApp`), so it stays as the iOS 17 path.
+                Button(intent: OpenURLIntent(url)) { content }.buttonStyle(.plain)
+            } else {
+                Link(destination: url) { content }
+            }
+        } else {
+            content
+        }
     }
 }

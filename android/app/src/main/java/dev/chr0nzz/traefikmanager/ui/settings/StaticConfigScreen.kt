@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,11 +92,11 @@ fun StaticConfigScreen(
     val palette = LocalTmPalette.current
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
-    var rawOpen by remember { mutableStateOf(false) }
+    var rawOpen by rememberSaveable { mutableStateOf(false) }
     var editing by remember { mutableStateOf<StaticEditing?>(null) }
     var removing by remember { mutableStateOf<PendingRemoval?>(null) }
     var formError by remember { mutableStateOf<UiText?>(null) }
-    var confirmDiscard by remember { mutableStateOf(false) }
+    var confirmDiscard by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect

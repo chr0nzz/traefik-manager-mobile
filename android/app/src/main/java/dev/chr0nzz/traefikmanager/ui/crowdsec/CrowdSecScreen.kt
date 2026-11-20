@@ -1,6 +1,7 @@
 package dev.chr0nzz.traefikmanager.ui.crowdsec
 
 import androidx.annotation.PluralsRes
+import dev.chr0nzz.traefikmanager.ui.components.contentAdaptiveInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,13 +77,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -147,7 +148,7 @@ fun CrowdSecScreen(
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     var addSheetFor by remember { mutableStateOf<String?>(null) }
-    var addSheetOpen by remember { mutableStateOf(false) }
+    var addSheetOpen by rememberSaveable { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<CsDecision?>(null) }
 
     LaunchedEffect(viewModel.queryState) {
@@ -313,7 +314,7 @@ private fun CrowdSecBody(
     onLoadMore: () -> Unit,
 ) {
     val palette = LocalTmPalette.current
-    val wide = currentWindowAdaptiveInfo().windowSizeClass
+    val wide = contentAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val alerts = state.visibleAlerts
     val snapshot = state.snapshot

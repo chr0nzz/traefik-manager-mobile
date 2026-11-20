@@ -50,7 +50,7 @@ struct AuthSettingsView: View {
                  ? String(localized: "Anything signed in with this key stops working immediately. If it is the key this app uses, you will have to reconnect.")
                  : String(localized: "Anything signed in with \(key.name) stops working immediately. If it is the key this app uses, you will have to reconnect."))
         }
-        .sheet(item: $issued) { key in
+        .shellSheet(item: $issued) { key in
             NavigationStack { KeySheet(title: String(localized: "New API key"), body: String(localized: "Save this key - it will not be shown again."), key: key.key) }
                 .interactiveDismissDisabled()
         }

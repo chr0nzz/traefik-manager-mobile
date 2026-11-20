@@ -55,6 +55,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -120,7 +121,7 @@ fun CertificatesScreen(
     val palette = LocalTmPalette.current
 
     var pendingRemoval by remember { mutableStateOf<List<CertRow>?>(null) }
-    var filterMenuOpen by remember { mutableStateOf(false) }
+    var filterMenuOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(viewModel.queryState) {
         snapshotFlow { viewModel.queryState.text.toString() }.collect(viewModel::onQueryChange)
@@ -361,7 +362,7 @@ private fun CertificateCard(
 ) {
     val palette = LocalTmPalette.current
     val clipboard = LocalClipboardManager.current
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
     val status = cert.health.asTmStatus()
     val statusColor = when (cert.health) {
         CertHealth.Healthy -> palette.green

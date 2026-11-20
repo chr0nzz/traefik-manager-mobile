@@ -28,7 +28,7 @@ struct CrowdSecView: View {
                         .accessibilityLabel("Refresh CrowdSec")
                 }
             }
-            .sheet(item: $adding) { value in
+            .shellSheet(item: $adding) { value in
                 AddDecisionSheet(initialValue: value, ownDecisions: model.snapshot.decisionList.filter(\.own)) { value, type, duration, reason in
                     try await model.addDecision(value: value, type: type, duration: duration, reason: reason, app: app)
                     message = String(localized: "Decision added for \(value.trimmed)")

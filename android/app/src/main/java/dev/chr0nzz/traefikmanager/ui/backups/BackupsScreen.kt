@@ -48,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +97,7 @@ fun BackupsScreen(
     var restoreTarget by remember { mutableStateOf<BackupEntry?>(null) }
     var deleteTarget by remember { mutableStateOf<BackupEntry?>(null) }
     var restoreCommitTarget by remember { mutableStateOf<GitCommit?>(null) }
-    var pushOpen by remember { mutableStateOf(false) }
+    var pushOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         val message = state.message ?: return@LaunchedEffect
@@ -579,7 +580,7 @@ private fun GitPane(
 
 @Composable
 private fun PushDialog(onDismiss: () -> Unit, onPush: (String) -> Unit) {
-    var message by remember { mutableStateOf("") }
+    var message by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.backups_git_push_title)) },

@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,10 +76,10 @@ fun AddDecisionSheet(
     val palette = LocalTmPalette.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var value by remember { mutableStateOf(initialValue) }
-    var type by remember { mutableStateOf("ban") }
-    var duration by remember { mutableStateOf("24h") }
-    var reason by remember { mutableStateOf("") }
-    var durationOpen by remember { mutableStateOf(false) }
+    var type by rememberSaveable { mutableStateOf("ban") }
+    var duration by rememberSaveable { mutableStateOf("24h") }
+    var reason by rememberSaveable { mutableStateOf("") }
+    var durationOpen by rememberSaveable { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

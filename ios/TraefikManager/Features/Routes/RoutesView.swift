@@ -31,6 +31,7 @@ struct RoutesView: View {
     @State private var protocolFilter: ProtocolFilter = .all
     @State private var statusFilter: StatusFilter = .all
     @State private var message: String?
+    @State private var columns = 1
     @State private var debugRoute: String? = DebugLaunch.route
     @State private var creating = DebugLaunch.form == "new"
     @State private var debugEdit: String? = DebugLaunch.form.flatMap { $0 == "new" ? nil : $0 }
@@ -60,10 +61,10 @@ struct RoutesView: View {
                         .accessibilityLabel("New route")
                 }
             }
-            .sheet(item: $debugEdit) { id in
+            .shellSheet(item: $debugEdit) { id in
                 NavigationStack { RouteFormView(routeId: id) }
             }
-            .sheet(isPresented: $creating) {
+            .shellSheet(isPresented: $creating) {
                 NavigationStack {
                     RouteFormView(routeId: nil) { name in message = String(localized: "\(name) saved") }
                 }
@@ -105,25 +106,38 @@ struct RoutesView: View {
                         .foregroundStyle(Palette.red)
                         .listRowBackground(Color.clear)
                 }
-                ForEach(visible, id: \.listKey) { route in
-                    // Hidden link behind the card so the row has no disclosure chevron.
-                    ZStack {
-                        NavigationLink(value: route.id) { EmptyView() }.opacity(0)
-                        RouteCard(route: route, health: store.health[route.id])
+                if columns > 1 {
+                    CardRows(visible, id: \.listKey, columns: columns) { route in
+                        NavigationLink(value: route.id) { RouteCard(route: route, health: store.health[route.id]) }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                if route.isFileRoute {
+                                    Button(route.enabled ? "Disable" : "Enable") { toggle(route) }
+                                }
+                            }
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
-                    .swipeActions(edge: .leading) {
-                        if route.isFileRoute {
-                            Button(route.enabled ? "Disable" : "Enable") { toggle(route) }
-                                .tint(route.enabled ? Palette.muted : Palette.green)
+                } else {
+                    ForEach(visible, id: \.listKey) { route in
+                        // Hidden link behind the card so the row has no disclosure chevron.
+                        ZStack {
+                            NavigationLink(value: route.id) { EmptyView() }.opacity(0)
+                            RouteCard(route: route, health: store.health[route.id])
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
+                        .swipeActions(edge: .leading) {
+                            if route.isFileRoute {
+                                Button(route.enabled ? "Disable" : "Enable") { toggle(route) }
+                                    .tint(route.enabled ? Palette.muted : Palette.green)
+                            }
                         }
                     }
                 }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .measuringCardColumns($columns)
         }
     }
 
