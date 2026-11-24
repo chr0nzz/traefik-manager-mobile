@@ -97,7 +97,7 @@ struct RoutesView: View {
 
     private var certOfferTitle: String {
         let count = shownOffer?.certs.count ?? 0
-        return count == 1 ? String(localized: "Remove its certificate too?") : String(localized: "Remove its \(count) certificates too?")
+        return String(localized: "Remove its \(count) certificates too?")
     }
 
     private var certOfferMessage: String {
