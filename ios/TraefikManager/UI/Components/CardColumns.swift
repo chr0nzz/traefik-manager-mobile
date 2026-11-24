@@ -23,9 +23,9 @@ extension View {
 /// Cards laid out `columns` to a row inside an existing `List`, so search, pull to refresh and
 /// header rows keep working. Cards in a row share the tallest card's height.
 ///
-/// Rows hold several tappable cards, so cells need their own buttons or links with
-/// `.buttonStyle(.plain)`, and per-card actions belong in a context menu rather than
-/// swipe actions, which would act on the whole row.
+/// Rows hold several tappable cards, so cells need their own buttons with `.buttonStyle(.plain)`.
+/// A `NavigationLink` in a cell fires for every card in the row when the row is tapped.
+/// Per-card actions belong in a context menu rather than swipe actions, which would act on the whole row.
 struct CardRows<Item, ID: Hashable, Cell: View>: View {
     let items: [Item]
     let id: KeyPath<Item, ID>

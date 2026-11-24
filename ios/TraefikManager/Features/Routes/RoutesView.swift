@@ -32,7 +32,7 @@ struct RoutesView: View {
     @State private var statusFilter: StatusFilter = .all
     @State private var message: String?
     @State private var columns = 1
-    @State private var debugRoute: String? = DebugLaunch.route
+    @State private var opened: String? = DebugLaunch.route
     @State private var creating = DebugLaunch.form == "new"
     @State private var debugEdit: String? = DebugLaunch.form.flatMap { $0 == "new" ? nil : $0 }
 
@@ -72,7 +72,7 @@ struct RoutesView: View {
             .navigationDestination(for: Route.ID.self) { id in
                 RouteDetailView(routeId: id, message: $message)
             }
-            .navigationDestination(item: $debugRoute) { id in
+            .navigationDestination(item: $opened) { id in
                 RouteDetailView(routeId: id, message: $message)
             }
             .task(id: app.generation) { await app.refreshRoutes() }
@@ -108,7 +108,7 @@ struct RoutesView: View {
                 }
                 if columns > 1 {
                     CardRows(visible, id: \.listKey, columns: columns) { route in
-                        NavigationLink(value: route.id) { RouteCard(route: route, health: store.health[route.id]) }
+                        Button { opened = route.id } label: { RouteCard(route: route, health: store.health[route.id]) }
                             .buttonStyle(.plain)
                             .contextMenu {
                                 if route.isFileRoute {

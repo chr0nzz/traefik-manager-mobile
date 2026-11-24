@@ -34,7 +34,7 @@ struct ServicesView: View {
     @State private var creating = DebugLaunch.form == "new-svc"
     @State private var message: String?
     @State private var columns = 1
-    @State private var debugDetail: String? = DebugLaunch.route
+    @State private var opened: String? = DebugLaunch.route
 
     private var store: ServicesStore { app.services }
 
@@ -67,7 +67,7 @@ struct ServicesView: View {
             .navigationDestination(for: ServiceRow.ID.self) { key in
                 ServiceDetailView(key: key, message: $message)
             }
-            .navigationDestination(item: $debugDetail) { key in
+            .navigationDestination(item: $opened) { key in
                 ServiceDetailView(key: key, message: $message)
             }
             .shellSheet(isPresented: $creating) {
@@ -119,7 +119,7 @@ struct ServicesView: View {
                 }
                 if columns > 1 {
                     CardRows(visible, id: \.id, columns: columns) { row in
-                        NavigationLink(value: row.id) { ServiceCard(row: row) }.buttonStyle(.plain)
+                        Button { opened = row.id } label: { ServiceCard(row: row) }.buttonStyle(.plain)
                     }
                 } else {
                     ForEach(visible) { row in
