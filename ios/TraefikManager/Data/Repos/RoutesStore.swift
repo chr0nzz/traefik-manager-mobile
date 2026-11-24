@@ -18,6 +18,7 @@ final class RoutesStore {
     private(set) var error: String?
     /// Bumped after any write so dependent screens (dashboard, launcher) reload.
     private(set) var changes = 0
+    var certOffer: CertOffer?
 
     private var generation = 0
 
@@ -29,6 +30,7 @@ final class RoutesStore {
         health = [:]
         error = nil
         loading = false
+        certOffer = nil
     }
 
     func load(service: TMService, cacheKey: String?) async {
@@ -88,13 +90,16 @@ final class RoutesStore {
         changes += 1
     }
 
-    func delete(_ route: Route, service: TMService) async throws {
+    @discardableResult
+    func delete(_ route: Route, service: TMService) async throws -> [CertEntry] {
+        let freed = await CertCleanup.offer(for: route, service: service)
         let result = try await service.deleteRoute(route)
         guard result.worked else {
             throw APIError.server(result.message ?? result.error ?? String(localized: "Could not delete the route"))
         }
         snapshot?.routes.removeAll { $0.id == route.id }
         changes += 1
+        return freed
     }
 
     func saveRaw(routeId: String, content: String, service: TMService) async throws {

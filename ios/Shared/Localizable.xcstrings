@@ -86826,6 +86826,82 @@
         }
       }
     },
+    "Nothing else uses %@ now that %@ is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trasa %2$@ je smazána a %1$@ už nic jiného nepoužívá. Odebrání restartuje Traefik a kopie acme.json se nejprve uloží do záloh."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet andet bruger %1$@, nu hvor %2$@ er væk. Fjernelse genstarter Traefik, og en kopi af acme.json gemmes først i Backupper."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach dem Löschen von %2$@ nutzt nichts anderes mehr %1$@. Das Entfernen startet Traefik neu, vorher wird eine Kopie von acme.json unter Backups gespeichert."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya nada usa %1$@ ahora que %2$@ se ha eliminado. Al quitar se reinicia Traefik, y antes se guarda una copia de seguridad de acme.json en Copias de seguridad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus rien n’utilise %1$@ maintenant que %2$@ n’existe plus. La suppression redémarre Traefik, et une copie de acme.json est d’abord enregistrée dans Sauvegardes."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus rien n’utilise %1$@ maintenant que %2$@ n’existe plus. La suppression redémarre Traefik, et une copie du fichier acme.json est d’abord enregistrée dans Sauvegardes."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ 라우트가 삭제되어 이제 %1$@ 도메인을 사용하는 곳이 없습니다. 제거하면 Traefik을 다시 시작하며, 먼저 acme.json 사본을 백업에 저장합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets anders gebruikt %1$@ nu %2$@ weg is. Verwijderen herstart Traefik, en eerst wordt een kopie van acme.json opgeslagen in Back-ups."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada mais usa %1$@ agora que %2$@ não existe mais. Remover reinicia o Traefik, e uma cópia do acme.json é salva em Backups antes."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada mais usa %1$@ agora que a rota %2$@ foi eliminada. A remoção reinicia o Traefik e o acme.json é primeiro copiado para Cópias de segurança."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Маршрут %2$@ удалён, и больше ничто не использует %1$@. Если убрать, Traefik будет перезапущен, а копия acme.json сначала сохранится в резервных копиях."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ 已删除，现在没有其他对象使用 %1$@。移除会重启 Traefik，并先将 acme.json 的副本保存到备份中。"
+          }
+        }
+      }
+    },
     "nothing here is a completed response": {
       "localizations": {
         "zh-Hans": {
@@ -102932,6 +103008,286 @@
           "stringUnit": {
             "state": "translated",
             "value": "항목 제거"
+          }
+        }
+      }
+    },
+    "Remove its %lld certificates too?": {
+      "localizations": {
+        "cs": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odebrat i její certifikát?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odebrat i její %lld certifikáty?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odebrat i jejích %lld certifikátů?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Odebrat i jejích %lld certifikátů?"
+                }
+              }
+            }
+          }
+        },
+        "da": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern også dens certifikat?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Fjern også dens %lld certifikater?"
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auch das Zertifikat entfernen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Auch die %lld Zertifikate entfernen?"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove its certificate too?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remove its %lld certificates too?"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Quitar también su certificado?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Quitar también sus %lld certificados?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "¿Quitar también sus %lld certificados?"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer aussi %lld certificat associé ?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer aussi les %lld certificats associés ?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer aussi les %lld certificats associés ?"
+                }
+              }
+            }
+          }
+        },
+        "fr-CA": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer aussi %lld certificat associé?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer aussi ses %lld certificats?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Supprimer aussi ses %lld certificats?"
+                }
+              }
+            }
+          }
+        },
+        "ko": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "인증서 %lld개도 제거하시겠습니까?"
+                }
+              }
+            }
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ook het bijbehorende certificaat verwijderen?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Ook de %lld bijbehorende certificaten verwijderen?"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover também %lld certificado dela?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover também os %lld certificados dela?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover também os %lld certificados dela?"
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover também %lld certificado associado?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover também os %lld certificados associados?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Remover também os %lld certificados associados?"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Также убрать его %lld сертификат?"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Также убрать его %lld сертификата?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Также убрать его %lld сертификатов?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Также убрать его %lld сертификатов?"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "同时移除其 %lld 个证书？"
+                }
+              }
+            }
           }
         }
       }

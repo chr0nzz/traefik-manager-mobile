@@ -35,6 +35,7 @@ struct RoutesView: View {
     @State private var opened: String? = DebugLaunch.route
     @State private var creating = DebugLaunch.form == "new"
     @State private var debugEdit: String? = DebugLaunch.form.flatMap { $0 == "new" ? nil : $0 }
+    @State private var offered: CertOffer?
 
     private var store: RoutesStore { app.routes }
 
@@ -77,7 +78,46 @@ struct RoutesView: View {
             }
             .task(id: app.generation) { await app.refreshRoutes() }
             .refreshable { await app.refreshRoutes() }
+            .onChange(of: store.certOffer?.id) { if let offer = store.certOffer { offered = offer } }
+            .typedConfirm(
+                isPresented: certOfferShown,
+                title: certOfferTitle,
+                message: certOfferMessage,
+                actionLabel: String(localized: "Remove"),
+                onConfirm: removeOfferedCerts
+            )
             .toast($message)
+    }
+
+    private var certOfferShown: Binding<Bool> {
+        Binding { store.certOffer != nil } set: { if !$0 { store.certOffer = nil } }
+    }
+
+    private var shownOffer: CertOffer? { store.certOffer ?? offered }
+
+    private var certOfferTitle: String {
+        let count = shownOffer?.certs.count ?? 0
+        return String(localized: "Remove its \(count) certificates too?")
+    }
+
+    private var certOfferMessage: String {
+        guard let offer = shownOffer else { return "" }
+        let names = offer.certs.map(\.main).joined(separator: ", ")
+        return String(localized: "Nothing else uses \(names) now that \(offer.routeName) is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.")
+    }
+
+    private func removeOfferedCerts() {
+        guard let offer = shownOffer, let service = app.service else { return }
+        store.certOffer = nil
+        offered = nil
+        Task {
+            do {
+                let response = try await service.deleteCerts(offer.certs.map { CertRef(resolver: $0.resolver, main: $0.main) })
+                message = response.outcome(asked: offer.certs.count)
+            } catch {
+                message = error.localizedDescription
+            }
+        }
     }
 
     @ViewBuilder
