@@ -302,10 +302,11 @@ struct RouteDetailView: View {
         guard let service = app.service else { return }
         Task {
             do {
-                try await app.routes.delete(route, service: service)
+                let freed = try await app.routes.delete(route, service: service)
                 message = String(localized: "\(route.name) deleted")
                 dismiss()
                 await app.refreshRoutes()
+                if !freed.isEmpty { app.routes.certOffer = CertOffer(routeName: route.name, certs: freed) }
             } catch {
                 message = error.localizedDescription
             }
