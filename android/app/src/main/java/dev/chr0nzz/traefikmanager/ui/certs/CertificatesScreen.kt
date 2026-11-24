@@ -73,6 +73,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.CertHealth
 import dev.chr0nzz.traefikmanager.data.model.CertRow
 import dev.chr0nzz.traefikmanager.data.model.CertVerdict
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.TypedConfirmDialog
@@ -94,7 +96,6 @@ import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
-import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 import androidx.compose.ui.platform.LocalResources
 
 fun CertHealth.asTmStatus(): TmStatus = when (this) {
@@ -253,35 +254,37 @@ fun CertificatesScreen(
                     headline = stringResource(R.string.certs_no_search_match),
                 )
 
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = TmSpacing.lg,
-                        end = TmSpacing.lg,
-                        top = TmSpacing.xs,
-                        bottom = 24.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                ) {
-                    item(key = "verdict") {
-                        VerdictLine(verdict = state.statusVerdict, info = state.statusNote.asString())
-                    }
-                    if (state.visible.isEmpty()) {
-                        item(key = "empty") {
-                            EmptyState(
-                                headline = stringResource(R.string.certs_no_match),
-                                body = stringResource(R.string.common_no_match_body),
+                else -> CardColumns { columns ->
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = TmSpacing.lg,
+                            end = TmSpacing.lg,
+                            top = TmSpacing.xs,
+                            bottom = 24.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                    ) {
+                        item(key = "verdict") {
+                            VerdictLine(verdict = state.statusVerdict, info = state.statusNote.asString())
+                        }
+                        if (state.visible.isEmpty()) {
+                            item(key = "empty") {
+                                EmptyState(
+                                    headline = stringResource(R.string.certs_no_match),
+                                    body = stringResource(R.string.common_no_match_body),
+                                )
+                            }
+                        }
+                        cardRows(state.visible, columns, key = { it.key }) { cert, cardModifier ->
+                            CertificateCard(
+                                cert = cert,
+                                verdict = state.verdict(cert),
+                                removable = state.removable(cert) && !state.removing,
+                                onRemove = { pendingRemoval = listOf(cert) },
+                                modifier = cardModifier,
                             )
                         }
-                    }
-                    distinctItems(state.visible, key = { it.key }) { cert ->
-                        CertificateCard(
-                            cert = cert,
-                            verdict = state.verdict(cert),
-                            removable = state.removable(cert) && !state.removing,
-                            onRemove = { pendingRemoval = listOf(cert) },
-                            modifier = Modifier.animateItem(),
-                        )
                     }
                 }
             }

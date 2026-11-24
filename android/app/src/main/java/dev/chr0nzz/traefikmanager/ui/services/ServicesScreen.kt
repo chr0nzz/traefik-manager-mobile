@@ -51,7 +51,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.ServiceRow
 import dev.chr0nzz.traefikmanager.data.repo.ProviderCount
-import dev.chr0nzz.traefikmanager.ui.components.distinctItems
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
 import dev.chr0nzz.traefikmanager.ui.components.ErrorState
@@ -320,23 +321,25 @@ private fun ServicesListPane(
                     onAction = onClearFilters,
                 )
 
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = TmSpacing.lg,
-                        end = TmSpacing.lg,
-                        top = TmSpacing.xs,
-                        bottom = contentPadding.calculateBottomPadding() + 24.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                ) {
-                    distinctItems(state.visible, key = { it.key }) { service ->
-                        ServiceCard(
-                            service = service,
-                            selected = service.key == selectedKey,
-                            onClick = { onSelect(service) },
-                            modifier = Modifier.animateItem(),
-                        )
+                else -> CardColumns { columns ->
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = TmSpacing.lg,
+                            end = TmSpacing.lg,
+                            top = TmSpacing.xs,
+                            bottom = contentPadding.calculateBottomPadding() + 24.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                    ) {
+                        cardRows(state.visible, columns, key = { it.key }) { service, cardModifier ->
+                            ServiceCard(
+                                service = service,
+                                selected = service.key == selectedKey,
+                                onClick = { onSelect(service) },
+                                modifier = cardModifier,
+                            )
+                        }
                     }
                 }
             }

@@ -72,6 +72,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.MiddlewareDef
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.distinctItems
@@ -310,24 +312,26 @@ private fun MiddlewareListPane(
                         stringResource(R.string.common_no_match_body)
                     },
                 )
-                else -> LazyColumn(
-                    contentPadding = PaddingValues(
-                        start = TmSpacing.lg,
-                        end = TmSpacing.lg,
-                        top = TmSpacing.xs,
-                        bottom = contentPadding.calculateBottomPadding() + 88.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    distinctItems(state.visible, key = { "${it.type}:${it.name}:${it.configFile}" }) { middleware ->
-                        MiddlewareCard(
-                            middleware = middleware,
-                            usageCount = state.usageFor(middleware.name),
-                            selected = middleware.name == selectedName,
-                            onClick = { onSelect(middleware) },
-                            modifier = Modifier.animateItem(),
-                        )
+                else -> CardColumns { columns ->
+                    LazyColumn(
+                        contentPadding = PaddingValues(
+                            start = TmSpacing.lg,
+                            end = TmSpacing.lg,
+                            top = TmSpacing.xs,
+                            bottom = contentPadding.calculateBottomPadding() + 88.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        cardRows(state.visible, columns, key = { "${it.type}:${it.name}:${it.configFile}" }) { middleware, cardModifier ->
+                            MiddlewareCard(
+                                middleware = middleware,
+                                usageCount = state.usageFor(middleware.name),
+                                selected = middleware.name == selectedName,
+                                onClick = { onSelect(middleware) },
+                                modifier = cardModifier,
+                            )
+                        }
                     }
                 }
             }
