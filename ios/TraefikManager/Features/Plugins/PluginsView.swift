@@ -20,7 +20,7 @@ struct PluginsView: View {
     @State private var restarting = false
     @State private var message: String?
     @State private var columns = 1
-    @State private var debugDetail: String? = DebugLaunch.route
+    @State private var opened: String? = DebugLaunch.route
 
     private var visible: [PluginEntry] {
         let needle = query.trimmed.lowercased()
@@ -60,7 +60,7 @@ struct PluginsView: View {
             .navigationDestination(for: PluginEntry.self) { plugin in
                 PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: users(plugin.name))
             }
-            .navigationDestination(item: $debugDetail) { name in
+            .navigationDestination(item: $opened) { name in
                 if let plugin = plugins.first(where: { $0.name == name }) {
                     PluginDetailView(plugin: plugin, latest: updates[plugin.name], users: users(plugin.name))
                 }
@@ -144,7 +144,7 @@ struct PluginsView: View {
 
                 if columns > 1 {
                     CardRows(visible, id: \.id, columns: columns) { plugin in
-                        NavigationLink(value: plugin) { pluginCard(plugin) }.buttonStyle(.plain)
+                        Button { opened = plugin.name } label: { pluginCard(plugin) }.buttonStyle(.plain)
                     }
                 }
             }
