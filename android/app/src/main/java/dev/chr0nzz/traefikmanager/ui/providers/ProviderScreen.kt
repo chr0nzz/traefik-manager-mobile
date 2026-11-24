@@ -47,6 +47,8 @@ import dev.chr0nzz.traefikmanager.data.model.ProviderPage
 import dev.chr0nzz.traefikmanager.data.model.ProviderProtocol
 import dev.chr0nzz.traefikmanager.data.model.ProviderRoute
 import dev.chr0nzz.traefikmanager.data.repo.Verdict
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
 import dev.chr0nzz.traefikmanager.ui.components.VerdictLine
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -64,7 +66,6 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
-import dev.chr0nzz.traefikmanager.ui.components.distinctItems
 
 fun ProviderRoute.tmStatus(): TmStatus = when (status.lowercase()) {
     "enabled" -> TmStatus.Ok
@@ -151,41 +152,43 @@ fun ProviderScreen(
                     headline = stringResource(R.string.providers_empty, page.label.asString()),
                     body = stringResource(page.empty),
                 )
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = TmSpacing.lg,
-                        end = TmSpacing.lg,
-                        top = TmSpacing.xs,
-                        bottom = 24.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                ) {
-                    item { VerdictCard(state = state) }
-                    if (state.visible.isEmpty() && state.routes.isNotEmpty()) {
-                        item(key = "empty") {
-                            EmptyState(
-                                headline = stringResource(R.string.providers_no_match),
-                                body = stringResource(R.string.common_no_match_body),
+                else -> CardColumns { columns ->
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = TmSpacing.lg,
+                            end = TmSpacing.lg,
+                            top = TmSpacing.xs,
+                            bottom = 24.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                    ) {
+                        item { VerdictCard(state = state) }
+                        if (state.visible.isEmpty() && state.routes.isNotEmpty()) {
+                            item(key = "empty") {
+                                EmptyState(
+                                    headline = stringResource(R.string.providers_no_match),
+                                    body = stringResource(R.string.common_no_match_body),
+                                )
+                            }
+                        }
+                        cardRows(state.visible, columns, key = { "${it.protocol}:${it.name}" }) { route, cardModifier ->
+                            ProviderRouteCard(
+                                route = route,
+                                onClick = { viewModel.select(route) },
+                                modifier = cardModifier,
                             )
                         }
-                    }
-                    distinctItems(state.visible, key = { "${it.protocol}:${it.name}" }) { route ->
-                        ProviderRouteCard(
-                            route = route,
-                            onClick = { viewModel.select(route) },
-                            modifier = Modifier.animateItem(),
-                        )
-                    }
-                    if (state.middlewares.isNotEmpty()) {
-                        item {
-                            SectionLabel(
-                                stringResource(R.string.providers_middlewares_title, state.middlewares.size),
-                                modifier = Modifier.padding(top = TmSpacing.sm),
-                            )
-                        }
-                        distinctItems(state.middlewares, key = { "mw:${it.name}" }) { middleware ->
-                            ProviderMiddlewareCard(middleware = middleware)
+                        if (state.middlewares.isNotEmpty()) {
+                            item {
+                                SectionLabel(
+                                    stringResource(R.string.providers_middlewares_title, state.middlewares.size),
+                                    modifier = Modifier.padding(top = TmSpacing.sm),
+                                )
+                            }
+                            cardRows(state.middlewares, columns, key = { "mw:${it.name}" }) { middleware, cardModifier ->
+                                ProviderMiddlewareCard(middleware = middleware, modifier = cardModifier)
+                            }
                         }
                     }
                 }
@@ -276,9 +279,9 @@ private fun ProviderRouteCard(route: ProviderRoute, onClick: () -> Unit, modifie
 }
 
 @Composable
-private fun ProviderMiddlewareCard(middleware: ProviderMiddleware) {
+private fun ProviderMiddlewareCard(middleware: ProviderMiddleware, modifier: Modifier = Modifier) {
     val palette = LocalTmPalette.current
-    TmCard(accentColor = palette.purple) {
+    TmCard(modifier = modifier, accentColor = palette.purple) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm),

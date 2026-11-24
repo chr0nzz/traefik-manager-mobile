@@ -51,7 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.Route
-import dev.chr0nzz.traefikmanager.ui.components.distinctItems
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
 import dev.chr0nzz.traefikmanager.ui.components.tmPaneScaffoldDirective
 import dev.chr0nzz.traefikmanager.ui.components.ConfirmDeleteDialog
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -285,45 +286,47 @@ private fun RoutesListPane(
                     body = state.error?.asString(),
                     onRetry = onRefresh,
                 )
-                else -> LazyColumn(
-                    contentPadding = PaddingValues(
-                        start = TmSpacing.lg,
-                        end = TmSpacing.lg,
-                        top = TmSpacing.xs,
-                        bottom = contentPadding.calculateBottomPadding() + 88.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    if (state.visible.isEmpty()) {
-                        item(key = "empty") {
-                            EmptyState(
-                                headline = stringResource(if (state.routes.isEmpty()) R.string.routemap_empty else R.string.providers_no_match),
-                                body = if (state.routes.isEmpty()) {
-                                    stringResource(R.string.routes_empty_body)
-                                } else {
-                                    stringResource(R.string.common_no_match_body)
-                                },
-                            )
-                        }
-                    } else {
-                        distinctItems(state.visible, key = { "${it.protocol}:${it.id}" }) { route ->
-                            RouteCard(
-                                route = route,
-                                selected = route.id == selectedId,
-                                onClick = { onSelect(route) },
-                                iconUrl = if (state.icons.enabled) {
-                                    dev.chr0nzz.traefikmanager.data.model.RouteIcons.urlFor(
-                                        route = route,
-                                        config = state.icons.config,
-                                        baseUrl = state.icons.baseUrl,
-                                    )
-                                } else {
-                                    null
-                                },
-                                health = state.health[route.id],
-                                modifier = Modifier.animateItem(),
-                            )
+                else -> CardColumns { columns ->
+                    LazyColumn(
+                        contentPadding = PaddingValues(
+                            start = TmSpacing.lg,
+                            end = TmSpacing.lg,
+                            top = TmSpacing.xs,
+                            bottom = contentPadding.calculateBottomPadding() + 88.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (state.visible.isEmpty()) {
+                            item(key = "empty") {
+                                EmptyState(
+                                    headline = stringResource(if (state.routes.isEmpty()) R.string.routemap_empty else R.string.providers_no_match),
+                                    body = if (state.routes.isEmpty()) {
+                                        stringResource(R.string.routes_empty_body)
+                                    } else {
+                                        stringResource(R.string.common_no_match_body)
+                                    },
+                                )
+                            }
+                        } else {
+                            cardRows(state.visible, columns, key = { "${it.protocol}:${it.id}" }) { route, cardModifier ->
+                                RouteCard(
+                                    route = route,
+                                    selected = route.id == selectedId,
+                                    onClick = { onSelect(route) },
+                                    iconUrl = if (state.icons.enabled) {
+                                        dev.chr0nzz.traefikmanager.data.model.RouteIcons.urlFor(
+                                            route = route,
+                                            config = state.icons.config,
+                                            baseUrl = state.icons.baseUrl,
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                    health = state.health[route.id],
+                                    modifier = cardModifier,
+                                )
+                            }
                         }
                     }
                 }

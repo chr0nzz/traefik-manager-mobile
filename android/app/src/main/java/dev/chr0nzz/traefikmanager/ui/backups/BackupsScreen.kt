@@ -61,6 +61,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chr0nzz.traefikmanager.data.model.BackupEntry
 import dev.chr0nzz.traefikmanager.data.model.BackupKind
 import dev.chr0nzz.traefikmanager.data.model.GitCommit
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.CardDivider
 import dev.chr0nzz.traefikmanager.ui.components.EmptyState
@@ -78,7 +80,6 @@ import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
-import dev.chr0nzz.traefikmanager.ui.components.distinctKeys
 import androidx.compose.ui.platform.LocalResources
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -330,131 +331,131 @@ private fun LocalPane(
         return
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = TmSpacing.lg,
-            end = TmSpacing.lg,
-            top = TmSpacing.xs,
-            bottom = 24.dp,
-        ),
-        verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-    ) {
-        item {
-            TmCard {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (rows.isEmpty()) {
-                                stringResource(R.string.backups_none)
-                            } else {
-                                pluralStringResource(R.plurals.backups_kept, rows.size, rows.size)
-                            },
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = listOfNotNull(
-                                formatSize(rows.sumOf { it.size }),
-                                rows.firstOrNull()?.let { stringResource(R.string.backups_newest, it.stamp) },
-                            ).joinToString(UiText.SEPARATOR),
-                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
-                            color = palette.muted,
-                        )
-                    }
-                    if (!certs && (!static || state.onHost)) {
-                        Button(onClick = onCreate, enabled = !state.busy) {
-                            Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Text(stringResource(R.string.backups_create), modifier = Modifier.padding(start = TmSpacing.xs))
+    CardColumns { columns ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = TmSpacing.lg,
+                end = TmSpacing.lg,
+                top = TmSpacing.xs,
+                bottom = 24.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+        ) {
+            item {
+                TmCard {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (rows.isEmpty()) {
+                                    stringResource(R.string.backups_none)
+                                } else {
+                                    pluralStringResource(R.plurals.backups_kept, rows.size, rows.size)
+                                },
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = listOfNotNull(
+                                    formatSize(rows.sumOf { it.size }),
+                                    rows.firstOrNull()?.let { stringResource(R.string.backups_newest, it.stamp) },
+                                ).joinToString(UiText.SEPARATOR),
+                                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                                color = palette.muted,
+                            )
+                        }
+                        if (!certs && (!static || state.onHost)) {
+                            Button(onClick = onCreate, enabled = !state.busy) {
+                                Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Text(stringResource(R.string.backups_create), modifier = Modifier.padding(start = TmSpacing.xs))
+                            }
                         }
                     }
-                }
-                if (certs) {
-                    Text(
-                        text = stringResource(R.string.backups_certs_help),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.muted,
-                        modifier = Modifier.padding(top = TmSpacing.xs),
-                    )
-                }
-                if (static && !state.onHost) {
-                    Text(
-                        text = stringResource(R.string.backups_static_agent_help),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.muted,
-                        modifier = Modifier.padding(top = TmSpacing.xs),
-                    )
-                }
-                if (!state.kindKnown) {
-                    Text(
-                        text = stringResource(R.string.backups_old_agent_help),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = palette.yellow,
-                        modifier = Modifier.padding(top = TmSpacing.xs),
-                    )
-                }
-            }
-        }
-
-        if (rows.isEmpty()) {
-            item {
-                EmptyState(
-                    headline = stringResource(
-                        when {
-                            static -> R.string.backups_empty_static
-                            certs -> R.string.backups_empty_certs
-                            else -> R.string.backups_empty
-                        },
-                    ),
-                    body = stringResource(
-                        when {
-                            static -> R.string.backups_empty_static_body
-                            certs -> R.string.backups_empty_certs_body
-                            else -> R.string.backups_empty_body
-                        },
-                    ),
-                )
-            }
-            return@LazyColumn
-        }
-
-        item {
-            SectionLabel(
-                stringResource(
-                    when {
-                        static -> R.string.backups_section_static
-                        certs -> R.string.backups_section_certs
-                        else -> R.string.backups_section_dynamic
-                    },
-                ),
-            )
-        }
-
-        val rowKeys = distinctKeys(rows) { it.name }
-        items(rows.size, key = { rowKeys[it] }) { index ->
-            val entry = rows[index]
-            TmCard {
-                Text(
-                    text = entry.name,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontFamily = MonoFamily),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = listOf(entry.stamp, formatSize(entry.size)).joinToString(UiText.SEPARATOR),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.muted,
-                )
-                CardDivider(modifier = Modifier.padding(vertical = TmSpacing.xs))
-                Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
-                    OutlinedButton(onClick = { onRestore(entry) }, enabled = !state.busy) {
-                        Icon(Icons.Outlined.Restore, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text(stringResource(R.string.common_restore), modifier = Modifier.padding(start = TmSpacing.xs))
+                    if (certs) {
+                        Text(
+                            text = stringResource(R.string.backups_certs_help),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted,
+                            modifier = Modifier.padding(top = TmSpacing.xs),
+                        )
                     }
-                    TextButton(onClick = { onDelete(entry) }, enabled = !state.busy) {
-                        Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Text(stringResource(R.string.common_delete), modifier = Modifier.padding(start = TmSpacing.xs))
+                    if (static && !state.onHost) {
+                        Text(
+                            text = stringResource(R.string.backups_static_agent_help),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.muted,
+                            modifier = Modifier.padding(top = TmSpacing.xs),
+                        )
+                    }
+                    if (!state.kindKnown) {
+                        Text(
+                            text = stringResource(R.string.backups_old_agent_help),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.yellow,
+                            modifier = Modifier.padding(top = TmSpacing.xs),
+                        )
+                    }
+                }
+            }
+
+            if (rows.isEmpty()) {
+                item {
+                    EmptyState(
+                        headline = stringResource(
+                            when {
+                                static -> R.string.backups_empty_static
+                                certs -> R.string.backups_empty_certs
+                                else -> R.string.backups_empty
+                            },
+                        ),
+                        body = stringResource(
+                            when {
+                                static -> R.string.backups_empty_static_body
+                                certs -> R.string.backups_empty_certs_body
+                                else -> R.string.backups_empty_body
+                            },
+                        ),
+                    )
+                }
+                return@LazyColumn
+            }
+
+            item {
+                SectionLabel(
+                    stringResource(
+                        when {
+                            static -> R.string.backups_section_static
+                            certs -> R.string.backups_section_certs
+                            else -> R.string.backups_section_dynamic
+                        },
+                    ),
+                )
+            }
+
+            cardRows(rows, columns, key = { it.name }) { entry, cardModifier ->
+                TmCard(modifier = cardModifier) {
+                    Text(
+                        text = entry.name,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = MonoFamily),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = listOf(entry.stamp, formatSize(entry.size)).joinToString(UiText.SEPARATOR),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = palette.muted,
+                    )
+                    CardDivider(modifier = Modifier.padding(vertical = TmSpacing.xs))
+                    Row(horizontalArrangement = Arrangement.spacedBy(TmSpacing.sm)) {
+                        OutlinedButton(onClick = { onRestore(entry) }, enabled = !state.busy) {
+                            Icon(Icons.Outlined.Restore, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Text(stringResource(R.string.common_restore), modifier = Modifier.padding(start = TmSpacing.xs))
+                        }
+                        TextButton(onClick = { onDelete(entry) }, enabled = !state.busy) {
+                            Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Text(stringResource(R.string.common_delete), modifier = Modifier.padding(start = TmSpacing.xs))
+                        }
                     }
                 }
             }
