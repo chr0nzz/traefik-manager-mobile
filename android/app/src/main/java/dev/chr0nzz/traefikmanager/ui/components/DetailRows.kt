@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
@@ -80,7 +81,7 @@ fun ValueRow(
         if (extra != null) {
             Text(
                 text = extra,
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily, textDirection = TextDirection.Ltr),
                 color = palette.muted,
             )
         }
