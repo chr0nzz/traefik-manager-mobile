@@ -2190,4 +2190,12 @@
     <string name="push_channel_description">رویدادهایی که Traefik Manager شما ارسال می‌کند</string>
     <string name="push_distributor_message">رویدادهای Traefik Manager</string>
     <string name="push_error_old_server">این سرور قدیمی‌تر از 1.12.0 است، پس کانالی برای ارسال push ندارد.</string>
+    <string name="routes_server_name">نام سرور بک‌اند</string>
+    <string name="routes_form_server_name_help">نامی که Traefik به‌عنوان SNI می‌فرستد و گواهی بک‌اند را با آن بررسی می‌کند. وقتی بک‌اند گواهی خود را برای نامی غیر از آدرس مقصد ارائه می‌دهد از آن استفاده کنید.</string>
+    <string name="middlewares_other_providers">سایر ارائه‌دهنده‌ها</string>
+    <string name="advisory_body">Traefik v%1$s شما تحت تأثیر %2$s (%3$s) است - %4$s.</string>
+    <string name="advisory_update_either">Traefik را به %1$s یا %2$s به‌روزرسانی کنید.</string>
+    <string name="advisory_severity_critical">بحرانی</string>
+    <string name="advisory_severity_high">بالا</string>
+    <string name="advisory_severity_moderate">متوسط</string>
 </resources>
