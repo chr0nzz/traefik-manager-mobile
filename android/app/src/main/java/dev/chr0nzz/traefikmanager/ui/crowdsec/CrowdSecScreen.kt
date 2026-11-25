@@ -1322,7 +1322,7 @@ private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
         Text(
             text = listOfNotNull(
                 if (state.alertsOk) {
-                    pluralStringResource(R.plurals.crowdsec_retained_alerts, state.alerts.size, state.alerts.size.toString())
+                    pluralStringResource(R.plurals.crowdsec_retained_alerts, state.alerts.size, state.alerts.size.fmt())
                 } else {
                     pluralStringResource(R.plurals.crowdsec_retained_alerts, 0, UNKNOWN)
                 },

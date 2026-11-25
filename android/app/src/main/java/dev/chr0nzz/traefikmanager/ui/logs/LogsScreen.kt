@@ -288,7 +288,7 @@ private fun LogsListPane(
                                 onClick = { viewModel.setLineCount(step) },
                                 shape = SegmentedButtonDefaults.itemShape(index, LOG_LINE_STEPS.size),
                             ) {
-                                Text(step.toString())
+                                Text(step.fmt())
                             }
                         }
                     }
