@@ -97,6 +97,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -405,7 +406,7 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
                         val name = LogParser.statusName(code)?.asString()?.lowercase()
                             ?: stringResource(R.string.logs_status_fallback)
                         VerdictItem(
-                            text = "$count $code $name",
+                            text = "${count.fmt()} $code $name",
                             color = if (code >= 500) palette.red else palette.yellow,
                             onClick = { onFacet(LogFacet.Status, code.toString()) },
                         )

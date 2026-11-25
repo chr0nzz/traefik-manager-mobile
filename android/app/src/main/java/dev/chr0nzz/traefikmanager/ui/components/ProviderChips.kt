@@ -35,6 +35,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 fun providerIcon(name: String): ImageVector = when {
     name.startsWith("docker") || name.startsWith("swarm") -> Icons.Outlined.Inventory2
@@ -91,7 +92,7 @@ fun ProviderRow(
                     color = if (active) palette.blue else palette.muted,
                 )
                 Text(
-                    text = provider.count.toString(),
+                    text = provider.count.fmt(),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontFamily = MonoFamily,
                         fontWeight = FontWeight.Bold,

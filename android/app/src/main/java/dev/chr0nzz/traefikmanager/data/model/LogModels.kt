@@ -1,5 +1,6 @@
 package dev.chr0nzz.traefikmanager.data.model
 
+import java.text.DecimalFormatSymbols
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -254,9 +255,9 @@ object LogParser {
     fun formatDuration(nanos: Long): String = when {
         nanos <= 0L -> ""
         nanos >= 1_000_000_000L -> String.format(formatLocale, "%.2fs", nanos / 1e9)
-        nanos >= 1_000_000L -> "${(nanos / 1e6).roundToLong()}ms"
-        nanos >= 1_000L -> "${(nanos / 1e3).roundToLong()}µs"
-        else -> "${nanos}ns"
+        nanos >= 1_000_000L -> String.format(formatLocale, "%dms", (nanos / 1e6).roundToLong())
+        nanos >= 1_000L -> String.format(formatLocale, "%dµs", (nanos / 1e3).roundToLong())
+        else -> String.format(formatLocale, "%dns", nanos)
     }
 
     fun parseTimestamp(date: String): Long? {
@@ -357,9 +358,9 @@ object LogParser {
 
     fun formatMs(value: Double?): String = when {
         value == null -> "-"
-        value >= 10_000 -> "${(value / 1000).roundToInt()}s"
+        value >= 10_000 -> String.format(formatLocale, "%ds", (value / 1000).roundToInt())
         value >= 1000 -> String.format(formatLocale, "%.2fs", value / 1000)
-        value >= 1 -> "${value.roundToInt()}ms"
+        value >= 1 -> String.format(formatLocale, "%dms", value.roundToInt())
         value > 0 -> "${trimZeros(String.format(formatLocale, "%.2f", value))}ms"
         else -> "0ms"
     }
@@ -367,7 +368,7 @@ object LogParser {
     fun heroMs(value: Double?): Pair<String, String> = when {
         value == null -> "-" to ""
         value >= 1000 -> String.format(formatLocale, "%.1f", value / 1000) to "s"
-        value >= 1 -> value.roundToInt().toString() to "ms"
+        value >= 1 -> String.format(formatLocale, "%d", value.roundToInt()) to "ms"
         else -> (trimZeros(String.format(formatLocale, "%.2f", value)).ifEmpty { "0" }) to "ms"
     }
 
@@ -381,6 +382,10 @@ object LogParser {
         }
     }
 
-    private fun trimZeros(value: String): String =
-        value.trimEnd('0').trimEnd('.', ',').ifEmpty { "0" }
+    private fun trimZeros(value: String): String {
+        val symbols = DecimalFormatSymbols.getInstance(formatLocale)
+        return value.trimEnd(symbols.zeroDigit).trimEnd(symbols.decimalSeparator, '.', ',').ifEmpty { symbols.zeroDigit.toString() }
+    }
 }
+
+fun Int.fmt(): String = LogParser.formatCount(this)

@@ -72,6 +72,7 @@ import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.YamlEditor
+import dev.chr0nzz.traefikmanager.ui.theme.CodeFamily
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
@@ -401,7 +402,7 @@ private fun WizardFieldEditor(
             },
             minLines = 3,
             maxLines = 8,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = MonoFamily),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = CodeFamily),
             keyboardOptions = KeyboardOptions(showKeyboardOnFocus = false),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -639,7 +640,7 @@ private fun TemplatePickerSheet(
                         supportingContent = {
                             Text(
                                 text = template.yaml.lineSequence().firstOrNull().orEmpty(),
-                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
+                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = CodeFamily),
                                 color = palette.muted,
                             )
                         },

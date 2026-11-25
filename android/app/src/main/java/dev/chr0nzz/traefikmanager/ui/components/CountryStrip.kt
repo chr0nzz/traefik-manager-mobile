@@ -22,6 +22,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @Composable
 fun CountryStrip(
@@ -75,7 +76,7 @@ fun CountryStrip(
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = country.count.toString(),
+                    text = country.count.fmt(),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontFamily = MonoFamily,
                         fontWeight = FontWeight.Bold,
@@ -83,7 +84,7 @@ fun CountryStrip(
                     color = palette.muted,
                 )
                 Text(
-                    text = "${country.count * 100 / total}%",
+                    text = "${(country.count * 100 / total).fmt()}%",
                     style = MaterialTheme.typography.labelSmall,
                     color = palette.muted,
                 )

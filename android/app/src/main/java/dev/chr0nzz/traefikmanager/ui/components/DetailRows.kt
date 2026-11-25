@@ -72,7 +72,7 @@ fun ValueRow(
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily, textDirection = TextDirection.ContentOrLtr),
             color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

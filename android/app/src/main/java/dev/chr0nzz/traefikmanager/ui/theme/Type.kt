@@ -1,10 +1,13 @@
 package dev.chr0nzz.traefikmanager.ui.theme
 
+import android.text.TextUtils
+import android.view.View
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import dev.chr0nzz.traefikmanager.R
+import java.util.Locale
 
 val InterFamily = FontFamily(
     Font(R.font.inter_variable, FontWeight.Normal),
@@ -13,11 +16,14 @@ val InterFamily = FontFamily(
     Font(R.font.inter_variable, FontWeight.Bold),
 )
 
-val MonoFamily = FontFamily(
+val CodeFamily = FontFamily(
     Font(R.font.jetbrains_mono_variable, FontWeight.Normal),
     Font(R.font.jetbrains_mono_variable, FontWeight.Medium),
     Font(R.font.jetbrains_mono_variable, FontWeight.SemiBold),
 )
+
+val MonoFamily: FontFamily
+    get() = if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault()) == View.LAYOUT_DIRECTION_RTL) InterFamily else CodeFamily
 
 private val base = Typography()
 

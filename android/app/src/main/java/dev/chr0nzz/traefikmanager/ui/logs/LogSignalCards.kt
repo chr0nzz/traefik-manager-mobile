@@ -63,6 +63,7 @@ import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @Composable
 fun LogSignalCards(
@@ -264,7 +265,7 @@ fun LogSignalCards(
                 title = stringResource(R.string.logs_card_methods),
                 glyph = Icons.Outlined.SwapHoriz,
                 accent = palette.orange,
-                hero = window.methods.size.toString(),
+                hero = window.methods.size.fmt(),
                 flags = {
                     if (writes.isNotEmpty()) {
                         val risky = writes.any { it.key == "DELETE" || it.key == "PUT" }
@@ -295,7 +296,7 @@ fun LogSignalCards(
                 title = stringResource(R.string.logs_card_domains),
                 glyph = Icons.Outlined.Language,
                 accent = palette.purple,
-                hero = if (window.domains.isEmpty()) "-" else window.domains.size.toString(),
+                hero = if (window.domains.isEmpty()) "-" else window.domains.size.fmt(),
                 flags = {
                     val failing = window.domains.count { it.errors > 0 }
                     if (failing > 0) {
@@ -325,7 +326,7 @@ fun LogSignalCards(
             title = stringResource(R.string.logs_card_paths),
             glyph = Icons.Outlined.Route,
             accent = palette.teal,
-            hero = window.paths.size.toString(),
+            hero = window.paths.size.fmt(),
             flags = {
                 val failing = window.paths.count { it.errors > 0 }
                 if (failing > 0) {
@@ -345,7 +346,7 @@ fun LogSignalCards(
                     val extra = window.paths.count { it.errors > 0 } - 1
                     listOfNotNull(
                         pluralStringResource(R.plurals.logs_top_requests, top.count, top.key, LogParser.formatCount(top.count)),
-                        top.worstCode?.let { "${top.worstCount} x $it" },
+                        top.worstCode?.let { "${top.worstCount.fmt()} x $it" },
                         if (extra > 0) stringResource(R.string.logs_more_failing, extra) else null,
                     ).joinToString(", ")
                 }
@@ -362,7 +363,7 @@ fun LogSignalCards(
                 title = stringResource(R.string.logs_card_clients),
                 glyph = Icons.Outlined.People,
                 accent = palette.blue,
-                hero = window.clients.size.toString(),
+                hero = window.clients.size.fmt(),
                 flags = {
                     val failing = window.clients.count { it.errors > 0 }
                     if (failing > 0) {
@@ -415,7 +416,7 @@ fun LogSignalCards(
                 title = stringResource(R.string.common_label_services),
                 glyph = Icons.Outlined.Dns,
                 accent = palette.green,
-                hero = if (window.services.isEmpty()) "-" else window.services.size.toString(),
+                hero = if (window.services.isEmpty()) "-" else window.services.size.fmt(),
                 flags = {
                     val failing = window.services.count { it.errors > 0 }
                     if (failing > 0) {

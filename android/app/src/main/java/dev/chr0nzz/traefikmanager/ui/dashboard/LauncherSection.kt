@@ -52,6 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 enum class LauncherDensity { List, Icons }
 
@@ -138,7 +139,7 @@ private fun GroupCard(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = group.apps.size.toString(),
+                text = group.apps.size.fmt(),
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = palette.muted,
             )

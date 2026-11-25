@@ -36,6 +36,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmRadius
 import dev.chr0nzz.traefikmanager.ui.theme.TmSize
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @Composable
 fun TmCard(
@@ -126,7 +127,7 @@ fun MonoText(
 ) {
     val palette = LocalTmPalette.current
     Text(
-        text = text,
+        text = rtlIsolated(text),
         style = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
         color = palette.muted,
         maxLines = maxLines,
@@ -172,7 +173,7 @@ fun CountChip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = count.toString(),
+            text = count.fmt(),
             style = MaterialTheme.typography.labelMedium.copy(fontFamily = MonoFamily),
             color = color,
         )
