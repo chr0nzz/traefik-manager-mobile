@@ -408,7 +408,7 @@ private struct TrafficFlow: View {
     }
 
     private var arrow: some View {
-        Image(systemName: "arrow.right")
+        Image(systemName: "arrow.forward")
             .font(.system(size: 11))
             .foregroundStyle(Palette.muted)
     }

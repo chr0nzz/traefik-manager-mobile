@@ -352,7 +352,7 @@ private struct SummaryCard: View {
                 HStack {
                     Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
                     Spacer()
-                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(Palette.muted)
+                    Image(systemName: "chevron.forward").font(.caption).foregroundStyle(Palette.muted)
                 }
                 Text(summary).font(.caption.monospaced()).foregroundStyle(warn ? Palette.yellow : Palette.muted)
             }

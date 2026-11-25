@@ -216,6 +216,7 @@ private struct ProviderRouteCard: View {
     private func row(_ icon: String, _ value: String, _ color: Color, extra: String? = nil) -> some View {
         HStack(spacing: Spacing.xs) {
             Image(systemName: icon).font(.system(size: 11)).foregroundStyle(Palette.muted)
+                .flipsForRightToLeftLayoutDirection(icon == "arrow.turn.down.right")
             Text(value).font(.caption.monospaced()).foregroundStyle(color).lineLimit(1)
             if let extra { Text(extra).font(.caption2.monospaced()).foregroundStyle(Palette.muted) }
         }
