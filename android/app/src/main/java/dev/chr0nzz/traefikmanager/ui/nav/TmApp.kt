@@ -105,6 +105,7 @@ import androidx.compose.material.icons.automirrored.outlined.MenuOpen
 import dev.chr0nzz.traefikmanager.ui.components.ProvideContentWidth
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.style.TextOverflow
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 private const val ROUTE_FORM = "route_form"
 private const val ROUTE_RAW = "route_raw"
@@ -586,7 +587,7 @@ private fun NavMenu(
     }
 }
 
-private fun badgeLabel(value: Int): String = if (value > 999) "999+" else value.toString()
+private fun badgeLabel(value: Int): String = if (value > 999) "${999.fmt()}+" else value.fmt()
 
 private fun drawerBadge(badge: NavBadge): (@Composable () -> Unit)? = when {
     badge.alerts > 0 -> {

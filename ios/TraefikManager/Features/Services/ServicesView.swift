@@ -229,7 +229,7 @@ struct ServiceCard: View {
                     .lineLimit(2)
             } else if let first = row.servers.first {
                 HStack(spacing: Spacing.xs) {
-                    Image(systemName: "arrow.turn.down.right").font(.system(size: 11)).foregroundStyle(Palette.muted)
+                    Image(systemName: "arrow.turn.down.right").font(.system(size: 11)).foregroundStyle(Palette.muted).flipsForRightToLeftLayoutDirection(true)
                     Text(first.target).font(.caption.monospaced()).foregroundStyle(Palette.green).lineLimit(1)
                     if row.servers.count > 1 {
                         Text(verbatim: "+\(row.servers.count - 1)").font(.caption2.monospaced()).foregroundStyle(Palette.muted)

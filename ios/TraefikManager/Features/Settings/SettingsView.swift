@@ -93,7 +93,7 @@ struct SettingsView: View {
             Section {
                 Button(role: .destructive) { confirmDisconnect = true } label: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Label("Disconnect", systemImage: "rectangle.portrait.and.arrow.right")
+                        Label("Disconnect", systemImage: "rectangle.portrait.and.arrow.forward")
                         Text("Forget this server and its API key on this device")
                             .font(.caption)
                             .foregroundStyle(Palette.muted)

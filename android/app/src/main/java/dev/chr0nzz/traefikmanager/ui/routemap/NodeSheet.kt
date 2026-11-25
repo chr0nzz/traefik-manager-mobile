@@ -31,6 +31,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,12 +125,12 @@ fun NodeSheet(
                         )
                     }
                     MapNodeKind.EntryPoint -> {
-                        DetailRow(stringResource(R.string.common_label_routers), serves.size.toString())
+                        DetailRow(stringResource(R.string.common_label_routers), serves.size.fmt())
                         DetailRow(stringResource(R.string.common_label_routes), routes.toString(), last = true)
                     }
                     MapNodeKind.Group -> {
                         DetailRow(stringResource(R.string.common_label_provider), node.label)
-                        DetailRow(stringResource(R.string.common_label_routes), node.members.size.toString())
+                        DetailRow(stringResource(R.string.common_label_routes), node.members.size.fmt())
                         DetailRow(
                             label = stringResource(R.string.common_label_services),
                             value = serves.joinToString(", ") { it.label }.ifEmpty { none },

@@ -9,6 +9,7 @@ import dev.chr0nzz.traefikmanager.data.model.TraefikObject
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.R
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 enum class ObjectState { Err, Warn, Idle, Ok }
 
@@ -163,8 +164,8 @@ object DashboardBuilder {
                 okSub = {
                     UiText.join(
                         buildList {
-                            if (tcpRouters.isNotEmpty()) add(UiText.Raw("TCP ${tcpRouters.size}"))
-                            if (udpRouters.isNotEmpty()) add(UiText.Raw("UDP ${udpRouters.size}"))
+                            if (tcpRouters.isNotEmpty()) add(UiText.Raw("TCP ${tcpRouters.size.fmt()}"))
+                            if (udpRouters.isNotEmpty()) add(UiText.Raw("UDP ${udpRouters.size.fmt()}"))
                             add(UiText.of(R.string.dashboard_sub_forwarding))
                         },
                     )

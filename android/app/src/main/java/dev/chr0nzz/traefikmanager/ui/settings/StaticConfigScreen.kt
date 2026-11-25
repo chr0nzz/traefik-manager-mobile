@@ -67,6 +67,7 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 private sealed interface StaticEditing {
     data class Entrypoint(val form: EntrypointForm, val adding: Boolean) : StaticEditing
@@ -555,7 +556,7 @@ private fun ListSectionCard(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = count.toString(),
+                text = count.fmt(),
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
                 color = palette.muted,
             )

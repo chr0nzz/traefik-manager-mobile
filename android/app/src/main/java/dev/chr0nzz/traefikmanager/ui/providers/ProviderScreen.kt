@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -66,6 +65,7 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.targetArrowIcon
 
 fun ProviderRoute.tmStatus(): TmStatus = when (status.lowercase()) {
     "enabled" -> TmStatus.Ok
@@ -256,7 +256,7 @@ private fun ProviderRouteCard(route: ProviderRoute, onClick: () -> Unit, modifie
             ValueRow(icon = Icons.Outlined.Language, value = route.rule, color = palette.muted)
         }
         route.target?.let { target ->
-            ValueRow(icon = Icons.Outlined.SubdirectoryArrowRight, value = target, color = palette.green)
+            ValueRow(icon = targetArrowIcon(), value = target, color = palette.green)
         }
 
         val meta = buildList {

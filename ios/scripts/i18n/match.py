@@ -9,7 +9,7 @@ RES = '/home/chronzz/code/traefik-manager/traefik-manager-mobile/android/app/src
 LANGS = {  # iOS locale -> Android values dir
     'zh-Hans': 'values-b+zh+Hans', 'cs': 'values-cs', 'da': 'values-da', 'de': 'values-de',
     'es': 'values-es', 'fr': 'values-fr', 'fr-CA': 'values-fr-rCA', 'ko': 'values-ko', 'nl': 'values-nl',
-    'pt-PT': 'values-pt', 'pt-BR': 'values-pt-rBR', 'ru': 'values-ru',
+    'pt-PT': 'values-pt', 'pt-BR': 'values-pt-rBR', 'ru': 'values-ru', 'fa': 'values-fa',
 }
 
 AND_PH = re.compile(r'%(?:(\d+)\$)?([sd])')

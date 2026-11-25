@@ -11,7 +11,6 @@ import androidx.compose.material.icons.outlined.ArrowOutward
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +35,7 @@ import dev.chr0nzz.traefikmanager.ui.components.ValueRow
 import dev.chr0nzz.traefikmanager.ui.components.TmStatus
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
+import dev.chr0nzz.traefikmanager.ui.components.targetArrowIcon
 
 fun Route.status(health: RouteHealth? = null): TmStatus = when {
     !enabled -> TmStatus.Disabled
@@ -105,7 +105,7 @@ fun RouteCard(
         }
 
         ValueRow(
-            icon = Icons.Outlined.SubdirectoryArrowRight,
+            icon = targetArrowIcon(),
             value = route.target,
             color = if (route.target == "N/A") palette.red else palette.green,
             extra = if (route.backendCount > 1) "+${route.backendCount - 1}" else null,

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Hub
-import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.ui.components.targetArrowIcon
 
 fun ServiceHealth.asTmStatus(): TmStatus = when (this) {
     ServiceHealth.Ok -> TmStatus.Ok
@@ -109,7 +109,7 @@ fun ServiceCard(
             service.composite.map { it.asString() to ServerHealth.Unknown }
         targets.take(2).forEach { (target, health) ->
             ValueRow(
-                icon = Icons.Outlined.SubdirectoryArrowRight,
+                icon = targetArrowIcon(),
                 value = target,
                 color = when (health) {
                     ServerHealth.Up -> palette.green
