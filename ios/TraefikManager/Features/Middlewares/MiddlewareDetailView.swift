@@ -44,7 +44,7 @@ struct MiddlewareDetailView: View {
                     }
                     DetailRow(
                         label: String(localized: "Usage"),
-                        value: usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes"),
+                        value: usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes", locale: NumberFormat.locale),
                         last: externalUsers.isEmpty
                     )
                     if !externalUsers.isEmpty {
@@ -93,10 +93,10 @@ struct MiddlewareDetailView: View {
         }
         .shellSheet(isPresented: $editing) {
             NavigationStack {
-                MiddlewareFormView(name: middleware.name) { message = String(localized: "\($0) saved") }
+                MiddlewareFormView(name: middleware.name) { message = String(localized: "\($0) saved", locale: NumberFormat.locale) }
             }
         }
-        .confirmationDialog(String(localized: "Delete \(middleware.name)?"), isPresented: $confirmDelete, titleVisibility: .visible) {
+        .confirmationDialog(String(localized: "Delete \(middleware.name)?", locale: NumberFormat.locale), isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete", role: .destructive) { delete(middleware, force: false) }
         } message: {
             Text("Any route still referencing it will stop working.")
@@ -120,7 +120,7 @@ struct MiddlewareDetailView: View {
                     message = result.message ?? result.error ?? String(localized: "Could not delete the middleware")
                     return
                 }
-                message = String(localized: "\(middleware.name) deleted")
+                message = String(localized: "\(middleware.name) deleted", locale: NumberFormat.locale)
                 dismiss()
                 app.routes.noteExternalChange()
                 await app.refreshRoutes()
@@ -136,14 +136,14 @@ struct MiddlewareDetailView: View {
         guard !external.isEmpty else {
             return routers.isEmpty
                 ? message
-                : message + "\n" + String(localized: "Deleting it removes it from \(routers.joined(separator: ", ")).")
+                : message + "\n" + String(localized: "Deleting it removes it from \(routers.joined(separator: ", ")).", locale: NumberFormat.locale)
         }
         var lines = [message]
         let fileCount = routers.count - external.count
         if fileCount > 0 {
-            lines.append(String(localized: "Traefik Manager removes it from \(fileCount) routes in your config files."))
+            lines.append(String(localized: "Traefik Manager removes it from \(fileCount) routes in your config files.", locale: NumberFormat.locale))
         }
-        lines.append(String(localized: "Traefik Manager cannot edit \(external.joined(separator: ", ")), because another provider such as Docker labels defines it. It stops working until you remove the middleware there."))
+        lines.append(String(localized: "Traefik Manager cannot edit \(external.joined(separator: ", ")), because another provider such as Docker labels defines it. It stops working until you remove the middleware there.", locale: NumberFormat.locale))
         return lines.joined(separator: "\n")
     }
 }

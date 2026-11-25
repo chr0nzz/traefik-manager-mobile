@@ -65,7 +65,7 @@ struct ProviderView: View {
     @ViewBuilder
     private var content: some View {
         if loading && routes.isEmpty {
-            ProgressView(String(localized: "Loading \(page.providerLabel) routes")).frame(maxWidth: .infinity, maxHeight: .infinity)
+            ProgressView(String(localized: "Loading \(page.providerLabel) routes", locale: NumberFormat.locale)).frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let error, routes.isEmpty {
             ContentUnavailableView {
                 Label("Traefik API not reachable", systemImage: "exclamationmark.triangle")
@@ -77,7 +77,7 @@ struct ProviderView: View {
         } else if !reachable {
             ContentUnavailableView("Traefik API not reachable", systemImage: "exclamationmark.triangle", description: Text("Check the Traefik API URL in Settings."))
         } else if routes.isEmpty && middlewares.isEmpty {
-            ContentUnavailableView(String(localized: "No \(page.providerLabel) routes found"), systemImage: page.systemImage, description: Text(page.providerEmpty))
+            ContentUnavailableView(String(localized: "No \(page.providerLabel) routes found", locale: NumberFormat.locale), systemImage: page.systemImage, description: Text(page.providerEmpty))
         } else {
             List {
                 Group {
@@ -116,7 +116,7 @@ struct ProviderView: View {
                             .listRowBackground(Color.clear)
                         }
                     } header: {
-                        SectionLabel(text: String(localized: "Middlewares \(middlewares.count)"))
+                        SectionLabel(text: String(localized: "Middlewares \(middlewares.count)", locale: NumberFormat.locale))
                     }
                 }
             }
@@ -131,14 +131,14 @@ struct ProviderView: View {
         var detail: [String] = []
         for proto in ServiceProtocol.allCases {
             let count = routes.filter { $0.proto == proto }.count
-            if count > 0 { detail.append("\(count) \(proto.rawValue)") }
+            if count > 0 { detail.append("\(count.fmt) \(proto.rawValue)") }
         }
-        if !middlewares.isEmpty { detail.append(String(localized: "\(middlewares.count) middlewares")) }
+        if !middlewares.isEmpty { detail.append(String(localized: "\(middlewares.count) middlewares", locale: NumberFormat.locale)) }
         let status: TMStatus = notServing > 0 ? .warn : .ok
         return Card(accent: status.color, spacing: 2) {
             HStack(spacing: Spacing.sm) {
                 StatusDot(status: status)
-                Text(notServing > 0 ? String(localized: "\(notServing) routes not serving") : String(localized: "\(routes.count) routes live"))
+                Text(notServing > 0 ? String(localized: "\(notServing) routes not serving", locale: NumberFormat.locale) : String(localized: "\(routes.count) routes live", locale: NumberFormat.locale))
                     .font(.subheadline.weight(.semibold))
             }
             Text(detail.isEmpty ? String(localized: "No routes") : detail.joined(separator: " · "))

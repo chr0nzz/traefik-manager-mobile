@@ -86,13 +86,13 @@ struct BackupsView: View {
             }
         }
         .typedConfirm(isPresented: $askRestore,
-                      title: String(localized: "Restore \(restoreTarget?.name ?? "")?"),
+                      title: String(localized: "Restore \(restoreTarget?.name ?? "")?", locale: NumberFormat.locale),
                       message: restoreConsequence(restoreTarget?.kind ?? .routes),
                       actionLabel: String(localized: "Restore")) {
             if let entry = restoreTarget { restore(entry) }
         }
         .typedConfirm(isPresented: $askRestoreCommit,
-                      title: String(localized: "Restore \(restoreCommitTarget?.shaShort ?? "")?"),
+                      title: String(localized: "Restore \(restoreCommitTarget?.shaShort ?? "")?", locale: NumberFormat.locale),
                       message: String(localized: "This writes every config file from that commit over what is running now."),
                       actionLabel: String(localized: "Restore")) {
             if let commit = restoreCommitTarget { restoreCommit(commit) }
@@ -152,9 +152,9 @@ struct BackupsView: View {
                     Card(spacing: Spacing.xs) {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(rows.isEmpty ? String(localized: "No backups") : String(localized: "\(rows.count) kept"))
+                                Text(rows.isEmpty ? String(localized: "No backups") : String(localized: "\(rows.count) kept", locale: NumberFormat.locale))
                                     .font(.subheadline.weight(.semibold))
-                                Text(([ByteSize.label(rows.reduce(0) { $0 + $1.size })] + (rows.first.map { [String(localized: "newest \($0.stamp)")] } ?? []))
+                                Text(([ByteSize.label(rows.reduce(0) { $0 + $1.size })] + (rows.first.map { [String(localized: "newest \($0.stamp)", locale: NumberFormat.locale)] } ?? []))
                                     .joined(separator: " · "))
                                     .font(.caption)
                                     .foregroundStyle(Palette.muted)
@@ -262,7 +262,7 @@ struct BackupsView: View {
                     if gitCommits.isEmpty {
                         ContentUnavailableView("No commits yet", systemImage: "clock.arrow.circlepath", description: Text("Push once and the history shows up here."))
                     } else {
-                        SectionLabel(text: String(localized: "History \(gitCommits.count)")).padding(.top, Spacing.xs)
+                        SectionLabel(text: String(localized: "History \(gitCommits.count)", locale: NumberFormat.locale)).padding(.top, Spacing.xs)
                         ForEach(gitCommits) { commit in
                             CommitCard(commit: commit, busy: busy) { diffFor = commit } onRestore: { restoreCommitTarget = commit; askRestoreCommit = true }
                         }
@@ -286,7 +286,7 @@ struct BackupsView: View {
 
     private func gitSummary(_ status: GitStatus) -> String {
         var parts: [String] = []
-        if !status.branch.isEmpty { parts.append(String(localized: "branch \(status.branch)")) }
+        if !status.branch.isEmpty { parts.append(String(localized: "branch \(status.branch)", locale: NumberFormat.locale)) }
         parts.append(status.lastSha.isEmpty ? String(localized: "nothing pushed yet") : status.lastSha)
         if !status.lastPush.isEmpty && !status.lastSha.isEmpty { parts.append(status.lastPush) }
         return parts.joined(separator: " · ")
@@ -353,8 +353,8 @@ struct BackupsView: View {
                 guard response.worked else { throw APIError.server(response.error ?? "") }
                 let created = response.created
                 if created.isEmpty { return String(localized: "Backup created") }
-                if created.count == 1 { return String(localized: "Backed up \(created[0])") }
-                return String(localized: "Backed up \(created.count) files")
+                if created.count == 1 { return String(localized: "Backed up \(created[0])", locale: NumberFormat.locale) }
+                return String(localized: "Backed up \(created.count) files", locale: NumberFormat.locale)
             }
         }
     }
@@ -363,7 +363,7 @@ struct BackupsView: View {
         run(String(localized: "Could not delete the backup")) { service in
             let response = try await service.deleteBackup(entry.name)
             guard response.worked else { throw APIError.server(response.error ?? response.message ?? "") }
-            return String(localized: "Deleted \(entry.name)")
+            return String(localized: "Deleted \(entry.name)", locale: NumberFormat.locale)
         }
     }
 
@@ -377,13 +377,13 @@ struct BackupsView: View {
                 restartPending = .static
                 return String(localized: "Static config restored - Traefik needs a restart")
             case .routes:
-                return String(localized: "Restored \(entry.name)")
+                return String(localized: "Restored \(entry.name)", locale: NumberFormat.locale)
             case .certs:
                 if response.restarted == true { return String(localized: "Certificates restored and Traefik restarted") }
                 restartPending = .certs
                 return response.restartError.isBlank
                     ? String(localized: "Certificates restored, but Traefik did not restart")
-                    : String(localized: "Certificates restored, but Traefik did not restart: \(response.restartError)")
+                    : String(localized: "Certificates restored, but Traefik did not restart: \(response.restartError)", locale: NumberFormat.locale)
             }
         }
     }
@@ -409,7 +409,7 @@ struct BackupsView: View {
             let response = try await service.gitRestore(commit.sha, hostBacked: hostBacked)
             guard response.worked else { throw APIError.server(response.error ?? response.message ?? "") }
             await app.refreshRoutes()
-            return String(localized: "Restored \(commit.shaShort)")
+            return String(localized: "Restored \(commit.shaShort)", locale: NumberFormat.locale)
         }
     }
 }

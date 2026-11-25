@@ -257,7 +257,7 @@ final class CrowdSecModel {
         } catch let APIError.http(status, message) where status == 503 && (message ?? "").localizedCaseInsensitiveContains("not configured") {
             return CrowdSecSnapshot(decisions: .notConfigured, alerts: .notConfigured)
         } catch let APIError.http(status, message) {
-            let text = message ?? String(localized: "CrowdSec LAPI unavailable (HTTP \(status))")
+            let text = message ?? String(localized: "CrowdSec LAPI unavailable (HTTP \(status))", locale: NumberFormat.locale)
             return CrowdSecSnapshot(decisions: .failed(withHint(text, status: status)), alerts: .failed(text))
         } catch APIError.unreachable(let detail) {
             return CrowdSecSnapshot(decisions: .failed(detail), alerts: .failed(detail))
@@ -302,7 +302,7 @@ final class CrowdSecModel {
         } catch APIError.http(404, _) {
             return .notConfigured
         } catch let APIError.http(status, message) {
-            return .failed(message ?? String(localized: "CrowdSec LAPI unavailable (HTTP \(status))"))
+            return .failed(message ?? String(localized: "CrowdSec LAPI unavailable (HTTP \(status))", locale: NumberFormat.locale))
         } catch {
             return .failed(error.localizedDescription)
         }
@@ -312,6 +312,6 @@ final class CrowdSecModel {
     private static func withHint(_ message: String, status: Int?) -> String {
         let forbidden = status == 403 || message.contains("403")
         guard forbidden, !message.localizedCaseInsensitiveContains("bouncer") else { return message }
-        return String(localized: "\(message). CrowdSec only accepts a bouncer key on /v1/decisions, the machine token is refused there, so CROWDSEC_API_KEY has to be set as well.")
+        return String(localized: "\(message). CrowdSec only accepts a bouncer key on /v1/decisions, the machine token is refused there, so CROWDSEC_API_KEY has to be set as well.", locale: NumberFormat.locale)
     }
 }

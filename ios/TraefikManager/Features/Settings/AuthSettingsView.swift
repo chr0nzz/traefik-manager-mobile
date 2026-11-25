@@ -48,7 +48,7 @@ struct AuthSettingsView: View {
         } message: { key in
             Text(key.name.isEmpty
                  ? String(localized: "Anything signed in with this key stops working immediately. If it is the key this app uses, you will have to reconnect.")
-                 : String(localized: "Anything signed in with \(key.name) stops working immediately. If it is the key this app uses, you will have to reconnect."))
+                 : String(localized: "Anything signed in with \(key.name) stops working immediately. If it is the key this app uses, you will have to reconnect.", locale: NumberFormat.locale))
         }
         .shellSheet(item: $issued) { key in
             NavigationStack { KeySheet(title: String(localized: "New API key"), body: String(localized: "Save this key - it will not be shown again."), key: key.key) }
@@ -114,7 +114,7 @@ struct AuthSettingsView: View {
                         Button { revokeTarget = key } label: { Image(systemName: "trash").foregroundStyle(key.revocable ? Palette.red : Palette.muted) }
                             .buttonStyle(.borderless)
                             .disabled(!key.revocable)
-                            .accessibilityLabel(String(localized: "Revoke \(key.name)"))
+                            .accessibilityLabel(String(localized: "Revoke \(key.name)", locale: NumberFormat.locale))
                     }
                 }
             } header: {

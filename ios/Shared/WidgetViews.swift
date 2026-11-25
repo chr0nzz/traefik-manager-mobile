@@ -250,7 +250,7 @@ struct ServersWidgetView: View {
             Circle().fill(status(server).color).frame(width: 6, height: 6)
             Text(server.name).font(.caption2.weight(.semibold)).lineLimit(1)
             Spacer(minLength: 2)
-            Text(server.reachable ? "\(server.routers)" : "-").font(.caption2.monospaced()).foregroundStyle(Palette.muted)
+            Text(server.reachable ? server.routers.fmt : "-").font(.caption2.monospaced()).foregroundStyle(Palette.muted)
         }
     }
 
@@ -273,9 +273,9 @@ struct ServersWidgetView: View {
     }
 
     private func summary(_ server: WidgetServerRow) -> String {
-        var parts = [String(localized: "\(server.routers) routers"), String(localized: "\(server.services) svc")]
-        if server.err > 0 { parts.append(String(localized: "\(server.err) down")) }
-        if server.bans >= 0 { parts.append(String(localized: "\(server.bans) bans")) }
+        var parts = [String(localized: "\(server.routers) routers", locale: NumberFormat.locale), String(localized: "\(server.services) svc", locale: NumberFormat.locale)]
+        if server.err > 0 { parts.append(String(localized: "\(server.err) down", locale: NumberFormat.locale)) }
+        if server.bans >= 0 { parts.append(String(localized: "\(server.bans) bans", locale: NumberFormat.locale)) }
         return parts.joined(separator: " · ")
     }
 }

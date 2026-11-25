@@ -56,9 +56,9 @@ struct TmNotification: Codable, Hashable, Sendable {
         let seconds = Int64(now.timeIntervalSince1970) - at
         guard seconds >= 0 else { return nil }
         if seconds < 60 { return String(localized: "just now") }
-        if seconds < 3600 { return String(localized: "\(Int(seconds / 60)) min ago") }
-        if seconds < 86_400 { return String(localized: "\(Int(seconds / 3600)) h ago") }
-        if seconds < 604_800 { return String(localized: "\(Int(seconds / 86_400)) d ago") }
+        if seconds < 3600 { return String(localized: "\(Int(seconds / 60)) min ago", locale: NumberFormat.locale) }
+        if seconds < 86_400 { return String(localized: "\(Int(seconds / 3600)) h ago", locale: NumberFormat.locale) }
+        if seconds < 604_800 { return String(localized: "\(Int(seconds / 86_400)) d ago", locale: NumberFormat.locale) }
         return nil
     }
 }
@@ -178,11 +178,11 @@ struct NotificationChannel: Codable, Identifiable, Hashable, Sendable {
         parts.append(known.isEmpty || known.count == ChannelKinds.categories.count
             ? String(localized: "All categories")
             : known.map(ChannelKinds.categoryLabel).joined(separator: ", "))
-        if minSeverity != "info" { parts.append(String(localized: "\(ChannelKinds.severityLabel(minSeverity)) and above")) }
+        if minSeverity != "info" { parts.append(String(localized: "\(ChannelKinds.severityLabel(minSeverity)) and above", locale: NumberFormat.locale)) }
         if digest == "hourly" { parts.append(String(localized: "Hourly digest")) }
         if digest == "daily" { parts.append(String(localized: "Daily digest")) }
         if !quietHours.isBlank {
-            parts.append(breakThrough ? String(localized: "Quiet \(quietHours), errors break through") : String(localized: "Quiet \(quietHours)"))
+            parts.append(breakThrough ? String(localized: "Quiet \(quietHours), errors break through", locale: NumberFormat.locale) : String(localized: "Quiet \(quietHours)", locale: NumberFormat.locale))
         }
         return parts.joined(separator: " · ")
     }

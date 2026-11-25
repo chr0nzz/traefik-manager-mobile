@@ -73,7 +73,7 @@ struct LogsView: View {
                 LogVerdictCard(model: model, window: window)
                 WindowKeyRow(model: model, window: window, visibleCount: visible.count)
                 Picker("Lines", selection: Binding(get: { model.lineCount }, set: { model.setLineCount($0, app: app) })) {
-                    ForEach(logLineSteps, id: \.self) { Text(verbatim: "\($0)").tag($0) }
+                    ForEach(logLineSteps, id: \.self) { Text($0.fmt).tag($0) }
                 }
                 .pickerStyle(.segmented)
                 LogSignalCards(window: window, facets: model.facets, compact: sizeClass != .regular) { model.toggleFacet($0, $1) }
@@ -84,7 +84,7 @@ struct LogsView: View {
                 HStack {
                     SectionLabel(text: String(localized: "Access log"))
                     Spacer()
-                    Text(String(localized: "\(visible.count) of \(model.fetched) lines"))
+                    Text(String(localized: "\(visible.count) of \(model.fetched) lines", locale: NumberFormat.locale))
                         .font(.caption2.monospaced())
                         .foregroundStyle(Palette.muted)
                 }
@@ -95,7 +95,7 @@ struct LogsView: View {
             .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.lg, bottom: Spacing.xs, trailing: Spacing.lg))
 
             if visible.isEmpty {
-                Text(String(localized: "0 of the last \(model.fetched) lines match the current filters"))
+                Text(String(localized: "0 of the last \(model.fetched) lines match the current filters", locale: NumberFormat.locale))
                     .font(.footnote)
                     .foregroundStyle(Palette.muted)
                     .listRowBackground(Color.clear)
@@ -139,17 +139,17 @@ private struct LogVerdictCard: View {
                     FlowLayout(spacing: Spacing.sm) {
                         ForEach(window.codeRank.prefix(3), id: \.0) { code, count in
                             verdictItem(
-                                "\(count) \(code) " + (LogParser.statusName(code)?.lowercased() ?? String(localized: "response")),
+                                "\(count.fmt) \(code) " + (LogParser.statusName(code)?.lowercased() ?? String(localized: "response")),
                                 color: code >= 500 ? Palette.red : Palette.yellow
                             ) { model.toggleFacet(.status, String(code)) }
                         }
                         if latency.slow > 0 {
-                            verdictItem(String(localized: "\(latency.slow) over 500ms"), color: Palette.yellow) {
+                            verdictItem(String(localized: "\(latency.slow) over 500ms", locale: NumberFormat.locale), color: Palette.yellow) {
                                 model.toggleFacet(.duration, "slow")
                             }
                         }
                         if window.retries > 0 {
-                            verdictItem(String(localized: "\(window.retries) retries"), color: Palette.yellow, action: nil)
+                            verdictItem(String(localized: "\(window.retries) retries", locale: NumberFormat.locale), color: Palette.yellow, action: nil)
                         }
                         if !calm.isEmpty {
                             Text(calm.joined(separator: ", ")).font(.caption2).foregroundStyle(Palette.muted)
@@ -157,7 +157,7 @@ private struct LogVerdictCard: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Text(window.spanMillis.map { String(localized: "\(LogParser.spanText($0)) window") } ?? String(localized: "\(model.fetched) lines"))
+                Text(window.spanMillis.map { String(localized: "\(LogParser.spanText($0)) window", locale: NumberFormat.locale) } ?? String(localized: "\(model.fetched) lines", locale: NumberFormat.locale))
                     .font(.caption2.monospaced())
                     .foregroundStyle(Palette.muted)
             }
@@ -165,9 +165,9 @@ private struct LogVerdictCard: View {
     }
 
     private var headline: String {
-        if window.serverErrors > 0 { return String(localized: "\(window.serverErrors) server errors") }
-        if window.clientErrors > 0 { return String(localized: "\(window.clientErrors) client errors") }
-        if window.latency.slow > 0 { return String(localized: "\(window.latency.slow) slow requests") }
+        if window.serverErrors > 0 { return String(localized: "\(window.serverErrors) server errors", locale: NumberFormat.locale) }
+        if window.clientErrors > 0 { return String(localized: "\(window.clientErrors) client errors", locale: NumberFormat.locale) }
+        if window.latency.slow > 0 { return String(localized: "\(window.latency.slow) slow requests", locale: NumberFormat.locale) }
         if window.parsed == 0 { return String(localized: "Nothing matches") }
         return String(localized: "All clean")
     }
@@ -177,7 +177,7 @@ private struct LogVerdictCard: View {
         if window.serverErrors == 0 { parts.append(String(localized: "no server errors")) }
         if window.clientErrors == 0 && window.serverErrors > 0 { parts.append(String(localized: "no client errors")) }
         if window.latency.slow == 0 {
-            parts.append(window.latency.max.map { String(localized: "nothing slower than \(LogParser.formatMs($0))") } ?? String(localized: "no timing recorded"))
+            parts.append(window.latency.max.map { String(localized: "nothing slower than \(LogParser.formatMs($0))", locale: NumberFormat.locale) } ?? String(localized: "no timing recorded"))
         }
         return parts
     }
@@ -211,14 +211,14 @@ private struct WindowKeyRow: View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             FlowLayout(spacing: Spacing.md) {
                 SectionLabel(text: String(localized: "Window"))
-                keyItem("list.bullet.rectangle", String(localized: "last \(model.fetched) lines"))
+                keyItem("list.bullet.rectangle", String(localized: "last \(model.fetched) lines", locale: NumberFormat.locale))
                 if let span = window.spanMillis, span > 0 {
-                    keyItem("clock", String(localized: "span \(LogParser.spanText(span))"))
+                    keyItem("clock", String(localized: "span \(LogParser.spanText(span))", locale: NumberFormat.locale))
                 }
                 if let rate = window.requestsPerMinute {
-                    keyItem("bolt", String(localized: "\(String(rate)) req/min"))
+                    keyItem("bolt", String(localized: "\(rate.fmt) req/min", locale: NumberFormat.locale))
                 }
-                keyItem("list.bullet.rectangle", String(localized: "\(model.unparsed) unparsed"))
+                keyItem("list.bullet.rectangle", String(localized: "\(model.unparsed) unparsed", locale: NumberFormat.locale))
             }
             if !model.facets.isEmpty {
                 let dead = model.deadFacets
@@ -240,18 +240,18 @@ private struct WindowKeyRow: View {
                             .background(tint.opacity(0.1), in: Capsule())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel(String(localized: "Clear \(facet.label) filter"))
+                        .accessibilityLabel(String(localized: "Clear \(facet.label) filter", locale: NumberFormat.locale))
                     }
                     Button("clear") { model.facets = [:] }.font(.caption2).buttonStyle(.plain).foregroundStyle(Palette.blue)
                 }
             }
             HStack {
                 if let span = model.selectionSpan, span > 0 {
-                    keyItem("clock", String(localized: "selection spans \(LogParser.spanText(span))"))
+                    keyItem("clock", String(localized: "selection spans \(LogParser.spanText(span))", locale: NumberFormat.locale))
                 }
                 Spacer()
                 let text = model.selected
-                    ? String(localized: "\(visibleCount) of the last \(model.fetched) lines")
+                    ? String(localized: "\(visibleCount) of the last \(model.fetched) lines", locale: NumberFormat.locale)
                     : String(localized: "sample, not all traffic")
                 Text(text).font(.caption2).foregroundStyle(Palette.yellow)
             }
@@ -273,7 +273,7 @@ private struct RuntimeChips: View {
     var body: some View {
         FlowLayout(spacing: Spacing.md) {
             chip("curlybraces", model.formatLabel, !model.parsedEntries.isEmpty)
-            chip("list.bullet.rectangle", String(localized: "\(model.parsedEntries.count) of \(model.fetched) lines parsed"), model.unparsed == 0)
+            chip("list.bullet.rectangle", String(localized: "\(model.parsedEntries.count) of \(model.fetched) lines parsed", locale: NumberFormat.locale), model.unparsed == 0)
             chip("timer", model.nanoPrecision ? String(localized: "ns precision") : String(localized: "ms precision"), model.nanoPrecision)
             chip("checkmark.shield", model.tlsFields ? String(localized: "tls fields") : String(localized: "no tls fields"), model.tlsFields)
             chip("globe", model.geoEnabled ? String(localized: "geoip on") : String(localized: "geoip off"), model.geoEnabled)
@@ -305,7 +305,7 @@ struct CountryStrip: View {
                         HStack(spacing: 4) {
                             Text(country.flag)
                             Text(country.code).font(.caption2.monospaced())
-                            Text(verbatim: "\(country.count)").font(.caption2.monospaced().weight(.bold))
+                            Text(country.count.fmt).font(.caption2.monospaced().weight(.bold))
                         }
                         .foregroundStyle(active ? Palette.blue : Palette.text)
                         .padding(.horizontal, Spacing.sm)

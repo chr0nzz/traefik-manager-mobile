@@ -76,7 +76,7 @@ struct LogDetailView: View {
         if let origin = entry.origin {
             DetailRow(
                 label: String(localized: "Origin status"),
-                value: origin == 0 ? String(localized: "0 tunnel (Traefik answered \(entry.status) itself)") : String(origin),
+                value: origin == 0 ? String(localized: "0 tunnel (Traefik answered \(entry.status) itself)", locale: NumberFormat.locale) : String(origin),
                 mono: true
             )
         }

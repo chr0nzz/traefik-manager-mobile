@@ -95,7 +95,7 @@ struct AppearanceView: View {
                         Text("Require unlock")
                         Text(!AppLock.available ? String(localized: "No Face ID, Touch ID or passcode is set up on this device")
                              : appLock ? String(localized: "Asked for on launch and whenever the app returns from the background")
-                             : String(localized: "Ask for \(AppLock.biometryName) before showing anything"))
+                             : String(localized: "Ask for \(AppLock.biometryName) before showing anything", locale: NumberFormat.locale))
                             .font(.caption2)
                             .foregroundStyle(Palette.muted)
                     }

@@ -159,12 +159,12 @@ struct PluginsView: View {
         let names = response.plugins.joined(separator: ", ")
         if let file = response.middlewareFile, !file.isBlank {
             return response.plugins.count == 1
-                ? String(localized: "Plugin \"\(names)\" saved to the static config, middleware saved to \(file).")
-                : String(localized: "Plugins \"\(names)\" saved to the static config, middleware saved to \(file).")
+                ? String(localized: "Plugin \"\(names)\" saved to the static config, middleware saved to \(file).", locale: NumberFormat.locale)
+                : String(localized: "Plugins \"\(names)\" saved to the static config, middleware saved to \(file).", locale: NumberFormat.locale)
         }
         return response.plugins.count == 1
-            ? String(localized: "Plugin \"\(names)\" saved to the static config.")
-            : String(localized: "Plugins \"\(names)\" saved to the static config.")
+            ? String(localized: "Plugin \"\(names)\" saved to the static config.", locale: NumberFormat.locale)
+            : String(localized: "Plugins \"\(names)\" saved to the static config.", locale: NumberFormat.locale)
     }
 
     private func load() async {
@@ -275,15 +275,15 @@ private struct PluginCard: View {
             }
             Divider().overlay(Palette.border).padding(.top, Spacing.xs)
             HStack {
-                Text(usage == 0 ? String(localized: "not referenced") : String(localized: "used by \(usage) middlewares"))
+                Text(usage == 0 ? String(localized: "not referenced") : String(localized: "used by \(usage) middlewares", locale: NumberFormat.locale))
                     .font(.caption2)
                     .foregroundStyle(usage == 0 ? Palette.yellow : Palette.muted)
                 Spacer()
                 if canManage {
                     Button(action: onEdit) { Image(systemName: "pencil") }
-                        .accessibilityLabel(String(localized: "Edit \(plugin.name)"))
+                        .accessibilityLabel(String(localized: "Edit \(plugin.name)", locale: NumberFormat.locale))
                     Button(action: onDelete) { Image(systemName: "trash").foregroundStyle(Palette.red) }
-                        .accessibilityLabel(String(localized: "Remove \(plugin.name)"))
+                        .accessibilityLabel(String(localized: "Remove \(plugin.name)", locale: NumberFormat.locale))
                 }
             }
             .buttonStyle(.borderless)
@@ -338,7 +338,7 @@ struct PluginDetailView: View {
                     DetailRow(label: String(localized: "Module"), value: plugin.displayModule, mono: true)
                     DetailRow(label: String(localized: "Version"), value: plugin.displayVersion, mono: true, last: latest == nil)
                     if let latest {
-                        DetailRow(label: String(localized: "Update"), value: String(localized: "\(latest) available"), mono: true, last: true)
+                        DetailRow(label: String(localized: "Update"), value: String(localized: "\(latest) available", locale: NumberFormat.locale), mono: true, last: true)
                     }
                 }
 

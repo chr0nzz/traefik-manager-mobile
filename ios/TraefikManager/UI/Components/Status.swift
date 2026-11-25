@@ -98,7 +98,7 @@ struct SignalStrip: View {
     static func summary(_ cells: [TMStatus]) -> String {
         Dictionary(grouping: cells, by: \.self)
             .sorted { $0.key.severity < $1.key.severity }
-            .map { "\($0.value.count) \($0.key.label)" }
+            .map { "\($0.value.count.fmt) \($0.key.label)" }
             .joined(separator: ", ")
     }
 }

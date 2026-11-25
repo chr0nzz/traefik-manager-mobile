@@ -67,7 +67,7 @@ struct RoutesView: View {
             }
             .shellSheet(isPresented: $creating) {
                 NavigationStack {
-                    RouteFormView(routeId: nil) { name in message = String(localized: "\(name) saved") }
+                    RouteFormView(routeId: nil) { name in message = String(localized: "\(name) saved", locale: NumberFormat.locale) }
                 }
             }
             .navigationDestination(for: Route.ID.self) { id in
@@ -97,13 +97,13 @@ struct RoutesView: View {
 
     private var certOfferTitle: String {
         let count = shownOffer?.certs.count ?? 0
-        return String(localized: "Remove its \(count) certificates too?")
+        return String(localized: "Remove its \(count) certificates too?", locale: NumberFormat.locale)
     }
 
     private var certOfferMessage: String {
         guard let offer = shownOffer else { return "" }
         let names = offer.certs.map(\.main).joined(separator: ", ")
-        return String(localized: "Nothing else uses \(names) now that \(offer.routeName) is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.")
+        return String(localized: "Nothing else uses \(names) now that \(offer.routeName) is gone. Removing restarts Traefik, and a copy of acme.json is saved to Backups first.", locale: NumberFormat.locale)
     }
 
     private func removeOfferedCerts() {
@@ -209,8 +209,8 @@ struct RoutesView: View {
             do {
                 try await store.toggle(route, service: service)
                 message = route.enabled
-                    ? String(localized: "\(route.name) disabled")
-                    : String(localized: "\(route.name) enabled")
+                    ? String(localized: "\(route.name) disabled", locale: NumberFormat.locale)
+                    : String(localized: "\(route.name) enabled", locale: NumberFormat.locale)
                 await app.refreshRoutes()
             } catch {
                 message = error.localizedDescription

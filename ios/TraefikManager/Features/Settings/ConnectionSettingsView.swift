@@ -85,7 +85,7 @@ struct ConnectionSettingsView: View {
                         case .idle: EmptyView()
                         case .running: ProgressView()
                         case let .ok(version):
-                            Label(String(localized: "Connected - Traefik v\(version)"), systemImage: "checkmark.circle.fill")
+                            Label(String(localized: "Connected - Traefik v\(version)", locale: NumberFormat.locale), systemImage: "checkmark.circle.fill")
                                 .foregroundStyle(Palette.green).font(.footnote)
                         case .failed: Image(systemName: "xmark.octagon.fill").foregroundStyle(Palette.red)
                         }

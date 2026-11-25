@@ -48,7 +48,7 @@ final class RoutesStore {
         } catch {
             guard generation == started else { return }
             if case let APIError.decoding(detail) = error {
-                self.error = String(localized: "The server sent a route the app could not read: \(detail)")
+                self.error = String(localized: "The server sent a route the app could not read: \(detail)", locale: NumberFormat.locale)
             } else {
                 self.error = error.localizedDescription
             }

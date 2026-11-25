@@ -21,11 +21,11 @@ enum APIError: LocalizedError, Equatable {
         case .invalidURL:
             String(localized: "The server URL is not valid")
         case let .http(status, message):
-            message ?? String(localized: "Server error \(status)")
+            message ?? String(localized: "Server error \(status)", locale: NumberFormat.locale)
         case let .unreachable(detail):
             detail
         case let .decoding(detail):
-            String(localized: "Unexpected response from the server: \(detail)")
+            String(localized: "Unexpected response from the server: \(detail)", locale: NumberFormat.locale)
         case let .server(message):
             message
         case let .inUse(message, _, _, _):

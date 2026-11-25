@@ -497,7 +497,7 @@ private fun WindowKeyRow(
             window.spanMillis?.takeIf { it > 0 }?.let {
                 KeyItem(Icons.Outlined.Schedule, stringResource(R.string.logs_span, LogParser.spanText(it)))
             }
-            window.requestsPerMinute?.let { KeyItem(Icons.Outlined.Bolt, stringResource(R.string.logs_req_per_min, it.toString())) }
+            window.requestsPerMinute?.let { KeyItem(Icons.Outlined.Bolt, stringResource(R.string.logs_req_per_min, it.fmt())) }
             KeyItem(
                 Icons.AutoMirrored.Outlined.ListAlt,
                 pluralStringResource(R.plurals.logs_unparsed, state.unparsed, state.unparsed),

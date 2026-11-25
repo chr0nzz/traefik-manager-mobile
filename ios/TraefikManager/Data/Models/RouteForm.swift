@@ -154,7 +154,7 @@ struct RouteForm: Hashable, Sendable {
         }
         if !backends.contains(where: \.filled) { return String(localized: "A backend host is required.") }
         if self.protocol != .http && backends.contains(where: { !$0.host.isBlank && $0.port.isBlank }) {
-            return String(localized: "\(self.protocol.rawValue.uppercased()) routes need a backend port.")
+            return String(localized: "\(self.protocol.rawValue.uppercased()) routes need a backend port.", locale: NumberFormat.locale)
         }
         return nil
     }
@@ -197,7 +197,7 @@ enum EntityNames {
         if trimmed.isEmpty { return String(localized: "Give it a name") }
         if trimmed == "." || trimmed == ".." { return String(localized: "That name is reserved") }
         if trimmed.unicodeScalars.count > maxLength {
-            return String(localized: "Keep the name to \(maxLength) characters or fewer")
+            return String(localized: "Keep the name to \(maxLength) characters or fewer", locale: NumberFormat.locale)
         }
         let forbidden = trimmed.unicodeScalars.contains { scalar in
             "@/,:{}".unicodeScalars.contains(scalar) || scalar.value < 0x20 || scalar.value == 0x7F

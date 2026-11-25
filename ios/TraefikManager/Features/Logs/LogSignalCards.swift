@@ -41,11 +41,11 @@ struct LogSignalCards: View {
         let top = window.codeRank.first
         let sub: String = if let (code, count) = top {
             [
-                "\(code) \(LogParser.statusName(code)?.lowercased() ?? String(localized: "response")) x\(count)",
-                window.codeRank.count > 1 ? String(localized: "+\(window.codeRank.count - 1) codes") : nil,
+                "\(code) \(LogParser.statusName(code)?.lowercased() ?? String(localized: "response")) x\(count.fmt)",
+                window.codeRank.count > 1 ? String(localized: "+\(window.codeRank.count - 1) codes", locale: NumberFormat.locale) : nil,
             ].compactMap { $0 }.joined(separator: " · ")
         } else {
-            [String(localized: "\(b.twoXx) ok"), String(localized: "\(b.threeXx) redirects"), String(localized: "clean")].joined(separator: " · ")
+            [String(localized: "\(b.twoXx) ok", locale: NumberFormat.locale), String(localized: "\(b.threeXx) redirects", locale: NumberFormat.locale), String(localized: "clean")].joined(separator: " · ")
         }
         return DeskCard(
             title: String(localized: "Status codes"),
@@ -122,9 +122,9 @@ struct LogSignalCards: View {
         let risky = window.methods.contains { $0.key == "PUT" || $0.key == "DELETE" }
         let sub: String = window.methods.max(by: { $0.count < $1.count }).map { top in
             let pct = top.count * 100 / max(1, window.parsed)
-            return risky ? String(localized: "\(top.key) \(pct)%, PUT or DELETE present") : String(localized: "\(top.key) \(pct)%, no PUT or DELETE")
+            return risky ? String(localized: "\(top.key) \(pct)%, PUT or DELETE present", locale: NumberFormat.locale) : String(localized: "\(top.key) \(pct)%, no PUT or DELETE", locale: NumberFormat.locale)
         } ?? String(localized: "no method recorded")
-        return DeskCard(title: String(localized: "Methods"), glyph: "arrow.left.arrow.right", accent: Palette.orange, hero: String(window.methods.count), sub: sub) {
+        return DeskCard(title: String(localized: "Methods"), glyph: "arrow.left.arrow.right", accent: Palette.orange, hero: window.methods.count.fmt, sub: sub) {
             if let first = writes.first {
                 Flag(
                     icon: "arrow.left.arrow.right",
@@ -151,12 +151,12 @@ struct LogSignalCards: View {
         let failingCount = window.paths.filter { $0.errors > 0 }.count
         let sub: String = window.paths.first.map { top in
             [
-                String(localized: "\(top.key) \(top.count) requests"),
-                top.worstCode.map { "\(top.worstCount) x \($0)" },
-                failingCount - 1 > 0 ? String(localized: "+\(failingCount - 1) more failing") : nil,
+                String(localized: "\(top.key) \(top.count) requests", locale: NumberFormat.locale),
+                top.worstCode.map { "\(top.worstCount.fmt) x \($0)" },
+                failingCount - 1 > 0 ? String(localized: "+\(failingCount - 1) more failing", locale: NumberFormat.locale) : nil,
             ].compactMap { $0 }.joined(separator: ", ")
         } ?? String(localized: "no path recorded")
-        return DeskCard(title: String(localized: "Paths"), glyph: "point.topleft.down.to.point.bottomright.curvepath", accent: Palette.teal, hero: String(window.paths.count), sub: sub) {
+        return DeskCard(title: String(localized: "Paths"), glyph: "point.topleft.down.to.point.bottomright.curvepath", accent: Palette.teal, hero: window.paths.count.fmt, sub: sub) {
             failingFlag(window.paths)
         } content: {
             RankedRows(groups: window.paths, facet: .path, facets: facets, limit: 4, prefix: "~", onFacet: onFacet)
@@ -170,8 +170,8 @@ struct LogSignalCards: View {
             .prefix(4)
         return DeskCard(
             title: String(localized: "Clients"), glyph: "person.2", accent: Palette.blue,
-            hero: String(window.clients.count),
-            sub: window.clients.first.map { String(localized: "\($0.key) \($0.count) requests") } ?? String(localized: "no client recorded")
+            hero: window.clients.count.fmt,
+            sub: window.clients.first.map { String(localized: "\($0.key) \($0.count) requests", locale: NumberFormat.locale) } ?? String(localized: "no client recorded")
         ) {
             failingFlag(window.clients)
         } content: {
@@ -191,9 +191,9 @@ struct LogSignalCards: View {
         let providers = Dictionary(grouping: window.services) { LogParser.providerOf($0.key) }.filter { !$0.key.isEmpty }
         return DeskCard(
             title: String(localized: "Services"), glyph: "server.rack", accent: Palette.green,
-            hero: window.services.isEmpty ? "-" : String(window.services.count),
+            hero: window.services.isEmpty ? "-" : window.services.count.fmt,
             sub: window.services.first.map {
-                String(localized: "\(LogParser.shortName($0.key)) \($0.count) requests")
+                String(localized: "\(LogParser.shortName($0.key)) \($0.count) requests", locale: NumberFormat.locale)
             } ?? String(localized: "this format names no service")
         ) {
             if window.services.contains(where: { $0.errors > 0 }) {
@@ -216,7 +216,7 @@ struct LogSignalCards: View {
                 Image(systemName: "exclamationmark.triangle").font(.system(size: 12)).foregroundStyle(Palette.yellow)
                 SectionLabel(text: String(localized: "Where it fails"))
                 Spacer()
-                Text(String(localized: "\(window.clientErrors + window.serverErrors) of \(window.parsed) requests"))
+                Text(String(localized: "\(window.clientErrors + window.serverErrors) of \(window.parsed) requests", locale: NumberFormat.locale))
                     .font(.caption2.monospaced())
                     .foregroundStyle(Palette.muted)
             }
@@ -231,14 +231,14 @@ struct LogSignalCards: View {
                             .foregroundStyle(failure.status >= 500 ? Palette.red : Palette.yellow)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(failure.path).font(.caption2.monospaced()).lineLimit(1)
-                            Text(String(localized: "\(LogParser.statusName(failure.status) ?? String(localized: "failed")) on \(failure.path), \(String(failure.share))% of that path"))
+                            Text(String(localized: "\(LogParser.statusName(failure.status) ?? String(localized: "failed")) on \(failure.path), \(failure.share.fmt)% of that path", locale: NumberFormat.locale))
                                 .font(.system(size: 10))
                                 .foregroundStyle(Palette.muted)
                                 .lineLimit(1)
                         }
                         Spacer()
                         Text(LogParser.formatCount(failure.count)).font(.caption2.monospaced().weight(.bold))
-                        Text(verbatim: "\(failure.share)%").font(.caption2).foregroundStyle(Palette.yellow)
+                        Text(verbatim: "\(failure.share.fmt)%").font(.caption2).foregroundStyle(Palette.yellow)
                     }
                     .foregroundStyle(Palette.text)
                 }
@@ -252,8 +252,8 @@ struct LogSignalCards: View {
     private func rankedCard(title: String, glyph: String, accent: Color, groups: [RankedGroup], facet: LogFacet, empty: String, limit: Int) -> some View {
         DeskCard(
             title: title, glyph: glyph, accent: accent,
-            hero: groups.isEmpty ? "-" : String(groups.count),
-            sub: groups.first.map { String(localized: "\($0.key) \($0.count) requests") } ?? empty
+            hero: groups.isEmpty ? "-" : groups.count.fmt,
+            sub: groups.first.map { String(localized: "\($0.key) \($0.count) requests", locale: NumberFormat.locale) } ?? empty
         ) {
             failingFlag(groups)
         } content: {
@@ -276,7 +276,7 @@ struct LogSignalCards: View {
         return Button { onFacet(facet, value) } label: {
             HStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 9))
-                Text(verbatim: "\(count)").font(.caption2.monospaced().weight(.bold))
+                Text(count.fmt).font(.caption2.monospaced().weight(.bold))
                 Text(label).font(.caption2)
             }
             .foregroundStyle(active ? Palette.blue : color)
@@ -358,7 +358,7 @@ struct Flag: View {
     var body: some View {
         let content = HStack(spacing: 3) {
             Image(systemName: icon).font(.system(size: 10))
-            Text(verbatim: "\(count)").font(.caption2.monospaced().weight(.bold))
+            Text(count.fmt).font(.caption2.monospaced().weight(.bold))
             Text(label).font(.caption2)
         }
         .foregroundStyle(color)
@@ -419,7 +419,7 @@ private struct RankedRows: View {
                         if group.errors > 0 {
                             let tint = group.serverErrors > 0 ? Palette.red : Palette.yellow
                             Image(systemName: "exclamationmark.triangle").font(.system(size: 9)).foregroundStyle(tint)
-                            Text(verbatim: "\(group.errors)").font(.caption2.monospaced()).foregroundStyle(tint)
+                            Text(group.errors.fmt).font(.caption2.monospaced()).foregroundStyle(tint)
                         }
                         Text(LogParser.formatCount(group.count)).font(.caption2.monospaced().weight(.bold))
                     }
@@ -432,7 +432,7 @@ private struct RankedRows: View {
             }
             if groups.count > limit {
                 let rest = groups.dropFirst(limit)
-                Text(String(localized: "+\(rest.reduce(0) { $0 + $1.count }) requests across \(rest.count) more"))
+                Text(String(localized: "+\(rest.reduce(0) { $0 + $1.count }) requests across \(rest.count) more", locale: NumberFormat.locale))
                     .font(.caption2)
                     .foregroundStyle(Palette.muted)
             }
