@@ -64,7 +64,7 @@ struct CertRow: Identifiable, Hashable {
 
     var daysLeftLabel: String? {
         guard let daysLeft else { return nil }
-        return daysLeft <= 0 ? String(localized: "expired") : String(localized: "\(daysLeft)d left")
+        return daysLeft <= 0 ? String(localized: "expired") : String(localized: "\(daysLeft)d left", locale: NumberFormat.locale)
     }
 
     var status: TMStatus {
@@ -225,14 +225,50 @@ struct CertDeleteResponse: Decodable, Sendable {
     /// The toast after a removal, port of `CertCleanup.outcome`.
     func outcome(asked: Int) -> String {
         let count = removed > 0 ? removed : asked
-        if ok && restarted { return String(localized: "Removed \(count) certificates") }
+        if ok && restarted { return String(localized: "Removed \(count) certificates", locale: NumberFormat.locale) }
         if ok {
             if !restartError.isBlank {
-                return String(localized: "Removed \(count) certificates, but Traefik did not restart: \(restartError). The change is undone until it does.")
+                return String(localized: "Removed \(count) certificates, but Traefik did not restart: \(restartError). The change is undone until it does.", locale: NumberFormat.locale)
             }
-            return String(localized: "Removed \(count) certificates, but Traefik did not restart. The change is undone until it does.")
+            return String(localized: "Removed \(count) certificates, but Traefik did not restart. The change is undone until it does.", locale: NumberFormat.locale)
         }
         if partial { return error ?? String(localized: "Certificate removal stopped partway") }
         return error ?? String(localized: "Could not remove the certificate")
+    }
+}
+
+struct CertOffer: Identifiable {
+    let routeName: String
+    let certs: [CertEntry]
+
+    var id: String { routeName + certs.map(\.main).joined(separator: ",") }
+}
+
+enum CertCleanup {
+    static func hosts(of route: Route) -> Set<String> {
+        guard route.tlsEnabled else { return [] }
+        let pattern = #/(!?)\s*Host(?:SNI)?\(`([^`]+)`\)/#
+        return Set(route.rule.matches(of: pattern)
+            .filter { $0.output.1 != "!" }
+            .map { String($0.output.2).trimmingCharacters(in: .whitespaces).lowercased() }
+            .filter { !$0.isEmpty && $0 != "*" })
+    }
+
+    static func freed(by hosts: Set<String>, certs: [CertEntry], usage: CertUsage?) -> [CertEntry] {
+        guard !hosts.isEmpty, let usage, usage.unusedKnown else { return [] }
+        let unused = Set(usage.certs.filter(\.unused).map(\.key))
+        return certs.filter { cert in
+            !cert.resolver.isEmpty && cert.resolver != "file" &&
+                unused.contains("\(cert.resolver)|\(cert.main)") &&
+                ([cert.main] + cert.sans).contains { hosts.contains($0.trimmingCharacters(in: .whitespaces).lowercased()) }
+        }
+    }
+
+    static func offer(for route: Route, service: TMService) async -> [CertEntry] {
+        let hosts = hosts(of: route)
+        guard !hosts.isEmpty, (try? await service.certManage())?.available == true else { return [] }
+        guard let usage = try? await service.certUsage(exclude: [route.id]),
+              let certs = try? await service.certs().certs else { return [] }
+        return freed(by: hosts, certs: certs, usage: usage)
     }
 }

@@ -81,6 +81,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
+import dev.chr0nzz.traefikmanager.ui.components.CardColumns
+import dev.chr0nzz.traefikmanager.ui.components.cardRows
 import dev.chr0nzz.traefikmanager.ui.components.DrawerButton
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.distinctItems
@@ -310,38 +312,40 @@ private fun PluginsListPane(
 
             state.visible.isEmpty() -> EmptyState(headline = stringResource(R.string.plugins_no_match))
 
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = TmSpacing.lg,
-                    end = TmSpacing.lg,
-                    top = TmSpacing.xs,
-                    bottom = contentPadding.calculateBottomPadding() + 24.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
-            ) {
-                if (state.restartPending) {
-                    item {
-                        PluginRestartNotice(
-                            detail = state.restartDetail?.asString().orEmpty(),
-                            busy = state.restarting,
-                            onRestart = onRestart,
-                            onDismiss = onDismissRestart,
+            else -> CardColumns { columns ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = TmSpacing.lg,
+                        end = TmSpacing.lg,
+                        top = TmSpacing.xs,
+                        bottom = contentPadding.calculateBottomPadding() + 24.dp,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(TmSpacing.sm),
+                ) {
+                    if (state.restartPending) {
+                        item {
+                            PluginRestartNotice(
+                                detail = state.restartDetail?.asString().orEmpty(),
+                                busy = state.restarting,
+                                onRestart = onRestart,
+                                onDismiss = onDismissRestart,
+                            )
+                        }
+                    }
+                    cardRows(state.visible, columns, key = { it.name }) { plugin, cardModifier ->
+                        PluginCard(
+                            plugin = plugin,
+                            usageCount = state.usageFor(plugin.name),
+                            latest = state.updates[plugin.name],
+                            selected = plugin.name == selectedName,
+                            canManage = state.canManage,
+                            onClick = { onSelect(plugin) },
+                            onEdit = { onEdit(plugin) },
+                            onDelete = { onDelete(plugin) },
+                            modifier = cardModifier,
                         )
                     }
-                }
-                distinctItems(state.visible, key = { it.name }) { plugin ->
-                    PluginCard(
-                        plugin = plugin,
-                        usageCount = state.usageFor(plugin.name),
-                        latest = state.updates[plugin.name],
-                        selected = plugin.name == selectedName,
-                        canManage = state.canManage,
-                        onClick = { onSelect(plugin) },
-                        onEdit = { onEdit(plugin) },
-                        onDelete = { onDelete(plugin) },
-                        modifier = Modifier.animateItem(),
-                    )
                 }
             }
         }

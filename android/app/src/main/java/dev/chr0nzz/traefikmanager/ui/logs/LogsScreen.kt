@@ -97,6 +97,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -287,7 +288,7 @@ private fun LogsListPane(
                                 onClick = { viewModel.setLineCount(step) },
                                 shape = SegmentedButtonDefaults.itemShape(index, LOG_LINE_STEPS.size),
                             ) {
-                                Text(step.toString())
+                                Text(step.fmt())
                             }
                         }
                     }
@@ -405,7 +406,7 @@ private fun VerdictCard(state: LogsUiState, onFacet: (LogFacet, String) -> Unit)
                         val name = LogParser.statusName(code)?.asString()?.lowercase()
                             ?: stringResource(R.string.logs_status_fallback)
                         VerdictItem(
-                            text = "$count $code $name",
+                            text = "${count.fmt()} $code $name",
                             color = if (code >= 500) palette.red else palette.yellow,
                             onClick = { onFacet(LogFacet.Status, code.toString()) },
                         )
@@ -496,7 +497,7 @@ private fun WindowKeyRow(
             window.spanMillis?.takeIf { it > 0 }?.let {
                 KeyItem(Icons.Outlined.Schedule, stringResource(R.string.logs_span, LogParser.spanText(it)))
             }
-            window.requestsPerMinute?.let { KeyItem(Icons.Outlined.Bolt, stringResource(R.string.logs_req_per_min, it.toString())) }
+            window.requestsPerMinute?.let { KeyItem(Icons.Outlined.Bolt, stringResource(R.string.logs_req_per_min, it.fmt())) }
             KeyItem(
                 Icons.AutoMirrored.Outlined.ListAlt,
                 pluralStringResource(R.plurals.logs_unparsed, state.unparsed, state.unparsed),

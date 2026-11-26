@@ -39,6 +39,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
 import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import kotlin.math.max
 import kotlin.math.min
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @Composable
 fun RouteMapCanvas(
@@ -251,7 +252,7 @@ private fun DrawScope.drawNode(
 
 private fun chipFor(node: MapNode): String? = when (node.kind) {
     MapNodeKind.Route -> node.route?.protocol?.uppercase() ?: "HTTP"
-    MapNodeKind.Group -> node.members.size.toString()
+    MapNodeKind.Group -> node.members.size.fmt()
     MapNodeKind.Middleware -> node.uses.takeIf { it > 1 }?.let { "${it}\u00d7" }
     MapNodeKind.Service, MapNodeKind.EntryPoint -> null
 }

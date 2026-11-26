@@ -130,6 +130,7 @@ import dev.chr0nzz.traefikmanager.data.model.UiText
 import dev.chr0nzz.traefikmanager.ui.components.TopBarTitle
 import dev.chr0nzz.traefikmanager.ui.components.asString
 import androidx.compose.ui.platform.LocalResources
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 private const val UNKNOWN = "?"
 
@@ -714,7 +715,7 @@ private fun CrowdSecBody(
                                 CrowdSecView.Evidence ->
                                     stringResource(
                                         R.string.crowdsec_tab_evidence,
-                                        if (state.alertsOk) state.visibleAlerts.size.toString() else UNKNOWN,
+                                        if (state.alertsOk) state.visibleAlerts.size.fmt() else UNKNOWN,
                                     )
                                 CrowdSecView.Bans ->
                                     stringResource(R.string.crowdsec_tab_bans, state.bansCount?.toString() ?: UNKNOWN)
@@ -808,7 +809,7 @@ private fun RankCard(
         hero = when {
             blind -> "-"
             rows.isEmpty() -> "0"
-            else -> hero ?: rows.size.toString()
+            else -> hero ?: rows.size.fmt()
         },
         heroUnit = heroUnit?.takeIf { !blind && rows.isNotEmpty() },
         accent = accent,
@@ -1008,7 +1009,7 @@ private fun AlertRow(
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = alert.eventsCount.toString(),
+                    text = alert.eventsCount.fmt(),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = MonoFamily,
                         fontWeight = FontWeight.Bold,
@@ -1321,7 +1322,7 @@ private fun CrowdSecWindowRow(state: CrowdSecUiState, span: Long?) {
         Text(
             text = listOfNotNull(
                 if (state.alertsOk) {
-                    pluralStringResource(R.plurals.crowdsec_retained_alerts, state.alerts.size, state.alerts.size.toString())
+                    pluralStringResource(R.plurals.crowdsec_retained_alerts, state.alerts.size, state.alerts.size.fmt())
                 } else {
                     pluralStringResource(R.plurals.crowdsec_retained_alerts, 0, UNKNOWN)
                 },

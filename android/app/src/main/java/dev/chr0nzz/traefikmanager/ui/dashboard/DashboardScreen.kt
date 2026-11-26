@@ -92,6 +92,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
+import androidx.compose.ui.text.style.TextDirection
+import dev.chr0nzz.traefikmanager.ui.components.rtlIsolated
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -359,7 +362,7 @@ private fun SignalCardView(
                 .padding(top = TmSpacing.xs),
         ) {
             Text(
-                text = card.total?.toString() ?: "-",
+                text = card.total?.fmt() ?: "-",
                 style = if (compact) {
                     MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
                 } else {
@@ -472,7 +475,7 @@ private fun EntrypointsSection(rows: List<EntrypointRow>) {
             )
             SectionLabel(stringResource(R.string.dashboard_entry_points))
             Text(
-                text = rows.size.toString(),
+                text = rows.size.fmt(),
                 style = MaterialTheme.typography.labelMedium.copy(fontFamily = MonoFamily),
                 color = palette.muted,
             )
@@ -515,7 +518,7 @@ private fun EntrypointRowView(row: EntrypointRow) {
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = row.routerCount?.toString() ?: "-",
+                text = row.routerCount?.fmt() ?: "-",
                 style = MaterialTheme.typography.labelMedium.copy(fontFamily = MonoFamily),
                 color = if (row.routerCount == null || row.routerCount == 0) {
                     palette.muted
@@ -544,14 +547,14 @@ private fun EntrypointRowView(row: EntrypointRow) {
         ) {
             Text(
                 text = row.address,
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
+                style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily, textDirection = TextDirection.Ltr),
                 color = palette.muted,
                 modifier = Modifier.padding(start = 46.dp, end = TmSpacing.sm),
             )
             SignalStrip(cells = row.cells, cellSize = 4.dp, emptyLabel = null)
         }
         Text(
-            text = row.facts.asString(),
+            text = rtlIsolated(row.facts.asString()),
             style = MaterialTheme.typography.labelSmall.copy(fontFamily = MonoFamily),
             color = palette.muted,
             maxLines = 1,

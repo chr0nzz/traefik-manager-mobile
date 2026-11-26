@@ -50,6 +50,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmDarkPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmLightPalette
 import dev.chr0nzz.traefikmanager.ui.theme.TmPalette
 import dev.chr0nzz.traefikmanager.data.model.UiText
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 internal object P {
     val text = pick { it.text }
@@ -348,7 +349,7 @@ class StatusWidget : GlanceAppWidget() {
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
-            Hero(rows.size.toString(), trq(R.plurals.widget_unit_servers, rows.size), fit.compact, fit)
+            Hero(rows.size.fmt(), trq(R.plurals.widget_unit_servers, rows.size), fit.compact, fit)
             Spacer(modifier = GlanceModifier.defaultWeight())
             HealthPill(
                 if (down == 0) tr(R.string.widget_all_up) else tr(R.string.widget_down_count, down),

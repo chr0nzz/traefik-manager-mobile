@@ -201,7 +201,7 @@ struct ChannelEditorView: View {
         }
         let missing = channel.missingFields
         if !missing.isEmpty {
-            error = String(localized: "Fill in \(missing.joined(separator: ", ")) first.")
+            error = String(localized: "Fill in \(missing.joined(separator: ", ")) first.", locale: NumberFormat.locale)
             return nil
         }
         error = nil

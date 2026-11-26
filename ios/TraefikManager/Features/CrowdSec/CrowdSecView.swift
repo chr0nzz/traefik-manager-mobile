@@ -31,7 +31,7 @@ struct CrowdSecView: View {
             .shellSheet(item: $adding) { value in
                 AddDecisionSheet(initialValue: value, ownDecisions: model.snapshot.decisionList.filter(\.own)) { value, type, duration, reason in
                     try await model.addDecision(value: value, type: type, duration: duration, reason: reason, app: app)
-                    message = String(localized: "Decision added for \(value.trimmed)")
+                    message = String(localized: "Decision added for \(value.trimmed)", locale: NumberFormat.locale)
                 } onDelete: { decision in
                     pendingDelete = decision
                 }
@@ -90,8 +90,8 @@ struct CrowdSecView: View {
                     GeographyCard(countries: model.countries, selected: model.country) { model.toggleFacet(.country, $0, app: app) }
                 }
                 Picker("View", selection: Binding(get: { model.tab }, set: { model.setTab($0, app: app) })) {
-                    Text(String(localized: "Evidence \(model.alertsOK ? String(alerts.count) : "?")")).tag(CrowdSecTab.evidence)
-                    Text(String(localized: "Bans \(model.bansCount.map(String.init) ?? "?")")).tag(CrowdSecTab.bans)
+                    Text(String(localized: "Evidence \(model.alertsOK ? alerts.count.fmt : "?")", locale: NumberFormat.locale)).tag(CrowdSecTab.evidence)
+                    Text(String(localized: "Bans \(model.bansCount?.fmt ?? "?")", locale: NumberFormat.locale)).tag(CrowdSecTab.bans)
                 }
                 .pickerStyle(.segmented)
             }
@@ -134,9 +134,9 @@ struct CrowdSecView: View {
     private func windowRow(span: Double?) -> some View {
         let snapshot = model.snapshot
         let parts = [
-            model.alertsOK ? String(localized: "retained \(snapshot.alertList.count) alerts") : String(localized: "retained ? alerts"),
-            span.map { String(localized: "span \(LogParser.spanText($0))") },
-            model.decisionsOK ? String(localized: "\(snapshot.decisionTotal) bans") : String(localized: "? bans"),
+            model.alertsOK ? String(localized: "retained \(snapshot.alertList.count) alerts", locale: NumberFormat.locale) : String(localized: "retained ? alerts"),
+            span.map { String(localized: "span \(LogParser.spanText($0))", locale: NumberFormat.locale) },
+            model.decisionsOK ? String(localized: "\(snapshot.decisionTotal) bans", locale: NumberFormat.locale) : String(localized: "? bans"),
         ].compactMap { $0 }
         return VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: Spacing.sm) {
@@ -144,7 +144,7 @@ struct CrowdSecView: View {
                 Text(parts.joined(separator: " · ")).font(.caption2.monospaced()).foregroundStyle(Palette.muted)
             }
             if snapshot.alertsCapped == true, let limit = snapshot.alertLimit {
-                Text(String(localized: "showing the newest \(limit) alerts, the LAPI holds more (CROWDSEC_ALERT_LIMIT)"))
+                Text(String(localized: "showing the newest \(limit) alerts, the LAPI holds more (CROWDSEC_ALERT_LIMIT)", locale: NumberFormat.locale))
                     .font(.caption2)
                     .foregroundStyle(Palette.yellow)
             }
@@ -181,7 +181,7 @@ struct CrowdSecView: View {
             .background(Palette.blue.opacity(0.1), in: Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(String(localized: "Remove the \(label) filter"))
+        .accessibilityLabel(String(localized: "Remove the \(label) filter", locale: NumberFormat.locale))
     }
 
     @ViewBuilder
@@ -198,7 +198,7 @@ struct CrowdSecView: View {
                 } else if feed?.rows.isEmpty == true {
                     Text("No active decisions")
                 } else if let feed {
-                    Text(String(localized: "Showing \(feed.rows.count) of \(feed.total)"))
+                    Text(String(localized: "Showing \(feed.rows.count) of \(feed.total)", locale: NumberFormat.locale))
                 }
             }
             .font(.footnote)
@@ -214,7 +214,7 @@ struct CrowdSecView: View {
         Task {
             do {
                 try await model.deleteDecision(decision, app: app)
-                message = String(localized: "\(decision.value) unbanned")
+                message = String(localized: "\(decision.value) unbanned", locale: NumberFormat.locale)
             } catch {
                 message = error.localizedDescription
             }
@@ -244,18 +244,18 @@ private struct CrowdSecVerdict: View {
                         Text("no alerts in the retained window").font(.caption2).foregroundStyle(Palette.muted)
                     } else {
                         FlowLayout(spacing: Spacing.sm) {
-                            item("scope", String(localized: "\(sources.count) sources"), Palette.text)
-                            item("bolt", String(localized: "\(scenarios.count) scenarios"), Palette.text)
-                            item("waveform", String(localized: "\(events) events"), Palette.text)
-                            if unbanned > 0 { item("lock.open", String(localized: "\(unbanned) no active ban"), Palette.yellow) }
+                            item("scope", String(localized: "\(sources.count) sources", locale: NumberFormat.locale), Palette.text)
+                            item("bolt", String(localized: "\(scenarios.count) scenarios", locale: NumberFormat.locale), Palette.text)
+                            item("waveform", String(localized: "\(events) events", locale: NumberFormat.locale), Palette.text)
+                            if unbanned > 0 { item("lock.open", String(localized: "\(unbanned) no active ban", locale: NumberFormat.locale), Palette.yellow) }
                         }
                     }
                 }
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 2) {
-                    if let span { Text(String(localized: "\(LogParser.spanText(span)) of alerts")).font(.caption2.monospaced()) }
+                    if let span { Text(String(localized: "\(LogParser.spanText(span)) of alerts", locale: NumberFormat.locale)).font(.caption2.monospaced()) }
                     if let readAt = model.readAt {
-                        Text(String(localized: "read \(LogParser.spanText(Date().timeIntervalSince(readAt) * 1000)) ago")).font(.caption2.monospaced())
+                        Text(String(localized: "read \(LogParser.spanText(Date().timeIntervalSince(readAt) * 1000)) ago", locale: NumberFormat.locale)).font(.caption2.monospaced())
                     }
                 }
                 .foregroundStyle(Palette.muted)
@@ -291,17 +291,17 @@ private struct CrowdSecDesk: View {
                 rankCard(
                     title: String(localized: "Networks"), glyph: "globe", accent: Palette.purple, rows: networks, facet: .asn,
                     blind: String(localized: "AS names ride on alert.source"), empty: String(localized: "this agent reports ip only"),
-                    subtitle: networks.first.map { String(localized: "worst \($0.label) \($0.count) alerts") },
+                    subtitle: networks.first.map { String(localized: "worst \($0.label) \($0.count) alerts", locale: NumberFormat.locale) },
                     rowFlag: { $0.extra.isEmpty ? nil : Countries.flag($0.extra) }
                 )
             }
             rankCard(
                 title: String(localized: "Scenarios"), glyph: "bolt", accent: Palette.orange, rows: scenarios, facet: .scenario,
                 blind: String(localized: "scenarios come from /v1/alerts"), empty: String(localized: "nothing to rank in the retained window"),
-                hero: String(alerts.count), unit: String(localized: "alerts"),
+                hero: alerts.count.fmt, unit: String(localized: "alerts"),
                 subtitle: scenarios.first.map { top in
                     let events = alerts.reduce(0) { $0 + $1.eventsCount }
-                    return String(localized: "worst \(top.label)") + " · " + String(localized: "\(events) events rolled up")
+                    return String(localized: "worst \(top.label)", locale: NumberFormat.locale) + " · " + String(localized: "\(events) events rolled up", locale: NumberFormat.locale)
                 }
             )
             let onPaths = !paths.isEmpty || accounts.isEmpty
@@ -311,8 +311,8 @@ private struct CrowdSecDesk: View {
                 glyph: "scope", accent: Palette.blue, rows: targeting, facet: onPaths ? .uri : .user,
                 blind: onPaths ? String(localized: "paths live in alert.meta[]") : String(localized: "accounts live in alert.meta[]"),
                 empty: String(localized: "no meta reported"),
-                hero: String(targeting.count), unit: onPaths ? String(localized: "paths") : String(localized: "accounts"),
-                subtitle: targeting.first.map { String(localized: "most wanted \($0.label)") }
+                hero: targeting.count.fmt, unit: onPaths ? String(localized: "paths") : String(localized: "accounts"),
+                subtitle: targeting.first.map { String(localized: "most wanted \($0.label)", locale: NumberFormat.locale) }
             )
             let named = model.snapshot.alertList.contains { !$0.routers.isEmpty }
             rankCard(
@@ -320,15 +320,15 @@ private struct CrowdSecDesk: View {
                 blind: String(localized: "routers live in alert.meta[]"),
                 empty: model.snapshot.alertList.isEmpty ? String(localized: "nothing was aimed at")
                     : named ? String(localized: "no router matches") : String(localized: "no router in the evidence"),
-                hero: String(routes.count), unit: String(localized: "routers"),
-                subtitle: routes.first.map { String(localized: "most wanted \($0.label)") },
+                hero: routes.count.fmt, unit: String(localized: "routers"),
+                subtitle: routes.first.map { String(localized: "most wanted \($0.label)", locale: NumberFormat.locale) },
                 hostChips: Array(hosts.prefix(3))
             )
             pair {
                 rankCard(
                     title: String(localized: "Tooling"), glyph: "cpu", accent: Palette.teal, rows: tooling, facet: .agent,
                     blind: String(localized: "user agents live in alert.meta[]"), empty: String(localized: "no HTTP scenario fired here"),
-                    subtitle: tooling.first.map { String(localized: "worst \($0.label)") }
+                    subtitle: tooling.first.map { String(localized: "worst \($0.label)", locale: NumberFormat.locale) }
                 )
             } and: { bansCard }
         }
@@ -354,7 +354,7 @@ private struct CrowdSecDesk: View {
             health: loose.contains { $0.count > 1 } ? Palette.red : loose.isEmpty ? nil : Palette.yellow,
             hero: model.alertsOK ? LogParser.formatCount(sources.count) : "-",
             sub: !model.alertsOK ? String(localized: "sources are only listed on /v1/alerts")
-                : sources.first.map { String(localized: "worst \($0.key) \($0.weight) events") } ?? String(localized: "no sources")
+                : sources.first.map { String(localized: "worst \($0.key) \($0.weight) events", locale: NumberFormat.locale) } ?? String(localized: "no sources")
         ) {
             if !model.alertsOK || !model.decisionsOK {
                 Text("ban state unknown").font(.caption2).foregroundStyle(Palette.muted)
@@ -374,8 +374,8 @@ private struct CrowdSecDesk: View {
             Cells(colors: sources.map { $0.open > 0 && $0.count > 1 ? Palette.red : $0.open > 0 ? Palette.yellow : Palette.muted.opacity(0.3) })
         } footer: {
             if !sources.isEmpty {
-                Text(String(localized: "\(repeats.count) repeat")).font(.caption2).foregroundStyle(Palette.muted)
-                Text(String(localized: "\(sources.count - repeats.count) one-shot")).font(.caption2).foregroundStyle(Palette.muted)
+                Text(String(localized: "\(repeats.count) repeat", locale: NumberFormat.locale)).font(.caption2).foregroundStyle(Palette.muted)
+                Text(String(localized: "\(sources.count - repeats.count) one-shot", locale: NumberFormat.locale)).font(.caption2).foregroundStyle(Palette.muted)
             }
         }
     }
@@ -394,7 +394,7 @@ private struct CrowdSecDesk: View {
             health: !model.decisionsOK ? Palette.red : stale != nil ? Palette.yellow : nil,
             hero: model.decisionsOK ? LogParser.formatCount(total) : "-",
             sub: !model.decisionsOK ? String(localized: "nothing was read from /v1/decisions")
-                : stale ?? (String(localized: "\(LogParser.formatCount(snapshot.ownBans)) from this host") + " · " + String(localized: "\(LogParser.formatCount(snapshot.subscribedBans)) subscribed"))
+                : stale ?? (String(localized: "\(LogParser.formatCount(snapshot.ownBans)) from this host", locale: NumberFormat.locale) + " · " + String(localized: "\(LogParser.formatCount(snapshot.subscribedBans)) subscribed", locale: NumberFormat.locale))
         ) {
             if model.decisionsOK {
                 Flag(icon: "nosign", count: snapshot.typeCount("ban"), label: "ban", color: Palette.muted) { onFacet(.type, "ban") }
@@ -402,7 +402,7 @@ private struct CrowdSecDesk: View {
         } content: {
             Cells(colors: (0..<min(cellCount, 240)).map { $0 < ownCells ? Palette.text.opacity(0.42) : Palette.muted.opacity(0.3) })
             if perCell > 1 {
-                Text(String(localized: "1 cell = \(LogParser.formatCount(perCell))")).font(.caption2).foregroundStyle(Palette.muted)
+                Text(String(localized: "1 cell = \(LogParser.formatCount(perCell))", locale: NumberFormat.locale)).font(.caption2).foregroundStyle(Palette.muted)
             }
         } footer: {
             ForEach(snapshot.origins, id: \.0) { origin, count in
@@ -426,15 +426,15 @@ private struct CrowdSecDesk: View {
             title: title,
             glyph: glyph,
             accent: accent,
-            hero: isBlind ? "-" : rows.isEmpty ? "0" : hero ?? String(rows.count),
+            hero: isBlind ? "-" : rows.isEmpty ? 0.fmt : hero ?? rows.count.fmt,
             heroUnit: !isBlind && !rows.isEmpty ? unit : nil,
-            sub: isBlind ? blind : rows.isEmpty ? empty : subtitle ?? String(localized: "worst \(rows[0].key)")
+            sub: isBlind ? blind : rows.isEmpty ? empty : subtitle ?? String(localized: "worst \(rows[0].key)", locale: NumberFormat.locale)
         ) {
             if !isBlind && !rows.isEmpty && !hostChips.isEmpty {
                 HStack(spacing: Spacing.sm) {
                     ForEach(hostChips) { host in
                         Button { onFacet(.host, host.key) } label: {
-                            Text(verbatim: "\(host.count) \(host.key)").font(.caption2).foregroundStyle(Palette.muted).lineLimit(1)
+                            Text(verbatim: "\(host.count.fmt) \(host.key)").font(.caption2).foregroundStyle(Palette.muted).lineLimit(1)
                         }
                         .buttonStyle(.plain)
                     }
@@ -451,7 +451,7 @@ private struct CrowdSecDesk: View {
                             Spacer(minLength: Spacing.xs)
                             if row.open > 0 {
                                 Image(systemName: "lock.open").font(.system(size: 9)).foregroundStyle(Palette.yellow)
-                                Text(verbatim: "\(row.open)").font(.caption2.monospaced()).foregroundStyle(Palette.yellow)
+                                Text(row.open.fmt).font(.caption2.monospaced()).foregroundStyle(Palette.yellow)
                             }
                             Text(LogParser.formatCount(row.count)).font(.caption2.monospaced().weight(.bold))
                         }
@@ -464,7 +464,7 @@ private struct CrowdSecDesk: View {
                 }
                 if rows.count > 4 {
                     let rest = rows.dropFirst(4)
-                    Text(String(localized: "+\(rest.reduce(0) { $0 + $1.count }) alerts across \(rest.count) more"))
+                    Text(String(localized: "+\(rest.reduce(0) { $0 + $1.count }) alerts across \(rest.count) more", locale: NumberFormat.locale))
                         .font(.caption2)
                         .foregroundStyle(Palette.muted)
                 }
@@ -532,14 +532,14 @@ private struct AlertRow: View {
                 }
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 3) {
-                    Text(verbatim: "\(alert.eventsCount)").font(.caption.monospaced().weight(.bold)).foregroundStyle(Palette.muted)
+                    Text(alert.eventsCount.fmt).font(.caption.monospaced().weight(.bold)).foregroundStyle(Palette.muted)
                     Text(!decisionsOK ? "?" : handled ? String(localized: "banned") : String(localized: "open"))
                         .font(.caption2)
                         .foregroundStyle(!decisionsOK ? Palette.muted : handled ? Palette.green : Palette.yellow)
                     if !handled && !alert.ip.isEmpty {
                         Button(action: onBan) { Image(systemName: "nosign").foregroundStyle(Palette.red) }
                             .buttonStyle(.borderless)
-                            .accessibilityLabel(String(localized: "Ban \(alert.ip)"))
+                            .accessibilityLabel(String(localized: "Ban \(alert.ip)", locale: NumberFormat.locale))
                     }
                 }
             }
@@ -575,7 +575,7 @@ private struct DecisionRow: View {
                 if decision.id != 0 {
                     Button(action: onDelete) { Image(systemName: "trash").foregroundStyle(Palette.red) }
                         .buttonStyle(.borderless)
-                        .accessibilityLabel(String(localized: "Unban \(decision.value)"))
+                        .accessibilityLabel(String(localized: "Unban \(decision.value)", locale: NumberFormat.locale))
                 }
             }
         }
@@ -598,8 +598,8 @@ private struct AddDecisionSheet: View {
     @State private var error: String?
 
     private let durations: [(String, String)] = [
-        ("1h", String(localized: "\(1) hours")), ("4h", String(localized: "\(4) hours")), ("24h", String(localized: "\(24) hours")),
-        ("168h", String(localized: "\(7) days")), ("720h", String(localized: "\(30) days")), ("8760h", String(localized: "\(1) years")),
+        ("1h", String(localized: "\(1) hours", locale: NumberFormat.locale)), ("4h", String(localized: "\(4) hours", locale: NumberFormat.locale)), ("24h", String(localized: "\(24) hours", locale: NumberFormat.locale)),
+        ("168h", String(localized: "\(7) days", locale: NumberFormat.locale)), ("720h", String(localized: "\(30) days", locale: NumberFormat.locale)), ("8760h", String(localized: "\(1) years", locale: NumberFormat.locale)),
     ]
 
     var body: some View {
@@ -632,7 +632,7 @@ private struct AddDecisionSheet: View {
                     Section { Text(error).foregroundStyle(Palette.red).font(.footnote) }
                 }
                 if !ownDecisions.isEmpty {
-                    Section(String(localized: "Your decisions \(ownDecisions.count)")) {
+                    Section(String(localized: "Your decisions \(ownDecisions.count)", locale: NumberFormat.locale)) {
                         ForEach(ownDecisions) { decision in
                             HStack {
                                 VStack(alignment: .leading) {
@@ -643,7 +643,7 @@ private struct AddDecisionSheet: View {
                                 if decision.id != 0 {
                                     Button { onDelete(decision) } label: { Image(systemName: "trash").foregroundStyle(Palette.red) }
                                         .buttonStyle(.borderless)
-                                        .accessibilityLabel(String(localized: "Unban \(decision.value)"))
+                                        .accessibilityLabel(String(localized: "Unban \(decision.value)", locale: NumberFormat.locale))
                                 }
                             }
                         }

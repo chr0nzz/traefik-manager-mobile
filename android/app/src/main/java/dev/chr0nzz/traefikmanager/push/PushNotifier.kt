@@ -35,7 +35,7 @@ object PushNotifier {
 
     fun show(context: Context, message: String, event: String, source: String = "Traefik Manager") {
         ensureChannel(context)
-        if (!allowed(context)) return
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
 
         val open = PendingIntent.getActivity(
             context,

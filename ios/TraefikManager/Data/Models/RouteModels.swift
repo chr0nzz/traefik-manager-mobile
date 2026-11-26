@@ -413,19 +413,19 @@ struct RouteHealth: Codable, Hashable, Sendable {
         case Self.up where isSelf:
             return String(localized: "Reachable, this app")
         case Self.up where servers != nil:
-            return String(localized: "Reachable, \(servers!.up) of \(servers!.total) servers up")
+            return String(localized: "Reachable, \(servers!.up) of \(servers!.total) servers up", locale: NumberFormat.locale)
         case Self.up where latencyMs != nil:
-            return String(localized: "Reachable in \(latencyMs!)ms")
+            return String(localized: "Reachable in \(latencyMs!)ms", locale: NumberFormat.locale)
         case Self.up:
             return String(localized: "Reachable")
         case Self.degraded where servers != nil:
-            return String(localized: "Degraded, \(servers!.up) of \(servers!.total) servers up")
+            return String(localized: "Degraded, \(servers!.up) of \(servers!.total) servers up", locale: NumberFormat.locale)
         case Self.degraded:
             return String(localized: "Degraded")
         case Self.down where servers != nil:
-            return String(localized: "Down, 0 of \(servers!.total) servers up")
+            return String(localized: "Down, 0 of \(servers!.total) servers up", locale: NumberFormat.locale)
         case Self.down:
-            if let error, !error.trimmingCharacters(in: .whitespaces).isEmpty { return String(localized: "Down: \(error)") }
+            if let error, !error.trimmingCharacters(in: .whitespaces).isEmpty { return String(localized: "Down: \(error)", locale: NumberFormat.locale) }
             return String(localized: "Down")
         default:
             return note ?? String(localized: "Not checked yet")

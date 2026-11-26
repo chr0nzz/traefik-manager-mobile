@@ -33,8 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
+import dev.chr0nzz.traefikmanager.ui.theme.CodeFamily
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
-import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
@@ -115,7 +115,7 @@ fun FormField(
         supportingText = help?.let { { Text(it) } },
         singleLine = true,
         textStyle = if (mono) {
-            MaterialTheme.typography.bodyMedium.copy(fontFamily = MonoFamily)
+            MaterialTheme.typography.bodyMedium.copy(fontFamily = CodeFamily)
         } else {
             MaterialTheme.typography.bodyMedium
         },
@@ -141,7 +141,7 @@ fun FormLines(
         label = { Text(label) },
         placeholder = { if (placeholder.isNotEmpty()) Text(placeholder) },
         supportingText = help?.let { { Text(it) } },
-        textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
+        textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = CodeFamily),
         minLines = 2,
         maxLines = 6,
         modifier = Modifier.fillMaxWidth(),

@@ -16,7 +16,7 @@ struct MiddlewaresView: View {
     @State private var columns = 1
     @State private var creating = DebugLaunch.form == "new-mw"
     @State private var showTemplates = false
-    @State private var debugDetail: String? = DebugLaunch.route
+    @State private var opened: String? = DebugLaunch.route
     @State private var live: [String: [String]] = [:]
 
     private var store: RoutesStore { app.routes }
@@ -66,12 +66,12 @@ struct MiddlewaresView: View {
             .navigationDestination(for: String.self) { name in
                 MiddlewareDetailView(name: name, usage: usage[name] ?? 0, externalUsers: external[name] ?? [], message: $message)
             }
-            .navigationDestination(item: $debugDetail) { name in
+            .navigationDestination(item: $opened) { name in
                 MiddlewareDetailView(name: name, usage: usage[name] ?? 0, externalUsers: external[name] ?? [], message: $message)
             }
             .shellSheet(isPresented: $creating) {
                 NavigationStack {
-                    MiddlewareFormView(name: nil) { message = String(localized: "\($0) saved") }
+                    MiddlewareFormView(name: nil) { message = String(localized: "\($0) saved", locale: NumberFormat.locale) }
                 }
             }
             .shellSheet(isPresented: $showTemplates) {
@@ -118,7 +118,7 @@ struct MiddlewaresView: View {
             List {
                 if columns > 1 {
                     CardRows(visible, id: \.name, columns: columns) { middleware in
-                        NavigationLink(value: middleware.name) {
+                        Button { opened = middleware.name } label: {
                             MiddlewareCard(middleware: middleware, usage: usage[middleware.name] ?? 0)
                         }
                         .buttonStyle(.plain)
@@ -169,7 +169,7 @@ struct MiddlewareCard: View {
             }
             Divider().overlay(Palette.border).padding(.top, Spacing.xs)
             HStack {
-                Text(usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes"))
+                Text(usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes", locale: NumberFormat.locale))
                     .font(.caption2)
                     .foregroundStyle(usage == 0 ? Palette.muted : Palette.text)
                 Spacer()

@@ -45,7 +45,7 @@ struct HomeView: View {
                         .symbolRenderingMode(app.notifications.unread > 0 ? .multicolor : .monochrome)
                 }
                 .accessibilityLabel(app.notifications.unread > 0
-                    ? String(localized: "Notifications, \(app.notifications.unread) unread")
+                    ? String(localized: "Notifications, \(app.notifications.unread) unread", locale: NumberFormat.locale)
                     : String(localized: "Notifications"))
                 Button {
                     Task { await refreshAll() }
@@ -236,7 +236,7 @@ struct ProviderChips: View {
                 .foregroundStyle(tint)
             Text(provider.name)
                 .foregroundStyle(isActive ? Palette.blue : Palette.muted)
-            Text(verbatim: "\(provider.count)")
+            Text(provider.count.fmt)
                 .fontWeight(.bold)
                 .foregroundStyle(isActive ? Palette.blue : Palette.text)
         }
@@ -289,7 +289,7 @@ private struct SignalCardView: View {
                     .foregroundStyle(glyph.1)
             }
             HStack(alignment: .firstTextBaseline) {
-                Text(card.total.map(String.init) ?? "-")
+                Text(card.total?.fmt ?? "-")
                     .font(compact ? .title2.weight(.semibold) : .title.weight(.semibold))
                     .monospacedDigit()
                 Spacer(minLength: 4)
@@ -329,7 +329,7 @@ private struct CountChip: View {
 
     var body: some View {
         HStack(spacing: 3) {
-            Text(verbatim: "\(flag.count)").fontWeight(.bold)
+            Text(flag.count.fmt).fontWeight(.bold)
             if showLabel { Text(flag.label) }
         }
         .font(.caption2.monospaced())
@@ -350,7 +350,7 @@ private struct EntrypointsCard: View {
                     .font(.system(size: 12))
                     .foregroundStyle(Palette.muted)
                 SectionLabel(text: String(localized: "Entry Points"))
-                Text(verbatim: "\(rows.count)")
+                Text(rows.count.fmt)
                     .font(.caption.monospaced())
                     .foregroundStyle(Palette.muted)
             }
@@ -385,7 +385,7 @@ private struct EntrypointRowView: View {
                     .font(.subheadline.monospaced())
                     .lineLimit(1)
                 Spacer()
-                Text(row.routerCount.map(String.init) ?? "-")
+                Text(row.routerCount?.fmt ?? "-")
                     .font(.caption.monospaced())
                     .foregroundStyle((row.routerCount ?? 0) == 0 ? Palette.muted : Palette.text)
                 if row.idle {
@@ -431,13 +431,13 @@ private struct RuntimeFooter: View {
             parts.append("v\(version)" + (runtime.codename.map { " \($0)" } ?? ""))
         }
         if let metrics = runtime.metrics, !metrics.isEmpty {
-            parts.append(String(localized: "metrics \(metrics)"))
+            parts.append(String(localized: "metrics \(metrics)", locale: NumberFormat.locale))
         } else {
             parts.append(String(localized: "metrics off"))
         }
         parts.append(runtime.accessLog == true ? String(localized: "access log on") : String(localized: "access log off"))
         if let tracing = runtime.tracing, !tracing.isEmpty {
-            parts.append(String(localized: "tracing \(tracing)"))
+            parts.append(String(localized: "tracing \(tracing)", locale: NumberFormat.locale))
         } else {
             parts.append(String(localized: "tracing off"))
         }

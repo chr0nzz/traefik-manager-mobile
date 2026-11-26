@@ -110,7 +110,7 @@ enum RouteMapBuilder {
 
         for (name, members) in collapsed.sorted(by: { $0.key < $1.key }) {
             let id = "group:\(name)"
-            add(MapNode(id: id, kind: .group, label: name, detail: String(localized: "\(members.count) routes"), members: members, health: worst(members)))
+            add(MapNode(id: id, kind: .group, label: name, detail: String(localized: "\(members.count) routes", locale: NumberFormat.locale), members: members, health: worst(members)))
             var eps = Set<String>()
             for ep in members.flatMap(\.entryPointNames) where eps.insert(ep).inserted { link("ep:\(ep)", id) }
             var services = Set<String>()

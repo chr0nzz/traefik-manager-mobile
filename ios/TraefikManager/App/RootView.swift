@@ -55,6 +55,7 @@ private struct TabShell: View {
     var body: some View {
         let destinations = app.destinations
         let primary = destinations.filter(\.primary)
+        let badges = app.navBadges
 
         TabView(selection: $tab) {
             ForEach(primary) { destination in
@@ -64,6 +65,7 @@ private struct TabShell: View {
                 }
                 .id("\(destination.id)-\(app.generation)")
                 .tabItem { Label(destination.label, systemImage: destination.systemImage) }
+                .badge(tabBadge(badges[destination]))
                 .tag(destination.id)
             }
 
@@ -125,6 +127,7 @@ private struct SidebarShell: View {
 
     var body: some View {
         let destinations = app.destinations
+        let badges = app.navBadges
         let selection = Binding<Destination?>(
             get: { app.selection },
             set: { if let destination = $0 { app.selection = destination } }
@@ -141,6 +144,7 @@ private struct SidebarShell: View {
                         Section(section.label) {
                             ForEach(items) { destination in
                                 Label(destination.label, systemImage: destination.systemImage)
+                                    .badge(sidebarBadge(badges[destination]))
                                     .tag(destination)
                             }
                         }
@@ -159,6 +163,18 @@ private struct SidebarShell: View {
             if !destinations.contains(app.selection) { app.selection = .home }
         }
     }
+}
+
+private func sidebarBadge(_ badge: NavBadge?) -> Text? {
+    guard let badge else { return nil }
+    if badge.alerts > 0 { return Text(NavBadge.label(badge.alerts)).foregroundStyle(Palette.red) }
+    if badge.count > 0 { return Text(NavBadge.label(badge.count)) }
+    return nil
+}
+
+private func tabBadge(_ badge: NavBadge?) -> Text? {
+    guard let badge, badge.alerts > 0 else { return nil }
+    return Text(NavBadge.label(badge.alerts))
 }
 
 // MARK: - Routing

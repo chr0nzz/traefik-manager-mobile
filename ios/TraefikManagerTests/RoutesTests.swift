@@ -244,3 +244,31 @@ final class TraefikAdvisoryTests: XCTestCase {
         XCTAssertEqual(TraefikAdvisories.notice(version: "3.7.15", middlewares: [], dismissed: { _ in nil })?.forwardAuthInUse, false)
     }
 }
+
+final class CertCleanupTests: XCTestCase {
+    private func route(_ json: String) throws -> Route {
+        try JSONDecoder().decode(Route.self, from: Data(json.utf8))
+    }
+
+    private func usage(_ json: String) throws -> CertUsage {
+        try JSONDecoder().decode(CertUsage.self, from: Data(json.utf8))
+    }
+
+    func testHostsNeedTLSAndSkipNegatedAndCatchAll() throws {
+        XCTAssertEqual(CertCleanup.hosts(of: try route(#"{"tls":true,"rule":"Host(`A.example.com`) || !Host(`b.example.com`) || HostSNI(`*`)"}"#)), ["a.example.com"])
+        XCTAssertTrue(CertCleanup.hosts(of: try route(#"{"rule":"Host(`a.example.com`)"}"#)).isEmpty)
+    }
+
+    func testFreedOnlyUnusedResolverCertsForTheHosts() throws {
+        let certs = [
+            CertEntry(resolver: "le", main: "a.example.com"),
+            CertEntry(resolver: "le", main: "c.example.com", sans: ["a.example.com"]),
+            CertEntry(resolver: "file", main: "a.example.com"),
+            CertEntry(resolver: "le", main: "z.example.com"),
+        ]
+        let report = try usage(#"{"unused_known":true,"certs":[{"resolver":"le","main":"a.example.com","unused":true},{"resolver":"le","main":"c.example.com","unused":false},{"resolver":"file","main":"a.example.com","unused":true},{"resolver":"le","main":"z.example.com","unused":true}]}"#)
+        XCTAssertEqual(CertCleanup.freed(by: ["a.example.com"], certs: certs, usage: report).map(\.main), ["a.example.com"])
+        XCTAssertTrue(CertCleanup.freed(by: ["a.example.com"], certs: certs, usage: CertUsage(unusedKnown: false)).isEmpty)
+        XCTAssertTrue(CertCleanup.freed(by: ["a.example.com"], certs: certs, usage: nil).isEmpty)
+    }
+}

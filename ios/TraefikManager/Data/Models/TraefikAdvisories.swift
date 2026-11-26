@@ -28,12 +28,12 @@ struct AdvisoryNotice: Sendable {
     let forwardAuthInUse: Bool
 
     var message: String {
-        var parts = [String(localized: "Your Traefik v\(version) is affected by \(advisory.id) (\(advisory.severity.label)) - \(advisory.summary).")]
+        var parts = [String(localized: "Your Traefik v\(version) is affected by \(advisory.id) (\(advisory.severity.label)) - \(advisory.summary).", locale: NumberFormat.locale)]
         if forwardAuthInUse { parts.append(String(localized: "A forwardAuth middleware is in use, so this is high priority.")) }
         if advisory.fixedIn.count > 1 {
-            parts.append(String(localized: "Update Traefik to \(advisory.fixedIn[0]) or \(advisory.fixedIn[1])."))
+            parts.append(String(localized: "Update Traefik to \(advisory.fixedIn[0]) or \(advisory.fixedIn[1]).", locale: NumberFormat.locale))
         } else if let only = advisory.fixedIn.first {
-            parts.append(String(localized: "Update Traefik to \(only)."))
+            parts.append(String(localized: "Update Traefik to \(only).", locale: NumberFormat.locale))
         }
         return parts.joined(separator: " ")
     }

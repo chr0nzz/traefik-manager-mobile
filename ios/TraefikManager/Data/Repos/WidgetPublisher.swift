@@ -131,14 +131,14 @@ enum WidgetPublisher {
             cards[card.kind.rawValue] = WidgetCard(
                 key: card.kind.rawValue,
                 title: card.title,
-                hero: "\(card.total ?? card.cells.count)",
+                hero: (card.total ?? card.cells.count).fmt,
                 unit: card.kind == .services ? String(localized: "services") : card.kind == .middlewares ? String(localized: "middlewares") : String(localized: "routers"),
                 health: wire(card.health),
                 healthLabel: card.healthLabel,
                 sub: card.sub,
                 cells: card.cells.prefix(cellLimit).map(wire),
-                chips: card.flags.map { WidgetChip(label: "\($0.count) \($0.label)", health: wire($0.status)) },
-                footer: card.providers.map { WidgetChip(label: "\($0.name) \($0.count)", health: wire($0.worst)) }
+                chips: card.flags.map { WidgetChip(label: "\($0.count.fmt) \($0.label)", health: wire($0.status)) },
+                footer: card.providers.map { WidgetChip(label: "\($0.name) \($0.count.fmt)", health: wire($0.worst)) }
             )
         }
         let rows = snapshot.entrypoints
@@ -146,14 +146,14 @@ enum WidgetPublisher {
         cards[WidgetCardKind.entrypoints.rawValue] = WidgetCard(
             key: WidgetCardKind.entrypoints.rawValue,
             title: WidgetCardKind.entrypoints.title,
-            hero: "\(rows.count)",
+            hero: rows.count.fmt,
             unit: String(localized: "entry points"),
             health: rows.contains { $0.health == .error } ? .error : idle > 0 ? .warn : .ok,
-            sub: rows.first { !$0.idle }.map { String(localized: "busiest \($0.name) · \($0.address)") } ?? String(localized: "nothing bound"),
+            sub: rows.first { !$0.idle }.map { String(localized: "busiest \($0.name) · \($0.address)", locale: NumberFormat.locale) } ?? String(localized: "nothing bound"),
             cells: rows.flatMap { $0.cells.map(wire) }.prefix(cellLimit).map { $0 },
-            chips: idle > 0 ? [WidgetChip(label: String(localized: "\(idle) idle"), health: .warn)] : [],
+            chips: idle > 0 ? [WidgetChip(label: String(localized: "\(idle) idle", locale: NumberFormat.locale), health: .warn)] : [],
             rows: rows.prefix(rowLimit).map {
-                WidgetRow(name: "\($0.name) \($0.address)", count: $0.routerCount.map(String.init) ?? "-", health: wire($0.health))
+                WidgetRow(name: "\($0.name) \($0.address)", count: $0.routerCount?.fmt ?? "-", health: wire($0.health))
             }
         )
         return cards
@@ -165,21 +165,21 @@ enum WidgetPublisher {
         let critical = certs.filter { ($0.daysLeft ?? 999) <= 7 }.count
         func health(_ days: Int?) -> WidgetHealth { (days ?? 999) <= 7 ? .error : (days ?? 999) <= 30 ? .warn : .ok }
         var chips: [WidgetChip] = []
-        if critical > 0 { chips.append(WidgetChip(label: String(localized: "\(critical) critical"), health: .error)) }
-        if expiring > critical { chips.append(WidgetChip(label: String(localized: "\(expiring - critical) expiring"), health: .warn)) }
+        if critical > 0 { chips.append(WidgetChip(label: String(localized: "\(critical) critical", locale: NumberFormat.locale), health: .error)) }
+        if expiring > critical { chips.append(WidgetChip(label: String(localized: "\(expiring - critical) expiring", locale: NumberFormat.locale), health: .warn)) }
         if expiring == 0 { chips.append(WidgetChip(label: String(localized: "all current"), health: .ok)) }
         let first = certs.first
         return WidgetCard(
             key: WidgetCardKind.certs.rawValue,
             title: WidgetCardKind.certs.title,
-            hero: "\(certs.count)",
+            hero: certs.count.fmt,
             unit: String(localized: "certificates"),
             health: critical > 0 ? .error : expiring > 0 ? .warn : .ok,
-            sub: first.map { cert in cert.daysLeft.map { String(localized: "soonest \(cert.main) · \($0)d left") } ?? String(localized: "soonest \(cert.main)") }
+            sub: first.map { cert in cert.daysLeft.map { String(localized: "soonest \(cert.main) · \($0)d left", locale: NumberFormat.locale) } ?? String(localized: "soonest \(cert.main)", locale: NumberFormat.locale) }
                 ?? String(localized: "no certificates"),
             cells: certs.prefix(cellLimit).map { health($0.daysLeft) },
             chips: chips,
-            rows: certs.prefix(rowLimit).map { WidgetRow(name: $0.main, count: $0.daysLeft.map { "\($0)d" } ?? "-", health: health($0.daysLeft)) }
+            rows: certs.prefix(rowLimit).map { WidgetRow(name: $0.main, count: $0.daysLeft.map { "\($0.fmt)d" } ?? "-", health: health($0.daysLeft)) }
         )
     }
 
@@ -206,42 +206,42 @@ enum WidgetPublisher {
             WidgetCardKind.sources.rawValue: WidgetCard(
                 key: WidgetCardKind.sources.rawValue,
                 title: WidgetCardKind.sources.title,
-                hero: "\(sources.count)",
+                hero: sources.count.fmt,
                 unit: String(localized: "sources"),
                 health: severe ? .error : loose > 0 ? .warn : .ok,
-                sub: sources.first.map { String(localized: "worst \($0.label)") + " · " + String(localized: "\($0.weight) events") } ?? String(localized: "nobody tripped a scenario"),
+                sub: sources.first.map { String(localized: "worst \($0.label)", locale: NumberFormat.locale) + " · " + String(localized: "\($0.weight) events", locale: NumberFormat.locale) } ?? String(localized: "nobody tripped a scenario"),
                 cells: sources.prefix(cellLimit).map { $0.open > 0 && $0.count > 1 ? .error : $0.open > 0 ? .warn : .idle },
                 chips: sources.isEmpty ? [] : loose > 0
-                    ? [WidgetChip(label: String(localized: "\(loose) loose"), health: severe ? .error : .warn),
-                       WidgetChip(label: String(localized: "\(sources.count - loose) banned"))]
+                    ? [WidgetChip(label: String(localized: "\(loose) loose", locale: NumberFormat.locale), health: severe ? .error : .warn),
+                       WidgetChip(label: String(localized: "\(sources.count - loose) banned", locale: NumberFormat.locale))]
                     : [WidgetChip(label: String(localized: "every source banned"))],
-                footer: [WidgetChip(label: String(localized: "\(repeats) repeat")), WidgetChip(label: String(localized: "\(sources.count - repeats) one-shot"))]
+                footer: [WidgetChip(label: String(localized: "\(repeats) repeat", locale: NumberFormat.locale)), WidgetChip(label: String(localized: "\(sources.count - repeats) one-shot", locale: NumberFormat.locale))]
             ),
             WidgetCardKind.scenarios.rawValue: WidgetCard(
                 key: WidgetCardKind.scenarios.rawValue,
                 title: WidgetCardKind.scenarios.title,
-                hero: "\(alerts.count)",
+                hero: alerts.count.fmt,
                 unit: String(localized: "alerts"),
                 health: scenarios.contains { $0.open > 0 } ? .warn : .ok,
-                sub: scenarios.first.map { String(localized: "worst \($0.label)") + " · " + String(localized: "\(events) events rolled up") } ?? String(localized: "nothing to rank in the retained window"),
+                sub: scenarios.first.map { String(localized: "worst \($0.label)", locale: NumberFormat.locale) + " · " + String(localized: "\(events) events rolled up", locale: NumberFormat.locale) } ?? String(localized: "nothing to rank in the retained window"),
                 rows: scenarios.prefix(rowLimit).map(rankRow)
             ),
             WidgetCardKind.paths.rawValue: WidgetCard(
                 key: WidgetCardKind.paths.rawValue,
                 title: WidgetCardKind.paths.title,
-                hero: "\(paths.count)",
+                hero: paths.count.fmt,
                 unit: String(localized: "paths"),
                 health: paths.contains { $0.open > 0 } ? .warn : .ok,
-                sub: paths.first.map { String(localized: "most wanted \($0.label)") } ?? String(localized: "nothing was aimed at"),
+                sub: paths.first.map { String(localized: "most wanted \($0.label)", locale: NumberFormat.locale) } ?? String(localized: "nothing was aimed at"),
                 rows: paths.prefix(rowLimit).map(rankRow)
             ),
             WidgetCardKind.bans.rawValue: WidgetCard(
                 key: WidgetCardKind.bans.rawValue,
                 title: WidgetCardKind.bans.title,
-                hero: "\(total)",
+                hero: total.fmt,
                 unit: String(localized: "bans"),
                 health: total == 0 ? .idle : .ok,
-                sub: String(localized: "\(own) from this host") + " · " + String(localized: "\(snapshot.subscribedBans) subscribed"),
+                sub: String(localized: "\(own) from this host", locale: NumberFormat.locale) + " · " + String(localized: "\(snapshot.subscribedBans) subscribed", locale: NumberFormat.locale),
                 cells: (0..<banCells).map { $0 < ownCells ? .ok : .idle },
                 footer: snapshot.origins.prefix(3).map { WidgetChip(label: "\($0.0) \($0.1)") }
             ),
@@ -251,8 +251,8 @@ enum WidgetPublisher {
     private static func rankRow(_ row: CsRanked) -> WidgetRow {
         WidgetRow(
             name: row.label,
-            count: "\(row.count)",
-            flag: row.open > 0 ? "\(row.open)" : "",
+            count: row.count.fmt,
+            flag: row.open > 0 ? row.open.fmt : "",
             health: row.open > 0 && row.open == row.count ? .error : row.open > 0 ? .warn : .ok
         )
     }

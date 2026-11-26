@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.chr0nzz.traefikmanager.ui.components.SectionLabel
 import dev.chr0nzz.traefikmanager.ui.components.TmCard
+import dev.chr0nzz.traefikmanager.ui.theme.CodeFamily
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
-import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
@@ -231,7 +231,7 @@ private fun YamlField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = MonoFamily),
+        textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = CodeFamily),
         minLines = 5,
         maxLines = 12,
         modifier = Modifier.fillMaxWidth(),

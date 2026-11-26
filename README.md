@@ -11,11 +11,23 @@ Native Android and iOS companion app for [Traefik Manager](https://github.com/ch
 
 ## Download
 
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=dev.chr0nzz.traefikmanager"><img src=".github/assets/get-it-on-google-play.svg" alt="Get it on Google Play" height="50" /></a>
+  <a href="https://apps.apple.com/us/app/traefik-manager/id6826725061"><img src=".github/assets/download-on-the-app-store.svg" alt="Download on the App Store" height="50" /></a>
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/chr0nzz/traefik-manager-mobile"><img src=".github/assets/get-it-on-obtainium.png" alt="Get it on Obtainium" height="50" /></a>
+</p>
+
 | Platform | Link |
 | --- | --- |
 | Android (APK) | [Latest release](https://github.com/chr0nzz/traefik-manager-mobile/releases/latest) |
 | Google Play | [Install from Play Store](https://play.google.com/store/apps/details?id=dev.chr0nzz.traefikmanager) |
+| Obtainium | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/chr0nzz/traefik-manager-mobile), or add `https://github.com/chr0nzz/traefik-manager-mobile` by hand |
 | iPhone and iPad | [Download on the App Store](https://apps.apple.com/us/app/traefik-manager/id6826725061) |
+| iOS beta | [Join the TestFlight beta](https://testflight.apple.com/join/zjT2P6JN) |
+
+Obtainium installs the APK from GitHub releases and updates it when a new release is published.
+
+The iOS beta runs on iPhone, iPad and Apple silicon Macs: install [TestFlight](https://apps.apple.com/app/testflight/id899247664), open the link and tap **Accept**. More in the [beta docs](https://traefik-manager.xyzlab.dev/beta.html#mobile-app).
 
 Both apps share one version number: the iOS app starts at 2.5.0, alongside Android.
 

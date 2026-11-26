@@ -201,8 +201,8 @@ struct StaticConfigView: View {
     private var providersSummary: String {
         let providers = model.providers
         var parts = [
-            providers.docker ? "docker" : String(localized: "\("docker") off"),
-            providers.file ? "file" : String(localized: "\("file") off"),
+            providers.docker ? "docker" : String(localized: "\("docker") off", locale: NumberFormat.locale),
+            providers.file ? "file" : String(localized: "\("file") off", locale: NumberFormat.locale),
         ]
         parts += model.otherProviders
         return parts.joined(separator: " · ")
@@ -242,7 +242,7 @@ struct StaticConfigView: View {
         return [
             system.checkNewVersion ? String(localized: "version check on") : String(localized: "version check off"),
             system.sendUsage ? String(localized: "usage stats on") : String(localized: "usage stats off"),
-            String(localized: "rule syntax \(system.ruleSyntax == "v2" ? "v2" : "v3")"),
+            String(localized: "rule syntax \(system.ruleSyntax == "v2" ? "v2" : "v3")", locale: NumberFormat.locale),
         ].joined(separator: " · ")
     }
 
@@ -301,11 +301,11 @@ private struct ListSectionCard<Rows: View>: View {
         Card(spacing: Spacing.xs) {
             HStack {
                 Text(title).font(.subheadline.weight(.semibold))
-                Text("\(count)").font(.caption.monospaced()).foregroundStyle(Palette.muted)
+                Text(count.fmt).font(.caption.monospaced()).foregroundStyle(Palette.muted)
                 Spacer()
                 Button(action: onAdd) { Image(systemName: "plus") }
                     .buttonStyle(.borderless)
-                    .accessibilityLabel(String(localized: "Add to \(title)"))
+                    .accessibilityLabel(String(localized: "Add to \(title)", locale: NumberFormat.locale))
             }
             if count == 0 {
                 Text(empty).font(.caption).foregroundStyle(Palette.muted)
@@ -333,7 +333,7 @@ private struct ItemRow: View {
             Spacer()
             Button("Edit", action: onEdit).font(.footnote)
             Button(action: onRemove) { Image(systemName: "trash").foregroundStyle(Palette.red) }
-                .accessibilityLabel(String(localized: "Remove \(title)"))
+                .accessibilityLabel(String(localized: "Remove \(title)", locale: NumberFormat.locale))
         }
         .buttonStyle(.borderless)
         .padding(.vertical, 2)
@@ -352,7 +352,7 @@ private struct SummaryCard: View {
                 HStack {
                     Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
                     Spacer()
-                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(Palette.muted)
+                    Image(systemName: "chevron.forward").font(.caption).foregroundStyle(Palette.muted)
                 }
                 Text(summary).font(.caption.monospaced()).foregroundStyle(warn ? Palette.yellow : Palette.muted)
             }

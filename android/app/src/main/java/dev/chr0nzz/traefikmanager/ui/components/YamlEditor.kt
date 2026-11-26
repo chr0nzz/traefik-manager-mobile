@@ -30,8 +30,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.chr0nzz.traefikmanager.ui.theme.CodeFamily
 import dev.chr0nzz.traefikmanager.ui.theme.LocalTmPalette
-import dev.chr0nzz.traefikmanager.ui.theme.MonoFamily
 import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 
 data class YamlColors(
@@ -164,7 +164,7 @@ fun YamlEditor(
     val lineCount = remember(state.text) { state.text.count { it == '\n' } + 1 }
 
     val style = TextStyle(
-        fontFamily = MonoFamily,
+        fontFamily = CodeFamily,
         fontSize = 13.sp,
         lineHeight = 20.sp,
         color = palette.text,
@@ -228,7 +228,7 @@ fun YamlPreview(source: String, modifier: Modifier = Modifier) {
     Text(
         text = highlightYaml(source, colors),
         style = LocalTextStyle.current.copy(
-            fontFamily = MonoFamily,
+            fontFamily = CodeFamily,
             fontSize = 12.sp,
             lineHeight = 18.sp,
             color = palette.text,

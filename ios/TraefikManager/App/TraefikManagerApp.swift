@@ -12,6 +12,7 @@ struct TraefikManagerApp: App {
                 RootView()
             }
             .environment(app)
+            .environment(\.locale, NumberFormat.locale)
             .preferredColorScheme(themeMode.colorScheme)
             // Launcher widget tiles on iOS 17 can only open this app; pass the app's page on to the browser.
             .onOpenURL { url in

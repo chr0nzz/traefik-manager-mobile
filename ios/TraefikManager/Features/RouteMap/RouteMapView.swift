@@ -42,7 +42,7 @@ struct RouteMapView: View {
             }
             .shellSheet(item: $editing) { id in
                 NavigationStack {
-                    RouteFormView(routeId: id) { message = String(localized: "\($0) saved") }
+                    RouteFormView(routeId: id) { message = String(localized: "\($0) saved", locale: NumberFormat.locale) }
                 }
             }
             .task(id: app.generation) { await app.refreshRoutes() }
@@ -252,7 +252,7 @@ struct RouteMapCanvas: View {
     private func chip(_ node: MapNode) -> String? {
         switch node.kind {
         case .route: node.route?.protocol.uppercased() ?? "HTTP"
-        case .group: String(node.members.count)
+        case .group: node.members.count.fmt
         case .middleware: node.uses > 1 ? "\(node.uses)×" : nil
         case .service, .entryPoint: nil
         }
@@ -331,7 +331,7 @@ private struct NodeSheet: View {
                             DetailRow(label: String(localized: "Service"), value: route.map { RouteDetailView.shortName($0.serviceName) }?.ifEmpty(none) ?? none, mono: true)
                             DetailRow(label: String(localized: "Provider"), value: route?.provider.ifEmpty("file") ?? "file", last: true)
                         case .middleware:
-                            DetailRow(label: String(localized: "Used by"), value: String(localized: "\(routeCount) routes"))
+                            DetailRow(label: String(localized: "Used by"), value: String(localized: "\(routeCount) routes", locale: NumberFormat.locale))
                             DetailRow(label: String(localized: "Routers"), value: feeds.map(\.label).joined(separator: ", ").ifEmpty(none), last: true)
                         case .service:
                             if !node.detail.isEmpty { DetailRow(label: String(localized: "Target"), value: node.detail, mono: true) }
@@ -342,11 +342,11 @@ private struct NodeSheet: View {
                                 last: true
                             )
                         case .entryPoint:
-                            DetailRow(label: String(localized: "Routers"), value: String(serves.count))
+                            DetailRow(label: String(localized: "Routers"), value: serves.count.fmt)
                             DetailRow(label: String(localized: "Routes"), value: String(routeCount), last: true)
                         case .group:
                             DetailRow(label: String(localized: "Provider"), value: node.label)
-                            DetailRow(label: String(localized: "Routes"), value: String(node.members.count))
+                            DetailRow(label: String(localized: "Routes"), value: node.members.count.fmt)
                             DetailRow(
                                 label: String(localized: "Services"),
                                 value: serves.map(\.label).joined(separator: ", ").ifEmpty(none),

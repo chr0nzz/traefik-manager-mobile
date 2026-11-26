@@ -76,11 +76,11 @@ struct RouteDetailView: View {
         }
         .shellSheet(isPresented: $editing) {
             NavigationStack {
-                RouteFormView(routeId: route.id) { name in message = String(localized: "\(name) saved") }
+                RouteFormView(routeId: route.id) { name in message = String(localized: "\(name) saved", locale: NumberFormat.locale) }
             }
         }
         .confirmationDialog(
-            String(localized: "Delete \(route.name)?"),
+            String(localized: "Delete \(route.name)?", locale: NumberFormat.locale),
             isPresented: $confirmDelete,
             titleVisibility: .visible
         ) {
@@ -203,7 +203,7 @@ struct RouteDetailView: View {
 
     private func middlewaresSection(_ route: Route) -> some View {
         let names = route.middlewareNames + route.entrypointMiddlewares.map {
-            String(localized: "\(Self.shortName($0)) (entry point)")
+            String(localized: "\(Self.shortName($0)) (entry point)", locale: NumberFormat.locale)
         }
         return DetailSection(title: String(localized: "Middlewares"), systemImage: "puzzlepiece.extension", tint: Palette.purple) {
             if names.isEmpty {
@@ -241,7 +241,7 @@ struct RouteDetailView: View {
             ForEach(Array(servers.enumerated()), id: \.offset) { index, server in
                 let health = serviceRow?.servers.first { $0.target == server }?.health
                 DetailRow(
-                    label: servers.count == 1 ? String(localized: "Server") : String(localized: "Server \(index + 1)"),
+                    label: servers.count == 1 ? String(localized: "Server") : String(localized: "Server \(index + 1)", locale: NumberFormat.locale),
                     value: server,
                     mono: true,
                     status: health == .up ? .ok : health == .down ? .error : nil,
@@ -289,8 +289,8 @@ struct RouteDetailView: View {
             do {
                 try await app.routes.toggle(route, service: service)
                 message = route.enabled
-                    ? String(localized: "\(route.name) disabled")
-                    : String(localized: "\(route.name) enabled")
+                    ? String(localized: "\(route.name) disabled", locale: NumberFormat.locale)
+                    : String(localized: "\(route.name) enabled", locale: NumberFormat.locale)
                 await app.refreshRoutes()
             } catch {
                 message = error.localizedDescription
@@ -302,10 +302,11 @@ struct RouteDetailView: View {
         guard let service = app.service else { return }
         Task {
             do {
-                try await app.routes.delete(route, service: service)
-                message = String(localized: "\(route.name) deleted")
+                let freed = try await app.routes.delete(route, service: service)
+                message = String(localized: "\(route.name) deleted", locale: NumberFormat.locale)
                 dismiss()
                 await app.refreshRoutes()
+                if !freed.isEmpty { app.routes.certOffer = CertOffer(routeName: route.name, certs: freed) }
             } catch {
                 message = error.localizedDescription
             }
@@ -330,7 +331,7 @@ struct RouteDetailView: View {
     static func describe(_ ping: PingResult) -> String? {
         if ping.isSelf { return String(localized: "this server") }
         if ping.degraded {
-            if let tally = ping.servers { return String(localized: "\(tally.up) of \(tally.total) servers up") }
+            if let tally = ping.servers { return String(localized: "\(tally.up) of \(tally.total) servers up", locale: NumberFormat.locale) }
             return String(localized: "some servers down")
         }
         if ping.ok {
@@ -378,7 +379,7 @@ private struct TrafficFlow: View {
                     label: String(localized: "Entry point"),
                     title: (route.entryPointNames.first ?? none).uppercased(),
                     lines: [
-                        route.entryPointNames.count > 1 ? String(localized: "+\(route.entryPointNames.count - 1) more") : nil,
+                        route.entryPointNames.count > 1 ? String(localized: "+\(route.entryPointNames.count - 1) more", locale: NumberFormat.locale) : nil,
                         route.tlsEnabled ? "TLS" : nil,
                     ].compactMap { $0 },
                     lineColor: Palette.green
@@ -407,7 +408,7 @@ private struct TrafficFlow: View {
     }
 
     private var arrow: some View {
-        Image(systemName: "arrow.right")
+        Image(systemName: "arrow.forward")
             .font(.system(size: 11))
             .foregroundStyle(Palette.muted)
     }

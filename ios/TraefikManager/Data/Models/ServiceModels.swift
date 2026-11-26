@@ -162,12 +162,12 @@ struct ServiceRow: Identifiable, Hashable, Sendable {
     var isComposite: Bool { !composite.isEmpty }
 
     var backendSummary: String? {
-        backendsTotal > 0 ? String(localized: "\(backendsUp)/\(backendsTotal) active") : nil
+        backendsTotal > 0 ? String(localized: "\(backendsUp)/\(backendsTotal) active", locale: NumberFormat.locale) : nil
     }
 
     var metaParts: [String] {
         var parts: [String] = []
-        if composite.isEmpty && !servers.isEmpty { parts.append(String(localized: "\(servers.count) servers")) }
+        if composite.isEmpty && !servers.isEmpty { parts.append(String(localized: "\(servers.count) servers", locale: NumberFormat.locale)) }
         if let backendSummary { parts.append(backendSummary) }
         if sticky { parts.append(String(localized: "sticky")) }
         if healthCheck { parts.append(String(localized: "health check")) }
@@ -259,9 +259,9 @@ enum ServiceRows {
         let weighted = { (child: WeightedChild) in child.weight.map { "\(child.name) (\($0))" } ?? child.name }
         targets += (service.weighted?.services ?? []).map(weighted)
         if let primary = service.mirroring?.service { targets.append(primary) }
-        targets += (service.mirroring?.mirrors ?? []).map { String(localized: "\($0.name) mirror (\($0.percent ?? 0)%)") }
+        targets += (service.mirroring?.mirrors ?? []).map { String(localized: "\($0.name) mirror (\($0.percent ?? 0)%)", locale: NumberFormat.locale) }
         if let primary = service.failover?.service { targets.append(primary) }
-        if let fallback = service.failover?.fallback { targets.append(String(localized: "\(fallback) fallback")) }
+        if let fallback = service.failover?.fallback { targets.append(String(localized: "\(fallback) fallback", locale: NumberFormat.locale)) }
         targets += (service.highestRandomWeight?.services ?? []).map(weighted)
         return targets
     }
@@ -301,9 +301,9 @@ enum BackendHealth {
     static func summary(_ row: ServiceRow?) -> String? {
         guard let row, row.healthCheck, row.backendsTotal > 0 else { return nil }
         let down = row.backendsTotal - row.backendsUp
-        if down == 0 { return String(localized: "\(row.backendsUp) of \(row.backendsTotal) servers up") }
-        if row.backendsUp == 0 { return String(localized: "all \(row.backendsTotal) servers down") }
-        return String(localized: "\(down) of \(row.backendsTotal) servers down")
+        if down == 0 { return String(localized: "\(row.backendsUp) of \(row.backendsTotal) servers up", locale: NumberFormat.locale) }
+        if row.backendsUp == 0 { return String(localized: "all \(row.backendsTotal) servers down", locale: NumberFormat.locale) }
+        return String(localized: "\(down) of \(row.backendsTotal) servers down", locale: NumberFormat.locale)
     }
 }
 

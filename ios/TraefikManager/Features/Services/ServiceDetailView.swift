@@ -56,7 +56,7 @@ struct ServiceDetailView: View {
                 }
 
                 if !row.servers.isEmpty || !row.isComposite {
-                    DetailSection(title: String(localized: "Servers") + (row.servers.isEmpty ? "" : "  \(row.servers.count)"), systemImage: "globe", tint: Palette.green) {
+                    DetailSection(title: String(localized: "Servers") + (row.servers.isEmpty ? "" : "  \(row.servers.count.fmt)"), systemImage: "globe", tint: Palette.green) {
                         if row.servers.isEmpty {
                             Text("No servers configured").font(.footnote).foregroundStyle(Palette.muted)
                         }
@@ -76,7 +76,7 @@ struct ServiceDetailView: View {
                 }
 
                 if row.isComposite {
-                    DetailSection(title: String(localized: "Targets") + "  \(row.composite.count)", systemImage: "arrow.triangle.branch", tint: Palette.orange) {
+                    DetailSection(title: String(localized: "Targets") + "  \(row.composite.count.fmt)", systemImage: "arrow.triangle.branch", tint: Palette.orange) {
                         ForEach(Array(row.composite.enumerated()), id: \.offset) { index, target in
                             Text(target).font(.caption.monospaced()).padding(.vertical, Spacing.sm)
                             if index < row.composite.count - 1 { Divider().overlay(Palette.border) }
@@ -104,10 +104,10 @@ struct ServiceDetailView: View {
         .toolbar { actions(row) }
         .shellSheet(item: $editing) { draft in
             NavigationStack {
-                ServiceEditorView(draft: draft) { message = String(localized: "Service \($0) saved") }
+                ServiceEditorView(draft: draft) { message = String(localized: "Service \($0) saved", locale: NumberFormat.locale) }
             }
         }
-        .confirmationDialog(String(localized: "Delete \"\(row.shortName)\"?"), isPresented: $confirmDelete, titleVisibility: .visible) {
+        .confirmationDialog(String(localized: "Delete \"\(row.shortName)\"?", locale: NumberFormat.locale), isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete", role: .destructive) { delete(row, force: false) }
         }
         .alert("Still in use", isPresented: Binding(get: { blocked != nil }, set: { if !$0 { blocked = nil } })) {
@@ -155,7 +155,7 @@ struct ServiceDetailView: View {
         Task {
             do {
                 try await app.services.delete(row.shortName, force: force, service: service)
-                message = String(localized: "Service \(row.shortName) deleted")
+                message = String(localized: "Service \(row.shortName) deleted", locale: NumberFormat.locale)
                 dismiss()
                 await app.refreshServices()
                 app.routes.noteExternalChange()
@@ -173,8 +173,8 @@ struct ServiceDetailView: View {
             do {
                 let owned = try await app.services.setOwnership(row.shortName, adopt: adopt, service: service)
                 message = owned
-                    ? String(localized: "Traefik Manager now manages \(row.shortName)")
-                    : String(localized: "\(row.shortName) is no longer managed here")
+                    ? String(localized: "Traefik Manager now manages \(row.shortName)", locale: NumberFormat.locale)
+                    : String(localized: "\(row.shortName) is no longer managed here", locale: NumberFormat.locale)
                 await app.refreshServices()
             } catch {
                 message = error.localizedDescription
@@ -187,10 +187,10 @@ struct ServiceDetailView: View {
     private func blockedText(_ blocked: (message: String, routers: [String], parents: [String])) -> String {
         var lines = [blocked.message]
         if !blocked.routers.isEmpty {
-            lines.append(String(localized: "Deleting it also deletes \(blocked.routers.count) routes: \(blocked.routers.joined(separator: ", "))."))
+            lines.append(String(localized: "Deleting it also deletes \(blocked.routers.count) routes: \(blocked.routers.joined(separator: ", ")).", locale: NumberFormat.locale))
         }
         if !blocked.parents.isEmpty {
-            lines.append(String(localized: "It is removed from \(blocked.parents.joined(separator: ", ")), and any left with no backends goes too."))
+            lines.append(String(localized: "It is removed from \(blocked.parents.joined(separator: ", ")), and any left with no backends goes too.", locale: NumberFormat.locale))
         }
         return lines.joined(separator: "\n")
     }

@@ -45,7 +45,7 @@ final class MiddlewareFormModel {
                     isEdit: true, originalName: existing.name, originalProtocol: proto
                 )
             } else {
-                error = String(localized: "Could not load \(name)")
+                error = String(localized: "Could not load \(name)", locale: NumberFormat.locale)
             }
         } else if form.configFile.isEmpty, configFiles.count == 1 {
             form.configFile = configFiles[0].label

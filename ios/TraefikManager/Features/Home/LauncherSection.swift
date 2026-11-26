@@ -55,7 +55,7 @@ private struct GroupCard: View {
                     .foregroundStyle(Palette.muted)
                 Text((group.custom ? group.name : LauncherBuilder.label(for: group.name)).uppercased())
                     .font(.caption2.monospaced().weight(.semibold))
-                Text(verbatim: "\(group.apps.count)")
+                Text(group.apps.count.fmt)
                     .font(.caption2.monospaced())
                     .foregroundStyle(Palette.muted)
                 Rectangle().fill(Palette.border).frame(height: 1).padding(.leading, Spacing.xs)
@@ -82,7 +82,7 @@ private struct GroupCard: View {
                 Button {
                     withAnimation { expanded.toggle() }
                 } label: {
-                    Text(expanded ? String(localized: "show less") : String(localized: "\(hiddenCount) more"))
+                    Text(expanded ? String(localized: "show less") : String(localized: "\(hiddenCount) more", locale: NumberFormat.locale))
                         .font(.caption)
                 }
                 .buttonStyle(.plain)

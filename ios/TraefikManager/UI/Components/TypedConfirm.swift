@@ -22,7 +22,7 @@ struct TypedConfirmModifier: ViewModifier {
             }
             Button("Cancel", role: .cancel) { typed = "" }
         } message: {
-            Text(message + "\n\n" + String(localized: "Type \(word) to confirm."))
+            Text(message + "\n\n" + String(localized: "Type \(word) to confirm.", locale: NumberFormat.locale))
         }
     }
 }

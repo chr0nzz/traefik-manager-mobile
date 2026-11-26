@@ -278,7 +278,7 @@ enum ByteSize {
     static func label(_ bytes: Int64) -> String {
         if bytes >= 1_048_576 { return "\(bytes / 1_048_576) MB" }
         if bytes >= 1024 { return "\(bytes / 1024) KB" }
-        return String(localized: "\(Int(bytes)) bytes")
+        return String(localized: "\(Int(bytes)) bytes", locale: NumberFormat.locale)
     }
 }
 

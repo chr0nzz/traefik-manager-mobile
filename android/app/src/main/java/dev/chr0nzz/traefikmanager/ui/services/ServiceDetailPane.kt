@@ -57,6 +57,7 @@ import dev.chr0nzz.traefikmanager.ui.theme.TmSpacing
 import androidx.compose.ui.res.stringResource
 import dev.chr0nzz.traefikmanager.R
 import dev.chr0nzz.traefikmanager.ui.components.asString
+import dev.chr0nzz.traefikmanager.data.model.fmt
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -181,7 +182,7 @@ fun ServiceDetailPane(
                         icon = Icons.Outlined.Public,
                         tint = palette.green,
                         title = stringResource(R.string.services_servers_title),
-                        trailing = service.servers.size.toString().takeIf { service.servers.isNotEmpty() },
+                        trailing = service.servers.size.fmt().takeIf { service.servers.isNotEmpty() },
                     )
                     if (service.servers.isEmpty()) {
                         Text(
@@ -238,7 +239,7 @@ fun ServiceDetailPane(
                         icon = Icons.AutoMirrored.Outlined.CallSplit,
                         tint = palette.orange,
                         title = stringResource(R.string.services_targets_title),
-                        trailing = service.composite.size.toString(),
+                        trailing = service.composite.size.fmt(),
                     )
                     service.composite.forEachIndexed { index, target ->
                         Text(
@@ -257,7 +258,7 @@ fun ServiceDetailPane(
                     icon = Icons.Outlined.Dns,
                     tint = palette.purple,
                     title = stringResource(R.string.services_used_by_title),
-                    trailing = service.usedBy.size.toString().takeIf { service.usedBy.isNotEmpty() },
+                    trailing = service.usedBy.size.fmt().takeIf { service.usedBy.isNotEmpty() },
                 )
                 if (service.usedBy.isEmpty()) {
                     Text(
