@@ -16,6 +16,13 @@ enum DestinationSection: CaseIterable, Identifiable {
     }
 }
 
+struct NavBadge: Equatable {
+    var count = 0
+    var alerts = 0
+
+    static func label(_ value: Int) -> String { value > 999 ? "\(999.fmt)+" : value.fmt }
+}
+
 /// Every top-level screen, port of `TmDestination`.
 enum Destination: String, CaseIterable, Identifiable, Hashable {
     case home, routes, middlewares, services, routeMap

@@ -110,6 +110,16 @@ final class AppModel {
         )
     }
 
+    var navBadges: [Destination: NavBadge] {
+        guard let raw = dashboard.raw else { return [:] }
+        let cards = DashboardBuilder.build(raw, providerFilter: nil).cards
+        func badge(_ kinds: Set<SignalCard.Kind>) -> NavBadge {
+            let picked = cards.filter { kinds.contains($0.kind) }
+            return NavBadge(count: picked.reduce(0) { $0 + ($1.total ?? 0) }, alerts: picked.reduce(0) { $0 + $1.alertCount })
+        }
+        return [.routes: badge([.http, .stream]), .services: badge([.services]), .middlewares: badge([.middlewares])]
+    }
+
     var destinations: [Destination] {
         let capabilities = capabilities
         return Destination.allCases.filter { $0.visible(with: capabilities) }
