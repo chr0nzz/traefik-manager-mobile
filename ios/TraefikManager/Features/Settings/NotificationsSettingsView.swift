@@ -61,8 +61,8 @@ struct NotificationsSettingsView: View {
             Button("Cancel", role: .cancel) {}
         } message: { channel in
             Text(channel.kind == "unifiedpush"
-                 ? String(localized: "Remove \"\(channel.name)\"? Push to that phone stops until the app registers again.")
-                 : String(localized: "Remove channel \"\(channel.name)\"? Events will stop being delivered to it."))
+                 ? String(localized: "Remove \"\(channel.name)\"? Push to that phone stops until the app registers again.", locale: NumberFormat.locale)
+                 : String(localized: "Remove channel \"\(channel.name)\"? Events will stop being delivered to it.", locale: NumberFormat.locale))
         }
         // An editor that outlived a fold or unfold reported back to the screen it replaced.
         .onChange(of: app.sheet == nil) { if app.sheet == nil { Task { await load() } } }
@@ -106,7 +106,7 @@ struct NotificationsSettingsView: View {
                         Label("History", systemImage: "clock.arrow.circlepath")
                         Spacer()
                         if app.notifications.unread > 0 {
-                            Text("\(app.notifications.unread)")
+                            Text(app.notifications.unread.fmt)
                                 .font(.caption2.weight(.bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
@@ -167,7 +167,7 @@ struct NotificationsSettingsView: View {
     }
 
     private func intervalLabel(_ seconds: Int) -> String {
-        routeCheckIntervals.contains(seconds) ? String(localized: "\(seconds / 60) minutes") : String(localized: "\(seconds) seconds")
+        routeCheckIntervals.contains(seconds) ? String(localized: "\(seconds / 60) minutes", locale: NumberFormat.locale) : String(localized: "\(seconds) seconds", locale: NumberFormat.locale)
     }
 
     private func channelRow(_ channel: NotificationChannel) -> some View {
@@ -179,19 +179,19 @@ struct NotificationsSettingsView: View {
                         Text(channel.name).font(.subheadline.weight(.semibold))
                         Text(ChannelKinds.label(channel.kind)).font(.caption2).foregroundStyle(Palette.purple)
                     }
-                    Text(missing.isEmpty ? channel.summary : String(localized: "Needs \(missing.joined(separator: ", "))"))
+                    Text(missing.isEmpty ? channel.summary : String(localized: "Needs \(missing.joined(separator: ", "))", locale: NumberFormat.locale))
                         .font(.caption)
                         .foregroundStyle(missing.isEmpty ? Palette.muted : Palette.yellow)
                 }
             }
             HStack(spacing: Spacing.lg) {
                 Button { test(channel) } label: { Image(systemName: "paperplane") }
-                    .accessibilityLabel(String(localized: "Send a test to \(channel.name)"))
+                    .accessibilityLabel(String(localized: "Send a test to \(channel.name)", locale: NumberFormat.locale))
                 Button { editing = channel } label: { Image(systemName: "pencil") }
-                    .accessibilityLabel(String(localized: "Edit \(channel.name)"))
+                    .accessibilityLabel(String(localized: "Edit \(channel.name)", locale: NumberFormat.locale))
                 Spacer()
                 Button { pendingDelete = channel } label: { Image(systemName: "trash").foregroundStyle(Palette.red) }
-                    .accessibilityLabel(String(localized: "Remove \(channel.name)"))
+                    .accessibilityLabel(String(localized: "Remove \(channel.name)", locale: NumberFormat.locale))
             }
             .buttonStyle(.borderless)
         }

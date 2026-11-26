@@ -75,7 +75,7 @@ struct WorldMap: View {
         }
         .aspectRatio(WorldMapShapes.viewBox.width / WorldMapShapes.viewBox.height, contentMode: .fit)
         .accessibilityElement()
-        .accessibilityLabel(counts.isEmpty ? String(localized: "World map, no located traffic") : String(localized: "World map, \(counts.count) countries with traffic"))
+        .accessibilityLabel(counts.isEmpty ? String(localized: "World map, no located traffic") : String(localized: "World map, \(counts.count) countries with traffic", locale: NumberFormat.locale))
     }
 }
 
@@ -92,7 +92,7 @@ struct GeographyCard: View {
             HStack {
                 SectionLabel(text: String(localized: "Geography"))
                 Spacer()
-                Text(String(localized: "\(countries.count) countries")).font(.caption2).foregroundStyle(Palette.muted)
+                Text(String(localized: "\(countries.count) countries", locale: NumberFormat.locale)).font(.caption2).foregroundStyle(Palette.muted)
             }
             if !countries.isEmpty {
                 WorldMap(counts: Dictionary(uniqueKeysWithValues: countries.map { ($0.code, $0.count) }), selected: selected)
@@ -104,8 +104,8 @@ struct GeographyCard: View {
                         Text(country.flag).accessibilityHidden(true)
                         Text(country.name).font(.caption2).foregroundStyle(selected == country.code ? Palette.blue : Palette.text).lineLimit(1)
                         Spacer()
-                        Text(verbatim: "\(country.count)").font(.caption2.monospaced().weight(.bold)).foregroundStyle(Palette.muted)
-                        Text(verbatim: "\(country.count * 100 / total)%").font(.caption2).foregroundStyle(Palette.muted)
+                        Text(country.count.fmt).font(.caption2.monospaced().weight(.bold)).foregroundStyle(Palette.muted)
+                        Text(verbatim: "\((country.count * 100 / total).fmt)%").font(.caption2).foregroundStyle(Palette.muted)
                     }
                     .padding(.vertical, 3)
                     .contentShape(Rectangle())
@@ -113,7 +113,7 @@ struct GeographyCard: View {
                 .buttonStyle(.plain)
             }
             if countries.count > limit {
-                Text(String(localized: "+\(countries.count - limit) more countries")).font(.caption2).foregroundStyle(Palette.muted)
+                Text(String(localized: "+\(countries.count - limit) more countries", locale: NumberFormat.locale)).font(.caption2).foregroundStyle(Palette.muted)
             }
         }
     }

@@ -42,7 +42,7 @@ struct ServersSettingsView: View {
                     .foregroundStyle(Palette.muted)
                     .listRowBackground(Color.clear)
             }
-            Section(String(localized: "Agents \(agents.count)")) {
+            Section(String(localized: "Agents \(agents.count)", locale: NumberFormat.locale)) {
                 if agents.isEmpty && !loading {
                     ContentUnavailableView("No agents yet", systemImage: "server.rack", description: Text("Add one to manage Traefik on another machine from this app."))
                 }
@@ -73,25 +73,25 @@ struct ServersSettingsView: View {
         } message: {
             Text("Agent URL: where this Traefik Manager reaches the agent.")
         }
-        .alert(String(localized: "Rename \(renameTarget?.name ?? "")"), isPresented: $renameOpen) {
+        .alert(String(localized: "Rename \(renameTarget?.name ?? "")", locale: NumberFormat.locale), isPresented: $renameOpen) {
             TextField("Name", text: $renameText)
             Button("Rename") { rename() }.disabled(renameText.isBlank || renameText == renameTarget?.name)
             Button("Cancel", role: .cancel) {}
         }
-        .alert(String(localized: "Remove \(deleteTarget?.name ?? "")?"), isPresented: Binding(get: { deleteTarget != nil }, set: { if !$0 { deleteTarget = nil } }), presenting: deleteTarget) { entry in
+        .alert(String(localized: "Remove \(deleteTarget?.name ?? "")?", locale: NumberFormat.locale), isPresented: Binding(get: { deleteTarget != nil }, set: { if !$0 { deleteTarget = nil } }), presenting: deleteTarget) { entry in
             Button("Remove", role: .destructive) { remove(entry) }
             Button("Cancel", role: .cancel) {}
         } message: { _ in
             Text("This only removes it from this Traefik Manager. The agent keeps running on that machine with the same key.")
         }
-        .alert(String(localized: "Rotate the key for \(rotateTarget?.name ?? "")?"), isPresented: Binding(get: { rotateTarget != nil }, set: { if !$0 { rotateTarget = nil } }), presenting: rotateTarget) { entry in
+        .alert(String(localized: "Rotate the key for \(rotateTarget?.name ?? "")?", locale: NumberFormat.locale), isPresented: Binding(get: { rotateTarget != nil }, set: { if !$0 { rotateTarget = nil } }), presenting: rotateTarget) { entry in
             Button("Rotate key", role: .destructive) { rotate(entry) }
             Button("Cancel", role: .cancel) {}
         } message: { _ in
             Text("The old key stops working immediately and every request to this server fails until you update its compose file and recreate the container. Health checks will keep looking green, because they are unauthenticated.")
         }
         .shellSheet(item: $issued) { key in
-            NavigationStack { KeySheet(title: key.rotated ? String(localized: "New key for \(key.agentName)") : String(localized: "Key for \(key.agentName)"),
+            NavigationStack { KeySheet(title: key.rotated ? String(localized: "New key for \(key.agentName)", locale: NumberFormat.locale) : String(localized: "Key for \(key.agentName)", locale: NumberFormat.locale),
                                        body: key.rotated ? String(localized: "Save this key - it will not be shown again. The agent stops working until you update it.")
                                                          : String(localized: "Save this key - it will not be shown again."),
                                        key: key.key) }
@@ -125,10 +125,10 @@ struct ServersSettingsView: View {
                     renameText = entry.name
                     renameOpen = true
                 } label: { Image(systemName: "pencil") }
-                    .accessibilityLabel(String(localized: "Rename \(entry.name)"))
+                    .accessibilityLabel(String(localized: "Rename \(entry.name)", locale: NumberFormat.locale))
                 if let id = entry.agentId {
                     Button { configuring = id } label: { Image(systemName: "slider.horizontal.3") }
-                        .accessibilityLabel(String(localized: "Configure \(entry.name)"))
+                        .accessibilityLabel(String(localized: "Configure \(entry.name)", locale: NumberFormat.locale))
                 }
                 Button { compose = ComposeSnippet(name: entry.name, text: composeText(entry)) } label: { Image(systemName: "terminal") }
                     .accessibilityLabel("Install snippet")
@@ -136,7 +136,7 @@ struct ServersSettingsView: View {
                     .accessibilityLabel("Rotate the key")
                 Spacer()
                 Button { deleteTarget = entry } label: { Image(systemName: "trash").foregroundStyle(Palette.red) }
-                    .accessibilityLabel(String(localized: "Remove \(entry.name)"))
+                    .accessibilityLabel(String(localized: "Remove \(entry.name)", locale: NumberFormat.locale))
             }
             .buttonStyle(.borderless)
             .padding(.top, Spacing.xs)
@@ -180,7 +180,7 @@ struct ServersSettingsView: View {
             let response = try await service.createAgent(name: name, url: url)
             guard response.ok else { throw APIError.server(response.error ?? String(localized: "Could not add the server")) }
             if let key = response.rawKey { issued = IssuedKey(agentName: name, key: key, rotated: false) }
-            return String(localized: "Added \(name)")
+            return String(localized: "Added \(name)", locale: NumberFormat.locale)
         }
     }
 
@@ -190,7 +190,7 @@ struct ServersSettingsView: View {
         mutate { service in
             let response = try await service.updateAgent(id, changes: ["name": .string(name)])
             guard response.worked else { throw APIError.server(response.error ?? String(localized: "Could not save the server")) }
-            return String(localized: "Renamed to \(name)")
+            return String(localized: "Renamed to \(name)", locale: NumberFormat.locale)
         }
     }
 
@@ -200,7 +200,7 @@ struct ServersSettingsView: View {
             let response = try await service.deleteAgent(id)
             guard response.worked else { throw APIError.server(response.error ?? String(localized: "Could not remove the server")) }
             if app.activeAgentId == id { await app.switchServer(to: nil) }
-            return String(localized: "Removed \(entry.name)")
+            return String(localized: "Removed \(entry.name)", locale: NumberFormat.locale)
         }
     }
 
@@ -269,7 +269,7 @@ private struct ComposeSheet: View {
             .padding(Spacing.lg)
         }
         .background(Palette.bg)
-        .navigationTitle(String(localized: "Install \(snippet.name)"))
+        .navigationTitle(String(localized: "Install \(snippet.name)", locale: NumberFormat.locale))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }

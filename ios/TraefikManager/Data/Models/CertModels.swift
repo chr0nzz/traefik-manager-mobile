@@ -64,7 +64,7 @@ struct CertRow: Identifiable, Hashable {
 
     var daysLeftLabel: String? {
         guard let daysLeft else { return nil }
-        return daysLeft <= 0 ? String(localized: "expired") : String(localized: "\(daysLeft)d left")
+        return daysLeft <= 0 ? String(localized: "expired") : String(localized: "\(daysLeft)d left", locale: NumberFormat.locale)
     }
 
     var status: TMStatus {
@@ -225,12 +225,12 @@ struct CertDeleteResponse: Decodable, Sendable {
     /// The toast after a removal, port of `CertCleanup.outcome`.
     func outcome(asked: Int) -> String {
         let count = removed > 0 ? removed : asked
-        if ok && restarted { return String(localized: "Removed \(count) certificates") }
+        if ok && restarted { return String(localized: "Removed \(count) certificates", locale: NumberFormat.locale) }
         if ok {
             if !restartError.isBlank {
-                return String(localized: "Removed \(count) certificates, but Traefik did not restart: \(restartError). The change is undone until it does.")
+                return String(localized: "Removed \(count) certificates, but Traefik did not restart: \(restartError). The change is undone until it does.", locale: NumberFormat.locale)
             }
-            return String(localized: "Removed \(count) certificates, but Traefik did not restart. The change is undone until it does.")
+            return String(localized: "Removed \(count) certificates, but Traefik did not restart. The change is undone until it does.", locale: NumberFormat.locale)
         }
         if partial { return error ?? String(localized: "Certificate removal stopped partway") }
         return error ?? String(localized: "Could not remove the certificate")

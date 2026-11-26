@@ -187,8 +187,8 @@ struct RouteFormView: View {
                 }
             } else if !model.form.isManagedService {
                 Text(model.form.serviceOwned
-                    ? String(localized: "This route uses a \(model.form.serviceType) service that Traefik Manager manages. Edit its backends from the Services tab.")
-                    : String(localized: "This route uses a \(model.form.serviceType) service. Backends are managed in the config file."))
+                    ? String(localized: "This route uses a \(model.form.serviceType) service that Traefik Manager manages. Edit its backends from the Services tab.", locale: NumberFormat.locale)
+                    : String(localized: "This route uses a \(model.form.serviceType) service. Backends are managed in the config file.", locale: NumberFormat.locale))
                     .font(.footnote)
                     .foregroundStyle(Palette.yellow)
             } else {
@@ -302,14 +302,14 @@ struct RouteFormView: View {
                             Spacer()
                             Button { moveMiddleware(index, by: -1) } label: { Image(systemName: "chevron.up") }
                                 .disabled(index == 0)
-                                .accessibilityLabel(String(localized: "Move \(name) up"))
+                                .accessibilityLabel(String(localized: "Move \(name) up", locale: NumberFormat.locale))
                             Button { moveMiddleware(index, by: 1) } label: { Image(systemName: "chevron.down") }
                                 .disabled(index == chosen.count - 1)
-                                .accessibilityLabel(String(localized: "Move \(name) down"))
+                                .accessibilityLabel(String(localized: "Move \(name) down", locale: NumberFormat.locale))
                             Button { model.form.middlewares.removeAll { $0 == name } } label: {
                                 Image(systemName: "minus.circle.fill").foregroundStyle(Palette.red)
                             }
-                            .accessibilityLabel(String(localized: "Remove \(name)"))
+                            .accessibilityLabel(String(localized: "Remove \(name)", locale: NumberFormat.locale))
                         }
                         .buttonStyle(.borderless)
                     }

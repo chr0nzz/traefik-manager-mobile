@@ -76,7 +76,7 @@ enum NotificationAlerts {
         if new.count > 4 {
             let content = UNMutableNotificationContent()
             content.title = "Traefik Manager"
-            content.body = String(localized: "\(new.count - 4) more notifications")
+            content.body = String(localized: "\(new.count - 4) more notifications", locale: NumberFormat.locale)
             content.threadIdentifier = connection.baseURL.absoluteString
             try? await center.add(UNNotificationRequest(identifier: "tm-more-\(Date().timeIntervalSince1970)", content: content, trigger: nil))
         }

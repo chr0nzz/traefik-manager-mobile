@@ -72,7 +72,7 @@ struct ServicesView: View {
             }
             .shellSheet(isPresented: $creating) {
                 NavigationStack {
-                    ServiceEditorView(draft: ServiceDraft()) { message = String(localized: "Service \($0) saved") }
+                    ServiceEditorView(draft: ServiceDraft()) { message = String(localized: "Service \($0) saved", locale: NumberFormat.locale) }
                 }
             }
             .task(id: app.generation) { await app.refreshServices() }
@@ -148,7 +148,7 @@ struct ServicesView: View {
             if total > 0 {
                 HStack(spacing: Spacing.sm) {
                     StatusDot(status: up == total ? .ok : up == 0 ? .error : .warn, size: 7)
-                    Text(String(localized: "\(up)/\(total) active"))
+                    Text(String(localized: "\(up)/\(total) active", locale: NumberFormat.locale))
                         .font(.caption.monospaced())
                         .foregroundStyle(Palette.muted)
                 }
@@ -236,7 +236,7 @@ struct ServiceCard: View {
                     }
                 }
             }
-            let meta = [row.provider] + row.metaParts + (row.usedBy.isEmpty ? [] : [String(localized: "used by \(row.usedBy.count) routes")])
+            let meta = [row.provider] + row.metaParts + (row.usedBy.isEmpty ? [] : [String(localized: "used by \(row.usedBy.count) routes", locale: NumberFormat.locale)])
             Divider().overlay(Palette.border).padding(.top, Spacing.xs)
             Text(meta.joined(separator: " · ")).font(.caption2).foregroundStyle(Palette.muted).lineLimit(1)
         }

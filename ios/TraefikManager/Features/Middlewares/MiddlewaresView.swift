@@ -71,7 +71,7 @@ struct MiddlewaresView: View {
             }
             .shellSheet(isPresented: $creating) {
                 NavigationStack {
-                    MiddlewareFormView(name: nil) { message = String(localized: "\($0) saved") }
+                    MiddlewareFormView(name: nil) { message = String(localized: "\($0) saved", locale: NumberFormat.locale) }
                 }
             }
             .shellSheet(isPresented: $showTemplates) {
@@ -169,7 +169,7 @@ struct MiddlewareCard: View {
             }
             Divider().overlay(Palette.border).padding(.top, Spacing.xs)
             HStack {
-                Text(usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes"))
+                Text(usage == 0 ? String(localized: "unused") : String(localized: "used by \(usage) routes", locale: NumberFormat.locale))
                     .font(.caption2)
                     .foregroundStyle(usage == 0 ? Palette.muted : Palette.text)
                 Spacer()

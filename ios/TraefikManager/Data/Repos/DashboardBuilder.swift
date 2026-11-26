@@ -169,7 +169,7 @@ enum DashboardBuilder {
                 listed: routersListed,
                 overviewTotal: overview?.http?.routers?.total,
                 emptyLabel: String(localized: "no HTTP routers configured"),
-                okSub: { ok in String(localized: "\(ok) live") }
+                okSub: { ok in String(localized: "\(ok) live", locale: NumberFormat.locale) }
             ),
             card(
                 kind: .stream,
@@ -180,8 +180,8 @@ enum DashboardBuilder {
                 emptyLabel: String(localized: "no stream routers configured"),
                 okSub: { _ in
                     var parts: [String] = []
-                    if !tcpRouters.isEmpty { parts.append("TCP \(tcpRouters.count)") }
-                    if !udpRouters.isEmpty { parts.append("UDP \(udpRouters.count)") }
+                    if !tcpRouters.isEmpty { parts.append("TCP \(tcpRouters.count.fmt)") }
+                    if !udpRouters.isEmpty { parts.append("UDP \(udpRouters.count.fmt)") }
                     parts.append(String(localized: "all forwarding"))
                     return joined(parts)
                 }
@@ -208,8 +208,8 @@ enum DashboardBuilder {
                 emptyLabel: String(localized: "no middlewares configured"),
                 okSub: { ok in
                     let unused = allMiddlewares.filter { $0.state == .idle }.count
-                    var parts = [String(localized: "\(ok) in use")]
-                    if unused > 0 { parts.append(String(localized: "\(unused) unused")) }
+                    var parts = [String(localized: "\(ok) in use", locale: NumberFormat.locale)]
+                    if unused > 0 { parts.append(String(localized: "\(unused) unused", locale: NumberFormat.locale)) }
                     return joined(parts)
                 }
             ),
@@ -270,16 +270,16 @@ enum DashboardBuilder {
             out.state = .err
             out.down = true
             if check.source == "traefik" || check.source == "servers" {
-                out.reason = String(localized: "backend down, 0 of \(total) servers up")
+                out.reason = String(localized: "backend down, 0 of \(total) servers up", locale: NumberFormat.locale)
             } else if let error = check.error, !error.isBlank {
-                out.reason = String(localized: "backend unreachable, \(error)")
+                out.reason = String(localized: "backend unreachable, \(error)", locale: NumberFormat.locale)
             } else {
                 out.reason = String(localized: "backend unreachable")
             }
         case RouteHealth.degraded:
             out.state = .warn
             out.degraded = true
-            out.reason = String(localized: "backend degraded, \(check.servers?.up ?? 0) of \(total) servers up")
+            out.reason = String(localized: "backend degraded, \(check.servers?.up ?? 0) of \(total) servers up", locale: NumberFormat.locale)
         default:
             break
         }
@@ -297,10 +297,10 @@ enum DashboardBuilder {
             return ObjectSignal(name: obj.shortName, state: .idle, reason: String(localized: "no health check configured"), provider: obj.provider)
         }
         if down == servers.count {
-            return ObjectSignal(name: obj.shortName, state: .err, reason: String(localized: "all \(servers.count) backends down"), provider: obj.provider, down: true)
+            return ObjectSignal(name: obj.shortName, state: .err, reason: String(localized: "all \(servers.count) backends down", locale: NumberFormat.locale), provider: obj.provider, down: true)
         }
         if down > 0 {
-            return ObjectSignal(name: obj.shortName, state: .warn, reason: String(localized: "\(down) of \(servers.count) backends down"), provider: obj.provider, degraded: true)
+            return ObjectSignal(name: obj.shortName, state: .warn, reason: String(localized: "\(down) of \(servers.count) backends down", locale: NumberFormat.locale), provider: obj.provider, degraded: true)
         }
         return ObjectSignal(name: obj.shortName, state: .ok, provider: obj.provider)
     }
@@ -346,7 +346,7 @@ enum DashboardBuilder {
     }
 
     static func backendsUpText(_ up: Int, _ total: Int) -> String {
-        String(localized: "\(up) of \(total) backends up")
+        String(localized: "\(up) of \(total) backends up", locale: NumberFormat.locale)
     }
 
     private static func cells(_ signals: [ObjectSignal]) -> [TMStatus] {
@@ -408,7 +408,7 @@ enum DashboardBuilder {
         } else if total == 0 {
             sub = emptyLabel
         } else if hidden > 0 && err == 0 && warn == 0 {
-            sub = joined([okSub(ok), String(localized: "+\(hidden) internal or other providers")])
+            sub = joined([okSub(ok), String(localized: "+\(hidden) internal or other providers", locale: NumberFormat.locale)])
         } else if let first = signals.first(where: { $0.state == .err }) {
             sub = named(first)
         } else if let first = signals.first(where: { $0.state == .warn }) {
@@ -474,9 +474,9 @@ enum DashboardBuilder {
         var facts: [String] = []
         if ep.asDefault { facts.append("asDefault") }
         let resolver = ep.http?.tls?.certResolver ?? ""
-        if !resolver.isEmpty { facts.append(String(localized: "TLS via \(resolver)")) }
+        if !resolver.isEmpty { facts.append(String(localized: "TLS via \(resolver)", locale: NumberFormat.locale)) }
         if ep.hasTLS && resolver.isEmpty { facts.append(String(localized: "TLS, no certResolver")) }
-        if let options = ep.http?.tls?.options, !options.isEmpty { facts.append(String(localized: "TLS options \(options)")) }
+        if let options = ep.http?.tls?.options, !options.isEmpty { facts.append(String(localized: "TLS options \(options)", locale: NumberFormat.locale)) }
         if let middlewares = ep.http?.middlewares, !middlewares.isEmpty {
             facts.append(middlewares.map(shortName).joined(separator: ", "))
         }
@@ -508,14 +508,14 @@ enum DashboardBuilder {
         let warnings = cards.reduce(0) { $0 + $1.flags.filter { $0.status == .warn }.reduce(0) { $0 + $1.count } } - overlapWarnings
         if errors > 0 {
             return Verdict(
-                headline: String(localized: "\(errors) objects are down"),
-                detail: warnings > 0 ? String(localized: "\(warnings) degraded") : String(localized: "traffic is not flowing for them"),
+                headline: String(localized: "\(errors) objects are down", locale: NumberFormat.locale),
+                detail: warnings > 0 ? String(localized: "\(warnings) degraded", locale: NumberFormat.locale) : String(localized: "traffic is not flowing for them"),
                 status: .error
             )
         }
         if warnings > 0 {
             return Verdict(
-                headline: String(localized: "\(warnings) objects are degraded"),
+                headline: String(localized: "\(warnings) objects are degraded", locale: NumberFormat.locale),
                 detail: String(localized: "still serving, worth a look"),
                 status: .warn
             )

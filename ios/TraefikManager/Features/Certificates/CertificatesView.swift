@@ -67,7 +67,7 @@ struct CertificatesView: View {
                         }
                         if !unusedRemovable.isEmpty {
                             Button(role: .destructive) { ask(unusedRemovable) } label: {
-                                Label(String(localized: "Remove \(unusedRemovable.count) unused"), systemImage: "trash")
+                                Label(String(localized: "Remove \(unusedRemovable.count) unused", locale: NumberFormat.locale), systemImage: "trash")
                             }
                         }
                     } label: {
@@ -145,25 +145,25 @@ struct CertificatesView: View {
         let resolvers = Set(certs.map(\.resolver).filter { !$0.isEmpty }).count
         let unused = usage?.certs.filter(\.unused).count ?? 0
         let orphaned = usage?.certs.filter(\.orphaned).count ?? 0
-        let headline = expired > 0 ? String(localized: "\(expired) certificates have expired")
-            : critical > 0 ? String(localized: "\(critical) expiring within 7 days")
-            : expiring > 0 ? String(localized: "\(expiring) expiring within 30 days")
+        let headline = expired > 0 ? String(localized: "\(expired) certificates have expired", locale: NumberFormat.locale)
+            : critical > 0 ? String(localized: "\(critical) expiring within 7 days", locale: NumberFormat.locale)
+            : expiring > 0 ? String(localized: "\(expiring) expiring within 30 days", locale: NumberFormat.locale)
             : String(localized: "All certificates healthy")
-        var detail = [String(localized: "\(certs.count) certificates")]
-        if expired > 0 { detail.append(String(localized: "\(expired) expired")) }
-        if critical > 0 { detail.append(String(localized: "\(critical) under 7d")) }
-        if expiring > 0 { detail.append(String(localized: "\(expiring) under 30d")) }
+        var detail = [String(localized: "\(certs.count) certificates", locale: NumberFormat.locale)]
+        if expired > 0 { detail.append(String(localized: "\(expired) expired", locale: NumberFormat.locale)) }
+        if critical > 0 { detail.append(String(localized: "\(critical) under 7d", locale: NumberFormat.locale)) }
+        if expiring > 0 { detail.append(String(localized: "\(expiring) under 30d", locale: NumberFormat.locale)) }
         if expired == 0 && critical == 0 && expiring == 0 { detail.append(String(localized: "none expiring soon")) }
-        if resolvers > 1 { detail.append(String(localized: "\(resolvers) resolvers")) }
-        if unused > 0 { detail.append(String(localized: "\(unused) unused")) }
-        if orphaned > 0 { detail.append(String(localized: "\(orphaned) no resolver")) }
-        if let next { detail.append(String(localized: "next expiry in \(next)d")) }
+        if resolvers > 1 { detail.append(String(localized: "\(resolvers) resolvers", locale: NumberFormat.locale)) }
+        if unused > 0 { detail.append(String(localized: "\(unused) unused", locale: NumberFormat.locale)) }
+        if orphaned > 0 { detail.append(String(localized: "\(orphaned) no resolver", locale: NumberFormat.locale)) }
+        if let next { detail.append(String(localized: "next expiry in \(next)d", locale: NumberFormat.locale)) }
         let status: TMStatus = expired > 0 || critical > 0 ? .error : expiring > 0 ? .warn : .ok
         var note = [String(localized: "TLS certificates are managed automatically by Traefik's ACME resolver.")]
         if manage.available {
             note.append(String(localized: "Removing one restarts Traefik so it lets go of it."))
         } else if !manage.reason.isBlank {
-            note.append(String(localized: "Removal is off: \(manage.reasonText)"))
+            note.append(String(localized: "Removal is off: \(manage.reasonText)", locale: NumberFormat.locale))
         } else {
             note.append(String(localized: "Renew or revoke them via your Traefik config."))
         }
@@ -179,14 +179,14 @@ struct CertificatesView: View {
     }
 
     private var removalTitle: String {
-        pendingRemoval.count == 1 ? String(localized: "Remove \(pendingRemoval.first?.main ?? "")?") : String(localized: "Remove \(pendingRemoval.count) certificates?")
+        pendingRemoval.count == 1 ? String(localized: "Remove \(pendingRemoval.first?.main ?? "")?", locale: NumberFormat.locale) : String(localized: "Remove \(pendingRemoval.count) certificates?", locale: NumberFormat.locale)
     }
 
     private var removalMessage: String {
         let inUse = pendingRemoval.filter { verdict($0)?.unused != true }.count
         return [
             String(localized: "Traefik is restarted afterwards, because it only reads acme.json at startup."),
-            inUse > 0 ? String(localized: "\(inUse) still serve routes, so Traefik requests new certificates for them.") : nil,
+            inUse > 0 ? String(localized: "\(inUse) still serve routes, so Traefik requests new certificates for them.", locale: NumberFormat.locale) : nil,
             String(localized: "A copy of acme.json is saved to Backups first."),
         ].compactMap { $0 }.joined(separator: " ")
     }
@@ -267,7 +267,7 @@ private struct CertCard: View {
                     Text(domain).font(.caption2.monospaced()).foregroundStyle(Palette.muted)
                 }
                 if cert.extraDomains.count > 2 {
-                    Button(expanded ? String(localized: "Show less") : String(localized: "+\(cert.extraDomains.count - 2) more")) {
+                    Button(expanded ? String(localized: "Show less") : String(localized: "+\(cert.extraDomains.count - 2) more", locale: NumberFormat.locale)) {
                         withAnimation { expanded.toggle() }
                     }
                     .font(.caption2)
@@ -278,8 +278,8 @@ private struct CertCard: View {
             Divider().overlay(Palette.border).padding(.top, Spacing.xs)
             HStack {
                 let parts = [
-                    cert.expiresOn.map { String(localized: "expires \($0.formatted(date: .abbreviated, time: .omitted))") } ?? String(localized: "expiry unknown"),
-                    cert.domainCount > 1 ? String(localized: "\(cert.domainCount) domains") : nil,
+                    cert.expiresOn.map { String(localized: "expires \($0.formatted(date: .abbreviated, time: .omitted))", locale: NumberFormat.locale) } ?? String(localized: "expiry unknown"),
+                    cert.domainCount > 1 ? String(localized: "\(cert.domainCount) domains", locale: NumberFormat.locale) : nil,
                     cert.origin,
                 ].compactMap { $0 }
                 Text(parts.joined(separator: " · ")).font(.caption2).foregroundStyle(Palette.muted).lineLimit(1)

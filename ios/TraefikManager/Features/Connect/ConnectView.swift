@@ -147,7 +147,7 @@ struct ConnectView: View {
         case .http(401, _):
             keyProvided ? String(localized: "Invalid API key") : String(localized: "This server requires an API key")
         case let .http(status, _):
-            String(localized: "Server error \(status)")
+            String(localized: "Server error \(status)", locale: NumberFormat.locale)
         case .unreachable:
             String(localized: "Could not reach the server. Check the URL, your network, and that the certificate is trusted.")
         default:

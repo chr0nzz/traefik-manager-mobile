@@ -182,10 +182,10 @@ enum LogParser {
 
     static func formatDuration(_ nanos: Int64) -> String {
         if nanos <= 0 { return "" }
-        if nanos >= 1_000_000_000 { return String(format: "%.2fs", Double(nanos) / 1e9) }
-        if nanos >= 1_000_000 { return "\(Int((Double(nanos) / 1e6).rounded()))ms" }
-        if nanos >= 1000 { return "\(Int((Double(nanos) / 1e3).rounded()))µs" }
-        return "\(nanos)ns"
+        if nanos >= 1_000_000_000 { return NumberFormat.decimal(Double(nanos) / 1e9, digits: 2...2) + "s" }
+        if nanos >= 1_000_000 { return Int((Double(nanos) / 1e6).rounded()).fmt + "ms" }
+        if nanos >= 1000 { return Int((Double(nanos) / 1e3).rounded()).fmt + "µs" }
+        return nanos.fmt + "ns"
     }
 
     /// Epoch milliseconds from a CLF or ISO-8601 date.
@@ -305,22 +305,22 @@ enum LogParser {
 
     static func shortName(_ name: String) -> String { RouteDetailView.shortName(name) }
 
-    static func formatCount(_ value: Int) -> String { value.formatted(.number) }
+    static func formatCount(_ value: Int) -> String { value.fmt }
 
     static func formatMs(_ value: Double?) -> String {
         guard let value else { return "-" }
-        if value >= 10_000 { return "\(Int((value / 1000).rounded()))s" }
-        if value >= 1000 { return String(format: "%.2fs", value / 1000) }
-        if value >= 1 { return "\(Int(value.rounded()))ms" }
-        if value > 0 { return trimZeros(String(format: "%.2f", value)) + "ms" }
-        return "0ms"
+        if value >= 10_000 { return Int((value / 1000).rounded()).fmt + "s" }
+        if value >= 1000 { return NumberFormat.decimal(value / 1000, digits: 2...2) + "s" }
+        if value >= 1 { return Int(value.rounded()).fmt + "ms" }
+        if value > 0 { return NumberFormat.decimal(value, digits: 0...2) + "ms" }
+        return 0.fmt + "ms"
     }
 
     static func heroMs(_ value: Double?) -> (String, String) {
         guard let value else { return ("-", "") }
-        if value >= 1000 { return (String(format: "%.1f", value / 1000), "s") }
-        if value >= 1 { return (String(Int(value.rounded())), "ms") }
-        return (trimZeros(String(format: "%.2f", value)).ifEmpty("0"), "ms")
+        if value >= 1000 { return (NumberFormat.decimal(value / 1000, digits: 1...1), "s") }
+        if value >= 1 { return (Int(value.rounded()).fmt, "ms") }
+        return (NumberFormat.decimal(value, digits: 0...2), "ms")
     }
 
     static func spanText(_ millis: Double) -> String {
@@ -329,12 +329,5 @@ enum LogParser {
         if seconds < 3600 { return "\(seconds / 60)m \(String(format: "%02d", seconds % 60))s" }
         if seconds < 86_400 { return "\(seconds / 3600)h \(String(format: "%02d", (seconds % 3600) / 60))m" }
         return "\(seconds / 86_400)d \((seconds % 86_400) / 3600)h"
-    }
-
-    private static func trimZeros(_ value: String) -> String {
-        var text = value
-        while text.hasSuffix("0") { text.removeLast() }
-        while text.hasSuffix(".") || text.hasSuffix(",") { text.removeLast() }
-        return text.ifEmpty("0")
     }
 }
