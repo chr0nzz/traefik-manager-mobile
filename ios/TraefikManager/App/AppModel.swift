@@ -18,6 +18,7 @@ final class AppModel {
             launcher.reset()
             services.reset()
             notifications.reset(for: activeAgentId)
+            listCounts = [:]
             Task { [geo] in await geo.reset() }
         }
     }
@@ -32,6 +33,8 @@ final class AppModel {
     let services = ServicesStore()
     let geo = GeoStore()
     let notifications = NotificationsStore()
+
+    private(set) var listCounts: [Destination: Int] = [:]
 
     private(set) var activeAgentId: String? {
         didSet { UserDefaults.standard.set(activeAgentId, forKey: PreferenceKey.activeAgent) }
@@ -111,13 +114,15 @@ final class AppModel {
     }
 
     var navBadges: [Destination: NavBadge] {
-        guard let raw = dashboard.raw else { return [:] }
+        guard let raw = dashboard.raw else { return listCounts.mapValues { NavBadge(count: $0) } }
         let cards = DashboardBuilder.build(raw, providerFilter: nil).cards
         func badge(_ kinds: Set<SignalCard.Kind>) -> NavBadge {
             let picked = cards.filter { kinds.contains($0.kind) }
             return NavBadge(count: picked.reduce(0) { $0 + ($1.total ?? 0) }, alerts: picked.reduce(0) { $0 + $1.alertCount })
         }
-        return [.routes: badge([.http, .stream]), .services: badge([.services]), .middlewares: badge([.middlewares])]
+        var badges: [Destination: NavBadge] = [.routes: badge([.http, .stream]), .services: badge([.services]), .middlewares: badge([.middlewares])]
+        for (destination, count) in listCounts { badges[destination] = NavBadge(count: count) }
+        return badges
     }
 
     var destinations: [Destination] {
@@ -133,6 +138,19 @@ final class AppModel {
         settings = newSettings
         if newServers.count > 1 || servers.isEmpty { servers = newServers }
         reconcileActive()
+        await refreshListCounts()
+    }
+
+    func reportCount(_ destination: Destination, _ count: Int) {
+        if listCounts[destination] != count { listCounts[destination] = count }
+    }
+
+    private func refreshListCounts() async {
+        guard let service else { return }
+        async let certs = try? service.certs()
+        async let plugins = try? service.plugins()
+        if let certs = await certs { reportCount(.certificates, certs.certs.count) }
+        if let plugins = await plugins { reportCount(.plugins, plugins.plugins.count) }
     }
 
     func switchServer(to agentId: String?) async {

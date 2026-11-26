@@ -212,6 +212,7 @@ struct CertificatesView: View {
         do {
             let response = try await fetched
             certs = CertRows.from(response.certs)
+            app.reportCount(.certificates, response.certs.count)
             serverError = response.error.flatMap { $0.isBlank ? nil : $0 }
         } catch {
             loadError = error.localizedDescription

@@ -177,6 +177,7 @@ struct PluginsView: View {
         do {
             let response = try await fetched
             plugins = response.plugins.sorted { $0.name.lowercased() < $1.name.lowercased() }
+            app.reportCount(.plugins, response.plugins.count)
             serverError = response.error.flatMap { $0.isBlank ? nil : $0 }
             middlewares = await routes?.middlewares ?? middlewares
             runtimeMiddlewares = await runtime?.all ?? runtimeMiddlewares
